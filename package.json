@@ -1,0 +1,10 @@
+{
+  "name": "cfsolara",
+  "version": "2.0.0",
+  "description": "CFSolara Cloudflare Pages Music Platform & APIs",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && cp -r index.html css js favicon.png favicon.svg dist/",
+    "deploy": "npm run build && /home/shijian/projects/shijianus-blog/node_modules/.bin/wrangler pages deploy dist --project-name=cfsolara --branch=main"
+  }
+}
