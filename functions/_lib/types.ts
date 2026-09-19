@@ -1,0 +1,39 @@
+export interface AppEnv {
+  EPOMAIL_BASE_URL?: string;
+  EPOMAIL_CLIENT_ID?: string;
+  EPOMAIL_CLIENT_SECRET?: string;
+  EPOMAIL_REDIRECT_URI?: string;
+  MUSIC_API_BASE?: string;
+  SOLARA_SECRET?: string;
+  KV?: any;
+  DB?: any;
+}
+
+export interface SongItem {
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  source: string;
+  picId: string;
+  lyricId: string;
+  urlId?: string;
+  coverUrl?: string;
+  duration?: number;
+}
+
+export interface LyricLine {
+  time: number;
+  text: string;
+}
+
+export interface UserSession {
+  id: string;
+  email: string;
+  name: string;
+  avatar: string;
+  role: string;
+  apiKey: string;
+  createdAt: string;
+  expiresAt: string;
+}

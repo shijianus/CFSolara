@@ -85,12 +85,51 @@
         </div>
         <div class="header">
             <h1>Solara</h1>
-            <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，仅供学习交流使用，请支持正版音乐奥！</div>
-            <div class="theme-switch-wrapper">
-                <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
-                    <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
-                    <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+            <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，已接入 EpoMail OAuth 平台化开放 API，请支持正版音乐奥！</div>
+            <div class="top-actions-wrapper">
+                <button id="epomailLoginBtn" class="epomail-auth-btn" type="button" title="EpoMail 唯一接入与 API 平台">
+                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                    <span id="epomailUserLabel">EpoMail 登录</span>
                 </button>
+                <div class="theme-switch-wrapper">
+                    <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
+                        <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
+                        <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="apiKeyModal" class="solara-modal-backdrop" style="display:none;" aria-hidden="true">
+            <div class="solara-modal-card">
+                <div class="solara-modal-header">
+                    <h3><i class="fas fa-key"></i> CFSolara 开发者专案连结</h3>
+                    <button type="button" id="closeApiKeyModalX" class="solara-modal-close" aria-label="关闭">&times;</button>
+                </div>
+                <div class="solara-modal-body">
+                    <div class="solara-user-badge" id="solaraUserBadge">
+                        <img id="solaraUserAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=epomail" alt="User Avatar" class="solara-user-avatar" />
+                        <div>
+                            <strong id="solaraUserName">Epomail 用户</strong>
+                            <small id="solaraUserEmail">user@epocanvas.com</small>
+                        </div>
+                    </div>
+                    <p class="solara-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
+                    <div class="api-key-box">
+                        <input type="text" id="userApiKeyInput" readonly value="solara_live_..." />
+                        <button type="button" id="copyApiKeyBtn"><i class="fas fa-copy"></i> 复制 Key</button>
+                    </div>
+                    <div class="api-endpoints-preview">
+                        <strong>快速接入端点：</strong>
+                        <code>GET /api/music/search?q={关键词}</code><br/>
+                        <code>GET /api/music/stream?id={歌曲ID}</code><br/>
+                        <code>GET /api/music/lyric?id={歌词ID}</code>
+                    </div>
+                </div>
+                <div class="solara-modal-footer">
+                    <button type="button" id="solaraLogoutBtn" class="solara-btn-danger">退出登录</button>
+                    <button type="button" id="closeApiKeyModalBtn" class="solara-btn-primary">关闭</button>
+                </div>
             </div>
         </div>
 

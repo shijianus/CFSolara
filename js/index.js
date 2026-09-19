@@ -3419,3 +3419,134 @@ function showNotification(message, type = "success") {
         notification.classList.remove("show");
     }, 3000);
 }
+
+// -------------------------------------------------------------
+// CFSolara 平台化: EpoMail OAuth 登录与开发者 API 凭证管理
+// -------------------------------------------------------------
+(function initEpomailAuth() {
+    const STORAGE_KEY = "solara_epomail_session";
+    const loginBtn = document.getElementById("epomailLoginBtn");
+    const userLabel = document.getElementById("epomailUserLabel");
+    const modal = document.getElementById("apiKeyModal");
+    const closeX = document.getElementById("closeApiKeyModalX");
+    const closeBtn = document.getElementById("closeApiKeyModalBtn");
+    const copyBtn = document.getElementById("copyApiKeyBtn");
+    const keyInput = document.getElementById("userApiKeyInput");
+    const logoutBtn = document.getElementById("solaraLogoutBtn");
+    const userName = document.getElementById("solaraUserName");
+    const userEmail = document.getElementById("solaraUserEmail");
+    const userAvatar = document.getElementById("solaraUserAvatar");
+
+    function getSavedSession() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function saveSession(session) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        } catch {}
+    }
+
+    function clearSession() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch {}
+    }
+
+    // 检查 URL Hash 中的 Session（来自 OAuth 回调跳转）
+    if (window.location.hash.includes("session=")) {
+        try {
+            const raw = window.location.hash.split("session=")[1];
+            const parsed = JSON.parse(decodeURIComponent(raw));
+            if (parsed && parsed.apiKey) {
+                saveSession(parsed);
+                window.history.replaceState(null, "", window.location.pathname);
+                showNotification("EpoMail OAuth 验证成功，API Key 已就绪！", "success");
+            }
+        } catch (e) {
+            console.warn("Failed to parse session from hash", e);
+        }
+    }
+
+    function renderAuthUI() {
+        const session = getSavedSession();
+        if (session && session.email) {
+            if (userLabel) userLabel.textContent = session.name || session.email.split("@")[0];
+            if (userName) userName.textContent = session.name || "EpoMail 用户";
+            if (userEmail) userEmail.textContent = session.email;
+            if (keyInput) keyInput.value = session.apiKey || "";
+            if (userAvatar && session.avatar) userAvatar.src = session.avatar;
+            if (loginBtn) {
+                loginBtn.classList.add("is-authenticated");
+                loginBtn.title = "已登录: " + session.email + " (点击查看 API 连结凭证)";
+            }
+        } else {
+            if (userLabel) userLabel.textContent = "EpoMail 登录";
+            if (loginBtn) {
+                loginBtn.classList.remove("is-authenticated");
+                loginBtn.title = "使用 EpoMail 账号统一接入与获取 API Key";
+            }
+        }
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+            const session = getSavedSession();
+            if (session && session.email) {
+                // 已登录 -> 展开 API Key 模态框
+                if (modal) {
+                    modal.style.display = "flex";
+                    modal.setAttribute("aria-hidden", "false");
+                }
+            } else {
+                // 未登录 -> 跳转至 Epomail OAuth 授权页
+                window.location.href = "/api/auth/login";
+            }
+        });
+    }
+
+    function closeModal() {
+        if (modal) {
+            modal.style.display = "none";
+            modal.setAttribute("aria-hidden", "true");
+        }
+    }
+
+    if (closeX) closeX.addEventListener("click", closeModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    if (copyBtn && keyInput) {
+        copyBtn.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(keyInput.value);
+                showNotification("API Key 已复制到剪贴簿！", "success");
+            } catch {
+                keyInput.select();
+                document.execCommand("copy");
+                showNotification("API Key 已复制！", "success");
+            }
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            clearSession();
+            closeModal();
+            renderAuthUI();
+            showNotification("已退出 EpoMail 登录", "info");
+        });
+    }
+
+    renderAuthUI();
+})();
+
