@@ -213,7 +213,7 @@ export function parseHighPrecisionLyrics(raw: string): {
       const rawDur = angleMatch[2] ? parseFloat(angleMatch[2]) : 0.3;
       const wText = angleMatch[3];
 
-      const isSeconds = rawStart < 1000 && !line.includes('[00:00.');
+      const isSeconds = String(angleMatch[1]).includes('.') || rawStart < 100;
       const startMs = Math.round((isSeconds ? rawStart * 1000 : rawStart) + offsetMs);
       const durMs = Math.round(isSeconds ? rawDur * 1000 : rawDur);
 
@@ -250,6 +250,9 @@ export function parseHighPrecisionLyrics(raw: string): {
       .trim();
 
     if (!plainText) continue;
+    if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(plainText)) {
+      continue;
+    }
 
     if (lineWords.length > 0) {
       hasWordTimestamps = true;
