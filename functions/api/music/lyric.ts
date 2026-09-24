@@ -17,14 +17,12 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   }
 
   try {
-    const { lyric, parsed } = await getTrackLyrics(env, id, source);
+    const lyricPayload = await getTrackLyrics(env, id, source);
     return jsonResponse({
-      ok: true,
-      id,
-      source,
-      lyric,
-      parsed,
-      lineCount: parsed.length,
+      ...lyricPayload,
+      // 向前兼容旧字段
+      lyric: lyricPayload.rawLyric,
+      parsed: lyricPayload.lines,
     });
   } catch (err: any) {
     console.error('[CFSolara Music Lyric Error]', err);

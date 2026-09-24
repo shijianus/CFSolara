@@ -22,9 +22,34 @@ export interface SongItem {
   duration?: number;
 }
 
-export interface LyricLine {
-  time: number;
+export type LyricSyncType = 'word' | 'line';
+
+export interface LyricWord {
   text: string;
+  start: number;     // 毫秒
+  startSec: number;  // 秒
+  end: number;       // 毫秒
+  endSec: number;    // 秒
+  duration: number;  // 毫秒
+}
+
+export interface LyricLine {
+  time: number;       // 毫秒
+  timeSec: number;    // 秒
+  duration?: number;  // 毫秒
+  text: string;
+  words?: LyricWord[];
+}
+
+export interface HighPrecisionLyricPayload {
+  ok: boolean;
+  id: string;
+  source: string;
+  syncType: LyricSyncType;
+  offset: number;     // 毫秒
+  lines: LyricLine[];
+  lineCount: number;
+  rawLyric?: string;
 }
 
 export interface UserSession {

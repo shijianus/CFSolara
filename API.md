@@ -66,20 +66,53 @@
   - 自动透明代理音频二进制流，支持 HTTP `Range` 请求头（快进、快退、分段缓冲）。
   - 返回标准音频 MIME 类型（`audio/mpeg` 或 `audio/flac`）。
 
-### 3. 动态歌词与逐行时间戳解析 (`GET /api/music/lyric`)
+### 3. 高精度多协议歌词服务 (`GET /api/lyric` & `GET /api/music/lyric`)
+- **端点**：
+  - `/api/lyric`（轻量独立端点，推荐）
+  - `/api/music/lyric`（模块化端点，兼容旧版）
+- **跨域支持**：全域 CORS (`Access-Control-Allow-Origin: *`)，支持直接前端 `fetch` 或第三方无缝集成。
 - **请求参数**：
   - `id`: 歌词 ID 或歌曲 ID（必填）
-  - `source`: 音源，默认 `netease`
-- **响应示例**：
+  - `source`: 音源，支持 `netease`、`qq`、`kuwo`、`kugou`、`local`，默认 `netease`
+- **数据契约规范**：
+  - `syncType`: `"word"`（逐字级精准对齐）或 `"line"`（行级平滑降级）。
+  - `offset`: 全局时间偏置（毫秒）。
+  - `lines`: 结构化时间轴数组。当 `syncType === "word"` 时，包含每个字的物理绝对时间戳 `words` 数组；当仅有普通 LRC 时，降级为行级模式，严禁伪造不准确的字时间戳。
+- **响应示例 (逐字模式 Word-Level Sync)**：
+  ```json
+  {
+    "ok": true,
+    "id": "863046037",
+    "source": "local",
+    "syncType": "word",
+    "offset": 0,
+    "lines": [
+      {
+        "time": 280,
+        "timeSec": 0.28,
+        "duration": 2080,
+        "text": "멈춘 시간 속",
+        "words": [
+          { "text": "멈춘 ", "start": 280, "startSec": 0.28, "end": 960, "endSec": 0.96, "duration": 680 },
+          { "text": "시간 ", "start": 960, "startSec": 0.96, "end": 1580, "endSec": 1.58, "duration": 620 },
+          { "text": "속", "start": 1580, "startSec": 1.58, "end": 2300, "endSec": 2.30, "duration": 720 }
+        ]
+      }
+    ],
+    "lineCount": 42
+  }
+  ```
+- **响应示例 (行级模式 Line-Level Sync)**：
   ```json
   {
     "ok": true,
     "id": "186016",
     "source": "netease",
-    "lyric": "[00:28.53]故事的小黄花\n[00:32.40]从出生那年就飘着...",
-    "parsed": [
-      { "time": 28.53, "text": "故事的小黄花" },
-      { "time": 32.40, "text": "从出生那年就飘着" }
+    "syncType": "line",
+    "offset": 0,
+    "lines": [
+      { "time": 28530, "timeSec": 28.53, "duration": 3870, "text": "故事的小黄花" },
+      { "time": 32400, "timeSec": 32.40, "duration": 3500, "text": "从出生那年就飘着" }
     ],
     "lineCount": 42
   }

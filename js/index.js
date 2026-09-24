@@ -581,8 +581,9 @@ const API = {
     },
 
     getLyric: (song) => {
-        const signature = API.generateSignature();
-        return `${API.baseUrl}?types=lyric&id=${song.lyric_id || song.id}&source=${song.source || "netease"}&s=${signature}`;
+        const id = encodeURIComponent(song.lyric_id || song.id);
+        const source = encodeURIComponent(song.source || "netease");
+        return `/api/lyric?id=${id}&source=${source}`;
     },
 
     getPicUrl: (song) => {
@@ -3157,7 +3158,7 @@ async function exploreOnlineMusic() {
     }
 }
 
-// 修复：加载歌词
+// 修复：加载歌词 - 原生消费高精度 REST API，彻底移除字数脑补
 async function loadLyrics(song) {
     try {
         const lyricUrl = API.getLyric(song);
@@ -3165,7 +3166,21 @@ async function loadLyrics(song) {
 
         const lyricData = await API.fetchJson(lyricUrl);
 
-        if (lyricData && lyricData.lyric) {
+        if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
+            state.lyricSyncType = lyricData.syncType || 'line';
+            state.lyricOffset = lyricData.offset || 0;
+            state.lyricsData = lyricData.lines.map(line => ({
+                time: typeof line.timeSec === 'number' ? line.timeSec : (line.time / 1000),
+                timeMs: line.time,
+                duration: line.duration || 3000,
+                text: line.text,
+                words: line.words || null,
+            })).sort((a, b) => a.time - b.time);
+
+            dom.lyrics.classList.remove("empty");
+            dom.lyrics.dataset.placeholder = "default";
+            displayLyrics();
+        } else if (lyricData && lyricData.lyric) {
             parseLyrics(lyricData.lyric);
             dom.lyrics.classList.remove("empty");
             dom.lyrics.dataset.placeholder = "default";
@@ -3186,7 +3201,7 @@ async function loadLyrics(song) {
     }
 }
 
-// 修复：解析歌词
+// 修复：解析歌词（回退模式）
 function parseLyrics(lyricText) {
     const lines = lyricText.split('\n');
     const lyrics = [];
@@ -3198,7 +3213,7 @@ function parseLyrics(lyricText) {
             const seconds = parseInt(match[2]);
             const milliseconds = parseInt(match[3].padEnd(3, '0'));
             const time = minutes * 60 + seconds + milliseconds / 1000;
-            const text = match[4].trim();
+            const text = match[4].replace(/<[^>]+>/g, '').trim();
 
             if (text) {
                 lyrics.push({ time, text });
@@ -3206,6 +3221,7 @@ function parseLyrics(lyricText) {
         }
     });
 
+    state.lyricSyncType = 'line';
     state.lyricsData = lyrics.sort((a, b) => a.time - b.time);
     displayLyrics();
 }
@@ -3228,11 +3244,19 @@ function clearLyricsContent() {
     }
 }
 
-// 修复：显示歌词
+// 修复：显示歌词 - 支持逐字与行级两种模式
 function displayLyrics() {
-    const lyricsHtml = state.lyricsData.map((lyric, index) =>
-        `<div data-time="${lyric.time}" data-index="${index}">${lyric.text}</div>`
-    ).join("");
+    const isWordSync = state.lyricSyncType === 'word';
+    const lyricsHtml = state.lyricsData.map((lyric, index) => {
+        if (isWordSync && lyric.words && lyric.words.length > 0) {
+            const wordsHtml = lyric.words.map((w, wIdx) =>
+                `<span class="word-char" data-windex="${wIdx}">${w.text}</span>`
+            ).join("");
+            return `<div data-time="${lyric.time}" data-index="${index}" class="lyric-line lyric-line--word">${wordsHtml}</div>`;
+        }
+        return `<div data-time="${lyric.time}" data-index="${index}" class="lyric-line lyric-line--line">${lyric.text}</div>`;
+    }).join("");
+
     setLyricsContentHtml(lyricsHtml);
     if (dom.lyrics) {
         dom.lyrics.dataset.placeholder = "default";
@@ -3242,7 +3266,7 @@ function displayLyrics() {
     }
 }
 
-// 修复：同步歌词
+// 修复：同步歌词 - 物理时间对齐，行级整行高亮，逐字精确跟随
 function syncLyrics() {
     if (state.lyricsData.length === 0) return;
 
@@ -3289,7 +3313,34 @@ function syncLyrics() {
             });
         });
     }
+
+    // 逐字模式：真实物理发音时间对齐跟随
+    if (state.lyricSyncType === 'word' && currentIndex >= 0 && currentIndex < state.lyricsData.length) {
+        const curLine = state.lyricsData[currentIndex];
+        if (curLine.words && curLine.words.length > 0) {
+            const activeLineElements = document.querySelectorAll(`div[data-index="${currentIndex}"] .word-char`);
+            if (activeLineElements.length > 0) {
+                curLine.words.forEach((w, wIdx) => {
+                    const charSpan = activeLineElements[wIdx];
+                    if (charSpan) {
+                        const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
+                        const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
+                        if (currentTime >= end) {
+                            charSpan.classList.add("word-sung");
+                            charSpan.classList.remove("word-singing");
+                        } else if (currentTime >= start) {
+                            charSpan.classList.add("word-singing");
+                            charSpan.classList.remove("word-sung");
+                        } else {
+                            charSpan.classList.remove("word-sung", "word-singing");
+                        }
+                    }
+                });
+            }
+        }
+    }
 }
+
 
 // 新增：滚动到当前歌词 - 修复居中显示问题
 function scrollToCurrentLyric(element, containerOverride) {

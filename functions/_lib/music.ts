@@ -101,47 +101,264 @@ export async function getTrackStreamUrl(env: AppEnv, id: string, source = 'netea
   return '';
 }
 
-export function parseLrcLyrics(rawLrc: string): LyricLine[] {
-  if (!rawLrc) return [];
-  const lines = rawLrc.split('\n');
-  const result: LyricLine[] = [];
-  const timeRegex = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/g;
+export function parseHighPrecisionLyrics(raw: string): {
+  syncType: LyricSyncType;
+  offset: number;
+  lines: LyricLine[];
+} {
+  if (!raw || !raw.trim()) {
+    return { syncType: 'line', offset: 0, lines: [] };
+  }
 
-  for (const line of lines) {
-    const text = line.replace(timeRegex, '').trim();
-    if (!text) continue;
+  // 1. 提取全局偏移量 [offset: +/- ms]
+  let offsetMs = 0;
+  const offsetMatch = raw.match(/\[offset:\s*([+-]?\d+)\]/i);
+  if (offsetMatch) {
+    offsetMs = parseInt(offsetMatch[1], 10) || 0;
+  }
 
-    timeRegex.lastIndex = 0;
+  // 2. 检测是否为 XML 包装的 QRC 格式
+  let cleanInput = raw;
+  const qrcXmlMatch = raw.match(/<Lyric_1[^>]*LyricContent="([^"]+)"/i);
+  if (qrcXmlMatch) {
+    cleanInput = qrcXmlMatch[1];
+  }
+
+  const rawLines = cleanInput.split('\n');
+  const parsedLines: LyricLine[] = [];
+  let hasWordTimestamps = false;
+
+  for (const rawLine of rawLines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // 过滤元数据标签 [ti:], [ar:], [al:], [by:], [offset:] 等
+    if (/^\[(ti|ar|al|by|offset|kana|re|ve):/i.test(line)) {
+      continue;
+    }
+
+    // 2.1 匹配网易云 YRC 格式：[lineStart,lineDur](wordStart,wordDur,0)word...
+    const yrcLineMatch = line.match(/^\[(\d+),(\d+)\](.*)$/);
+    if (yrcLineMatch) {
+      const lineStartMs = parseInt(yrcLineMatch[1], 10) + offsetMs;
+      const lineDurMs = parseInt(yrcLineMatch[2], 10);
+      const content = yrcLineMatch[3];
+
+      const words: LyricWord[] = [];
+      const wordRegex = /\((\d+),(\d+)(?:,\d+)?\)([^(]+)/g;
+      let wMatch;
+      let lineText = '';
+
+      while ((wMatch = wordRegex.exec(content)) !== null) {
+        let wStart = parseInt(wMatch[1], 10);
+        const wDur = parseInt(wMatch[2], 10);
+        const wText = wMatch[3];
+
+        if (wStart < lineStartMs && wStart < 60000) {
+          wStart = lineStartMs + wStart;
+        } else {
+          wStart = wStart + offsetMs;
+        }
+
+        const wEnd = wStart + wDur;
+        words.push({
+          text: wText,
+          start: Math.max(0, wStart),
+          startSec: parseFloat((Math.max(0, wStart) / 1000).toFixed(3)),
+          end: Math.max(0, wEnd),
+          endSec: parseFloat((Math.max(0, wEnd) / 1000).toFixed(3)),
+          duration: Math.max(0, wDur),
+        });
+        lineText += wText;
+      }
+
+      if (words.length > 0) {
+        hasWordTimestamps = true;
+        parsedLines.push({
+          time: Math.max(0, lineStartMs),
+          timeSec: parseFloat((Math.max(0, lineStartMs) / 1000).toFixed(3)),
+          duration: lineDurMs,
+          text: lineText.trim() || content.replace(/\([^)]+\)/g, '').trim(),
+          words,
+        });
+        continue;
+      }
+    }
+
+    // 2.2 匹配标准行级时间戳 [mm:ss.xx] 或 [mm:ss.xxx]
+    const standardTimeRegex = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
+    const timeMatchesMs: number[] = [];
     let match;
-    while ((match = timeRegex.exec(line)) !== null) {
+
+    while ((match = standardTimeRegex.exec(line)) !== null) {
       const minutes = parseInt(match[1], 10);
       const seconds = parseInt(match[2], 10);
-      const milliseconds = match[3] ? parseInt(match[3].padEnd(3, '0').slice(0, 3), 10) : 0;
-      const time = minutes * 60 + seconds + milliseconds / 1000;
-      result.push({ time, text });
+      const ms = match[3] ? parseInt(match[3].padEnd(3, '0').slice(0, 3), 10) : 0;
+      timeMatchesMs.push(minutes * 60000 + seconds * 1000 + ms + offsetMs);
+    }
+
+    const cleanLineBody = line.replace(standardTimeRegex, '').trim();
+    if (!cleanLineBody && timeMatchesMs.length > 0) continue;
+
+    // 检查行内是否有逐字标签：
+    // 形式一：<0.28,0.68>word 或 <280,680>word
+    const angleWordRegex = /<([\d.]+)(?:,\s*([\d.]+))?>([^<]+)/g;
+    // 形式二：(1234,567)word
+    const parenWordRegex = /\((\d+),(\d+)(?:,\d+)?\)([^(]+)/g;
+
+    let lineWords: LyricWord[] = [];
+    let angleMatch;
+    while ((angleMatch = angleWordRegex.exec(cleanLineBody)) !== null) {
+      const rawStart = parseFloat(angleMatch[1]);
+      const rawDur = angleMatch[2] ? parseFloat(angleMatch[2]) : 0.3;
+      const wText = angleMatch[3];
+
+      const isSeconds = rawStart < 1000 && !line.includes('[00:00.');
+      const startMs = Math.round((isSeconds ? rawStart * 1000 : rawStart) + offsetMs);
+      const durMs = Math.round(isSeconds ? rawDur * 1000 : rawDur);
+
+      lineWords.push({
+        text: wText,
+        start: Math.max(0, startMs),
+        startSec: parseFloat((Math.max(0, startMs) / 1000).toFixed(3)),
+        end: Math.max(0, startMs + durMs),
+        endSec: parseFloat((Math.max(0, startMs + durMs) / 1000).toFixed(3)),
+        duration: Math.max(0, durMs),
+      });
+    }
+
+    if (lineWords.length === 0) {
+      let pMatch;
+      while ((pMatch = parenWordRegex.exec(cleanLineBody)) !== null) {
+        const wStart = parseInt(pMatch[1], 10) + offsetMs;
+        const wDur = parseInt(pMatch[2], 10);
+        const wText = pMatch[3];
+        lineWords.push({
+          text: wText,
+          start: Math.max(0, wStart),
+          startSec: parseFloat((Math.max(0, wStart) / 1000).toFixed(3)),
+          end: Math.max(0, wStart + wDur),
+          endSec: parseFloat((Math.max(0, wStart + wDur) / 1000).toFixed(3)),
+          duration: Math.max(0, wDur),
+        });
+      }
+    }
+
+    const plainText = cleanLineBody
+      .replace(/<[^>]+>/g, '')
+      .replace(/\([^)]+\)/g, '')
+      .trim();
+
+    if (!plainText) continue;
+
+    if (lineWords.length > 0) {
+      hasWordTimestamps = true;
+    }
+
+    if (timeMatchesMs.length > 0) {
+      for (const t of timeMatchesMs) {
+        parsedLines.push({
+          time: Math.max(0, t),
+          timeSec: parseFloat((Math.max(0, t) / 1000).toFixed(3)),
+          text: plainText,
+          words: lineWords.length > 0 ? lineWords : undefined,
+        });
+      }
+    } else if (lineWords.length > 0) {
+      const lineStart = lineWords[0].start;
+      parsedLines.push({
+        time: lineStart,
+        timeSec: lineWords[0].startSec,
+        duration: lineWords[lineWords.length - 1].end - lineStart,
+        text: plainText,
+        words: lineWords,
+      });
     }
   }
 
-  result.sort((a, b) => a.time - b.time);
-  return result;
-}
+  parsedLines.sort((a, b) => a.time - b.time);
 
-export async function getTrackLyrics(env: AppEnv, id: string, source = 'netease'): Promise<{ lyric: string; parsed: LyricLine[] }> {
-  const data = await fetchMusicProvider(env, {
-    types: 'lyric',
-    id,
-    source,
-  });
-
-  const rawLyric = typeof data === 'object' && data !== null && typeof data.lyric === 'string'
-    ? data.lyric
-    : typeof data === 'string'
-      ? data
-      : '';
+  // 为没有设定 duration 的行计算行时长
+  for (let i = 0; i < parsedLines.length; i++) {
+    const cur = parsedLines[i];
+    if (!cur.duration) {
+      const next = parsedLines[i + 1];
+      if (next) {
+        cur.duration = Math.max(300, next.time - cur.time);
+      } else {
+        cur.duration = 4500;
+      }
+    }
+  }
 
   return {
-    lyric: rawLyric,
-    parsed: parseLrcLyrics(rawLyric),
+    syncType: hasWordTimestamps ? 'word' : 'line',
+    offset: offsetMs,
+    lines: parsedLines,
+  };
+}
+
+export function parseLrcLyrics(rawLrc: string): LyricLine[] {
+  return parseHighPrecisionLyrics(rawLrc).lines;
+}
+
+export async function getTrackLyrics(env: AppEnv, id: string, source = 'netease'): Promise<HighPrecisionLyricPayload> {
+  let rawLyric = '';
+
+  // 1. 网易云直接优先尝试高精度 YRC
+  if (source === 'netease') {
+    try {
+      const url = `https://music.163.com/api/song/lyric/v1?id=${encodeURIComponent(id)}&cp=false&tv=0&lv=0&rv=0&kv=0&yv=-1&ytv=0&yrv=0`;
+      const resp = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          Referer: 'https://music.163.com/',
+        },
+      });
+      if (resp.ok) {
+        const json = (await resp.json()) as any;
+        if (json?.yrc?.lyric && typeof json.yrc.lyric === 'string') {
+          rawLyric = json.yrc.lyric;
+        } else if (json?.lrc?.lyric && typeof json.lrc.lyric === 'string') {
+          rawLyric = json.lrc.lyric;
+        }
+      }
+    } catch {
+      // 忽略直接请求异常
+    }
+  }
+
+  // 2. 上游 Provider 抓取
+  if (!rawLyric) {
+    try {
+      const data = await fetchMusicProvider(env, {
+        types: 'lyric',
+        id,
+        source,
+      });
+
+      if (typeof data === 'object' && data !== null && typeof data.lyric === 'string') {
+        rawLyric = data.lyric;
+      } else if (typeof data === 'string') {
+        rawLyric = data;
+      }
+    } catch {
+      rawLyric = '';
+    }
+  }
+
+  // 3. 高精度多协议解析
+  const { syncType, offset, lines } = parseHighPrecisionLyrics(rawLyric);
+
+  return {
+    ok: true,
+    id,
+    source,
+    syncType,
+    offset,
+    lines,
+    lineCount: lines.length,
+    rawLyric,
   };
 }
 

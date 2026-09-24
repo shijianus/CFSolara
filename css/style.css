@@ -923,6 +923,23 @@ html.mobile-view .playlist-label {
     box-shadow: 0 4px 15px var(--lyrics-highlight-shadow); 
 }
 
+.lyric-line--word .word-char {
+    display: inline-block;
+    transition: color 0.12s ease, transform 0.12s ease;
+}
+
+.lyrics .current .word-singing {
+    color: #ffffff;
+    text-shadow: 0 0 12px var(--lyrics-highlight-text);
+    transform: scale(1.12);
+    font-weight: 800;
+}
+
+.lyrics .current .word-sung {
+    color: var(--lyrics-highlight-text);
+    opacity: 1;
+}
+
 /* 控制区域 */
 .controls {
     grid-area: controls;
