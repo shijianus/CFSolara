@@ -101,6 +101,18 @@ export async function getTrackStreamUrl(env: AppEnv, id: string, source = 'netea
   return '';
 }
 
+export function isMetadataLine(text: string): boolean {
+  if (!text) return true;
+  const trimmed = text.trim();
+  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer)\s*[:：]/i.test(trimmed)) {
+    return true;
+  }
+  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50) {
+    return true;
+  }
+  return false;
+}
+
 export function parseHighPrecisionLyrics(raw: string): {
   syncType: LyricSyncType;
   offset: number;
@@ -334,18 +346,6 @@ export function parseHighPrecisionLyrics(raw: string): {
       });
     }
   }
-
-export function isMetadataLine(text: string): boolean {
-  if (!text) return true;
-  const trimmed = text.trim();
-  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer)\s*[:：]/i.test(trimmed)) {
-    return true;
-  }
-  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50) {
-    return true;
-  }
-  return false;
-}
 
   parsedLines.sort((a, b) => a.time - b.time);
 
