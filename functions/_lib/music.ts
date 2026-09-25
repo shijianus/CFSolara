@@ -335,15 +335,33 @@ export function parseHighPrecisionLyrics(raw: string): {
     }
   }
 
+export function isMetadataLine(text: string): boolean {
+  if (!text) return true;
+  const trimmed = text.trim();
+  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer)\s*[:：]/i.test(trimmed)) {
+    return true;
+  }
+  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50) {
+    return true;
+  }
+  return false;
+}
+
   parsedLines.sort((a, b) => a.time - b.time);
 
-  // 为没有设定 duration 的行计算行时长
+  // 为没有设定 duration 的行计算合理行时长，若包含间奏保留间奏空间
   for (let i = 0; i < parsedLines.length; i++) {
     const cur = parsedLines[i];
     if (!cur.duration) {
       const next = parsedLines[i + 1];
       if (next) {
-        cur.duration = Math.max(300, next.time - cur.time);
+        const gap = next.time - cur.time;
+        if (gap > 4500) {
+          const naturalMs = Math.round(Math.min(gap - 2000, Math.max(2000, cur.text.length * 360)));
+          cur.duration = naturalMs;
+        } else {
+          cur.duration = Math.max(300, gap);
+        }
       } else {
         cur.duration = 4500;
       }
@@ -373,7 +391,7 @@ export function isValidLyric(raw: string): boolean {
   const validVocalLines = lines.filter((l) => {
     const textOnly = l.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
     if (!textOnly) return false;
-    return !/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(textOnly);
+    return !isMetadataLine(textOnly);
   });
   return validVocalLines.length > 0;
 }
@@ -445,8 +463,8 @@ async function crawlNetEaseBySearch(query: string): Promise<{ raw: string; id: s
           title: String(song.name || ''),
           artist: Array.isArray(song.artists) ? song.artists.map((a: any) => a.name).join(' / ') : '',
         };
-        // 优先采纳含逐字 YRC 标签的候选项
-        if (raw.includes('[') && raw.includes('](')) {
+        // 优先采纳含逐字 YRC 标签的候选项（包括网易云原生 JSON 逐字与标签逐字）
+        if (raw.includes('{"t":') || (raw.includes('[') && raw.includes(']('))) {
           return item;
         }
         if (!candidate) {
@@ -551,15 +569,19 @@ async function crawlKugouBySearch(query: string): Promise<{ raw: string; id: str
     if (!dRes.ok) return null;
     const dJson = (await dRes.json()) as any;
     if (dJson.content) {
-      const decoded = atob(dJson.content);
-      if (isValidLyric(decoded)) {
-        return {
-          raw: decoded,
-          id: item.FileHash,
-          title: String(item.SongName || ''),
-          artist: String(item.SingerName || ''),
-        };
-      }
+      try {
+        const binaryStr = atob(dJson.content);
+        const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+        const decoded = new TextDecoder('utf-8').decode(bytes);
+        if (isValidLyric(decoded)) {
+          return {
+            raw: decoded,
+            id: item.FileHash,
+            title: String(item.SongName || ''),
+            artist: String(item.SingerName || ''),
+          };
+        }
+      } catch {}
     }
   } catch {}
   return null;
