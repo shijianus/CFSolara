@@ -682,6 +682,8 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
   // 3. 高精度多协议结构化解析
   const { syncType, offset, lines } = parseHighPrecisionLyrics(rawLyric);
 
+  const isPure = lines.length === 0 || /纯音乐/i.test(rawLyric);
+
   return {
     ok: true,
     id: finalId,
@@ -693,6 +695,7 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     lines,
     lineCount: lines.length,
     rawLyric,
+    isPureMusic: isPure,
   };
 }
 
