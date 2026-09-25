@@ -1,4 +1,4 @@
-import type { AppEnv, LyricLine, SongItem } from './types';
+import type { AppEnv, HighPrecisionLyricPayload, LyricFetchOptions, LyricLine, LyricSyncType, LyricWord, SongItem } from './types';
 
 const DEFAULT_API_BASE = 'https://music-api.gdstudio.xyz/api.php';
 const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
@@ -133,11 +133,61 @@ export function parseHighPrecisionLyrics(raw: string): {
     if (!line) continue;
 
     // 过滤元数据标签 [ti:], [ar:], [al:], [by:], [offset:] 等
-    if (/^\[(ti|ar|al|by|offset|kana|re|ve):/i.test(line)) {
+    if (/^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total):/i.test(line)) {
       continue;
     }
 
-    // 2.1 匹配网易云 YRC 格式：[lineStart,lineDur](wordStart,wordDur,0)word...
+    // 2.1 网易云 / smart-lyric JSON 行格式：{"t":1234,"c":[{"tx":"...", "t":1234, "d":500}]} 或 {"c":[{"tx":"..."}]}
+    if (line.startsWith('{') && line.endsWith('}')) {
+      try {
+        const json = JSON.parse(line);
+        if (Array.isArray(json.c)) {
+          let lineText = '';
+          const words: LyricWord[] = [];
+          let hasWordInfo = false;
+          const lineBaseTime = typeof json.t === 'number' ? json.t : 0;
+
+          for (const item of json.c) {
+            const tx = item.tx || '';
+            lineText += tx;
+            if (typeof item.t === 'number' && typeof item.d === 'number') {
+              hasWordInfo = true;
+              const wStart = item.t + offsetMs;
+              const wEnd = wStart + item.d;
+              words.push({
+                text: tx,
+                start: Math.max(0, wStart),
+                startSec: parseFloat((Math.max(0, wStart) / 1000).toFixed(3)),
+                end: Math.max(0, wEnd),
+                endSec: parseFloat((Math.max(0, wEnd) / 1000).toFixed(3)),
+                duration: Math.max(0, item.d),
+              });
+            }
+          }
+
+          const cleanText = lineText.trim();
+          if (!cleanText) continue;
+          if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(cleanText)) {
+            continue;
+          }
+
+          if (hasWordInfo && words.length > 0) hasWordTimestamps = true;
+          const lineTime = words.length > 0 ? words[0].start : (lineBaseTime + offsetMs);
+          const lineDur = words.length > 0 ? (words[words.length - 1].end - lineTime) : undefined;
+
+          parsedLines.push({
+            time: Math.max(0, lineTime),
+            timeSec: parseFloat((Math.max(0, lineTime) / 1000).toFixed(3)),
+            duration: lineDur,
+            text: cleanText,
+            words: words.length > 0 ? words : undefined,
+          });
+          continue;
+        }
+      } catch {}
+    }
+
+    // 2.2 匹配网易云 YRC 格式：[lineStart,lineDur](wordStart,wordDur,0)word...
     const yrcLineMatch = line.match(/^\[(\d+),(\d+)\](.*)$/);
     if (yrcLineMatch) {
       const lineStartMs = parseInt(yrcLineMatch[1], 10) + offsetMs;
@@ -172,20 +222,26 @@ export function parseHighPrecisionLyrics(raw: string): {
         lineText += wText;
       }
 
+      const cleanText = lineText.trim() || content.replace(/\([^)]+\)/g, '').trim();
+      if (!cleanText) continue;
+      if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(cleanText)) {
+        continue;
+      }
+
       if (words.length > 0) {
         hasWordTimestamps = true;
         parsedLines.push({
           time: Math.max(0, lineStartMs),
           timeSec: parseFloat((Math.max(0, lineStartMs) / 1000).toFixed(3)),
           duration: lineDurMs,
-          text: lineText.trim() || content.replace(/\([^)]+\)/g, '').trim(),
+          text: cleanText,
           words,
         });
         continue;
       }
     }
 
-    // 2.2 匹配标准行级时间戳 [mm:ss.xx] 或 [mm:ss.xxx]
+    // 2.3 匹配标准行级时间戳 [mm:ss.xx] 或 [mm:ss.xxx]
     const standardTimeRegex = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
     const timeMatchesMs: number[] = [];
     let match;
@@ -305,64 +361,276 @@ export function parseLrcLyrics(rawLrc: string): LyricLine[] {
   return parseHighPrecisionLyrics(rawLrc).lines;
 }
 
-export async function getTrackLyrics(env: AppEnv, id: string, source = 'netease'): Promise<HighPrecisionLyricPayload> {
+// ── 外部爬虫与多源聚合抓取器 ──
+
+async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
+  try {
+    const url = `https://music.163.com/api/song/lyric/v1?id=${encodeURIComponent(id)}&cp=false&tv=0&lv=0&rv=0&kv=0&yv=-1&ytv=0&yrv=0`;
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Referer: 'https://music.163.com/',
+      },
+    });
+    if (resp.ok) {
+      const json = (await resp.json()) as any;
+      if (json?.yrc?.lyric && typeof json.yrc.lyric === 'string') return json.yrc.lyric;
+      if (json?.lrc?.lyric && typeof json.lrc.lyric === 'string') return json.lrc.lyric;
+    }
+  } catch {}
+  return '';
+}
+
+async function fetchDirectQQLyrics(songmid: string): Promise<string> {
+  try {
+    const url = `https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=${encodeURIComponent(songmid)}&format=json&nobase64=1`;
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Referer: 'https://y.qq.com/',
+      },
+    });
+    if (resp.ok) {
+      const json = (await resp.json()) as any;
+      if (json.code === 0 && typeof json.lyric === 'string') return json.lyric;
+    }
+  } catch {}
+  return '';
+}
+
+async function crawlNetEaseBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+  try {
+    const sUrl = `https://music.163.com/api/search/get/web?s=${encodeURIComponent(query)}&type=1&offset=0&total=true&limit=3`;
+    const sRes = await fetch(sUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Referer: 'https://music.163.com/',
+      },
+    });
+    if (!sRes.ok) return null;
+    const sJson = (await sRes.json()) as any;
+    const song = sJson.result?.songs?.[0];
+    if (!song?.id) return null;
+
+    const raw = await fetchDirectNetEaseLyrics(String(song.id));
+    if (raw) {
+      return {
+        raw,
+        id: String(song.id),
+        title: String(song.name || ''),
+        artist: Array.isArray(song.artists) ? song.artists.map((a: any) => a.name).join(' / ') : '',
+      };
+    }
+  } catch {}
+  return null;
+}
+
+async function crawlQQBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+  try {
+    const sUrl = `https://c.y.qq.com/soso/fcgi-bin/client_search_cp?p=1&n=3&w=${encodeURIComponent(query)}&format=json`;
+    const sRes = await fetch(sUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Referer: 'https://y.qq.com/',
+      },
+    });
+    if (!sRes.ok) return null;
+    const sJson = (await sRes.json()) as any;
+    const song = sJson.data?.song?.list?.[0];
+    if (!song?.songmid) return null;
+
+    const raw = await fetchDirectQQLyrics(song.songmid);
+    if (raw) {
+      return {
+        raw,
+        id: song.songmid,
+        title: String(song.songname || ''),
+        artist: Array.isArray(song.singer) ? song.singer.map((s: any) => s.name).join(' / ') : '',
+      };
+    }
+  } catch {}
+  return null;
+}
+
+async function crawlLrclibBySearch(query: string, title?: string, artist?: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+  try {
+    let url = '';
+    if (title) {
+      url = `https://lrclib.net/api/get?track_name=${encodeURIComponent(title)}${artist ? `&artist_name=${encodeURIComponent(artist)}` : ''}`;
+    } else {
+      url = `https://lrclib.net/api/search?q=${encodeURIComponent(query)}`;
+    }
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as any;
+    if (Array.isArray(json)) {
+      const match = json.find((x: any) => x.syncedLyrics);
+      if (match?.syncedLyrics) {
+        return {
+          raw: match.syncedLyrics,
+          id: String(match.id),
+          title: String(match.trackName || ''),
+          artist: String(match.artistName || ''),
+        };
+      }
+    } else if (json?.syncedLyrics) {
+      return {
+        raw: json.syncedLyrics,
+        id: String(json.id),
+        title: String(json.trackName || ''),
+        artist: String(json.artistName || ''),
+      };
+    }
+  } catch {}
+  return null;
+}
+
+async function crawlKugouBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+  try {
+    const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=3`;
+    const sRes = await fetch(sUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+    });
+    if (!sRes.ok) return null;
+    const sJson = (await sRes.json()) as any;
+    const item = sJson.data?.lists?.[0];
+    if (!item?.FileHash) return null;
+
+    const lUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(item.SongName)}&hash=${item.FileHash}&timelength=${(item.Duration || 0) * 1000}`;
+    const lRes = await fetch(lUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+    });
+    if (!lRes.ok) return null;
+    const lJson = (await lRes.json()) as any;
+    const candidate = lJson.candidates?.[0];
+    if (!candidate?.id || !candidate?.accesskey) return null;
+
+    const dUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=lrc&charset=utf8`;
+    const dRes = await fetch(dUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+    });
+    if (!dRes.ok) return null;
+    const dJson = (await dRes.json()) as any;
+    if (dJson.content) {
+      const decoded = atob(dJson.content);
+      return {
+        raw: decoded,
+        id: item.FileHash,
+        title: String(item.SongName || ''),
+        artist: String(item.SingerName || ''),
+      };
+    }
+  } catch {}
+  return null;
+}
+
+/**
+ * 通用全网歌词聚合抓取入口 (Universal High-Precision Lyric Engine)
+ * 支持通过 ID 直接获取，或通过 title / artist / q 在全网主流平台进行瀑布爬取
+ */
+export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions): Promise<HighPrecisionLyricPayload> {
+  const { id = '', source = 'netease', title = '', artist = '', q = '' } = options;
+
   let rawLyric = '';
+  let finalSource = source;
+  let finalId = id;
+  let finalTitle = title;
+  let finalArtist = artist;
 
-  // 1. 网易云直接优先尝试高精度 YRC
-  if (source === 'netease') {
-    try {
-      const url = `https://music.163.com/api/song/lyric/v1?id=${encodeURIComponent(id)}&cp=false&tv=0&lv=0&rv=0&kv=0&yv=-1&ytv=0&yrv=0`;
-      const resp = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-          Referer: 'https://music.163.com/',
-        },
-      });
-      if (resp.ok) {
-        const json = (await resp.json()) as any;
-        if (json?.yrc?.lyric && typeof json.yrc.lyric === 'string') {
-          rawLyric = json.yrc.lyric;
-        } else if (json?.lrc?.lyric && typeof json.lrc.lyric === 'string') {
-          rawLyric = json.lrc.lyric;
+  // 1. 直连 ID 优先提取
+  if (id && id !== 'undefined' && id !== 'null') {
+    if (source === 'netease' || (/^\d+$/.test(id) && source !== 'tencent' && source !== 'qq')) {
+      rawLyric = await fetchDirectNetEaseLyrics(id);
+      if (rawLyric) finalSource = 'netease';
+    } else if (source === 'tencent' || source === 'qq') {
+      rawLyric = await fetchDirectQQLyrics(id);
+      if (rawLyric) finalSource = 'tencent';
+    }
+
+    // 上游 Provider 备选
+    if (!rawLyric) {
+      try {
+        const data = await fetchMusicProvider(env, { types: 'lyric', id, source });
+        if (typeof data === 'object' && data !== null && typeof data.lyric === 'string') {
+          rawLyric = data.lyric;
+        } else if (typeof data === 'string') {
+          rawLyric = data;
         }
-      }
-    } catch {
-      // 忽略直接请求异常
+      } catch {}
     }
   }
 
-  // 2. 上游 Provider 抓取
-  if (!rawLyric) {
-    try {
-      const data = await fetchMusicProvider(env, {
-        types: 'lyric',
-        id,
-        source,
-      });
+  // 2. 如果直连未取到歌词，但提供了 title、artist 或 q，启动全网瀑布实时爬虫
+  const searchQuery = (q || `${title} ${artist}`).trim();
+  if (!rawLyric && searchQuery) {
+    // 2.1 网易云全网检索
+    const neteaseResult = await crawlNetEaseBySearch(searchQuery);
+    if (neteaseResult?.raw) {
+      rawLyric = neteaseResult.raw;
+      finalSource = 'netease';
+      finalId = neteaseResult.id;
+      if (!finalTitle) finalTitle = neteaseResult.title;
+      if (!finalArtist) finalArtist = neteaseResult.artist;
+    }
 
-      if (typeof data === 'object' && data !== null && typeof data.lyric === 'string') {
-        rawLyric = data.lyric;
-      } else if (typeof data === 'string') {
-        rawLyric = data;
+    // 2.2 QQ 音乐全网检索
+    if (!rawLyric) {
+      const qqResult = await crawlQQBySearch(searchQuery);
+      if (qqResult?.raw) {
+        rawLyric = qqResult.raw;
+        finalSource = 'tencent';
+        finalId = qqResult.id;
+        if (!finalTitle) finalTitle = qqResult.title;
+        if (!finalArtist) finalArtist = qqResult.artist;
       }
-    } catch {
-      rawLyric = '';
+    }
+
+    // 2.3 LRCLIB 国际公共库检索 (覆盖海量全球与外文歌曲)
+    if (!rawLyric) {
+      const lrclibResult = await crawlLrclibBySearch(searchQuery, title, artist);
+      if (lrclibResult?.raw) {
+        rawLyric = lrclibResult.raw;
+        finalSource = 'lrclib';
+        finalId = lrclibResult.id;
+        if (!finalTitle) finalTitle = lrclibResult.title;
+        if (!finalArtist) finalArtist = lrclibResult.artist;
+      }
+    }
+
+    // 2.4 酷狗音乐检索
+    if (!rawLyric) {
+      const kugouResult = await crawlKugouBySearch(searchQuery);
+      if (kugouResult?.raw) {
+        rawLyric = kugouResult.raw;
+        finalSource = 'kugou';
+        finalId = kugouResult.id;
+        if (!finalTitle) finalTitle = kugouResult.title;
+        if (!finalArtist) finalArtist = kugouResult.artist;
+      }
     }
   }
 
-  // 3. 高精度多协议解析
+  // 3. 高精度多协议结构化解析
   const { syncType, offset, lines } = parseHighPrecisionLyrics(rawLyric);
 
   return {
     ok: true,
-    id,
-    source,
+    id: finalId,
+    source: finalSource,
     syncType,
     offset,
+    title: finalTitle || undefined,
+    artist: finalArtist || undefined,
     lines,
     lineCount: lines.length,
     rawLyric,
   };
+}
+
+export async function getTrackLyrics(env: AppEnv, id: string, source = 'netease'): Promise<HighPrecisionLyricPayload> {
+  return getUniversalLyrics(env, { id, source });
 }
 
 export async function getRandomTracks(env: AppEnv, count = 10, genre?: string): Promise<SongItem[]> {

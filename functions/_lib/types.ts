@@ -47,9 +47,20 @@ export interface HighPrecisionLyricPayload {
   source: string;
   syncType: LyricSyncType;
   offset: number;     // 毫秒
+  title?: string;
+  artist?: string;
   lines: LyricLine[];
   lineCount: number;
   rawLyric?: string;
+}
+
+export interface LyricFetchOptions {
+  id?: string;
+  source?: string;
+  title?: string;
+  artist?: string;
+  q?: string;
+  duration?: number;
 }
 
 export interface UserSession {

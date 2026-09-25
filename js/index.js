@@ -581,10 +581,14 @@ const API = {
     },
 
     getLyric: (song) => {
-        const id = encodeURIComponent(song.lyric_id || song.id);
-        const source = encodeURIComponent(song.source || "netease");
-        return `/api/lyric?id=${id}&source=${source}`;
+        const params = new URLSearchParams();
+        if (song.lyric_id || song.id) params.set('id', song.lyric_id || song.id);
+        if (song.source) params.set('source', song.source);
+        if (song.name || song.title) params.set('title', song.name || song.title);
+        if (song.artist) params.set('artist', song.artist);
+        return `/api/lyric?${params.toString()}`;
     },
+
 
     getPicUrl: (song) => {
         const signature = API.generateSignature();
