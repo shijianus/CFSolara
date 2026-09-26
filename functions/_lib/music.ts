@@ -144,8 +144,8 @@ export function parseHighPrecisionLyrics(raw: string): {
     const line = rawLine.trim();
     if (!line) continue;
 
-    // 过滤元数据标签 [ti:], [ar:], [al:], [by:], [offset:] 等
-    if (/^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total):/i.test(line)) {
+    // 过滤元数据标签 [ti:], [ar:], [al:], [by:], [offset:], [language:], [id:] 等
+    if (/^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total|language|id):/i.test(line)) {
       continue;
     }
 
@@ -199,7 +199,9 @@ export function parseHighPrecisionLyrics(raw: string): {
       } catch {}
     }
 
-    // 2.2 匹配网易云 YRC 格式：[lineStart,lineDur](wordStart,wordDur,0)word...
+    // 2.2 匹配网易云 YRC 与酷狗 KRC 逐字格式：
+    // YRC: [lineStart,lineDur](wordStart,wordDur)word...
+    // KRC: [lineStart,lineDur]<wordStart,wordDur,0>word...
     const yrcLineMatch = line.match(/^\[(\d+),(\d+)\](.*)$/);
     if (yrcLineMatch) {
       const lineStartMs = parseInt(yrcLineMatch[1], 10) + offsetMs;
@@ -207,7 +209,7 @@ export function parseHighPrecisionLyrics(raw: string): {
       const content = yrcLineMatch[3];
 
       const words: LyricWord[] = [];
-      const wordRegex = /\((\d+),(\d+)(?:,\d+)?\)([^(]+)/g;
+      const wordRegex = /[<(](\d+),(\d+)(?:,\d+)?[>)]([^<(\n]+)/g;
       let wMatch;
       let lineText = '';
 
@@ -234,7 +236,7 @@ export function parseHighPrecisionLyrics(raw: string): {
         lineText += wText;
       }
 
-      const cleanText = lineText.trim() || content.replace(/\([^)]+\)/g, '').trim();
+      const cleanText = lineText.trim() || content.replace(/[<(][^>)]+[>)]/g, '').trim();
       if (!cleanText) continue;
       if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(cleanText)) {
         continue;
@@ -246,6 +248,7 @@ export function parseHighPrecisionLyrics(raw: string): {
           time: Math.max(0, lineStartMs),
           timeSec: parseFloat((Math.max(0, lineStartMs) / 1000).toFixed(3)),
           duration: lineDurMs,
+          durationSec: parseFloat((Math.max(0, lineDurMs) / 1000).toFixed(3)),
           text: cleanText,
           words,
         });
@@ -387,13 +390,18 @@ export function isValidLyric(raw: string): boolean {
   const trimmed = raw.trim();
   if (!trimmed) return false;
   if (/^\[00:00(?:\.00+)?\]\s*(暂无歌词|纯音乐，请欣赏|没有填词|纯音乐)/i.test(trimmed)) return false;
-  const lines = trimmed.split('\n').filter((l) => l.trim() && !/^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total):/i.test(l.trim()));
+  const lines = trimmed.split('\n').filter((l) => l.trim() && !/^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total|language|id):/i.test(l.trim()));
   const validVocalLines = lines.filter((l) => {
     const textOnly = l.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
     if (!textOnly) return false;
     return !isMetadataLine(textOnly);
   });
   return validVocalLines.length > 0;
+}
+
+export function hasWordSyncTags(raw: string): boolean {
+  if (!raw || typeof raw !== 'string') return false;
+  return /"d":\s*\d+/.test(raw) || /\[\d+,\d+\]\s*[<(]\d+,\d+/.test(raw);
 }
 
 async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
@@ -542,6 +550,22 @@ async function crawlLrclibBySearch(query: string, title?: string, artist?: strin
   return null;
 }
 
+async function decodeKugouKrc(base64Content: string): Promise<string> {
+  const binaryStr = atob(base64Content);
+  const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+  const key = [64, 71, 97, 119, 94, 50, 116, 71, 81, 54, 49, 45, 206, 210, 110, 105];
+  const bodyBuf = bytes.slice(4);
+  for (let i = 0; i < bodyBuf.length; i++) {
+    bodyBuf[i] ^= key[i % 16];
+  }
+  const ds = new DecompressionStream('deflate');
+  const writer = ds.writable.getWriter();
+  writer.write(bodyBuf);
+  writer.close();
+  const res = new Response(ds.readable);
+  return await res.text();
+}
+
 async function crawlKugouBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
   try {
     const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=3`;
@@ -559,27 +583,55 @@ async function crawlKugouBySearch(query: string): Promise<{ raw: string; id: str
     });
     if (!lRes.ok) return null;
     const lJson = (await lRes.json()) as any;
-    const candidate = lJson.candidates?.[0];
-    if (!candidate?.id || !candidate?.accesskey) return null;
+    const candidates = Array.isArray(lJson.candidates) ? lJson.candidates : [];
+    if (candidates.length === 0) return null;
 
-    const dUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=lrc&charset=utf8`;
-    const dRes = await fetch(dUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
-    });
-    if (!dRes.ok) return null;
-    const dJson = (await dRes.json()) as any;
-    if (dJson.content) {
+    for (const candidate of candidates.slice(0, 3)) {
+      if (!candidate?.id || !candidate?.accesskey) continue;
+
+      // 1. 优先尝试获取并解码毫秒级逐字 KRC 格式
       try {
-        const binaryStr = atob(dJson.content);
-        const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
-        const decoded = new TextDecoder('utf-8').decode(bytes);
-        if (isValidLyric(decoded)) {
-          return {
-            raw: decoded,
-            id: item.FileHash,
-            title: String(item.SongName || ''),
-            artist: String(item.SingerName || ''),
-          };
+        const krcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=krc&charset=utf8`;
+        const krcRes = await fetch(krcUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+        });
+        if (krcRes.ok) {
+          const krcJson = (await krcRes.json()) as any;
+          if (krcJson.content) {
+            const decoded = await decodeKugouKrc(krcJson.content);
+            if (isValidLyric(decoded) && hasWordSyncTags(decoded)) {
+              return {
+                raw: decoded,
+                id: item.FileHash,
+                title: String(item.SongName || ''),
+                artist: String(item.SingerName || ''),
+              };
+            }
+          }
+        }
+      } catch {}
+
+      // 2. 降级尝试获取普通行级 LRC
+      try {
+        const lrcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=lrc&charset=utf8`;
+        const lrcRes = await fetch(lrcUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+        });
+        if (lrcRes.ok) {
+          const lrcJson = (await lrcRes.json()) as any;
+          if (lrcJson.content) {
+            const binaryStr = atob(lrcJson.content);
+            const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+            const decoded = new TextDecoder('utf-8').decode(bytes);
+            if (isValidLyric(decoded)) {
+              return {
+                raw: decoded,
+                id: item.FileHash,
+                title: String(item.SongName || ''),
+                artist: String(item.SingerName || ''),
+              };
+            }
+          }
         }
       } catch {}
     }
@@ -629,20 +681,33 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
   }
 
-  // 2. 如果直连未取到歌词，但提供了 title、artist 或 q，启动全网瀑布实时爬虫
+  // 2. 逐字高精升级与全网瀑布实时爬虫：
+  // 核心法则：如果当前歌词没有真实逐字时间戳（即为普通粗粒度行级 LRC），但提供了搜索线索（title/artist/q），
+  // 必须优先尝试获取具备真实逐字时间戳（如酷狗 KRC 或网易云 YRC）的毫秒级高精歌词！
   const searchQuery = (q || `${title} ${artist}`).trim();
-  if (!rawLyric && searchQuery) {
-    // 2.1 网易云全网检索 (多候选遍历与 YRC 优先)
-    const neteaseResult = await crawlNetEaseBySearch(searchQuery);
-    if (neteaseResult?.raw && isValidLyric(neteaseResult.raw)) {
-      rawLyric = neteaseResult.raw;
-      finalSource = 'netease';
-      finalId = neteaseResult.id;
-      if (!finalTitle) finalTitle = neteaseResult.title;
-      if (!finalArtist) finalArtist = neteaseResult.artist;
+  if (searchQuery && (!rawLyric || !hasWordSyncTags(rawLyric))) {
+    // 2.1 酷狗音乐高精逐字 KRC 检索（拥有最庞大、覆盖最全的逐字歌词库）
+    const kugouResult = await crawlKugouBySearch(searchQuery);
+    if (kugouResult?.raw && isValidLyric(kugouResult.raw) && hasWordSyncTags(kugouResult.raw)) {
+      rawLyric = kugouResult.raw;
+      finalSource = 'kugou';
+      finalId = kugouResult.id;
+      if (!finalTitle) finalTitle = kugouResult.title;
+      if (!finalArtist) finalArtist = kugouResult.artist;
     }
 
-    // 2.2 QQ 音乐全网检索
+    // 2.2 若当前依然没有任何有效歌词，继续依次尝试网易云、QQ、LRCLIB 与酷狗普通 LRC
+    if (!rawLyric) {
+      const neteaseResult = await crawlNetEaseBySearch(searchQuery);
+      if (neteaseResult?.raw && isValidLyric(neteaseResult.raw)) {
+        rawLyric = neteaseResult.raw;
+        finalSource = 'netease';
+        finalId = neteaseResult.id;
+        if (!finalTitle) finalTitle = neteaseResult.title;
+        if (!finalArtist) finalArtist = neteaseResult.artist;
+      }
+    }
+
     if (!rawLyric) {
       const qqResult = await crawlQQBySearch(searchQuery);
       if (qqResult?.raw && isValidLyric(qqResult.raw)) {
@@ -654,7 +719,6 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       }
     }
 
-    // 2.3 LRCLIB 国际公共库检索 (覆盖海量全球与外文歌曲)
     if (!rawLyric) {
       const lrclibResult = await crawlLrclibBySearch(searchQuery, title, artist);
       if (lrclibResult?.raw && isValidLyric(lrclibResult.raw)) {
@@ -666,16 +730,12 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       }
     }
 
-    // 2.4 酷狗音乐检索
-    if (!rawLyric) {
-      const kugouResult = await crawlKugouBySearch(searchQuery);
-      if (kugouResult?.raw && isValidLyric(kugouResult.raw)) {
-        rawLyric = kugouResult.raw;
-        finalSource = 'kugou';
-        finalId = kugouResult.id;
-        if (!finalTitle) finalTitle = kugouResult.title;
-        if (!finalArtist) finalArtist = kugouResult.artist;
-      }
+    if (!rawLyric && kugouResult?.raw && isValidLyric(kugouResult.raw)) {
+      rawLyric = kugouResult.raw;
+      finalSource = 'kugou';
+      finalId = kugouResult.id;
+      if (!finalTitle) finalTitle = kugouResult.title;
+      if (!finalArtist) finalArtist = kugouResult.artist;
     }
   }
 
