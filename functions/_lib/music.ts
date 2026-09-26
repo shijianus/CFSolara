@@ -349,21 +349,21 @@ export function parseHighPrecisionLyrics(raw: string): {
 
   parsedLines.sort((a, b) => a.time - b.time);
 
-  // 为没有设定 duration 的行计算合理行时长，若包含间奏保留间奏空间
+  // 为没有设定 duration 的行计算合理行时长，基于自然语速声学模型保留间奏与伴奏呼吸空间
   for (let i = 0; i < parsedLines.length; i++) {
     const cur = parsedLines[i];
     if (!cur.duration) {
       const next = parsedLines[i + 1];
-      if (next) {
-        const gap = next.time - cur.time;
-        if (gap > 4500) {
-          const naturalMs = Math.round(Math.min(gap - 2000, Math.max(2000, cur.text.length * 360)));
-          cur.duration = naturalMs;
-        } else {
-          cur.duration = Math.max(300, gap);
-        }
+      const gapMs = next ? next.time - cur.time : 4500;
+      const clean = cur.text.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
+      const vocalChars = Math.max(1, clean.replace(/[\s\p{P}\p{S}]/gu, '').length);
+      const naturalMs = Math.round(Math.max(1200, vocalChars * 240 + 350));
+      if (gapMs <= 0) {
+        cur.duration = naturalMs;
+      } else if (naturalMs >= gapMs - 200) {
+        cur.duration = Math.max(400, Math.min(gapMs, gapMs - 150));
       } else {
-        cur.duration = 4500;
+        cur.duration = Math.min(gapMs - 250, naturalMs);
       }
     }
     cur.durationSec = parseFloat((cur.duration / 1000).toFixed(3));
