@@ -566,74 +566,131 @@ async function decodeKugouKrc(base64Content: string): Promise<string> {
   return await res.text();
 }
 
-async function crawlKugouBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+async function crawlKugouBySearch(
+  query: string,
+  targetDuration?: number,
+  targetArtist?: string,
+): Promise<{ raw: string; id: string; title: string; artist: string; duration?: number } | null> {
   try {
-    const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=3`;
+    const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=10`;
     const sRes = await fetch(sUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
     });
     if (!sRes.ok) return null;
     const sJson = (await sRes.json()) as any;
-    const item = sJson.data?.lists?.[0];
-    if (!item?.FileHash) return null;
+    const lists = Array.isArray(sJson.data?.lists) ? sJson.data.lists : [];
+    if (lists.length === 0) return null;
 
-    const lUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(item.SongName)}&hash=${item.FileHash}&timelength=${(item.Duration || 0) * 1000}`;
-    const lRes = await fetch(lUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
-    });
-    if (!lRes.ok) return null;
-    const lJson = (await lRes.json()) as any;
-    const candidates = Array.isArray(lJson.candidates) ? lJson.candidates : [];
-    if (candidates.length === 0) return null;
+    const normQuery = query.toLowerCase();
+    const isExplicitLive = /(live|演唱会|现场)/i.test(normQuery);
+    const isExplicitDj = /(dj|remix)/i.test(normQuery);
 
-    for (const candidate of candidates.slice(0, 3)) {
-      if (!candidate?.id || !candidate?.accesskey) continue;
+    // 严密计算候选歌曲匹配得分（杜绝将全曲误匹配到短版、片段、DJ或不同歌手翻唱）
+    const scoredCandidates = lists.map((item: any) => {
+      let score = 0;
+      const sName = String(item.SongName || '');
+      const singer = String(item.SingerName || '');
+      const dur = typeof item.Duration === 'number' ? item.Duration : 0;
 
-      // 1. 优先尝试获取并解码毫秒级逐字 KRC 格式
-      try {
-        const krcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=krc&charset=utf8`;
-        const krcRes = await fetch(krcUrl, {
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
-        });
-        if (krcRes.ok) {
-          const krcJson = (await krcRes.json()) as any;
-          if (krcJson.content) {
-            const decoded = await decodeKugouKrc(krcJson.content);
-            if (isValidLyric(decoded) && hasWordSyncTags(decoded)) {
-              return {
-                raw: decoded,
-                id: item.FileHash,
-                title: String(item.SongName || ''),
-                artist: String(item.SingerName || ''),
-              };
+      // 1. 过滤垃圾/改编标签（若搜索词未明确要求）
+      if (!isExplicitLive && /(live|演唱会|现场)/i.test(sName)) score -= 30;
+      if (!isExplicitDj && /(dj|remix|哈基米)/i.test(sName)) score -= 60;
+      if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑)/i.test(sName)) score -= 80;
+
+      // 2. 歌手匹配权重
+      if (targetArtist) {
+        const normArtist = targetArtist.toLowerCase().split(/[\/,]/)[0].trim();
+        if (normArtist && singer.toLowerCase().includes(normArtist)) {
+          score += 50;
+        } else if (singer && singer !== '未知' && !singer.toLowerCase().includes(normArtist)) {
+          score -= 40;
+        }
+      }
+
+      // 3. 时长贴合权重（关键防线：杜绝将整曲替换为截断的短版/高潮版）
+      if (targetDuration && targetDuration > 20 && dur > 0) {
+        const diff = Math.abs(dur - targetDuration);
+        if (diff <= 5) score += 50;
+        else if (diff <= 12) score += 25;
+        else if (diff <= 25) score += 5;
+        else if (diff > 35) score -= 90; // 时长相差超过35秒基本为剪辑版或变奏版
+      }
+
+      return { item, score };
+    })
+    .filter((x: any) => x.score > -60)
+    .sort((a: any, b: any) => b.score - a.score);
+
+    for (const { item } of scoredCandidates.slice(0, 4)) {
+      if (!item?.FileHash) continue;
+      const lUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(item.SongName)}&hash=${item.FileHash}&timelength=${(item.Duration || 0) * 1000}`;
+      const lRes = await fetch(lUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+      });
+      if (!lRes.ok) continue;
+      const lJson = (await lRes.json()) as any;
+      const candidates = Array.isArray(lJson.candidates) ? lJson.candidates : [];
+      if (candidates.length === 0) continue;
+
+      for (const candidate of candidates.slice(0, 3)) {
+        if (!candidate?.id || !candidate?.accesskey) continue;
+
+        // 1. 优先尝试获取并解码毫秒级逐字 KRC 格式
+        try {
+          const krcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=krc&charset=utf8`;
+          const krcRes = await fetch(krcUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+          });
+          if (krcRes.ok) {
+            const krcJson = (await krcRes.json()) as any;
+            if (krcJson.content) {
+              const decoded = await decodeKugouKrc(krcJson.content);
+              if (isValidLyric(decoded) && hasWordSyncTags(decoded)) {
+                // 深度校验：检查 KRC 实际最后一句歌词时间戳，确保不是半截歌词
+                const timeMatches = [...decoded.matchAll(/\[(\d+),/g)];
+                const lastTimestampMs = timeMatches.length > 0 ? parseInt(timeMatches[timeMatches.length - 1][1], 10) : 0;
+                if (targetDuration && targetDuration > 60 && lastTimestampMs < (targetDuration - 50) * 1000) {
+                  // 歌词在歌曲结束前50秒以上就戛然而止，属于截断歌词，跳过
+                  continue;
+                }
+
+                return {
+                  raw: decoded,
+                  id: item.FileHash,
+                  title: String(item.SongName || ''),
+                  artist: String(item.SingerName || ''),
+                  duration: item.Duration,
+                };
+              }
             }
           }
-        }
-      } catch {}
+        } catch {}
 
-      // 2. 降级尝试获取普通行级 LRC
-      try {
-        const lrcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=lrc&charset=utf8`;
-        const lrcRes = await fetch(lrcUrl, {
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
-        });
-        if (lrcRes.ok) {
-          const lrcJson = (await lrcRes.json()) as any;
-          if (lrcJson.content) {
-            const binaryStr = atob(lrcJson.content);
-            const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
-            const decoded = new TextDecoder('utf-8').decode(bytes);
-            if (isValidLyric(decoded)) {
-              return {
-                raw: decoded,
-                id: item.FileHash,
-                title: String(item.SongName || ''),
-                artist: String(item.SingerName || ''),
-              };
+        // 2. 降级尝试获取普通行级 LRC
+        try {
+          const lrcUrl = `http://lyrics.kugou.com/download?ver=1&client=pc&id=${candidate.id}&accesskey=${candidate.accesskey}&fmt=lrc&charset=utf8`;
+          const lrcRes = await fetch(lrcUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+          });
+          if (lrcRes.ok) {
+            const lrcJson = (await lrcRes.json()) as any;
+            if (lrcJson.content) {
+              const binaryStr = atob(lrcJson.content);
+              const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+              const decoded = new TextDecoder('utf-8').decode(bytes);
+              if (isValidLyric(decoded)) {
+                return {
+                  raw: decoded,
+                  id: item.FileHash,
+                  title: String(item.SongName || ''),
+                  artist: String(item.SingerName || ''),
+                  duration: item.Duration,
+                };
+              }
             }
           }
-        }
-      } catch {}
+        } catch {}
+      }
     }
   } catch {}
   return null;
@@ -681,13 +738,24 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
   }
 
+  // 计算既有歌词的基准时长与跨度（用于衡量候选项是否全篇对齐）
+  let estimatedDurationSec = 0;
+  if (rawLyric) {
+    const timeMatches = [...rawLyric.matchAll(/\[(\d{1,2}):(\d{2})(?:\.(\d{2,3}))?\]/g)];
+    if (timeMatches.length > 0) {
+      const lastM = timeMatches[timeMatches.length - 1];
+      estimatedDurationSec = parseInt(lastM[1], 10) * 60 + parseInt(lastM[2], 10);
+    }
+  }
+
   // 2. 逐字高精升级与全网瀑布实时爬虫：
   // 核心法则：如果当前歌词没有真实逐字时间戳（即为普通粗粒度行级 LRC），但提供了搜索线索（title/artist/q），
   // 必须优先尝试获取具备真实逐字时间戳（如酷狗 KRC 或网易云 YRC）的毫秒级高精歌词！
+  // 关键防御：高精升级时严禁将完整歌曲降级为短版、高潮剪辑版或不同歌手翻唱版！
   const searchQuery = (q || `${title} ${artist}`).trim();
   if (searchQuery && (!rawLyric || !hasWordSyncTags(rawLyric))) {
-    // 2.1 酷狗音乐高精逐字 KRC 检索（拥有最庞大、覆盖最全的逐字歌词库）
-    const kugouResult = await crawlKugouBySearch(searchQuery);
+    // 2.1 酷狗音乐高精逐字 KRC 检索（严守时长一致与全曲覆盖法则）
+    const kugouResult = await crawlKugouBySearch(searchQuery, estimatedDurationSec, artist);
     if (kugouResult?.raw && isValidLyric(kugouResult.raw) && hasWordSyncTags(kugouResult.raw)) {
       rawLyric = kugouResult.raw;
       finalSource = 'kugou';
