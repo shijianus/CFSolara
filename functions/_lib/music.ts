@@ -570,6 +570,8 @@ async function crawlKugouBySearch(
   query: string,
   targetDuration?: number,
   targetArtist?: string,
+  targetTitle?: string,
+  referenceRawLyric?: string,
 ): Promise<{ raw: string; id: string; title: string; artist: string; duration?: number } | null> {
   try {
     const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=10`;
@@ -584,6 +586,12 @@ async function crawlKugouBySearch(
     const normQuery = query.toLowerCase();
     const isExplicitLive = /(live|演唱会|现场)/i.test(normQuery);
     const isExplicitDj = /(dj|remix)/i.test(normQuery);
+    const cleanTargetTitle = (targetTitle || '')
+      .replace(/\([^)]+\)/g, '')
+      .replace(/\[[^\]]+\]/g, '')
+      .replace(/《[^》]+》/g, '')
+      .trim()
+      .toLowerCase();
 
     // 严密计算候选歌曲匹配得分（杜绝将全曲误匹配到短版、片段、DJ或不同歌手翻唱）
     const scoredCandidates = lists.map((item: any) => {
@@ -591,6 +599,16 @@ async function crawlKugouBySearch(
       const sName = String(item.SongName || '');
       const singer = String(item.SingerName || '');
       const dur = typeof item.Duration === 'number' ? item.Duration : 0;
+
+      // 0. 歌名核心匹配权重（坚固防线：杜绝赵雷《成都》匹配到赵雷《家乡》）
+      if (cleanTargetTitle && cleanTargetTitle.length >= 2) {
+        const sClean = sName.replace(/\([^)]+\)/g, '').replace(/\[[^\]]+\]/g, '').trim().toLowerCase();
+        if (sClean.includes(cleanTargetTitle) || cleanTargetTitle.includes(sClean)) {
+          score += 55;
+        } else {
+          score -= 70; // 歌名不匹配，严重扣分！
+        }
+      }
 
       // 1. 过滤垃圾/改编标签（若搜索词未明确要求）
       if (!isExplicitLive && /(live|演唱会|现场)/i.test(sName)) score -= 30;
@@ -618,7 +636,7 @@ async function crawlKugouBySearch(
 
       return { item, score };
     })
-    .filter((x: any) => x.score > -60)
+    .filter((x: any) => x.score > -50)
     .sort((a: any, b: any) => b.score - a.score);
 
     for (const { item } of scoredCandidates.slice(0, 4)) {
@@ -646,12 +664,30 @@ async function crawlKugouBySearch(
             if (krcJson.content) {
               const decoded = await decodeKugouKrc(krcJson.content);
               if (isValidLyric(decoded) && hasWordSyncTags(decoded)) {
-                // 深度校验：检查 KRC 实际最后一句歌词时间戳，确保不是半截歌词
+                // 深度校验 1：检查 KRC 实际最后一句歌词时间戳，确保不是半截歌词
                 const timeMatches = [...decoded.matchAll(/\[(\d+),/g)];
                 const lastTimestampMs = timeMatches.length > 0 ? parseInt(timeMatches[timeMatches.length - 1][1], 10) : 0;
                 if (targetDuration && targetDuration > 60 && lastTimestampMs < (targetDuration - 50) * 1000) {
                   // 歌词在歌曲结束前50秒以上就戛然而止，属于截断歌词，跳过
                   continue;
+                }
+
+                // 深度校验 2：内容相似度验证（若已有原歌曲歌词参考，比对代表性句子）
+                if (referenceRawLyric) {
+                  const refLines = referenceRawLyric.split('\n')
+                    .map((l) => l.replace(/\[\d{1,2}:\d{2}(?:\.\d{2,3})?\]/g, '').replace(/\{[^}]+\}/g, '').trim())
+                    .filter((l) => l.length >= 3 && !/^(作词|作曲|编曲|词|曲|制作|演唱|歌手)/i.test(l));
+                  if (refLines.length >= 4) {
+                    const sample1 = refLines[Math.floor(refLines.length * 0.25)];
+                    const sample2 = refLines[Math.floor(refLines.length * 0.65)];
+                    const cleanDecoded = decoded.replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '');
+                    const m1 = sample1 && cleanDecoded.includes(sample1.slice(0, Math.min(4, sample1.length)));
+                    const m2 = sample2 && cleanDecoded.includes(sample2.slice(0, Math.min(4, sample2.length)));
+                    if (!m1 && !m2) {
+                      // 候选歌词与原歌曲关键歌词完全不匹配，坚决舍弃！
+                      continue;
+                    }
+                  }
                 }
 
                 return {
@@ -754,8 +790,8 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
   // 关键防御：高精升级时严禁将完整歌曲降级为短版、高潮剪辑版或不同歌手翻唱版！
   const searchQuery = (q || `${title} ${artist}`).trim();
   if (searchQuery && (!rawLyric || !hasWordSyncTags(rawLyric))) {
-    // 2.1 酷狗音乐高精逐字 KRC 检索（严守时长一致与全曲覆盖法则）
-    const kugouResult = await crawlKugouBySearch(searchQuery, estimatedDurationSec, artist);
+    // 2.1 酷狗音乐高精逐字 KRC 检索（严守歌名、歌手、时长一致与内容相似度校验法则）
+    const kugouResult = await crawlKugouBySearch(searchQuery, estimatedDurationSec, artist, title, rawLyric);
     if (kugouResult?.raw && isValidLyric(kugouResult.raw) && hasWordSyncTags(kugouResult.raw)) {
       rawLyric = kugouResult.raw;
       finalSource = 'kugou';
@@ -804,7 +840,6 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       finalId = kugouResult.id;
       if (!finalTitle) finalTitle = kugouResult.title;
       if (!finalArtist) finalArtist = kugouResult.artist;
-    }
   }
 
   // 3. 高精度多协议结构化解析
