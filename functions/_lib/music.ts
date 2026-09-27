@@ -840,6 +840,7 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       finalId = kugouResult.id;
       if (!finalTitle) finalTitle = kugouResult.title;
       if (!finalArtist) finalArtist = kugouResult.artist;
+    }
   }
 
   // 3. 高精度多协议结构化解析
