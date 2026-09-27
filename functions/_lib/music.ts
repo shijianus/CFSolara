@@ -734,31 +734,49 @@ async function crawlKugouBySearch(
 
                     // C. 间奏后时间戳严格物理对齐（坚决杜绝因变奏/长间奏导致后半段直接乱掉）
                     const candidateLines: { text: string; timeSec: number }[] = [];
-                    for (const candLine of decoded.split('\n')) {
+                    for (const candLine of decoded.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)) {
                       const cMatch = candLine.match(/^\[(\d+),\d+\](.*)$/);
                       if (cMatch) {
                         const cTimeSec = parseInt(cMatch[1], 10) / 1000;
                         const cText = cMatch[2].replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').replace(/\s+/g, '');
-                        if (cText.length >= 2) {
+                        if (cText.length >= 2 && !/^(作词|作曲|编曲|词|曲|制作|演唱|歌手)/i.test(cText)) {
                           candidateLines.push({ text: cText, timeSec: cTimeSec });
                         }
                       }
                     }
 
-                    const midRef = sample2 || refParsedLines[Math.floor(refParsedLines.length * 0.5)];
-                    if (midRef && candidateLines.length > 0) {
-                      const midRefClean = midRef.text.replace(/\s+/g, '');
-                      const matchingCandLine = candidateLines.find((cl) => {
-                        return cl.text.includes(midRefClean.slice(0, Math.min(4, midRefClean.length))) ||
-                          midRefClean.includes(cl.text.slice(0, Math.min(4, cl.text.length)));
+                    // 多位点巡检（覆盖前奏后、第一段间奏后、第二段间奏后的句子，时差超过 2.0 秒坚决舍弃）
+                    let hasInterludeDrift = false;
+                    const checkIndices = [
+                      Math.floor(refParsedLines.length * 0.20),
+                      Math.floor(refParsedLines.length * 0.35),
+                      Math.floor(refParsedLines.length * 0.50),
+                      Math.floor(refParsedLines.length * 0.65),
+                      Math.floor(refParsedLines.length * 0.80),
+                    ];
+
+                    for (const idx of checkIndices) {
+                      const refItem = refParsedLines[idx];
+                      if (!refItem) continue;
+                      const rClean = refItem.text.replace(/\s+/g, '');
+                      if (rClean.length < 3) continue;
+
+                      const match = candidateLines.find((cl) => {
+                        return cl.text.includes(rClean.slice(0, 3)) || rClean.includes(cl.text.slice(0, 3));
                       });
-                      if (matchingCandLine) {
-                        const timeDiff = Math.abs(matchingCandLine.timeSec - midRef.timeSec);
-                        if (timeDiff > 2.5) {
-                          // 间奏或编曲时长与原曲录音室音源相差超过 2.5 秒，说明版本不符，直接舍弃！
-                          continue;
+
+                      if (match) {
+                        const diff = Math.abs(match.timeSec - refItem.timeSec);
+                        if (diff > 2.0) {
+                          hasInterludeDrift = true;
+                          break;
                         }
                       }
+                    }
+
+                    if (hasInterludeDrift) {
+                      // 间奏或编曲时长与原曲录音室音源相差超过 2.0 秒，说明版本不符，直接舍弃！
+                      continue;
                     }
                   }
                 }
