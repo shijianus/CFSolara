@@ -613,7 +613,7 @@ async function crawlKugouBySearch(
       // 1. 过滤垃圾/改编标签（若搜索词未明确要求）
       if (!isExplicitLive && /(live|演唱会|现场)/i.test(sName)) score -= 30;
       if (!isExplicitDj && /(dj|remix|哈基米)/i.test(sName)) score -= 60;
-      if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑)/i.test(sName)) score -= 80;
+      if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑|双声道|变奏|改编|翻唱|二创|鬼畜|环绕|慢速|加速|减速)/i.test(sName)) score -= 80;
 
       // 2. 歌手匹配权重
       if (targetArtist) {
@@ -650,8 +650,12 @@ async function crawlKugouBySearch(
       const candidates = Array.isArray(lJson.candidates) ? lJson.candidates : [];
       if (candidates.length === 0) continue;
 
-      for (const candidate of candidates.slice(0, 3)) {
+      for (const candidate of candidates.slice(0, 4)) {
         if (!candidate?.id || !candidate?.accesskey) continue;
+        const cSong = String(candidate.song || candidate.SongName || '');
+        if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑|双声道|变奏|改编|翻唱|二创|鬼畜|环绕|慢速|加速|减速)/i.test(cSong)) {
+          continue;
+        }
 
         // 1. 优先尝试获取并解码毫秒级逐字 KRC 格式
         try {
@@ -672,20 +676,89 @@ async function crawlKugouBySearch(
                   continue;
                 }
 
-                // 深度校验 2：内容相似度验证（若已有原歌曲歌词参考，比对代表性句子）
+                // 深度校验 2：内容相似度与全曲时间轴（含间奏）严格对齐校验
                 if (referenceRawLyric) {
-                  const refLines = referenceRawLyric.split('\n')
-                    .map((l) => l.replace(/\[\d{1,2}:\d{2}(?:\.\d{2,3})?\]/g, '').replace(/\{[^}]+\}/g, '').trim())
-                    .filter((l) => l.length >= 3 && !/^(作词|作曲|编曲|词|曲|制作|演唱|歌手)/i.test(l));
-                  if (refLines.length >= 4) {
-                    const sample1 = refLines[Math.floor(refLines.length * 0.25)];
-                    const sample2 = refLines[Math.floor(refLines.length * 0.65)];
+                  const refParsedLines: { text: string; timeSec: number }[] = [];
+                  for (const rawLine of referenceRawLyric.split('\n')) {
+                    const l = rawLine.trim();
+                    if (!l) continue;
+                    if (l.startsWith('{') && l.endsWith('}')) {
+                      try {
+                        const j = JSON.parse(l);
+                        if (Array.isArray(j.c)) {
+                          const tText = j.c.map((c: any) => c.tx || '').join('').trim();
+                          const tSec = (j.t || 0) / 1000;
+                          if (tText && tText.length >= 2 && !/^(作词|作曲|编曲|词|曲|制作|演唱|歌手)/i.test(tText)) {
+                            refParsedLines.push({ text: tText, timeSec: tSec });
+                          }
+                          continue;
+                        }
+                      } catch {}
+                    }
+                    const m = l.match(/^\[(\d{1,2}):(\d{2})(?:\.(\d{2,3}))?\](.*)$/);
+                    if (m) {
+                      const min = parseInt(m[1], 10);
+                      const sec = parseInt(m[2], 10);
+                      const ms = m[3] ? parseInt(m[3].padEnd(3, '0').slice(0, 3), 10) : 0;
+                      const tSec = min * 60 + sec + ms / 1000;
+                      const tText = m[4].replace(/\{[^}]+\}/g, '').trim();
+                      if (tText && tText.length >= 2 && !/^(作词|作曲|编曲|词|曲|制作|演唱|歌手)/i.test(tText)) {
+                        refParsedLines.push({ text: tText, timeSec: tSec });
+                      }
+                    }
+                  }
+
+                  if (refParsedLines.length >= 4) {
                     const cleanDecoded = decoded.replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '');
-                    const m1 = sample1 && cleanDecoded.includes(sample1.slice(0, Math.min(4, sample1.length)));
-                    const m2 = sample2 && cleanDecoded.includes(sample2.slice(0, Math.min(4, sample2.length)));
-                    if (!m1 && !m2) {
-                      // 候选歌词与原歌曲关键歌词完全不匹配，坚决舍弃！
+
+                    // A. 语种一致性严密防护（杜绝韩语歌曲被替换为英文/中文版）
+                    const refHasKorean = refParsedLines.some((x) => /[\uac00-\ud7af]/.test(x.text));
+                    if (refHasKorean && !/[\uac00-\ud7af]/.test(cleanDecoded)) {
                       continue;
+                    }
+                    const refHasJapanese = refParsedLines.some((x) => /[\u3040-\u30ff]/.test(x.text));
+                    if (refHasJapanese && !/[\u3040-\u30ff]/.test(cleanDecoded)) {
+                      continue;
+                    }
+
+                    // B. 文本相似度抽样核验
+                    const sample1 = refParsedLines[Math.floor(refParsedLines.length * 0.25)];
+                    const sample2 = refParsedLines[Math.floor(refParsedLines.length * 0.65)];
+                    const s1Clean = sample1 ? sample1.text.replace(/\s+/g, '') : '';
+                    const s2Clean = sample2 ? sample2.text.replace(/\s+/g, '') : '';
+                    const m1 = s1Clean && cleanDecoded.includes(s1Clean.slice(0, Math.min(4, s1Clean.length)));
+                    const m2 = s2Clean && cleanDecoded.includes(s2Clean.slice(0, Math.min(4, s2Clean.length)));
+                    if (!m1 && !m2) {
+                      continue;
+                    }
+
+                    // C. 间奏后时间戳严格物理对齐（坚决杜绝因变奏/长间奏导致后半段直接乱掉）
+                    const candidateLines: { text: string; timeSec: number }[] = [];
+                    for (const candLine of decoded.split('\n')) {
+                      const cMatch = candLine.match(/^\[(\d+),\d+\](.*)$/);
+                      if (cMatch) {
+                        const cTimeSec = parseInt(cMatch[1], 10) / 1000;
+                        const cText = cMatch[2].replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').replace(/\s+/g, '');
+                        if (cText.length >= 2) {
+                          candidateLines.push({ text: cText, timeSec: cTimeSec });
+                        }
+                      }
+                    }
+
+                    const midRef = sample2 || refParsedLines[Math.floor(refParsedLines.length * 0.5)];
+                    if (midRef && candidateLines.length > 0) {
+                      const midRefClean = midRef.text.replace(/\s+/g, '');
+                      const matchingCandLine = candidateLines.find((cl) => {
+                        return cl.text.includes(midRefClean.slice(0, Math.min(4, midRefClean.length))) ||
+                          midRefClean.includes(cl.text.slice(0, Math.min(4, cl.text.length)));
+                      });
+                      if (matchingCandLine) {
+                        const timeDiff = Math.abs(matchingCandLine.timeSec - midRef.timeSec);
+                        if (timeDiff > 2.5) {
+                          // 间奏或编曲时长与原曲录音室音源相差超过 2.5 秒，说明版本不符，直接舍弃！
+                          continue;
+                        }
+                      }
                     }
                   }
                 }
