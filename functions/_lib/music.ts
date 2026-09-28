@@ -173,6 +173,7 @@ export function parseHighPrecisionLyrics(raw: string): {
                 end: Math.max(0, wEnd),
                 endSec: parseFloat((Math.max(0, wEnd) / 1000).toFixed(3)),
                 duration: Math.max(0, item.d),
+                durationSec: parseFloat((Math.max(0, item.d) / 1000).toFixed(3)),
               });
             }
           }
@@ -191,6 +192,7 @@ export function parseHighPrecisionLyrics(raw: string): {
             time: Math.max(0, lineTime),
             timeSec: parseFloat((Math.max(0, lineTime) / 1000).toFixed(3)),
             duration: lineDur,
+            durationSec: lineDur !== undefined ? parseFloat((Math.max(0, lineDur) / 1000).toFixed(3)) : undefined,
             text: cleanText,
             words: words.length > 0 ? words : undefined,
           });
@@ -232,6 +234,7 @@ export function parseHighPrecisionLyrics(raw: string): {
           end: Math.max(0, wEnd),
           endSec: parseFloat((Math.max(0, wEnd) / 1000).toFixed(3)),
           duration: Math.max(0, wDur),
+          durationSec: parseFloat((Math.max(0, wDur) / 1000).toFixed(3)),
         });
         lineText += wText;
       }
@@ -295,6 +298,7 @@ export function parseHighPrecisionLyrics(raw: string): {
         end: Math.max(0, startMs + durMs),
         endSec: parseFloat((Math.max(0, startMs + durMs) / 1000).toFixed(3)),
         duration: Math.max(0, durMs),
+        durationSec: parseFloat((Math.max(0, durMs) / 1000).toFixed(3)),
       });
     }
 
@@ -311,6 +315,7 @@ export function parseHighPrecisionLyrics(raw: string): {
           end: Math.max(0, wStart + wDur),
           endSec: parseFloat((Math.max(0, wStart + wDur) / 1000).toFixed(3)),
           duration: Math.max(0, wDur),
+          durationSec: parseFloat((Math.max(0, wDur) / 1000).toFixed(3)),
         });
       }
     }
@@ -340,10 +345,12 @@ export function parseHighPrecisionLyrics(raw: string): {
       }
     } else if (lineWords.length > 0) {
       const lineStart = lineWords[0].start;
+      const lineDur = lineWords[lineWords.length - 1].end - lineStart;
       parsedLines.push({
         time: lineStart,
         timeSec: lineWords[0].startSec,
-        duration: lineWords[lineWords.length - 1].end - lineStart,
+        duration: lineDur,
+        durationSec: parseFloat((Math.max(0, lineDur) / 1000).toFixed(3)),
         text: plainText,
         words: lineWords,
       });

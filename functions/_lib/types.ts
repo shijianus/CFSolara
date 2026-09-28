@@ -31,12 +31,14 @@ export interface LyricWord {
   end: number;       // 毫秒
   endSec: number;    // 秒
   duration: number;  // 毫秒
+  durationSec?: number; // 秒
 }
 
 export interface LyricLine {
   time: number;       // 毫秒
   timeSec: number;    // 秒
   duration?: number;  // 毫秒
+  durationSec?: number; // 秒
   text: string;
   words?: LyricWord[];
 }
