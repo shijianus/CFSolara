@@ -830,6 +830,117 @@ async function crawlKugouBySearch(
   return null;
 }
 
+async function crawlMusixmatchBySearch(
+  title?: string,
+  artist?: string,
+): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+  if (!title) return null;
+  try {
+    const tokenRes = await fetch('https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!tokenRes.ok) return null;
+    const tokenData = (await tokenRes.json()) as any;
+    const token = tokenData?.message?.body?.user_token;
+    if (!token) return null;
+
+    const qTrack = encodeURIComponent(title);
+    const qArtist = artist ? encodeURIComponent(artist) : '';
+    const subUrl = `https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&q_track=${qTrack}&q_artist=${qArtist}&user_token=${token}&app_id=web-desktop-app-v1.0`;
+    const subRes = await fetch(subUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Cookie: 'AWSELBCORS=0; AWSELB=0',
+      },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!subRes.ok) return null;
+    const subData = (await subRes.json()) as any;
+    const macro = subData?.message?.body?.macro_calls;
+    const trackInfo = macro?.['matcher.track.get']?.message?.body?.track;
+    const subtitleBody = macro?.['track.subtitles.get']?.message?.body?.subtitle_list?.[0]?.subtitle?.subtitle_body;
+    if (subtitleBody && isValidLyric(subtitleBody)) {
+      return {
+        raw: subtitleBody,
+        id: String(trackInfo?.track_id || ''),
+        title: trackInfo?.track_name || title,
+        artist: trackInfo?.artist_name || artist || '',
+      };
+    }
+  } catch {}
+  return null;
+}
+
+function formatLrcTimestamp(ms: number): string {
+  const totalSec = Math.max(0, ms / 1000);
+  const mins = Math.floor(totalSec / 60);
+  const secs = (totalSec % 60).toFixed(3);
+  return `${String(mins).padStart(2, '0')}:${secs.padStart(6, '0')}`;
+}
+
+function formatTtmlTimestamp(ms: number): string {
+  const totalSec = Math.max(0, ms / 1000);
+  const hours = Math.floor(totalSec / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = (totalSec % 60).toFixed(3);
+  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${secs.padStart(6, '0')}`;
+}
+
+export function generateEnhancedLrc(lines: LyricLine[]): string {
+  return lines
+    .map((line) => {
+      const lineTimeStr = formatLrcTimestamp(line.time);
+      if (line.words && line.words.length > 0) {
+        const wordsStr = line.words
+          .map((w) => `<${formatLrcTimestamp(w.start)}>${w.text}`)
+          .join('');
+        const endStr = `<${formatLrcTimestamp(line.words[line.words.length - 1].end)}>`;
+        return `[${lineTimeStr}]${wordsStr}${endStr}`;
+      }
+      return `[${lineTimeStr}]${line.text}`;
+    })
+    .join('\n');
+}
+
+export function generateTtml(lines: LyricLine[], title?: string, artist?: string): string {
+  const paragraphs = lines
+    .map((line) => {
+      const pBegin = formatTtmlTimestamp(line.time);
+      const lineDur = line.duration || (line.words && line.words.length > 0 ? (line.words[line.words.length - 1].end - line.time) : 3000);
+      const pEnd = formatTtmlTimestamp(line.time + lineDur);
+      if (line.words && line.words.length > 0) {
+        const spans = line.words
+          .map((w) => {
+            const sBegin = formatTtmlTimestamp(w.start);
+            const sEnd = formatTtmlTimestamp(w.end);
+            const escaped = w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `        <span begin="${sBegin}" end="${sEnd}">${escaped}</span>`;
+          })
+          .join('\n');
+        return `      <p begin="${pBegin}" end="${pEnd}">\n${spans}\n      </p>`;
+      }
+      const escapedText = line.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `      <p begin="${pBegin}" end="${pEnd}">${escapedText}</p>`;
+    })
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="utf-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:itunes="http://music.apple.com/lyric-ttml-extensions">
+  <head>
+    <metadata>
+      <ttm:title>${(title || '').replace(/&/g, '&amp;')}</ttm:title>
+      <ttm:agent type="person">${(artist || '').replace(/&/g, '&amp;')}</ttm:agent>
+    </metadata>
+  </head>
+  <body>
+    <div>
+${paragraphs}
+    </div>
+  </body>
+</tt>`;
+}
+
 /**
  * 通用全网歌词聚合抓取入口 (Universal High-Precision Lyric Engine)
  * 支持通过 ID 直接获取，或通过 title / artist / q 在全网主流平台进行瀑布爬取
@@ -922,6 +1033,17 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
 
     if (!rawLyric) {
+      const mmResult = await crawlMusixmatchBySearch(title || searchQuery, artist);
+      if (mmResult?.raw && isValidLyric(mmResult.raw)) {
+        rawLyric = mmResult.raw;
+        finalSource = 'musixmatch';
+        finalId = mmResult.id;
+        if (!finalTitle) finalTitle = mmResult.title;
+        if (!finalArtist) finalArtist = mmResult.artist;
+      }
+    }
+
+    if (!rawLyric) {
       const lrclibResult = await crawlLrclibBySearch(searchQuery, title, artist);
       if (lrclibResult?.raw && isValidLyric(lrclibResult.raw)) {
         rawLyric = lrclibResult.raw;
@@ -946,6 +1068,9 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
 
   const isPure = lines.length === 0 || /纯音乐/i.test(rawLyric);
 
+  const elrc = lines.length > 0 ? generateEnhancedLrc(lines) : (rawLyric || '');
+  const ttml = lines.length > 0 ? generateTtml(lines, finalTitle, finalArtist) : '';
+
   return {
     ok: true,
     id: finalId,
@@ -957,6 +1082,8 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     lines,
     lineCount: lines.length,
     rawLyric,
+    elrc,
+    ttml,
     isPureMusic: isPure,
   };
 }

@@ -54,6 +54,9 @@ export interface HighPrecisionLyricPayload {
   lines: LyricLine[];
   lineCount: number;
   rawLyric?: string;
+  elrc?: string;      // Enhanced LRC (LRC A2 / Lyricify / AMLL)
+  ttml?: string;      // Apple Music Timed Text XML (TTML)
+  isPureMusic?: boolean;
 }
 
 export interface LyricFetchOptions {

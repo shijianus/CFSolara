@@ -21,6 +21,8 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     return errorResponse('缺少歌词查询参数 (Parameter id, title, artist or q is required)', 400);
   }
 
+  const format = url.searchParams.get('format')?.toLowerCase() || 'json';
+
   try {
     const lyricPayload = await getUniversalLyrics(env, {
       id,
@@ -30,12 +32,43 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       q,
       duration,
     });
-    return jsonResponse({
-      ...lyricPayload,
-      // 向前兼容历史字段
-      lyric: lyricPayload.rawLyric,
-      parsed: lyricPayload.lines,
-    });
+
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+    };
+
+    if (format === 'ttml' || format === 'xml') {
+      return new Response(lyricPayload.ttml || '', {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          ...cacheHeaders,
+        },
+      });
+    }
+
+    if (format === 'elrc' || format === 'lrc' || format === 'text') {
+      return new Response(lyricPayload.elrc || lyricPayload.rawLyric || '', {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          ...cacheHeaders,
+        },
+      });
+    }
+
+    return jsonResponse(
+      {
+        ...lyricPayload,
+        // 向前兼容历史字段与开放生态
+        lyric: lyricPayload.rawLyric,
+        parsed: lyricPayload.lines,
+        elrc: lyricPayload.elrc,
+        ttml: lyricPayload.ttml,
+      },
+      200,
+      cacheHeaders,
+    );
   } catch (err: any) {
     console.error('[CFSolara Music Lyric Error]', err);
     return errorResponse(err?.message || '获取歌词失败', 502);
