@@ -582,10 +582,30 @@ const API = {
 
     getLyric: (song) => {
         const params = new URLSearchParams();
-        if (song.lyric_id || song.id) params.set('id', song.lyric_id || song.id);
-        if (song.source) params.set('source', song.source);
-        if (song.name || song.title) params.set('title', song.name || song.title);
-        if (song.artist) params.set('artist', song.artist);
+        const id = song.lyric_id || song.id;
+        if (id) params.set('id', String(id));
+        if (song.source) params.set('source', String(song.source));
+        const title = song.name || song.title;
+        if (title) params.set('title', String(title));
+        
+        let artistStr = '';
+        if (Array.isArray(song.artist)) {
+            artistStr = song.artist
+                .map(a => (typeof a === 'object' && a ? a.name || '' : String(a)))
+                .filter(Boolean)
+                .join(' / ');
+        } else if (typeof song.artist === 'object' && song.artist !== null) {
+            artistStr = song.artist.name || '';
+        } else if (song.artist) {
+            artistStr = String(song.artist);
+        }
+        if (artistStr) params.set('artist', artistStr);
+        if (title && artistStr) {
+            params.set('q', `${title} ${artistStr}`.trim());
+        } else if (title) {
+            params.set('q', String(title).trim());
+        }
+        if (song.duration) params.set('duration', String(song.duration));
         return `/api/lyric?${params.toString()}`;
     },
 
@@ -1973,8 +1993,20 @@ function setupInteractions() {
     dom.playPauseBtn.addEventListener("click", togglePlayPause);
     dom.audioPlayer.addEventListener("timeupdate", handleTimeUpdate);
     dom.audioPlayer.addEventListener("loadedmetadata", handleLoadedMetadata);
-    dom.audioPlayer.addEventListener("play", updatePlayPauseButton);
-    dom.audioPlayer.addEventListener("pause", updatePlayPauseButton);
+    dom.audioPlayer.addEventListener("play", () => {
+        updatePlayPauseButton();
+        startLyricSyncLoop();
+    });
+    dom.audioPlayer.addEventListener("pause", () => {
+        updatePlayPauseButton();
+        stopLyricSyncLoop();
+    });
+    dom.audioPlayer.addEventListener("ended", () => {
+        stopLyricSyncLoop();
+    });
+    dom.audioPlayer.addEventListener("seeked", () => {
+        syncLyrics();
+    });
     dom.audioPlayer.addEventListener("volumechange", onAudioVolumeChange);
 
     dom.progressBar.addEventListener("input", handleProgressInput);
@@ -2141,12 +2173,12 @@ function setupInteractions() {
         }
     });
 
-    // 新增：歌词滚动监听
+    // 修复：歌词滚动监听 - 仅当用户主动触发滚轮、触摸滑动或指针拖动时暂停自动跟随，彻底避免程序化 scrollTo 锁死滚动
     const attachLyricScrollHandler = (scrollElement, getCurrentElement) => {
         if (!scrollElement) {
             return;
         }
-        scrollElement.addEventListener("scroll", () => {
+        const onUserInteraction = () => {
             state.userScrolledLyrics = true;
             clearTimeout(state.lyricsScrollTimeout);
             state.lyricsScrollTimeout = setTimeout(() => {
@@ -2158,7 +2190,11 @@ function setupInteractions() {
                     scrollToCurrentLyric(currentLyricElement, scrollElement);
                 }
             }, 3000);
-        }, { passive: true });
+        };
+
+        scrollElement.addEventListener("wheel", onUserInteraction, { passive: true });
+        scrollElement.addEventListener("touchmove", onUserInteraction, { passive: true });
+        scrollElement.addEventListener("pointerdown", onUserInteraction, { passive: true });
     };
 
     attachLyricScrollHandler(dom.lyricsScroll, () => dom.lyricsContent?.querySelector(".current"));
@@ -2854,7 +2890,9 @@ async function playSong(song, options = {}) {
     state.pendingPaletteReady = false;
 
     try {
+        state.currentSong = song;
         updateCurrentSongInfo(song, { loadArtwork: false });
+        loadLyrics(song);
 
         const quality = state.playbackQuality || '320';
         const audioUrl = API.getSongUrl(song, quality);
@@ -2974,8 +3012,9 @@ function scheduleDeferredSongAssets(song, playPromise) {
             return;
         }
 
-        updateCurrentSongInfo(song, { loadArtwork: true });
-        loadLyrics(song);
+        if (!state.lyricsData || state.lyricsData.length === 0) {
+            loadLyrics(song);
+        }
         state.audioReadyForPalette = true;
         attemptPaletteApplication();
     };
@@ -3162,13 +3201,63 @@ async function exploreOnlineMusic() {
     }
 }
 
+let lyricSyncRafId = null;
+
+function startLyricSyncLoop() {
+    if (lyricSyncRafId) cancelAnimationFrame(lyricSyncRafId);
+    const loop = () => {
+        if (!dom.audioPlayer.paused && !dom.audioPlayer.ended) {
+            syncLyrics();
+            lyricSyncRafId = requestAnimationFrame(loop);
+        } else {
+            lyricSyncRafId = null;
+        }
+    };
+    lyricSyncRafId = requestAnimationFrame(loop);
+}
+
+function stopLyricSyncLoop() {
+    if (lyricSyncRafId) {
+        cancelAnimationFrame(lyricSyncRafId);
+        lyricSyncRafId = null;
+    }
+}
+
+function attachLyricClickToSeek() {
+    const handleLineClick = (event) => {
+        const line = event.target.closest('.lyric-line');
+        if (!line) return;
+        const timeAttr = line.getAttribute('data-time');
+        if (timeAttr !== null && !isNaN(parseFloat(timeAttr))) {
+            const targetTime = parseFloat(timeAttr);
+            setAudioCurrentTime(targetTime);
+            state.userScrolledLyrics = false;
+            syncLyrics();
+        }
+    };
+
+    if (dom.lyricsContent && !dom.lyricsContent._hasClickSeek) {
+        dom.lyricsContent.addEventListener('click', handleLineClick);
+        dom.lyricsContent._hasClickSeek = true;
+    }
+    if (dom.mobileInlineLyricsContent && !dom.mobileInlineLyricsContent._hasClickSeek) {
+        dom.mobileInlineLyricsContent.addEventListener('click', handleLineClick);
+        dom.mobileInlineLyricsContent._hasClickSeek = true;
+    }
+}
+
 // 修复：加载歌词 - 原生消费高精度 REST API，彻底移除字数脑补
 async function loadLyrics(song) {
+    if (!song) return;
     try {
+        if (state.currentSong === song && (!state.lyricsData || state.lyricsData.length === 0)) {
+            setLyricsContentHtml("<div class=\"lyric-loading\">歌词加载中...</div>");
+        }
         const lyricUrl = API.getLyric(song);
         debugLog(`获取歌词URL: ${lyricUrl}`);
 
         const lyricData = await API.fetchJson(lyricUrl);
+        if (state.currentSong !== song) return;
 
         if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
             state.lyricSyncType = lyricData.syncType || 'line';
@@ -3196,6 +3285,7 @@ async function loadLyrics(song) {
             state.currentLyricLine = -1;
         }
     } catch (error) {
+        if (state.currentSong !== song) return;
         console.error("加载歌词失败:", error);
         setLyricsContentHtml("<div>歌词加载失败</div>");
         dom.lyrics.classList.add("empty");
@@ -3248,7 +3338,7 @@ function clearLyricsContent() {
     }
 }
 
-// 修复：显示歌词 - 支持逐字与行级两种模式
+// 修复：显示歌词 - 支持逐字与行级两种模式，并注入交互与即时居中
 function displayLyrics() {
     const isWordSync = state.lyricSyncType === 'word';
     const lyricsHtml = state.lyricsData.map((lyric, index) => {
@@ -3265,16 +3355,16 @@ function displayLyrics() {
     if (dom.lyrics) {
         dom.lyrics.dataset.placeholder = "default";
     }
-    if (state.isMobileInlineLyricsOpen) {
-        syncLyrics();
-    }
+    attachLyricClickToSeek();
+    state.currentLyricLine = -1;
+    syncLyrics();
 }
 
 // 修复：同步歌词 - 物理时间对齐，行级整行高亮，逐字精确跟随
 function syncLyrics() {
-    if (state.lyricsData.length === 0) return;
+    if (!state.lyricsData || state.lyricsData.length === 0) return;
 
-    const currentTime = dom.audioPlayer.currentTime;
+    const currentTime = dom.audioPlayer.currentTime || 0;
     let currentIndex = -1;
 
     for (let i = 0; i < state.lyricsData.length; i++) {
@@ -3314,18 +3404,37 @@ function syncLyrics() {
                 } else {
                     element.classList.remove("current");
                 }
+
+                // 保持已唱完行和未唱行的文字状态一致
+                if (state.lyricSyncType === 'word') {
+                    if (index < currentIndex) {
+                        element.querySelectorAll(".word-char").forEach(c => {
+                            c.classList.add("word-sung");
+                            c.classList.remove("word-singing");
+                        });
+                    } else if (index > currentIndex) {
+                        element.querySelectorAll(".word-char").forEach(c => {
+                            c.classList.remove("word-sung", "word-singing");
+                        });
+                    }
+                }
             });
         });
     }
 
-    // 逐字模式：真实物理发音时间对齐跟随
+    // 逐字模式：真实物理发音时间对齐跟随 (分别对桌面端与移动端容器进行安全更新)
     if (state.lyricSyncType === 'word' && currentIndex >= 0 && currentIndex < state.lyricsData.length) {
         const curLine = state.lyricsData[currentIndex];
         if (curLine.words && curLine.words.length > 0) {
-            const activeLineElements = document.querySelectorAll(`div[data-index="${currentIndex}"] .word-char`);
-            if (activeLineElements.length > 0) {
+            const lineContainers = [
+                dom.lyricsContent?.querySelector(`div[data-index="${currentIndex}"]`),
+                dom.mobileInlineLyricsContent?.querySelector(`div[data-index="${currentIndex}"]`),
+            ].filter(Boolean);
+
+            lineContainers.forEach(containerEl => {
+                const charSpans = containerEl.querySelectorAll('.word-char');
                 curLine.words.forEach((w, wIdx) => {
-                    const charSpan = activeLineElements[wIdx];
+                    const charSpan = charSpans[wIdx];
                     if (charSpan) {
                         const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
                         const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
@@ -3340,7 +3449,7 @@ function syncLyrics() {
                         }
                     }
                 });
-            }
+            });
         }
     }
 }

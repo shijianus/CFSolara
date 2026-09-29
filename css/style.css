@@ -890,13 +890,28 @@ html.mobile-view .playlist-label {
     width: 100%;
 }
 
+.lyrics:not(.empty) .lyrics-content {
+    padding-top: 180px;
+    padding-bottom: 220px;
+    box-sizing: border-box;
+}
+
 .lyrics-content > div {
     white-space: pre-wrap;
-    padding: 5px;
-    margin-bottom: 5px;
+    padding: 6px 12px;
+    margin-bottom: 6px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.65;
+}
+
+.lyrics-content > div:hover {
+    opacity: 0.95;
+    background: rgba(255, 255, 255, 0.06);
 }
 
 /* 当歌词容器只有默认文本时的样式 */
@@ -916,6 +931,7 @@ html.mobile-view .playlist-label {
     content: none;
 }
 .lyrics .current { 
+    opacity: 1 !important;
     color: var(--lyrics-highlight-text); 
     font-weight: 700; 
     background-color: var(--lyrics-highlight-bg); 
