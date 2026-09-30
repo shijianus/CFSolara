@@ -251,6 +251,9 @@ body.mobile-view .mobile-inline-lyrics {
     gap: 12px;
     overflow: hidden;
     cursor: pointer;
+    --lyric-word-active: #ffffff;
+    --lyric-word-inactive: rgba(255, 255, 255, 0.35);
+    --lyric-word-glow: rgba(255, 255, 255, 0.85);
 }
 
 body.mobile-view .mobile-inline-lyrics__hint {

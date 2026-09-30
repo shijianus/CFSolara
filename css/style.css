@@ -21,6 +21,9 @@
     --component-bg: rgba(255, 255, 255, 0.5);
     --scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);
     --scrollbar-track-bg: transparent;
+    --lyric-word-active: #111827;
+    --lyric-word-inactive: rgba(44, 62, 80, 0.35);
+    --lyric-word-glow: rgba(26, 188, 156, 0.5);
 }
 
 .dark-mode {
@@ -38,6 +41,9 @@
     --lyrics-highlight-text: #34d1b6;
     --component-bg: rgba(44, 44, 44, 0.5);
     --scrollbar-thumb-bg: rgba(255, 255, 255, 0.2);
+    --lyric-word-active: #ffffff;
+    --lyric-word-inactive: rgba(255, 255, 255, 0.35);
+    --lyric-word-glow: rgba(255, 255, 255, 0.85);
 }
 
 .dark-mode .quality-menu {
@@ -947,10 +953,10 @@ html.mobile-view .playlist-label {
     --fill: 0%;
     background: linear-gradient(
         to right,
-        #ffffff 0%,
-        #ffffff var(--fill, 0%),
-        rgba(255, 255, 255, 0.35) var(--fill, 0%),
-        rgba(255, 255, 255, 0.35) 100%
+        var(--lyric-word-active, #ffffff) 0%,
+        var(--lyric-word-active, #ffffff) var(--fill, 0%),
+        var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) var(--fill, 0%),
+        var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -958,14 +964,16 @@ html.mobile-view .playlist-label {
     will-change: transform, background;
 }
 
-.lyrics .current .word-char.word-sung {
+.lyrics .current .word-char.word-sung,
+.mobile-inline-lyrics__content .current .word-char.word-sung {
     --fill: 100%;
-    -webkit-text-fill-color: #ffffff;
+    -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
 }
 
-.lyrics .current .word-char.word-singing {
+.lyrics .current .word-char.word-singing,
+.mobile-inline-lyrics__content .current .word-char.word-singing {
     transform: scale(1.12);
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
+    filter: drop-shadow(0 0 10px var(--lyric-word-glow, rgba(255, 255, 255, 0.85)));
 }
 
 /* 控制区域 */
