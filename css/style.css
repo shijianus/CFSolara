@@ -898,20 +898,21 @@ html.mobile-view .playlist-label {
 
 .lyrics-content > div {
     white-space: pre-wrap;
-    padding: 6px 12px;
-    margin-bottom: 6px;
+    padding: 8px 14px;
+    margin-bottom: 8px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
     cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0.65;
+    border-radius: 10px;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease;
+    opacity: 0.35;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .lyrics-content > div:hover {
-    opacity: 0.95;
-    background: rgba(255, 255, 255, 0.06);
+    opacity: 0.75;
 }
 
 /* 当歌词容器只有默认文本时的样式 */
@@ -930,30 +931,41 @@ html.mobile-view .playlist-label {
 .lyrics.empty[data-placeholder="message"] .lyrics-scroll::before {
     content: none;
 }
+
+/* 核心：无对话气泡底色、优雅放大的Apple Music / AMLL 高沉浸卡拉OK排版 */
 .lyrics .current { 
     opacity: 1 !important;
-    color: var(--lyrics-highlight-text); 
-    font-weight: 700; 
-    background-color: var(--lyrics-highlight-bg); 
-    transform: scale(1.05); 
-    box-shadow: 0 4px 15px var(--lyrics-highlight-shadow); 
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: scale(1.12) !important;
+    font-weight: 700;
 }
 
-.lyric-line--word .word-char {
+/* 逐字卡拉OK平滑渐变填充核心技术 (60fps Progressive Syllable Wipe) */
+.word-char {
     display: inline-block;
-    transition: color 0.12s ease, transform 0.12s ease;
+    --fill: 0%;
+    background: linear-gradient(
+        to right,
+        #ffffff 0%,
+        #ffffff var(--fill, 0%),
+        rgba(255, 255, 255, 0.35) var(--fill, 0%),
+        rgba(255, 255, 255, 0.35) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.12s ease;
+    will-change: transform, background;
 }
 
-.lyrics .current .word-singing {
-    color: #ffffff;
-    text-shadow: 0 0 12px var(--lyrics-highlight-text);
+.lyrics .current .word-char.word-sung {
+    --fill: 100%;
+    -webkit-text-fill-color: #ffffff;
+}
+
+.lyrics .current .word-char.word-singing {
     transform: scale(1.12);
-    font-weight: 800;
-}
-
-.lyrics .current .word-sung {
-    color: var(--lyrics-highlight-text);
-    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85));
 }
 
 /* 控制区域 */

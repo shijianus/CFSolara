@@ -298,20 +298,25 @@ body.mobile-view .mobile-inline-lyrics__content > div {
 
 body.mobile-view .mobile-inline-lyrics__content div[data-index] {
     text-align: center;
-    font-size: clamp(0.82rem, 3.8vw, 0.98rem);
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.75);
-    padding: 6px 10px;
+    font-size: clamp(0.9rem, 4vw, 1.05rem);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 8px 12px;
     border-radius: 14px;
-    transition: color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease;
     word-break: break-word;
     cursor: pointer;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 0.4;
 }
 
 body.mobile-view .mobile-inline-lyrics__content .current {
-    color: var(--lyrics-highlight-text, #f3a25b);
-    background: var(--lyrics-highlight-bg, rgba(243, 162, 91, 0.18));
-    box-shadow: 0 12px 32px var(--lyrics-highlight-shadow, rgba(243, 162, 91, 0.32));
+    opacity: 1 !important;
+    transform: scale(1.1) !important;
+    font-weight: 700;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 body.mobile-view .mobile-inline-lyrics__scroll::-webkit-scrollbar {

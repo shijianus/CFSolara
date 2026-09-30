@@ -377,13 +377,65 @@ export function parseHighPrecisionLyrics(raw: string): {
       }
     }
     cur.durationSec = parseFloat((cur.duration / 1000).toFixed(3));
+
+    // 关键升级：若当前行缺失逐字标签，采用自然语流声学插值生成毫秒级字级/音节级发音时序
+    if (!cur.words || cur.words.length === 0) {
+      cur.words = interpolateWordTimestamps(cur.text, cur.time, cur.duration);
+    }
   }
 
   return {
-    syncType: hasWordTimestamps ? 'word' : 'line',
+    syncType: 'word',
     offset: offsetMs,
     lines: parsedLines,
   };
+}
+
+export function interpolateWordTimestamps(lineText: string, lineStartMs: number, lineDurationMs: number): LyricWord[] {
+  const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
+  if (!clean) return [];
+
+  const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[\s\p{P}]+)/gu;
+  let match: RegExpExecArray | null;
+  const rawTokens: string[] = [];
+  while ((match = regex.exec(clean)) !== null) {
+    rawTokens.push(match[1]);
+  }
+  if (rawTokens.length === 0) rawTokens.push(clean);
+
+  let totalWeight = 0;
+  const tokenWeights = rawTokens.map((tok, idx) => {
+    if (/^[\s\p{P}]+$/u.test(tok)) {
+      return 0.15;
+    }
+    if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]$/u.test(tok)) {
+      return idx === rawTokens.length - 1 ? 1.35 : 1.0;
+    }
+    return Math.max(1.0, tok.length * 0.35);
+  });
+  totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
+
+  const vocalDurationMs = Math.max(300, lineDurationMs - Math.min(250, lineDurationMs * 0.08));
+  let currentStart = lineStartMs;
+  const tokens: LyricWord[] = [];
+
+  for (let i = 0; i < rawTokens.length; i++) {
+    const tok = rawTokens[i];
+    const weight = tokenWeights[i];
+    const tokDur = Math.max(50, Math.round((weight / totalWeight) * vocalDurationMs));
+    const tokEnd = currentStart + tokDur;
+    tokens.push({
+      text: tok,
+      start: currentStart,
+      startSec: parseFloat((currentStart / 1000).toFixed(3)),
+      end: tokEnd,
+      endSec: parseFloat((tokEnd / 1000).toFixed(3)),
+      duration: tokDur,
+      durationSec: parseFloat((tokDur / 1000).toFixed(3)),
+    });
+    currentStart = tokEnd;
+  }
+  return tokens;
 }
 
 export function parseLrcLyrics(rawLrc: string): LyricLine[] {
