@@ -3522,7 +3522,8 @@ function syncLyrics(timeOverride) {
                     element.classList.add("current");
                     const shouldScroll = !state.userScrolledLyrics && (!inline || state.isMobileInlineLyricsOpen);
                     if (shouldScroll) {
-                        scrollToCurrentLyric(element, container);
+                        const isJump = Boolean(timeOverride !== undefined || state.isSeeking);
+                        scrollToCurrentLyric(element, container, isJump);
                     }
                 } else {
                     element.classList.remove("current");
@@ -3607,8 +3608,8 @@ function syncLyrics(timeOverride) {
 }
 
 
-// 新增：滚动到当前歌词 - 修复居中显示问题
-function scrollToCurrentLyric(element, containerOverride) {
+// 滚动到当前歌词 - 完美垂直居中并支持平滑发音跟随与瞬时精准吸附
+function scrollToCurrentLyric(element, containerOverride, immediate = false) {
     const container = containerOverride || dom.lyricsScroll || dom.lyrics;
     if (!container || !element) {
         return;
@@ -3626,9 +3627,12 @@ function scrollToCurrentLyric(element, containerOverride) {
 
     const maxScrollTop = container.scrollHeight - containerHeight;
     const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+    const distance = Math.abs(container.scrollTop - finalScrollTop);
 
-    if (Math.abs(container.scrollTop - finalScrollTop) > 1) {
-        if (typeof container.scrollTo === "function") {
+    if (distance > 1) {
+        if (immediate || distance > 120) {
+            container.scrollTop = finalScrollTop;
+        } else if (typeof container.scrollTo === "function") {
             container.scrollTo({
                 top: finalScrollTop,
                 behavior: 'smooth'
