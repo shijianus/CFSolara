@@ -28,9 +28,11 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
   const cache = typeof caches !== 'undefined' ? (caches as any).default : null;
   const cacheKeyUrl = new URL(request.url);
   cacheKeyUrl.searchParams.sort();
+  cacheKeyUrl.searchParams.set('_v', '2.5');
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: 'GET' });
+  const bypassCache = url.searchParams.has('nocache') || url.searchParams.has('_t');
 
-  if (cache) {
+  if (cache && !bypassCache) {
     try {
       const cached = await cache.match(cacheKey);
       if (cached) return cached;
