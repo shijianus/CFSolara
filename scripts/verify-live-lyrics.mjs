@@ -326,12 +326,22 @@ async function run() {
     });
     console.log(`[Word-Karaoke] Total .word-char spans in lyrics: ${wordCharCount}`);
 
-    // 跳转至第 1 句歌词发音时间 (约 30.5秒) 并触发同步
-    console.log('[Word-Karaoke] Seeking to 30.5s for word-level singing/sung verification...');
+    // 定位至第 1 句歌词发音时间 (约 30.06秒) 并推进至 30.5s 触发发音中渐变擦除
+    console.log('[Word-Karaoke] Clicking line "电视一直闪" and advancing to 30.5s for word-level wipe...');
+    const nsywTargetLine = page.locator('#lyricsContent .lyric-line', { hasText: '电视一直闪' }).first();
+    await nsywTargetLine.click();
+    await page.waitForTimeout(500);
+
     await page.evaluate(() => {
-      const audio = document.getElementById('audioPlayer');
-      audio.currentTime = 30.5;
-      audio.dispatchEvent(new Event('seeked'));
+      if (typeof setAudioCurrentTime === 'function') {
+        setAudioCurrentTime(30.5);
+      } else {
+        const audio = document.getElementById('audioPlayer');
+        if (audio) audio.currentTime = 30.5;
+      }
+      if (typeof syncLyrics === 'function') {
+        syncLyrics();
+      }
     });
     await page.waitForTimeout(600);
 
