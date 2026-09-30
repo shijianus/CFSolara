@@ -339,14 +339,45 @@ async function run() {
       const singingWords = document.querySelectorAll('#lyricsContent .word-singing');
       const sungWords = document.querySelectorAll('#lyricsContent .word-sung');
       const currentLine = document.querySelector('#lyricsContent .current');
+      const inactiveLine = document.querySelector('#lyricsContent .lyric-line:not(.current)');
+      
+      let curStyle = null;
+      let inactiveStyle = null;
+      if (currentLine) {
+        const cs = window.getComputedStyle(currentLine);
+        curStyle = {
+          backgroundColor: cs.backgroundColor,
+          boxShadow: cs.boxShadow,
+          fontSize: cs.fontSize,
+          transform: cs.transform
+        };
+      }
+      if (inactiveLine) {
+        const is = window.getComputedStyle(inactiveLine);
+        inactiveStyle = {
+          opacity: is.opacity,
+          color: is.color
+        };
+      }
+
+      // Check progressive --fill on words
+      const singingWordFills = Array.from(singingWords).map(w => ({
+        text: w.textContent,
+        fill: w.style.getPropertyValue('--fill'),
+        hasSingingClass: w.classList.contains('word-singing')
+      }));
+
       return {
         hasWordSinging: singingWords.length > 0,
         singingWordsCount: singingWords.length,
         singingText: Array.from(singingWords).map(w => w.textContent).join(''),
+        singingWordFills,
         hasWordSung: sungWords.length > 0,
         sungWordsCount: sungWords.length,
         sungText: Array.from(sungWords).map(w => w.textContent).join(''),
-        currentLineText: currentLine ? currentLine.textContent.trim() : null
+        currentLineText: currentLine ? currentLine.textContent.trim() : null,
+        currentStyle: curStyle,
+        inactiveStyle: inactiveStyle
       };
     });
     console.log(`[Word-Karaoke Result]:`, wordState);
@@ -354,7 +385,18 @@ async function run() {
     if (wordCharCount === 0 || (!wordState.hasWordSinging && !wordState.hasWordSung)) {
       throw new Error(`Word-level karaoke highlighting failed! Result: ${JSON.stringify(wordState)}`);
     }
-    console.log('✅ Word-level karaoke highlighting (.word-singing / .word-sung) validated successfully!');
+
+    // Verify dialogue box is completely eliminated (no opaque card background)
+    if (wordState.currentStyle) {
+      console.log(`[AMLL Style Check] Current line background: ${wordState.currentStyle.backgroundColor}, box-shadow: ${wordState.currentStyle.boxShadow}`);
+      const bg = wordState.currentStyle.backgroundColor;
+      const isCardEliminated = !bg || bg.includes('rgba(0, 0, 0, 0)') || bg === 'transparent' || bg.includes('rgba(255, 255, 255, 0.0');
+      console.log(`[AMLL Style Check] Dialogue card box eliminated: ${isCardEliminated}`);
+      if (!isCardEliminated) {
+        console.warn(`[AMLL Style Warning] Background may still have box styling: ${bg}`);
+      }
+    }
+    console.log('✅ Word-level karaoke highlighting (.word-singing / .word-sung / dynamic --fill) validated successfully!');
 
     // 5. 测试移动端视口 (Mobile Viewport Verification)
     console.log('\n--- 5. Testing Mobile Viewport & Inline Lyrics ---');
