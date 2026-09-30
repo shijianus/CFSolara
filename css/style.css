@@ -1007,6 +1007,14 @@ html.mobile-view .playlist-label {
     filter: none;
 }
 
+.lyrics .lyric-line:not(.current) .word-char.word-sung,
+.mobile-inline-lyrics__content .lyric-line:not(.current) .word-char.word-sung {
+    --fill: 100%;
+    -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+    transform: scale(1);
+    filter: none;
+}
+
 .lyrics .current .word-char.word-singing,
 .mobile-inline-lyrics__content .current .word-char.word-singing {
     transform: scale(1.1);

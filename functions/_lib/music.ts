@@ -101,19 +101,119 @@ export async function getTrackStreamUrl(env: AppEnv, id: string, source = 'netea
   return '';
 }
 
-export function isMetadataLine(text: string): boolean {
+export function isMetadataLine(text: string, title?: string, artist?: string): boolean {
   if (!text) return true;
   const trimmed = text.trim();
-  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|混音|母带|吉他|贝斯|鼓|和声|合声|合音|弦乐|键盘|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|文案|插画|封面|发行公司|出品人|总策划|音乐总监|人声编辑|音频编辑|项目经理|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director)[\u4e00-\u9fa5a-zA-Z\s]*[:：]/i.test(trimmed)) {
+  if (
+    /^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|文案|插画|封面|发行公司|出品人|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director)[\u4e00-\u9fa5a-zA-Z0-9\s.·]*[:：\/—–-]/i.test(
+      trimmed,
+    )
+  ) {
     return true;
   }
-  if (/^(作词|作曲|编曲|词|曲|制作人|录音室|混音室|母带工程|和声编写|和声配唱|录音工程|录音助理|混音助理)\s*[：:\/—–-]/i.test(trimmed)) {
+  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 60 && /(唱|曲|词|编|混|录|室)/.test(trimmed)) {
     return true;
   }
-  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50 && /(唱|曲|词|编)/.test(trimmed)) {
-    return true;
+  // Title / Artist delimiter check (e.g. "李荣浩 - 年少有为", "G.E.M. 邓紫棋 - 泡沫", "Shape of You - Ed Sheeran")
+  if (/^([^-–—]+)[-–—]([^-–—]+)$/.test(trimmed)) {
+    const parts = trimmed.split(/[-–—]/).map((p) => p.trim().toLowerCase());
+    const cleanTitle = (title || '').toLowerCase().replace(/\([^)]+\)/g, '').trim();
+    const cleanArtist = (artist || '').toLowerCase().replace(/\([^)]+\)/g, '').trim();
+    if (
+      (cleanTitle && (parts[0].includes(cleanTitle) || parts[1].includes(cleanTitle))) ||
+      (cleanArtist && (parts[0].includes(cleanArtist) || parts[1].includes(cleanArtist)))
+    ) {
+      return true;
+    }
+  }
+  if (title) {
+    const cleanTitle = title.toLowerCase().replace(/\([^)]+\)/g, '').trim();
+    if (cleanTitle.length >= 2 && trimmed.toLowerCase() === cleanTitle) {
+      return true;
+    }
   }
   return false;
+}
+
+export function calibrateLyricsWithReference(
+  parsedLines: LyricLine[],
+  refRawLyric?: string,
+): LyricLine[] {
+  if (!refRawLyric || !parsedLines || parsedLines.length === 0) return parsedLines;
+
+  // 1. 提取参考音频原始 LRC 中可信的非元数据演唱句
+  const refLines: { text: string; timeSec: number }[] = [];
+  for (const line of refRawLyric.split('\n')) {
+    const m = line.match(/^\[(\d{1,2}):(\d{2})(?:\.(\d{2,3}))?\](.*)$/);
+    if (m) {
+      const min = parseInt(m[1], 10);
+      const sec = parseInt(m[2], 10);
+      const ms = m[3] ? parseInt(m[3].padEnd(3, '0').slice(0, 3), 10) : 0;
+      const timeSec = min * 60 + sec + ms / 1000;
+      const text = m[4].replace(/\{[^}]+\}/g, '').replace(/<[^>]+>/g, '').trim();
+      if (text && text.length >= 2 && !isMetadataLine(text)) {
+        refLines.push({ text: text.replace(/\s+/g, ''), timeSec });
+      }
+    }
+  }
+
+  if (refLines.length === 0) return parsedLines;
+
+  // 2. 跨句子查找物理时间基准锚点（对比前 10 句真实演唱句）
+  const deltas: number[] = [];
+  for (const ref of refLines.slice(0, 10)) {
+    const cand = parsedLines.find((c) => {
+      const cClean = c.text.replace(/\s+/g, '');
+      return (
+        (cClean.length >= 3 && ref.text.includes(cClean.slice(0, 3))) ||
+        (ref.text.length >= 3 && cClean.includes(ref.text.slice(0, 3)))
+      );
+    });
+    if (cand) {
+      const diffSec = ref.timeSec - cand.timeSec;
+      if (Math.abs(diffSec) <= 10.0) {
+        deltas.push(diffSec);
+      }
+    }
+  }
+
+  if (deltas.length === 0) return parsedLines;
+
+  // 取中位数消除单句转音或个体标记差异
+  deltas.sort((a, b) => a - b);
+  const medianDelta = deltas[Math.floor(deltas.length / 2)];
+
+  // 若偏差小于 35ms，视为完美贴合，无需物理微移
+  if (Math.abs(medianDelta) < 0.035) {
+    return parsedLines;
+  }
+
+  const deltaMs = Math.round(medianDelta * 1000);
+
+  return parsedLines.map((line) => {
+    const newTime = Math.max(0, line.time + deltaMs);
+    const newTimeSec = parseFloat((newTime / 1000).toFixed(3));
+    let newWords = line.words;
+    if (Array.isArray(line.words)) {
+      newWords = line.words.map((w) => {
+        const wStart = Math.max(0, w.start + deltaMs);
+        const wEnd = Math.max(0, w.end + deltaMs);
+        return {
+          ...w,
+          start: wStart,
+          startSec: parseFloat((wStart / 1000).toFixed(3)),
+          end: wEnd,
+          endSec: parseFloat((wEnd / 1000).toFixed(3)),
+        };
+      });
+    }
+    return {
+      ...line,
+      time: newTime,
+      timeSec: newTimeSec,
+      words: newWords,
+    };
+  });
 }
 
 export function parseTtmlTimestamp(ts: string): number {
@@ -254,7 +354,12 @@ export function parseMusixmatchRichsync(raw: string, offsetMs = 0): LyricLine[] 
   }
 }
 
-export function parseHighPrecisionLyrics(raw: string): {
+export function parseHighPrecisionLyrics(
+  raw: string,
+  title?: string,
+  artist?: string,
+  referenceRawLyric?: string,
+): {
   syncType: LyricSyncType;
   offset: number;
   lines: LyricLine[];
@@ -275,10 +380,12 @@ export function parseHighPrecisionLyrics(raw: string): {
     const ttmlLines = parseTtmlLyrics(raw, offsetMs);
     if (ttmlLines.length > 0) {
       const hasWordTimestamps = ttmlLines.some((l) => l.words && l.words.length > 0);
+      const filtered = ttmlLines.filter((l) => !isMetadataLine(l.text, title, artist));
+      const calibrated = calibrateLyricsWithReference(filtered, referenceRawLyric);
       return {
         syncType: hasWordTimestamps ? 'word' : 'line',
         offset: offsetMs,
-        lines: ttmlLines.sort((a, b) => a.time - b.time),
+        lines: calibrated.sort((a, b) => a.time - b.time),
       };
     }
   }
@@ -287,10 +394,12 @@ export function parseHighPrecisionLyrics(raw: string): {
   if (raw.trim().startsWith('[') && /"ts"\s*:\s*[\d.]+/i.test(raw)) {
     const mmLines = parseMusixmatchRichsync(raw, offsetMs);
     if (mmLines && mmLines.length > 0) {
+      const filtered = mmLines.filter((l) => !isMetadataLine(l.text, title, artist));
+      const calibrated = calibrateLyricsWithReference(filtered, referenceRawLyric);
       return {
         syncType: 'word',
         offset: offsetMs,
-        lines: mmLines.sort((a, b) => a.time - b.time),
+        lines: calibrated.sort((a, b) => a.time - b.time),
       };
     }
   }
@@ -345,7 +454,7 @@ export function parseHighPrecisionLyrics(raw: string): {
           }
 
           const cleanText = lineText.trim();
-          if (!cleanText || isMetadataLine(cleanText)) {
+          if (!cleanText || isMetadataLine(cleanText, title, artist)) {
             continue;
           }
 
@@ -393,7 +502,7 @@ export function parseHighPrecisionLyrics(raw: string): {
         const wDur = parseInt(wMatch[2], 10);
         const wText = wMatch[3];
 
-        if (wStart < lineStartMs && wStart < 60000) {
+        if (wStart < lineStartMs) {
           wStart = lineStartMs + wStart;
         } else {
           wStart = wStart + offsetMs;
@@ -413,10 +522,7 @@ export function parseHighPrecisionLyrics(raw: string): {
       }
 
       const cleanText = lineText.trim() || content.replace(/[<(][^>)]+[>)]/g, '').trim();
-      if (!cleanText) continue;
-      if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(cleanText)) {
-        continue;
-      }
+      if (!cleanText || isMetadataLine(cleanText, title, artist)) continue;
 
       if (words.length > 0) {
         hasWordTimestamps = true;
@@ -499,7 +605,7 @@ export function parseHighPrecisionLyrics(raw: string): {
       .trim();
 
     if (!plainText) continue;
-    if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(plainText)) {
+    if (isMetadataLine(plainText, title, artist)) {
       continue;
     }
 
@@ -557,10 +663,13 @@ export function parseHighPrecisionLyrics(raw: string): {
     }
   }
 
+  const filtered = parsedLines.filter((l) => !isMetadataLine(l.text, title, artist));
+  const calibrated = calibrateLyricsWithReference(filtered, referenceRawLyric);
+
   return {
     syncType: hasWordTimestamps ? 'word' : 'line',
     offset: offsetMs,
-    lines: parsedLines,
+    lines: calibrated,
   };
 }
 
@@ -816,18 +925,6 @@ async function crawlKugouBySearch(
   referenceRawLyric?: string,
 ): Promise<{ raw: string; id: string; title: string; artist: string; duration?: number } | null> {
   try {
-    const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=10`;
-    const sRes = await fetch(sUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
-    });
-    if (!sRes.ok) return null;
-    const sJson = (await sRes.json()) as any;
-    const lists = Array.isArray(sJson.data?.lists) ? sJson.data.lists : [];
-    if (lists.length === 0) return null;
-
-    const normQuery = query.toLowerCase();
-    const isExplicitLive = /(live|演唱会|现场)/i.test(normQuery);
-    const isExplicitDj = /(dj|remix)/i.test(normQuery);
     const cleanTargetTitle = (targetTitle || '')
       .replace(/\([^)]+\)/g, '')
       .replace(/\[[^\]]+\]/g, '')
@@ -835,69 +932,133 @@ async function crawlKugouBySearch(
       .trim()
       .toLowerCase();
 
-    // 严密计算候选歌曲匹配得分（杜绝将全曲误匹配到短版、片段、DJ或不同歌手翻唱）
-    const scoredCandidates = lists.map((item: any) => {
-      let score = 0;
-      const sName = String(item.SongName || '');
-      const singer = String(item.SingerName || '');
-      const dur = typeof item.Duration === 'number' ? item.Duration : 0;
+    interface RawCandidate {
+      id: string;
+      accesskey: string;
+      song: string;
+      singer: string;
+      duration: number;
+      fileHash?: string;
+    }
 
-      // 0. 歌名核心匹配权重（坚固防线：杜绝赵雷《成都》匹配到赵雷《家乡》）
-      if (cleanTargetTitle && cleanTargetTitle.length >= 2) {
-        const sClean = sName.replace(/\([^)]+\)/g, '').replace(/\[[^\]]+\]/g, '').trim().toLowerCase();
-        if (sClean.includes(cleanTargetTitle) || cleanTargetTitle.includes(sClean)) {
-          score += 55;
-        } else {
-          score -= 70; // 歌名不匹配，严重扣分！
+    const collectedCandidates: RawCandidate[] = [];
+
+    // 渠道 1：直接向 lyrics.kugou.com/search 检索（优先检索官方/原唱高精逐字库）
+    const directQueries = [query];
+    if (targetTitle && targetTitle !== query) directQueries.push(targetTitle);
+    for (const dq of directQueries) {
+      const durParam = targetDuration ? `&timelength=${Math.round(targetDuration * 1000)}` : '';
+      const dUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(dq)}${durParam}`;
+      try {
+        const dRes = await fetch(dUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' } });
+        if (dRes.ok) {
+          const dJson = (await dRes.json()) as any;
+          for (const c of dJson.candidates || []) {
+            if (c.id && c.accesskey) {
+              collectedCandidates.push({
+                id: String(c.id),
+                accesskey: String(c.accesskey),
+                song: String(c.song || ''),
+                singer: String(c.singer || ''),
+                duration: typeof c.duration === 'number' ? c.duration : 0,
+              });
+            }
+          }
         }
-      }
+      } catch {}
+    }
 
-      // 1. 过滤垃圾/改编标签（若搜索词未明确要求）
-      if (!isExplicitLive && /(live|演唱会|现场)/i.test(sName)) score -= 30;
-      if (!isExplicitDj && /(dj|remix|哈基米)/i.test(sName)) score -= 60;
-      if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑|双声道|变奏|改编|翻唱|二创|鬼畜|环绕|慢速|加速|减速)/i.test(sName)) score -= 80;
-
-      // 2. 歌手匹配权重
-      if (targetArtist) {
-        const normArtist = targetArtist.toLowerCase().split(/[\/,]/)[0].trim();
-        if (normArtist && singer.toLowerCase().includes(normArtist)) {
-          score += 50;
-        } else if (singer && singer !== '未知' && !singer.toLowerCase().includes(normArtist)) {
-          score -= 40;
-        }
-      }
-
-      // 3. 时长贴合权重（关键防线：杜绝将整曲替换为截断的短版/高潮版）
-      if (targetDuration && targetDuration > 20 && dur > 0) {
-        const diff = Math.abs(dur - targetDuration);
-        if (diff <= 5) score += 50;
-        else if (diff <= 12) score += 25;
-        else if (diff <= 25) score += 5;
-        else if (diff > 35) score -= 90; // 时长相差超过35秒基本为剪辑版或变奏版
-      }
-
-      return { item, score };
-    })
-    .filter((x: any) => x.score > -50)
-    .sort((a: any, b: any) => b.score - a.score);
-
-    for (const { item } of scoredCandidates.slice(0, 4)) {
-      if (!item?.FileHash) continue;
-      const lUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(item.SongName)}&hash=${item.FileHash}&timelength=${(item.Duration || 0) * 1000}`;
-      const lRes = await fetch(lUrl, {
+    // 渠道 2：通过 song_search_v2 搜索并以 FileHash 精准匹配录音室母带版本
+    try {
+      const sUrl = `https://songsearch.kugou.com/song_search_v2?keyword=${encodeURIComponent(query)}&page=1&pagesize=8`;
+      const sRes = await fetch(sUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
       });
-      if (!lRes.ok) continue;
-      const lJson = (await lRes.json()) as any;
-      const candidates = Array.isArray(lJson.candidates) ? lJson.candidates : [];
-      if (candidates.length === 0) continue;
-
-      for (const candidate of candidates.slice(0, 4)) {
-        if (!candidate?.id || !candidate?.accesskey) continue;
-        const cSong = String(candidate.song || candidate.SongName || '');
-        if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑|双声道|变奏|改编|翻唱|二创|鬼畜|环绕|慢速|加速|减速)/i.test(cSong)) {
-          continue;
+      if (sRes.ok) {
+        const sJson = (await sRes.json()) as any;
+        const lists = Array.isArray(sJson.data?.lists) ? sJson.data.lists : [];
+        for (const item of lists.slice(0, 4)) {
+          if (!item?.FileHash) continue;
+          const lUrl = `http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword=${encodeURIComponent(item.SongName)}&hash=${item.FileHash}&timelength=${(item.Duration || 0) * 1000}`;
+          const lRes = await fetch(lUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+          });
+          if (lRes.ok) {
+            const lJson = (await lRes.json()) as any;
+            for (const c of lJson.candidates || []) {
+              if (c.id && c.accesskey) {
+                collectedCandidates.push({
+                  id: String(c.id),
+                  accesskey: String(c.accesskey),
+                  song: String(c.song || item.SongName || ''),
+                  singer: String(c.singer || item.SingerName || ''),
+                  duration: typeof c.duration === 'number' ? c.duration : (item.Duration || 0) * 1000,
+                  fileHash: item.FileHash,
+                });
+              }
+            }
+          }
         }
+      }
+    } catch {}
+
+    if (collectedCandidates.length === 0) return null;
+
+    // 按 ID 去重
+    const seenCandidateIds = new Set<string>();
+    const uniqueCandidates = collectedCandidates.filter((c) => {
+      if (seenCandidateIds.has(c.id)) return false;
+      seenCandidateIds.add(c.id);
+      return true;
+    });
+
+    // 严密计算候选歌曲打分（坚固防线：杜绝短版、铃声、伴奏与翻唱）
+    const scoredCandidates = uniqueCandidates
+      .map((c) => {
+        let score = 0;
+        const sClean = c.song.replace(/\([^)]+\)/g, '').replace(/\[[^\]]+\]/g, '').trim().toLowerCase();
+        const durSec = c.duration / 1000;
+
+        // 0. 时长贴合权重（关键防线：若歌曲长于90秒，坚决剔除小于60秒的铃声短版片段）
+        if (targetDuration && targetDuration > 20) {
+          if (targetDuration > 90 && durSec < 60) {
+            score -= 160;
+          }
+          const diff = Math.abs(durSec - targetDuration);
+          if (diff <= 3) score += 60;
+          else if (diff <= 8) score += 40;
+          else if (diff <= 18) score += 15;
+          else if (diff > 35) score -= 80;
+        }
+
+        // 1. 歌名核心匹配权重
+        if (cleanTargetTitle && cleanTargetTitle.length >= 2) {
+          if (sClean.includes(cleanTargetTitle) || cleanTargetTitle.includes(sClean)) {
+            score += 50;
+          } else {
+            score -= 60;
+          }
+        }
+
+        // 2. 过滤垃圾/改编/伴奏
+        if (/(伴奏|伴唱|纯音乐|铃声|片段|短版|剪辑|双声道|变奏|改编|翻唱|二创|鬼畜|环绕|慢速|加速|减速)/i.test(c.song)) {
+          score -= 90;
+        }
+
+        // 3. 歌手匹配权重
+        if (targetArtist) {
+          const normArtist = targetArtist.toLowerCase().split(/[\/,]/)[0].trim();
+          if (normArtist && c.singer.toLowerCase().includes(normArtist)) {
+            score += 35;
+          }
+        }
+
+        return { candidate: c, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    for (const { candidate } of scoredCandidates.slice(0, 5)) {
 
         // 1. 优先尝试获取并解码毫秒级逐字 KRC 格式
         try {
@@ -997,6 +1158,11 @@ async function crawlKugouBySearch(
                       Math.floor(refParsedLines.length * 0.80),
                     ];
 
+                    // 计算首个匹配句的基准偏移量（消除前奏长短静音差异）
+                    const firstMatchRef = refParsedLines.find((r) => candidateLines.some((c) => c.text.includes(r.text.slice(0, 3))));
+                    const firstMatchCand = firstMatchRef ? candidateLines.find((c) => c.text.includes(firstMatchRef.text.slice(0, 3))) : null;
+                    const baseOffsetSec = firstMatchRef && firstMatchCand ? (firstMatchCand.timeSec - firstMatchRef.timeSec) : 0;
+
                     for (const idx of checkIndices) {
                       const refItem = refParsedLines[idx];
                       if (!refItem) continue;
@@ -1008,8 +1174,8 @@ async function crawlKugouBySearch(
                       });
 
                       if (match) {
-                        const diff = Math.abs(match.timeSec - refItem.timeSec);
-                        if (diff > 2.0) {
+                        const relativeDiff = Math.abs((match.timeSec - baseOffsetSec) - refItem.timeSec);
+                        if (relativeDiff > 2.5) {
                           hasInterludeDrift = true;
                           break;
                         }
@@ -1025,10 +1191,10 @@ async function crawlKugouBySearch(
 
                 return {
                   raw: decoded,
-                  id: item.FileHash,
-                  title: String(item.SongName || ''),
-                  artist: String(item.SingerName || ''),
-                  duration: item.Duration,
+                  id: candidate.fileHash || candidate.id,
+                  title: String(candidate.song || ''),
+                  artist: String(candidate.singer || ''),
+                  duration: candidate.duration,
                 };
               }
             }
@@ -1050,10 +1216,10 @@ async function crawlKugouBySearch(
               if (isValidLyric(decoded)) {
                 return {
                   raw: decoded,
-                  id: item.FileHash,
-                  title: String(item.SongName || ''),
-                  artist: String(item.SingerName || ''),
-                  duration: item.Duration,
+                  id: candidate.fileHash || candidate.id,
+                  title: String(candidate.song || ''),
+                  artist: String(candidate.singer || ''),
+                  duration: candidate.duration,
                 };
               }
             }
@@ -1218,6 +1384,9 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
   }
 
+  // 保存原声提供商基准歌词，用于后续字级歌词物理锚点对齐校准
+  const referenceRawLyric = rawLyric;
+
   // 计算既有歌词的基准时长与跨度（用于衡量候选项是否全篇对齐）
   let estimatedDurationSec = 0;
   if (rawLyric) {
@@ -1321,8 +1490,8 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
   }
 
-  // 3. 高精度多协议结构化解析
-  const { syncType, offset, lines } = parseHighPrecisionLyrics(rawLyric);
+  // 3. 高精度多协议结构化解析与音频基准校准
+  const { syncType, offset, lines } = parseHighPrecisionLyrics(rawLyric, finalTitle, finalArtist, referenceRawLyric);
 
   const isPure = lines.length === 0 || /纯音乐/i.test(rawLyric);
 

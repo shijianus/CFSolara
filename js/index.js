@@ -3487,7 +3487,7 @@ function syncLyrics(timeOverride) {
     if (!state.lyricsData || state.lyricsData.length === 0) return;
 
     const baseTime = (typeof timeOverride === 'number') ? timeOverride : (dom.audioPlayer.currentTime || 0);
-    const currentTime = baseTime + (state.userLyricOffset || 0) / 1000;
+    const currentTime = baseTime + ((state.lyricOffset || 0) + (state.userLyricOffset || 0)) / 1000;
     let currentIndex = -1;
 
     for (let i = 0; i < state.lyricsData.length; i++) {

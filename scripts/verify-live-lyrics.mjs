@@ -411,7 +411,7 @@ async function run() {
     // 5. 测试移动端视口 (Mobile Viewport Verification)
     console.log('\n--- 5. Testing Mobile Viewport & Inline Lyrics ---');
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1000);
 
     // 检查移动端界面是否渲染
