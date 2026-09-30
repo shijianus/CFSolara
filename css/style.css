@@ -860,6 +860,7 @@ html.mobile-view .playlist-label {
 
 .lyrics {
     grid-area: lyrics;
+    position: relative;
     text-align: center;
     font-size: 1em;
     line-height: 2;
@@ -870,6 +871,36 @@ html.mobile-view .playlist-label {
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
+}
+
+/* 歌词同步模式徽章 (逐字对齐 / 仅行级) */
+.lyrics-sync-badge {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.lyrics-sync-badge.word-sync {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.lyrics-sync-badge.line-sync {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .lyrics-scroll {
@@ -944,12 +975,14 @@ html.mobile-view .playlist-label {
     background: transparent !important;
     box-shadow: none !important;
     transform: scale(1.12) !important;
+    transform-origin: left center !important;
     font-weight: 700;
 }
 
 /* 逐字卡拉OK平滑渐变填充核心技术 (60fps Progressive Syllable Wipe) */
 .word-char {
     display: inline-block;
+    white-space: pre-wrap;
     --fill: 0%;
     background: linear-gradient(
         to right,
@@ -962,17 +995,21 @@ html.mobile-view .playlist-label {
     -webkit-text-fill-color: transparent;
     transition: transform 0.12s ease;
     will-change: transform, background;
+    cursor: pointer;
 }
 
 .lyrics .current .word-char.word-sung,
 .mobile-inline-lyrics__content .current .word-char.word-sung {
     --fill: 100%;
     -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
+    transform: scale(1);
+    opacity: 0.95;
+    filter: none;
 }
 
 .lyrics .current .word-char.word-singing,
 .mobile-inline-lyrics__content .current .word-char.word-singing {
-    transform: scale(1.12);
+    transform: scale(1.1);
     filter: drop-shadow(0 0 10px var(--lyric-word-glow, rgba(255, 255, 255, 0.85)));
 }
 

@@ -104,13 +104,154 @@ export async function getTrackStreamUrl(env: AppEnv, id: string, source = 'netea
 export function isMetadataLine(text: string): boolean {
   if (!text) return true;
   const trimmed = text.trim();
-  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer)\s*[:：]/i.test(trimmed)) {
+  if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|混音|母带|吉他|贝斯|鼓|和声|合声|合音|弦乐|键盘|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|文案|插画|封面|发行公司|出品人|总策划|音乐总监|人声编辑|音频编辑|项目经理|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director)[\u4e00-\u9fa5a-zA-Z\s]*[:：]/i.test(trimmed)) {
     return true;
   }
-  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50) {
+  if (/^(作词|作曲|编曲|词|曲|制作人|录音室|混音室|母带工程|和声编写|和声配唱|录音工程|录音助理|混音助理)\s*[：:\/—–-]/i.test(trimmed)) {
+    return true;
+  }
+  if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 50 && /(唱|曲|词|编)/.test(trimmed)) {
     return true;
   }
   return false;
+}
+
+export function parseTtmlTimestamp(ts: string): number {
+  if (!ts) return 0;
+  const trimmed = ts.trim();
+  const colonParts = trimmed.split(':');
+  if (colonParts.length === 3) {
+    const hours = parseFloat(colonParts[0]) || 0;
+    const minutes = parseFloat(colonParts[1]) || 0;
+    const seconds = parseFloat(colonParts[2]) || 0;
+    return Math.round((hours * 3600 + minutes * 60 + seconds) * 1000);
+  } else if (colonParts.length === 2) {
+    const minutes = parseFloat(colonParts[0]) || 0;
+    const seconds = parseFloat(colonParts[1]) || 0;
+    return Math.round((minutes * 60 + seconds) * 1000);
+  } else if (trimmed.endsWith('ms')) {
+    return parseFloat(trimmed.slice(0, -2)) || 0;
+  } else if (trimmed.endsWith('s')) {
+    return Math.round((parseFloat(trimmed.slice(0, -1)) || 0) * 1000);
+  }
+  const num = parseFloat(trimmed);
+  return isNaN(num) ? 0 : Math.round(num < 1000 ? num * 1000 : num);
+}
+
+export function parseTtmlLyrics(xml: string, offsetMs = 0): LyricLine[] {
+  const lines: LyricLine[] = [];
+  const pRegex = /<p\b([^>]*)>([\s\S]*?)<\/p>/gi;
+  let pMatch: RegExpExecArray | null;
+
+  while ((pMatch = pRegex.exec(xml)) !== null) {
+    const pAttrs = pMatch[1];
+    const pContent = pMatch[2];
+
+    const beginMatch = pAttrs.match(/begin="([^"]+)"/i);
+    const endMatch = pAttrs.match(/end="([^"]+)"/i);
+    const pBeginMs = beginMatch ? parseTtmlTimestamp(beginMatch[1]) + offsetMs : 0;
+    const pEndMs = endMatch ? parseTtmlTimestamp(endMatch[1]) + offsetMs : pBeginMs + 3000;
+
+    const spanRegex = /<span\b([^>]*)>([^<]*)<\/span>/gi;
+    let spanMatch: RegExpExecArray | null;
+    const words: LyricWord[] = [];
+    let lineText = '';
+
+    while ((spanMatch = spanRegex.exec(pContent)) !== null) {
+      const spanAttrs = spanMatch[1];
+      const spanText = spanMatch[2].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+      const sBeginMatch = spanAttrs.match(/begin="([^"]+)"/i);
+      const sEndMatch = spanAttrs.match(/end="([^"]+)"/i);
+      const sBeginMs = sBeginMatch ? parseTtmlTimestamp(sBeginMatch[1]) + offsetMs : pBeginMs;
+      const sEndMs = sEndMatch ? parseTtmlTimestamp(sEndMatch[1]) + offsetMs : sBeginMs + 300;
+      const durMs = Math.max(0, sEndMs - sBeginMs);
+
+      words.push({
+        text: spanText,
+        start: sBeginMs,
+        startSec: parseFloat((sBeginMs / 1000).toFixed(3)),
+        end: sEndMs,
+        endSec: parseFloat((sEndMs / 1000).toFixed(3)),
+        duration: durMs,
+        durationSec: parseFloat((durMs / 1000).toFixed(3)),
+      });
+      lineText += spanText;
+    }
+
+    const cleanText = lineText.trim() || pContent.replace(/<[^>]+>/g, '').trim();
+    if (!cleanText || isMetadataLine(cleanText)) continue;
+
+    const lineStartMs = words.length > 0 ? words[0].start : pBeginMs;
+    const lineEndMs = words.length > 0 ? words[words.length - 1].end : pEndMs;
+    const lineDurMs = Math.max(300, lineEndMs - lineStartMs);
+
+    lines.push({
+      time: lineStartMs,
+      timeSec: parseFloat((lineStartMs / 1000).toFixed(3)),
+      duration: lineDurMs,
+      durationSec: parseFloat((lineDurMs / 1000).toFixed(3)),
+      text: cleanText,
+      words: words.length > 0 ? words : undefined,
+    });
+  }
+
+  return lines;
+}
+
+export function parseMusixmatchRichsync(raw: string, offsetMs = 0): LyricLine[] | null {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    if (parsed.length === 0 || typeof parsed[0].ts !== 'number') return null;
+
+    const lines: LyricLine[] = [];
+    for (const item of parsed) {
+      const lineStartMs = Math.round(item.ts * 1000) + offsetMs;
+      const lineEndMs = typeof item.te === 'number' ? Math.round(item.te * 1000) + offsetMs : lineStartMs + 3000;
+      const words: LyricWord[] = [];
+      let lineText = '';
+
+      if (Array.isArray(item.l)) {
+        for (let i = 0; i < item.l.length; i++) {
+          const wItem = item.l[i];
+          const wText = String(wItem.c || '');
+          const wStartMs = Math.round((item.ts + (wItem.o || 0)) * 1000) + offsetMs;
+          const nextW = item.l[i + 1];
+          const wEndMs = nextW
+            ? Math.round((item.ts + (nextW.o || 0)) * 1000) + offsetMs
+            : lineEndMs;
+          const wDurMs = Math.max(40, wEndMs - wStartMs);
+
+          words.push({
+            text: wText,
+            start: wStartMs,
+            startSec: parseFloat((wStartMs / 1000).toFixed(3)),
+            end: wEndMs,
+            endSec: parseFloat((wEndMs / 1000).toFixed(3)),
+            duration: wDurMs,
+            durationSec: parseFloat((wDurMs / 1000).toFixed(3)),
+          });
+          lineText += wText;
+        }
+      }
+
+      const cleanText = lineText.trim();
+      if (!cleanText || isMetadataLine(cleanText)) continue;
+
+      lines.push({
+        time: lineStartMs,
+        timeSec: parseFloat((lineStartMs / 1000).toFixed(3)),
+        duration: lineEndMs - lineStartMs,
+        durationSec: parseFloat(((lineEndMs - lineStartMs) / 1000).toFixed(3)),
+        text: cleanText,
+        words: words.length > 0 ? words : undefined,
+      });
+    }
+
+    return lines;
+  } catch {
+    return null;
+  }
 }
 
 export function parseHighPrecisionLyrics(raw: string): {
@@ -129,7 +270,32 @@ export function parseHighPrecisionLyrics(raw: string): {
     offsetMs = parseInt(offsetMatch[1], 10) || 0;
   }
 
-  // 2. 检测是否为 XML 包装的 QRC 格式
+  // 2. 检测 TTML / Apple Music XML 格式
+  if (raw.includes('<tt') || /<p\b[^>]*begin=/i.test(raw)) {
+    const ttmlLines = parseTtmlLyrics(raw, offsetMs);
+    if (ttmlLines.length > 0) {
+      const hasWordTimestamps = ttmlLines.some((l) => l.words && l.words.length > 0);
+      return {
+        syncType: hasWordTimestamps ? 'word' : 'line',
+        offset: offsetMs,
+        lines: ttmlLines.sort((a, b) => a.time - b.time),
+      };
+    }
+  }
+
+  // 3. 检测 Musixmatch richsync JSON 格式
+  if (raw.trim().startsWith('[') && /"ts"\s*:\s*[\d.]+/i.test(raw)) {
+    const mmLines = parseMusixmatchRichsync(raw, offsetMs);
+    if (mmLines && mmLines.length > 0) {
+      return {
+        syncType: 'word',
+        offset: offsetMs,
+        lines: mmLines.sort((a, b) => a.time - b.time),
+      };
+    }
+  }
+
+  // 4. 检测是否为 XML 包装的 QRC 格式
   let cleanInput = raw;
   const qrcXmlMatch = raw.match(/<Lyric_1[^>]*LyricContent="([^"]+)"/i);
   if (qrcXmlMatch) {
@@ -149,7 +315,7 @@ export function parseHighPrecisionLyrics(raw: string): {
       continue;
     }
 
-    // 2.1 网易云 / smart-lyric JSON 行格式：{"t":1234,"c":[{"tx":"...", "t":1234, "d":500}]} 或 {"c":[{"tx":"..."}]}
+    // 4.1 网易云 / smart-lyric JSON 行格式：{"t":1234,"c":[{"tx":"...", "t":1234, "d":500}]} 或 {"c":[{"tx":"..."}]}
     if (line.startsWith('{') && line.endsWith('}')) {
       try {
         const json = JSON.parse(line);
@@ -179,14 +345,21 @@ export function parseHighPrecisionLyrics(raw: string): {
           }
 
           const cleanText = lineText.trim();
-          if (!cleanText) continue;
-          if (/^(作词|作曲|编曲|词|曲|制作|制作人|监制|录音|混音|母带|吉他|贝斯|鼓|和声|弦乐|企划|统筹|OP|SP|Written by|Composed by|Arranged by|Produced by|Lyrics by|Music by)\s*[:：]/i.test(cleanText)) {
+          if (!cleanText || isMetadataLine(cleanText)) {
             continue;
           }
 
-          if (hasWordInfo && words.length > 0) hasWordTimestamps = true;
+          if (hasWordInfo && words.length > 1) {
+            hasWordTimestamps = true;
+          }
           const lineTime = words.length > 0 ? words[0].start : (lineBaseTime + offsetMs);
           const lineDur = words.length > 0 ? (words[words.length - 1].end - lineTime) : undefined;
+
+          // 若整句仅包含 1 个词块但文字有多字，拆分为音节以便逐字卡拉OK平滑展示
+          let finalWords: LyricWord[] | undefined = words.length > 0 ? words : undefined;
+          if (finalWords && finalWords.length === 1 && cleanText.length > 1 && lineDur && lineDur > 400) {
+            finalWords = interpolateWordTimestamps(cleanText, lineTime, lineDur);
+          }
 
           parsedLines.push({
             time: Math.max(0, lineTime),
@@ -194,7 +367,7 @@ export function parseHighPrecisionLyrics(raw: string): {
             duration: lineDur,
             durationSec: lineDur !== undefined ? parseFloat((Math.max(0, lineDur) / 1000).toFixed(3)) : undefined,
             text: cleanText,
-            words: words.length > 0 ? words : undefined,
+            words: finalWords,
           });
           continue;
         }
@@ -385,7 +558,7 @@ export function parseHighPrecisionLyrics(raw: string): {
   }
 
   return {
-    syncType: 'word',
+    syncType: hasWordTimestamps ? 'word' : 'line',
     offset: offsetMs,
     lines: parsedLines,
   };
@@ -460,7 +633,17 @@ export function isValidLyric(raw: string): boolean {
 
 export function hasWordSyncTags(raw: string): boolean {
   if (!raw || typeof raw !== 'string') return false;
-  return /"d":\s*\d+/.test(raw) || /\[\d+,\d+\]\s*[<(]\d+,\d+/.test(raw);
+  // KRC or YRC syllable tags: [lineStart,lineDur]<wStart,wDur,0>word
+  if (/\[\d+,\d+\]\s*[<(]\d+,\d+/.test(raw)) return true;
+  // Enhanced LRC (multiple syllable timestamps per line)
+  if (/<(?:\d{1,2}:)?\d{2}[.:]\d{2,3}>[^<\n]+<(?:\d{1,2}:)?\d{2}[.:]\d{2,3}>/.test(raw)) return true;
+  // TTML / XML spans
+  if (/<span\b[^>]*begin=/i.test(raw)) return true;
+  // Smart lyric JSON: must have multiple word tokens inside a c array
+  if (/"c"\s*:\s*\[[^{}]*\{"tx"[^{}]*\}[^{}]*\{"tx"/.test(raw)) return true;
+  // Musixmatch richsync JSON
+  if (/"ts"\s*:\s*[\d.]+\s*,\s*"te"\s*:\s*[\d.]+\s*,\s*"l"\s*:\s*\[/.test(raw)) return true;
+  return false;
 }
 
 async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
@@ -1045,14 +1228,36 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
   }
 
+  // 若缺失歌曲标题但提供了网易云 ID，自动解析曲名与歌手以便进行全网高精逐字匹配
+  if (!finalTitle && id && id !== 'undefined' && id !== 'null' && (source === 'netease' || /^\d+$/.test(id))) {
+    try {
+      const dRes = await fetch(`https://music.163.com/api/song/detail/?id=${encodeURIComponent(id)}&ids=[${encodeURIComponent(id)}]`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+      });
+      if (dRes.ok) {
+        const dJson = (await dRes.json()) as any;
+        const sItem = dJson?.songs?.[0];
+        if (sItem) {
+          finalTitle = sItem.name || finalTitle;
+          if (!finalArtist && sItem.artists?.[0]?.name) {
+            finalArtist = sItem.artists[0].name;
+          }
+          if (!estimatedDurationSec && sItem.duration) {
+            estimatedDurationSec = Math.round(sItem.duration / 1000);
+          }
+        }
+      }
+    } catch {}
+  }
+
   // 2. 逐字高精升级与全网瀑布实时爬虫：
   // 核心法则：如果当前歌词没有真实逐字时间戳（即为普通粗粒度行级 LRC），但提供了搜索线索（title/artist/q），
-  // 必须优先尝试获取具备真实逐字时间戳（如酷狗 KRC 或网易云 YRC）的毫秒级高精歌词！
+  // 必须优先尝试获取具备真实逐字时间戳（如酷狗 KRC、Musixmatch richsync 或网易云 YRC）的毫秒级高精歌词！
   // 关键防御：高精升级时严禁将完整歌曲降级为短版、高潮剪辑版或不同歌手翻唱版！
-  const searchQuery = (q || `${title} ${artist}`).trim();
+  const searchQuery = (q || `${finalTitle || title} ${finalArtist || artist}`).trim();
   if (searchQuery && (!rawLyric || !hasWordSyncTags(rawLyric))) {
     // 2.1 酷狗音乐高精逐字 KRC 检索（严守歌名、歌手、时长一致与内容相似度校验法则）
-    const kugouResult = await crawlKugouBySearch(searchQuery, estimatedDurationSec, artist, title, rawLyric);
+    const kugouResult = await crawlKugouBySearch(searchQuery, estimatedDurationSec, finalArtist || artist, finalTitle || title, rawLyric);
     if (kugouResult?.raw && isValidLyric(kugouResult.raw) && hasWordSyncTags(kugouResult.raw)) {
       rawLyric = kugouResult.raw;
       finalSource = 'kugou';
@@ -1061,7 +1266,19 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       if (!finalArtist) finalArtist = kugouResult.artist;
     }
 
-    // 2.2 若当前依然没有任何有效歌词，继续依次尝试网易云、QQ、LRCLIB 与酷狗普通 LRC
+    // 2.2 Musixmatch 字级 rich-sync 与行级 subtitles 检索（欧美及国际歌曲优先字级源）
+    if (!rawLyric || !hasWordSyncTags(rawLyric)) {
+      const mmResult = await crawlMusixmatchBySearch(finalTitle || title || searchQuery, finalArtist || artist);
+      if (mmResult?.raw && isValidLyric(mmResult.raw) && (hasWordSyncTags(mmResult.raw) || !rawLyric)) {
+        rawLyric = mmResult.raw;
+        finalSource = 'musixmatch';
+        finalId = mmResult.id;
+        if (!finalTitle) finalTitle = mmResult.title;
+        if (!finalArtist) finalArtist = mmResult.artist;
+      }
+    }
+
+    // 2.3 若当前依然没有任何有效歌词，继续依次尝试网易云、QQ、LRCLIB 与酷狗普通 LRC
     if (!rawLyric) {
       const neteaseResult = await crawlNetEaseBySearch(searchQuery);
       if (neteaseResult?.raw && isValidLyric(neteaseResult.raw)) {
@@ -1085,18 +1302,7 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
     }
 
     if (!rawLyric) {
-      const mmResult = await crawlMusixmatchBySearch(title || searchQuery, artist);
-      if (mmResult?.raw && isValidLyric(mmResult.raw)) {
-        rawLyric = mmResult.raw;
-        finalSource = 'musixmatch';
-        finalId = mmResult.id;
-        if (!finalTitle) finalTitle = mmResult.title;
-        if (!finalArtist) finalArtist = mmResult.artist;
-      }
-    }
-
-    if (!rawLyric) {
-      const lrclibResult = await crawlLrclibBySearch(searchQuery, title, artist);
+      const lrclibResult = await crawlLrclibBySearch(searchQuery, finalTitle || title, finalArtist || artist);
       if (lrclibResult?.raw && isValidLyric(lrclibResult.raw)) {
         rawLyric = lrclibResult.raw;
         finalSource = 'lrclib';

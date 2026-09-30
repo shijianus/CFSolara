@@ -600,13 +600,15 @@ const API = {
             artistStr = String(song.artist);
         }
         if (artistStr) params.set('artist', artistStr);
+        const albumStr = song.album || song.album_name;
+        if (albumStr && typeof albumStr === 'string') params.set('album', albumStr);
         if (title && artistStr) {
             params.set('q', `${title} ${artistStr}`.trim());
         } else if (title) {
             params.set('q', String(title).trim());
         }
         if (song.duration) params.set('duration', String(song.duration));
-        return `/api/lyric?${params.toString()}`;
+        return `/api/lyrics?${params.toString()}`;
     },
 
 
@@ -1367,6 +1369,7 @@ function setAudioCurrentTime(time) {
     dom.currentTimeDisplay.textContent = formatTime(clamped);
     updateProgressBarBackground(clamped, duration);
     state.currentPlaybackTime = clamped;
+    syncLyrics(clamped);
 }
 
 function handleProgressInput() {
@@ -1374,12 +1377,14 @@ function handleProgressInput() {
     const value = Number(dom.progressBar.value);
     dom.currentTimeDisplay.textContent = formatTime(value);
     updateProgressBarBackground(value, Number(dom.progressBar.max));
+    syncLyrics(value);
 }
 
 function handleProgressChange() {
     const value = Number(dom.progressBar.value);
     state.isSeeking = false;
     seekAudio(value);
+    syncLyrics(value);
 }
 
 function seekAudio(value) {
@@ -1387,6 +1392,7 @@ function seekAudio(value) {
     setAudioCurrentTime(value);
     state.lastSavedPlaybackTime = state.currentPlaybackTime;
     safeSetLocalStorage("currentPlaybackTime", state.currentPlaybackTime.toFixed(1));
+    syncLyrics(value);
 }
 
 async function togglePlayPause() {
@@ -2000,11 +2006,16 @@ function setupInteractions() {
     dom.audioPlayer.addEventListener("pause", () => {
         updatePlayPauseButton();
         stopLyricSyncLoop();
+        syncLyrics();
     });
     dom.audioPlayer.addEventListener("ended", () => {
         stopLyricSyncLoop();
+        syncLyrics();
     });
     dom.audioPlayer.addEventListener("seeked", () => {
+        syncLyrics();
+    });
+    dom.audioPlayer.addEventListener("ratechange", () => {
         syncLyrics();
     });
     dom.audioPlayer.addEventListener("volumechange", onAudioVolumeChange);
@@ -3223,8 +3234,44 @@ function stopLyricSyncLoop() {
     }
 }
 
+function escapeLyricHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function updateLyricsSyncBadge(type) {
+    const badgeText = type === 'word' ? '逐字对齐' : '仅行级';
+    const badgeClass = type === 'word' ? 'word-sync' : 'line-sync';
+    const icon = type === 'word' ? '<i class="fas fa-bolt"></i> ' : '<i class="fas fa-align-left"></i> ';
+
+    if (dom.lyrics) {
+        let badge = dom.lyrics.querySelector('.lyrics-sync-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            dom.lyrics.appendChild(badge);
+        }
+        badge.className = `lyrics-sync-badge ${badgeClass}`;
+        badge.innerHTML = `${icon}${badgeText}`;
+        badge.style.display = (state.lyricsData && state.lyricsData.length > 0) ? 'inline-flex' : 'none';
+    }
+}
+
 function attachLyricClickToSeek() {
     const handleLineClick = (event) => {
+        const word = event.target.closest('.word-char');
+        if (word && word.getAttribute('data-start') !== null) {
+            const wordTime = parseFloat(word.getAttribute('data-start'));
+            if (!isNaN(wordTime)) {
+                setAudioCurrentTime(wordTime);
+                state.userScrolledLyrics = false;
+                syncLyrics(wordTime);
+                return;
+            }
+        }
         const line = event.target.closest('.lyric-line');
         if (!line) return;
         const timeAttr = line.getAttribute('data-time');
@@ -3232,7 +3279,7 @@ function attachLyricClickToSeek() {
             const targetTime = parseFloat(timeAttr);
             setAudioCurrentTime(targetTime);
             state.userScrolledLyrics = false;
-            syncLyrics();
+            syncLyrics(targetTime);
         }
     };
 
@@ -3293,7 +3340,7 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
     return tokens;
 }
 
-// 修复：加载歌词 - 100% 逐字卡拉OK保障体系与声学同步
+// 加载歌词 - 100% 逐字卡拉OK与行级兜底保障体系
 async function loadLyrics(song) {
     if (!song) return;
     try {
@@ -3307,7 +3354,7 @@ async function loadLyrics(song) {
         if (state.currentSong !== song) return;
 
         if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
-            state.lyricSyncType = 'word';
+            state.lyricSyncType = lyricData.syncType || (lyricData.lines.some(l => l.words && l.words.length > 1) ? 'word' : 'line');
             state.lyricOffset = lyricData.offset || 0;
             state.lyricsData = lyricData.lines.map((line, idx, arr) => {
                 const timeSec = typeof line.timeSec === 'number' ? line.timeSec : (line.time / 1000);
@@ -3322,6 +3369,7 @@ async function loadLyrics(song) {
                     time: timeSec,
                     timeMs: timeMs,
                     duration: durMs,
+                    durationSec: parseFloat((durMs / 1000).toFixed(3)),
                     text: line.text,
                     words: words,
                 };
@@ -3340,6 +3388,7 @@ async function loadLyrics(song) {
             dom.lyrics.dataset.placeholder = "message";
             state.lyricsData = [];
             state.currentLyricLine = -1;
+            updateLyricsSyncBadge('');
         }
     } catch (error) {
         if (state.currentSong !== song) return;
@@ -3349,10 +3398,11 @@ async function loadLyrics(song) {
         dom.lyrics.dataset.placeholder = "message";
         state.lyricsData = [];
         state.currentLyricLine = -1;
+        updateLyricsSyncBadge('');
     }
 }
 
-// 修复：解析歌词并自动升级为逐字卡拉OK
+// 解析歌词并自动升级为逐字卡拉OK
 function parseLyrics(lyricText) {
     const lines = lyricText.split('\n');
     const rawList = [];
@@ -3374,7 +3424,7 @@ function parseLyrics(lyricText) {
 
     rawList.sort((a, b) => a.time - b.time);
 
-    state.lyricSyncType = 'word';
+    state.lyricSyncType = 'line';
     state.lyricsData = rawList.map((item, idx, arr) => {
         const next = arr[idx + 1];
         const durMs = next ? Math.max(500, next.timeMs - item.timeMs) : 3500;
@@ -3383,6 +3433,7 @@ function parseLyrics(lyricText) {
             time: item.time,
             timeMs: item.timeMs,
             duration: durMs,
+            durationSec: parseFloat((durMs / 1000).toFixed(3)),
             text: item.text,
             words: words,
         };
@@ -3403,19 +3454,21 @@ function clearLyricsContent() {
     setLyricsContentHtml("");
     state.lyricsData = [];
     state.currentLyricLine = -1;
+    updateLyricsSyncBadge('');
     if (isMobileView) {
         closeMobileInlineLyrics({ force: true });
     }
 }
 
-// 修复：显示歌词 - 100% 逐字渲染，彻底消除对话字幕块
+// 显示歌词 - 100% 逐字渲染，彻底消除对话字幕块
 function displayLyrics() {
-    state.lyricSyncType = 'word';
     const lyricsHtml = state.lyricsData.map((lyric, index) => {
-        const words = (lyric.words && lyric.words.length > 0) ? lyric.words : [{ text: lyric.text }];
-        const wordsHtml = words.map((w, wIdx) =>
-            `<span class="word-char" data-windex="${wIdx}">${w.text}</span>`
-        ).join("");
+        const words = (lyric.words && lyric.words.length > 0) ? lyric.words : [{ text: lyric.text, startSec: lyric.time, endSec: lyric.time + (lyric.durationSec || 3) }];
+        const wordsHtml = words.map((w, wIdx) => {
+            const sAttr = typeof w.startSec === 'number' ? ` data-start="${w.startSec}"` : '';
+            const eAttr = typeof w.endSec === 'number' ? ` data-end="${w.endSec}"` : '';
+            return `<span class="word-char" data-windex="${wIdx}"${sAttr}${eAttr}>${escapeLyricHtml(w.text)}</span>`;
+        }).join("");
         return `<div data-time="${lyric.time}" data-index="${index}" class="lyric-line">${wordsHtml}</div>`;
     }).join("");
 
@@ -3423,16 +3476,18 @@ function displayLyrics() {
     if (dom.lyrics) {
         dom.lyrics.dataset.placeholder = "default";
     }
+    updateLyricsSyncBadge(state.lyricSyncType || 'word');
     attachLyricClickToSeek();
     state.currentLyricLine = -1;
     syncLyrics();
 }
 
-// 修复：同步歌词 - 60fps 毫秒级字级/音节级平滑发音流动跟随
-function syncLyrics() {
+// 同步歌词 - 60fps 毫秒级字级/音节级平滑发音流动跟随
+function syncLyrics(timeOverride) {
     if (!state.lyricsData || state.lyricsData.length === 0) return;
 
-    const currentTime = dom.audioPlayer.currentTime || 0;
+    const baseTime = (typeof timeOverride === 'number') ? timeOverride : (dom.audioPlayer.currentTime || 0);
+    const currentTime = baseTime + (state.userLyricOffset || 0) / 1000;
     let currentIndex = -1;
 
     for (let i = 0; i < state.lyricsData.length; i++) {
@@ -3498,18 +3553,33 @@ function syncLyrics() {
                 dom.mobileInlineLyricsContent?.querySelector(`div[data-index="${currentIndex}"]`),
             ].filter(Boolean);
 
+            // 严密计算当前正在唱的唯一字 (Active Word)，确保同一瞬间最多只有1个字获得 word-singing
+            let activeWordIdx = -1;
+            for (let wIdx = 0; wIdx < curLine.words.length; wIdx++) {
+                const w = curLine.words[wIdx];
+                const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
+                const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
+                if (currentTime >= start && currentTime < end) {
+                    activeWordIdx = wIdx;
+                    break;
+                }
+            }
+
             lineContainers.forEach(containerEl => {
                 const charSpans = containerEl.querySelectorAll('.word-char');
-                curLine.words.forEach((w, wIdx) => {
+                for (let wIdx = 0; wIdx < curLine.words.length; wIdx++) {
                     const charSpan = charSpans[wIdx];
-                    if (charSpan) {
-                        const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
-                        const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
-                        if (currentTime >= end) {
+                    if (!charSpan) continue;
+                    const w = curLine.words[wIdx];
+                    const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
+                    const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
+
+                    if (activeWordIdx !== -1) {
+                        if (wIdx < activeWordIdx) {
                             charSpan.style.setProperty('--fill', '100%');
                             charSpan.classList.add("word-sung");
                             charSpan.classList.remove("word-singing");
-                        } else if (currentTime >= start) {
+                        } else if (wIdx === activeWordIdx) {
                             const dur = Math.max(0.04, end - start);
                             const pct = Math.min(100, Math.max(0, ((currentTime - start) / dur) * 100));
                             charSpan.style.setProperty('--fill', `${pct.toFixed(1)}%`);
@@ -3519,8 +3589,18 @@ function syncLyrics() {
                             charSpan.style.setProperty('--fill', '0%');
                             charSpan.classList.remove("word-sung", "word-singing");
                         }
+                    } else {
+                        // 当前时间处于词间间隙或尚未发音/发音已完毕
+                        if (currentTime >= end) {
+                            charSpan.style.setProperty('--fill', '100%');
+                            charSpan.classList.add("word-sung");
+                            charSpan.classList.remove("word-singing");
+                        } else {
+                            charSpan.style.setProperty('--fill', '0%');
+                            charSpan.classList.remove("word-sung", "word-singing");
+                        }
                     }
-                });
+                }
             });
         }
     }
