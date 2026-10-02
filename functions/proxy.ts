@@ -96,21 +96,77 @@ async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
     return new Response("Missing types", { status: 400 });
   }
 
-  const upstream = await fetch(apiUrl.toString(), {
-    headers: {
-      "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
-      "Accept": "application/json",
-    },
-  });
+  const types = apiUrl.searchParams.get("types");
+  if (types === "url") {
+    let id = apiUrl.searchParams.get("id") || "";
+    id = id.replace(/^[a-z0-9_-]+:/i, "");
+    apiUrl.searchParams.set("id", id);
 
-  const headers = createCorsHeaders(upstream.headers);
+    const source = apiUrl.searchParams.get("source") || "netease";
+    if (source !== "netease" && source !== "bilibili") {
+      apiUrl.searchParams.set("source", "netease");
+    }
+  }
+
+  let upstreamResponse: Response | null = null;
+  try {
+    upstreamResponse = await fetch(apiUrl.toString(), {
+      headers: {
+        "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
+        "Accept": "application/json",
+      },
+    });
+  } catch (fetchErr) {
+    console.error("[Proxy Upstream Fetch Error]", fetchErr);
+  }
+
+  const headers = createCorsHeaders(upstreamResponse ? upstreamResponse.headers : undefined);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json; charset=utf-8");
   }
 
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
+  if (types === "url") {
+    const rawId = (apiUrl.searchParams.get("id") || "").replace(/^[a-z0-9_-]+:/i, "");
+    if (upstreamResponse && upstreamResponse.ok) {
+      try {
+        const bodyText = await upstreamResponse.text();
+        const parsed = JSON.parse(bodyText);
+        if (parsed && typeof parsed.url === "string" && parsed.url.length > 0) {
+          return new Response(bodyText, {
+            status: upstreamResponse.status,
+            statusText: upstreamResponse.statusText,
+            headers,
+          });
+        }
+      } catch {
+        // Fall through to stream fallback
+      }
+    }
+
+    // Fallback: Return stream proxy if GDStudio fails or returns empty URL
+    if (rawId) {
+      const fallbackBody = JSON.stringify({
+        url: `/api/music/stream?id=${encodeURIComponent(rawId)}&source=netease`,
+        br: 320,
+        fallback: true,
+      });
+      return new Response(fallbackBody, {
+        status: 200,
+        headers,
+      });
+    }
+  }
+
+  if (!upstreamResponse) {
+    return new Response(JSON.stringify({ error: "Upstream fetch failed" }), {
+      status: 502,
+      headers,
+    });
+  }
+
+  return new Response(upstreamResponse.body, {
+    status: upstreamResponse.status,
+    statusText: upstreamResponse.statusText,
     headers,
   });
 }

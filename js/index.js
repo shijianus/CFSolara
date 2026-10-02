@@ -389,7 +389,10 @@ function buildAudioProxyUrl(url) {
 }
 
 const SOURCE_OPTIONS = [
+    { value: "nexus", label: "Sonic 全网聚合" },
     { value: "netease", label: "网易云音乐" },
+    { value: "qq", label: "QQ音乐" },
+    { value: "kugou", label: "酷狗音乐" },
     { value: "kuwo", label: "酷我音乐" },
     { value: "joox", label: "JOOX音乐" }
 ];
@@ -398,6 +401,7 @@ function normalizeSource(value) {
     const allowed = SOURCE_OPTIONS.map(option => option.value);
     return allowed.includes(value) ? value : SOURCE_OPTIONS[0].value;
 }
+
 
 const QUALITY_OPTIONS = [
     { value: "128", label: "标准音质", description: "128 kbps" },
@@ -495,32 +499,97 @@ const API = {
         }
     },
 
-    search: async (keyword, source = "netease", count = 20, page = 1) => {
-        const signature = API.generateSignature();
-        const url = `${API.baseUrl}?types=search&source=${source}&name=${encodeURIComponent(keyword)}&count=${count}&pages=${page}&s=${signature}`;
-
+    search: async (keyword, source = "nexus", count = 20, page = 1) => {
         try {
-            debugLog(`API请求: ${url}`);
-            const data = await API.fetchJson(url);
-            debugLog(`API响应: ${JSON.stringify(data).substring(0, 200)}...`);
+            let url;
+            if (source === "nexus" || !source || source === "all") {
+                url = `/api/sonic/search/nexus?q=${encodeURIComponent(keyword)}&count=${count}&page=${page}`;
+            } else {
+                url = `/api/sonic/search/${encodeURIComponent(source)}?q=${encodeURIComponent(keyword)}&count=${count}&page=${page}`;
+            }
 
-            if (!Array.isArray(data)) throw new Error("搜索结果格式错误");
+            debugLog(`[Sonic Search] API请求: ${url}`);
+            const resp = await API.fetchJson(url);
+            debugLog(`[Sonic Search] API响应: ${JSON.stringify(resp).substring(0, 200)}...`);
 
-            return data.map(song => ({
-                id: song.id,
-                name: song.name,
-                artist: song.artist,
-                album: song.album,
-                pic_id: song.pic_id,
-                url_id: song.url_id,
-                lyric_id: song.lyric_id,
-                source: song.source,
-            }));
+            if (resp && resp.brand === "Sonic" && resp.data && Array.isArray(resp.data.tracks)) {
+                return resp.data.tracks.map(track => {
+                    const rawId = String(track.platformId || track.id || "");
+                    const cleanId = rawId.replace(/^[a-z0-9_-]+:/i, "");
+                    const sources = Array.isArray(track.sources) ? track.sources : [];
+                    const neteaseSource = sources.find(s => s.platform === "netease");
+                    const hasNetease = track.platform === "netease" || Boolean(neteaseSource);
+
+                    const playableSource = hasNetease ? "netease" : (track.platform || track.source || "netease");
+                    const playableId = (neteaseSource && neteaseSource.platformId)
+                        ? String(neteaseSource.platformId).replace(/^[a-z0-9_-]+:/i, "")
+                        : cleanId;
+
+                    return {
+                        id: playableId,
+                        name: track.title || track.name,
+                        title: track.title,
+                        artist: track.artist,
+                        album: track.album,
+                        duration: track.duration,
+                        pic_id: track.picId || track.cover,
+                        url_id: playableId,
+                        lyric_id: track.lyricId || track.platformId || playableId,
+                        cover: track.cover,
+                        coverUrl: track.coverUrl || track.cover,
+                        source: playableSource,
+                        platform: track.platform || playableSource,
+                        platformId: String(track.platformId || cleanId).replace(/^[a-z0-9_-]+:/i, ""),
+                        sources: sources,
+                    };
+                });
+            }
+
+            // Fallback for array response
+            if (Array.isArray(resp)) {
+                return resp.map(song => ({
+                    id: song.id,
+                    name: song.name,
+                    artist: song.artist,
+                    album: song.album,
+                    pic_id: song.pic_id,
+                    url_id: song.url_id,
+                    lyric_id: song.lyric_id,
+                    source: song.source || (source === "nexus" ? "netease" : source),
+                    platform: song.source || (source === "nexus" ? "netease" : source),
+                    platformId: String(song.id || ""),
+                }));
+            }
+
+            throw new Error("搜索结果格式错误");
         } catch (error) {
-            debugLog(`API错误: ${error.message}`);
+            debugLog(`[Sonic Search] API错误: ${error.message}，尝试传统备用通道`);
+            try {
+                const signature = API.generateSignature();
+                const legacySource = source === "nexus" ? "netease" : source;
+                const legacyUrl = `${API.baseUrl}?types=search&source=${legacySource}&name=${encodeURIComponent(keyword)}&count=${count}&pages=${page}&s=${signature}`;
+                const data = await API.fetchJson(legacyUrl);
+                if (Array.isArray(data)) {
+                    return data.map(song => ({
+                        id: song.id,
+                        name: song.name,
+                        artist: song.artist,
+                        album: song.album,
+                        pic_id: song.pic_id,
+                        url_id: song.url_id,
+                        lyric_id: song.lyric_id,
+                        source: song.source || legacySource,
+                        platform: song.source || legacySource,
+                        platformId: String(song.id || ""),
+                    }));
+                }
+            } catch (fallbackErr) {
+                debugLog(`备用搜索通道亦失败: ${fallbackErr.message}`);
+            }
             throw error;
         }
     },
+
 
     getRadarPlaylist: async (playlistId = "3778678", options = {}) => {
         const signature = API.generateSignature();
@@ -577,7 +646,10 @@ const API = {
 
     getSongUrl: (song, quality = "320") => {
         const signature = API.generateSignature();
-        return `${API.baseUrl}?types=url&id=${song.id}&source=${song.source || "netease"}&br=${quality}&s=${signature}`;
+        const rawId = String(song.url_id || song.id || "");
+        const cleanId = rawId.replace(/^[a-z0-9_-]+:/i, "");
+        const source = song.source || (song.platform === "netease" ? "netease" : "netease");
+        return `${API.baseUrl}?types=url&id=${encodeURIComponent(cleanId)}&source=${encodeURIComponent(source)}&br=${quality}&s=${signature}`;
     },
 
     getLyric: (song) => {
@@ -609,6 +681,63 @@ const API = {
         }
         if (song.duration) params.set('duration', String(song.duration));
         return `/api/lyrics?${params.toString()}`;
+    },
+
+
+    // Sonic Lyrics Gateway — 聚合逐字端点 (优先平台原生 → AMLL TTML → 假逐字兜底)
+    getSonicLyric: (song) => {
+        const params = new URLSearchParams();
+        const title = song.name || song.title;
+        if (title) params.set('title', String(title));
+
+        let artistStr = '';
+        if (Array.isArray(song.artist)) {
+            artistStr = song.artist
+                .map(a => (typeof a === 'object' && a ? a.name || '' : String(a)))
+                .filter(Boolean)
+                .join(' / ');
+        } else if (typeof song.artist === 'object' && song.artist !== null) {
+            artistStr = song.artist.name || '';
+        } else if (song.artist) {
+            artistStr = String(song.artist);
+        }
+        if (artistStr) params.set('artist', artistStr);
+
+        const albumStr = song.album || song.album_name;
+        if (albumStr && typeof albumStr === 'string') params.set('album', albumStr);
+        if (song.duration) params.set('duration', String(song.duration));
+
+        // Map platform-specific IDs for platform native + AMLL TTML DB lookup
+        const platform = (song.platform || song.source || 'netease').toLowerCase();
+        const rawSongId = song.platformId || song.lyric_id || song.id;
+        const songId = rawSongId ? String(rawSongId).replace(/^[a-z0-9_-]+:/i, "") : "";
+        if (songId) {
+            // Platform native identifiers for Sonic priority chain ①
+            params.set('platform', platform);
+            params.set('platformId', songId);
+            // AMLL TTML DB lookup identifiers for Sonic priority chain ②③
+            if (platform === 'netease' || platform === 'ncm') {
+                params.set('ncmMusicId', songId);
+            } else if (platform === 'qq' || platform === 'tencent') {
+                params.set('qqMusicId', songId);
+            }
+        }
+
+        // 透传多源平台ID（从 search/nexus 合并结果中带回）
+        if (Array.isArray(song.sources)) {
+            for (const s of song.sources) {
+                const sId = String(s.platformId || "").replace(/^[a-z0-9_-]+:/i, "");
+                if ((s.platform === 'netease' || s.platform === 'ncm') && !params.has('ncmMusicId') && sId) {
+                    params.set('ncmMusicId', sId);
+                }
+                if ((s.platform === 'qq' || s.platform === 'tencent') && !params.has('qqMusicId') && sId) {
+                    params.set('qqMusicId', sId);
+                }
+            }
+        }
+
+        params.set('prefer', 'word');
+        return `/api/sonic/lyrics/nexus?${params.toString()}`;
     },
 
 
@@ -2269,6 +2398,29 @@ function updateCurrentSongInfo(song, options = {}) {
     }
 
     // 加载封面
+    const directCover = song.coverUrl || song.cover || (typeof song.pic_id === "string" && (song.pic_id.startsWith("http") || song.pic_id.startsWith("/api/")) ? song.pic_id : "");
+    if (directCover) {
+        cancelDeferredPaletteUpdate();
+        dom.albumCover.classList.add("loading");
+        const imageUrl = preferHttpsUrl(directCover);
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            if (state.currentSong !== song) return;
+            setAlbumCoverImage(imageUrl);
+            const shouldApplyImmediately = paletteCache.has(imageUrl) ||
+                (state.currentPaletteImage === imageUrl && state.dynamicPalette);
+            scheduleDeferredPaletteUpdate(imageUrl, { immediate: shouldApplyImmediately });
+        };
+        img.onerror = () => {
+            if (state.currentSong !== song) return;
+            cancelDeferredPaletteUpdate();
+            showAlbumCoverPlaceholder();
+        };
+        img.src = imageUrl;
+        return Promise.resolve();
+    }
+
     if (song.pic_id) {
         cancelDeferredPaletteUpdate();
         dom.albumCover.classList.add("loading");
@@ -2662,7 +2814,6 @@ async function playSearchResult(index) {
     try {
         // 立即隐藏搜索结果，显示播放界面
         hideSearchResults();
-        dom.searchInput.value = "";
         if (isMobileView) {
             closeMobileSearch();
         }
@@ -2872,9 +3023,12 @@ function waitForAudioReady(player) {
     if (player.readyState >= 1) {
         return Promise.resolve();
     }
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+        let timer = null;
         const cleanup = () => {
+            if (timer) clearTimeout(timer);
             player.removeEventListener('loadedmetadata', onLoaded);
+            player.removeEventListener('canplay', onLoaded);
             player.removeEventListener('error', onError);
         };
         const onLoaded = () => {
@@ -2883,9 +3037,14 @@ function waitForAudioReady(player) {
         };
         const onError = () => {
             cleanup();
-            reject(new Error('音频加载失败'));
+            resolve();
         };
+        timer = setTimeout(() => {
+            cleanup();
+            resolve();
+        }, 5000);
         player.addEventListener('loadedmetadata', onLoaded, { once: true });
+        player.addEventListener('canplay', onLoaded, { once: true });
         player.addEventListener('error', onError, { once: true });
     });
 }
@@ -3243,10 +3402,12 @@ function escapeLyricHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-function updateLyricsSyncBadge(type) {
-    const badgeText = type === 'word' ? '逐字对齐' : '仅行级';
-    const badgeClass = type === 'word' ? 'word-sync' : 'line-sync';
-    const icon = type === 'word' ? '<i class="fas fa-bolt"></i> ' : '<i class="fas fa-align-left"></i> ';
+function updateLyricsSyncBadge(type, sourceQuality) {
+    const isWord = type === 'word';
+    const isInterpolated = sourceQuality === 'interpolated';
+    const badgeText = isWord ? (isInterpolated ? '逐字平滑' : '逐字对齐') : '仅行级';
+    const badgeClass = isWord ? (isInterpolated ? 'word-sync approx-sync' : 'word-sync') : 'line-sync';
+    const icon = isWord ? '<i class="fas fa-bolt"></i> ' : '<i class="fas fa-align-left"></i> ';
 
     if (dom.lyrics) {
         let badge = dom.lyrics.querySelector('.lyrics-sync-badge');
@@ -3347,48 +3508,130 @@ async function loadLyrics(song) {
         if (state.currentSong === song && (!state.lyricsData || state.lyricsData.length === 0)) {
             setLyricsContentHtml("<div class=\"lyric-loading\">歌词加载中...</div>");
         }
-        const lyricUrl = API.getLyric(song);
-        debugLog(`获取歌词URL: ${lyricUrl}`);
 
-        const lyricData = await API.fetchJson(lyricUrl);
-        if (state.currentSong !== song) return;
+        // ── Sonic Lyrics Gateway 优先：AMLL 逐词 TTML → LRCLIB 行级兜底 ──
+        let sonicOk = false;
+        try {
+            const sonicUrl = API.getSonicLyric(song);
+            debugLog(`[Sonic] 请求逐字歌词: ${sonicUrl}`);
+            const sonicResp = await API.fetchJson(sonicUrl);
+            if (state.currentSong !== song) return;
 
-        if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
-            state.lyricSyncType = lyricData.syncType || (lyricData.lines.some(l => l.words && l.words.length > 1) ? 'word' : 'line');
-            state.lyricOffset = lyricData.offset || 0;
-            state.lyricsData = lyricData.lines.map((line, idx, arr) => {
-                const timeSec = typeof line.timeSec === 'number' ? line.timeSec : (line.time / 1000);
-                const timeMs = line.time;
-                const nextLine = arr[idx + 1];
-                const durMs = line.duration || (nextLine ? Math.max(500, nextLine.time - line.time) : 3500);
-                const words = (line.words && line.words.length > 0)
-                    ? line.words
-                    : interpolateWordTimestamps(line.text, timeMs, durMs);
+            if (sonicResp && sonicResp.brand === 'Sonic' && sonicResp.data) {
+                const sonicData = sonicResp.data;
+                const sonicMeta = sonicResp.meta || {};
 
-                return {
-                    time: timeSec,
-                    timeMs: timeMs,
-                    duration: durMs,
-                    durationSec: parseFloat((durMs / 1000).toFixed(3)),
-                    text: line.text,
-                    words: words,
-                };
-            }).sort((a, b) => a.time - b.time);
+                // 纯音乐优雅占位，不抛错，不破坏界面
+                if (sonicData.instrumental) {
+                    setLyricsContentHtml("<div class=\"lyric-instrumental\"><i class=\"fas fa-music\"></i> 纯音乐，请欣赏</div>");
+                    dom.lyrics.classList.remove("empty");
+                    dom.lyrics.dataset.placeholder = "default";
+                    state.lyricsData = [];
+                    state.currentLyricLine = -1;
+                    state.lyricSyncType = 'none';
+                    state.lyricSourceQuality = 'none';
+                    updateLyricsSyncBadge('');
+                    sonicOk = true;
+                    return;
+                }
 
-            dom.lyrics.classList.remove("empty");
-            dom.lyrics.dataset.placeholder = "default";
-            displayLyrics();
-        } else if (lyricData && lyricData.lyric) {
-            parseLyrics(lyricData.lyric);
-            dom.lyrics.classList.remove("empty");
-            dom.lyrics.dataset.placeholder = "default";
-        } else {
-            setLyricsContentHtml("<div>暂无歌词</div>");
-            dom.lyrics.classList.add("empty");
-            dom.lyrics.dataset.placeholder = "message";
-            state.lyricsData = [];
-            state.currentLyricLine = -1;
-            updateLyricsSyncBadge('');
+                if (sonicData.level !== 'none') {
+                    const syncedLines = sonicData.syncedLyrics;
+                    if (Array.isArray(syncedLines) && syncedLines.length > 0) {
+                        state.lyricSyncType = sonicData.level === 'word' ? 'word' : 'line';
+                        state.lyricSourceQuality = sonicData.sourceQuality || (sonicData.level === 'word' ? 'real' : 'none');
+                        state.lyricOffset = 0;
+                    state.lyricsData = syncedLines.map((line, idx, arr) => {
+                        const timeMs = line.startMs;
+                        const timeSec = timeMs / 1000;
+                        const durMs = line.durationMs || (arr[idx + 1] ? Math.max(500, arr[idx + 1].startMs - timeMs) : 3500);
+
+                        // Convert Sonic words (startMs/durationMs) → internal format (startSec/endSec)
+                        const words = (Array.isArray(line.words) && line.words.length > 0)
+                            ? line.words.map(w => {
+                                const wStartMs = w.startMs;
+                                const wDurMs = w.durationMs || 300;
+                                const wEndMs = wStartMs + wDurMs;
+                                return {
+                                    text: w.text,
+                                    start: wStartMs,
+                                    startSec: parseFloat((wStartMs / 1000).toFixed(3)),
+                                    end: wEndMs,
+                                    endSec: parseFloat((wEndMs / 1000).toFixed(3)),
+                                    duration: wDurMs,
+                                    durationSec: parseFloat((wDurMs / 1000).toFixed(3)),
+                                };
+                            })
+                            : interpolateWordTimestamps(line.text, timeMs, durMs);
+
+                        return {
+                            time: timeSec,
+                            timeMs: timeMs,
+                            duration: durMs,
+                            durationSec: parseFloat((durMs / 1000).toFixed(3)),
+                            text: line.text,
+                            words: words,
+                        };
+                    }).sort((a, b) => a.time - b.time);
+
+                    dom.lyrics.classList.remove("empty");
+                    dom.lyrics.dataset.placeholder = "default";
+                    displayLyrics();
+                    sonicOk = true;
+                    debugLog(`[Sonic] 逐字歌词加载成功: provider=${sonicMeta.provider}, level=${sonicData.level}, lines=${syncedLines.length}, quality=${sonicMeta.qualityScore}`);
+                }
+            }
+        }
+    } catch (sonicErr) {
+            debugLog(`[Sonic] 逐字歌词请求失败，降级到传统引擎: ${sonicErr.message}`);
+        }
+
+        // ── 若 Sonic 未命中，降级到传统多源引擎 ──
+        if (!sonicOk) {
+            if (state.currentSong !== song) return;
+            const lyricUrl = API.getLyric(song);
+            debugLog(`获取歌词URL: ${lyricUrl}`);
+
+            const lyricData = await API.fetchJson(lyricUrl);
+            if (state.currentSong !== song) return;
+
+            if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
+                state.lyricSyncType = lyricData.syncType || (lyricData.lines.some(l => l.words && l.words.length > 1) ? 'word' : 'line');
+                state.lyricOffset = lyricData.offset || 0;
+                state.lyricsData = lyricData.lines.map((line, idx, arr) => {
+                    const timeSec = typeof line.timeSec === 'number' ? line.timeSec : (line.time / 1000);
+                    const timeMs = line.time;
+                    const nextLine = arr[idx + 1];
+                    const durMs = line.duration || (nextLine ? Math.max(500, nextLine.time - line.time) : 3500);
+                    const words = (line.words && line.words.length > 0)
+                        ? line.words
+                        : interpolateWordTimestamps(line.text, timeMs, durMs);
+
+                    return {
+                        time: timeSec,
+                        timeMs: timeMs,
+                        duration: durMs,
+                        durationSec: parseFloat((durMs / 1000).toFixed(3)),
+                        text: line.text,
+                        words: words,
+                    };
+                }).sort((a, b) => a.time - b.time);
+
+                dom.lyrics.classList.remove("empty");
+                dom.lyrics.dataset.placeholder = "default";
+                displayLyrics();
+            } else if (lyricData && lyricData.lyric) {
+                parseLyrics(lyricData.lyric);
+                dom.lyrics.classList.remove("empty");
+                dom.lyrics.dataset.placeholder = "default";
+            } else {
+                setLyricsContentHtml("<div>暂无歌词</div>");
+                dom.lyrics.classList.add("empty");
+                dom.lyrics.dataset.placeholder = "message";
+                state.lyricsData = [];
+                state.currentLyricLine = -1;
+                updateLyricsSyncBadge('');
+            }
         }
     } catch (error) {
         if (state.currentSong !== song) return;
@@ -3467,7 +3710,12 @@ function displayLyrics() {
         const wordsHtml = words.map((w, wIdx) => {
             const sAttr = typeof w.startSec === 'number' ? ` data-start="${w.startSec}"` : '';
             const eAttr = typeof w.endSec === 'number' ? ` data-end="${w.endSec}"` : '';
-            return `<span class="word-char" data-windex="${wIdx}"${sAttr}${eAttr}>${escapeLyricHtml(w.text)}</span>`;
+            let rawText = w.text || '';
+            const nextWord = words[wIdx + 1];
+            if (nextWord && /[a-zA-Z0-9]$/.test(rawText) && /^[a-zA-Z0-9]/.test(nextWord.text || '') && !rawText.endsWith(' ')) {
+                rawText += ' ';
+            }
+            return `<span class="word-char" data-windex="${wIdx}"${sAttr}${eAttr}>${escapeLyricHtml(rawText)}</span>`;
         }).join("");
         return `<div data-time="${lyric.time}" data-index="${index}" class="lyric-line">${wordsHtml}</div>`;
     }).join("");
@@ -3476,7 +3724,7 @@ function displayLyrics() {
     if (dom.lyrics) {
         dom.lyrics.dataset.placeholder = "default";
     }
-    updateLyricsSyncBadge(state.lyricSyncType || 'word');
+    updateLyricsSyncBadge(state.lyricSyncType || 'word', state.lyricSourceQuality);
     attachLyricClickToSeek();
     state.currentLyricLine = -1;
     syncLyrics();

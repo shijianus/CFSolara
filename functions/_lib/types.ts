@@ -7,7 +7,24 @@ export interface AppEnv {
   SOLARA_SECRET?: string;
   KV?: any;
   DB?: any;
+  SONIC_UPSTREAM_GDSTUDIO?: string;
+  SONIC_UPSTREAM_AMLL?: string;
+  SONIC_UPSTREAM_LRCLIB?: string;
+  SONIC_UPSTREAM_METING?: string;
+  SONIC_ENABLE_NETEASE?: string;
+  SONIC_ENABLE_QQ?: string;
+  SONIC_ENABLE_KUGOU?: string;
+  SONIC_ENABLE_AMLL?: string;
+  SONIC_ENABLE_LRCLIB?: string;
+  SONIC_ENABLE_GDSTUDIO?: string;
+  SONIC_ENABLE_APPLE?: string;
+  SONIC_ENABLE_YTMUSIC?: string;
+  SONIC_APPLE_MUSIC_TOKEN?: string;
+  SONIC_YOUTUBE_API_KEY?: string;
+  SONIC_TIMEOUT_MS?: string;
+  [key: string]: any;
 }
+
 
 export interface SongItem {
   id: string;

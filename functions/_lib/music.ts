@@ -105,7 +105,7 @@ export function isMetadataLine(text: string, title?: string, artist?: string): b
   if (!text) return true;
   const trimmed = text.trim();
   if (
-    /^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|出品|文案|插画|封面|发行公司|出品人|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director)[\u4e00-\u9fa5a-zA-Z0-9\s.·]*[:：\/—–-]/i.test(
+    /^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|钢琴|小提琴|中提琴|大提琴|小提琴独奏|大提琴独奏|萨克斯|长笛|笛子|二胡|古筝|琵琶|打击乐|管乐|铜管|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|发行人|出品|出品人|出品公司|发行公司|版权|版权所有|特别支持|特别鸣谢|鸣谢|鸣谢单位|致谢|文案|插画|封面|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|营销|宣发|商务|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director|Special Thanks|Presented by|Published by)[\u4e00-\u9fa5a-zA-Z0-9\s.·()（）]*[:：\/—–-]/i.test(
       trimmed,
     )
   ) {
@@ -245,29 +245,50 @@ export function parseTtmlLyrics(xml: string, offsetMs = 0): LyricLine[] {
 
   while ((pMatch = pRegex.exec(xml)) !== null) {
     const pAttrs = pMatch[1];
-    const pContent = pMatch[2];
+    let pContent = pMatch[2];
 
     const beginMatch = pAttrs.match(/begin="([^"]+)"/i);
     const endMatch = pAttrs.match(/end="([^"]+)"/i);
     const pBeginMs = beginMatch ? parseTtmlTimestamp(beginMatch[1]) + offsetMs : 0;
     const pEndMs = endMatch ? parseTtmlTimestamp(endMatch[1]) + offsetMs : pBeginMs + 3000;
 
-    const spanRegex = /<span\b([^>]*)>([^<]*)<\/span>/gi;
+    // 1. 过滤翻译行与罗马音行 (ttm:role="x-translation" / "x-roman")
+    pContent = pContent.replace(/<span\b[^>]*ttm:role=["']x-(?:translation|roman)["'][^>]*>[\s\S]*?<\/span>/gi, '');
+
+    // 2. 解包外层背景伴唱容器 (ttm:role="x-bg")，让内部嵌套的子 span 成为一级发音单元
+    pContent = pContent.replace(/<span\b[^>]*ttm:role=["']x-bg["'][^>]*>/gi, '');
+
+    // 3. 匹配有效字级 span，同时捕获 span 之间的空白字符
+    const spanRegex = /<span\b([^>]*)>([\s\S]*?)<\/span>([\t ]*)/gi;
     let spanMatch: RegExpExecArray | null;
     const words: LyricWord[] = [];
-    let lineText = '';
+    const validSpanTexts: string[] = [];
 
     while ((spanMatch = spanRegex.exec(pContent)) !== null) {
       const spanAttrs = spanMatch[1];
-      const spanText = spanMatch[2].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+      const rawText = spanMatch[2].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+      const trailingSpace = spanMatch[3] || '';
+
       const sBeginMatch = spanAttrs.match(/begin="([^"]+)"/i);
       const sEndMatch = spanAttrs.match(/end="([^"]+)"/i);
-      const sBeginMs = sBeginMatch ? parseTtmlTimestamp(sBeginMatch[1]) + offsetMs : pBeginMs;
+
+      if (!sBeginMatch) {
+        // 无时间戳的杂项 span，不作为字级发音词
+        continue;
+      }
+
+      const sBeginMs = parseTtmlTimestamp(sBeginMatch[1]) + offsetMs;
       const sEndMs = sEndMatch ? parseTtmlTimestamp(sEndMatch[1]) + offsetMs : sBeginMs + 300;
       const durMs = Math.max(0, sEndMs - sBeginMs);
 
+      // 若 span 之后有空格，或者为西方语言单词且需要空格间隔，保留尾随空格
+      let wordText = rawText;
+      if (trailingSpace.length > 0 && !wordText.endsWith(' ')) {
+        wordText += ' ';
+      }
+
       words.push({
-        text: spanText,
+        text: wordText,
         start: sBeginMs,
         startSec: parseFloat((sBeginMs / 1000).toFixed(3)),
         end: sEndMs,
@@ -275,15 +296,22 @@ export function parseTtmlLyrics(xml: string, offsetMs = 0): LyricLine[] {
         duration: durMs,
         durationSec: parseFloat((durMs / 1000).toFixed(3)),
       });
-      lineText += spanText;
+      validSpanTexts.push(wordText);
     }
 
-    const cleanText = lineText.trim() || pContent.replace(/<[^>]+>/g, '').trim();
+    // 纯文本正文：优先由合法字级 words 拼接，无 words 时清洗剩余纯标签
+    const cleanText = validSpanTexts.length > 0
+      ? validSpanTexts.join('').trim()
+      : pContent.replace(/<[^>]+>/g, '').trim();
+
     if (!cleanText || isMetadataLine(cleanText)) continue;
 
     const lineStartMs = words.length > 0 ? words[0].start : pBeginMs;
-    const lineEndMs = words.length > 0 ? words[words.length - 1].end : pEndMs;
-    const lineDurMs = Math.max(300, lineEndMs - lineStartMs);
+    // 确保整行持续时长完全覆盖到 pEndMs 或最后一个字发音结束，杜绝 300ms 闪退
+    const lineEndMs = words.length > 0
+      ? Math.max(pEndMs, words[words.length - 1].end)
+      : pEndMs;
+    const lineDurMs = Math.max(500, lineEndMs - lineStartMs);
 
     lines.push({
       time: lineStartMs,
@@ -677,26 +705,42 @@ export function interpolateWordTimestamps(lineText: string, lineStartMs: number,
   const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
   if (!clean) return [];
 
-  const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[\s\p{P}]+)/gu;
+  // 匹配汉字/日韩假名音节、英文/拉丁单词、或标点符号
+  const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[^\s\w\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]+|\s+)/gu;
   let match: RegExpExecArray | null;
-  const rawTokens: string[] = [];
+  const rawSegments: string[] = [];
   while ((match = regex.exec(clean)) !== null) {
-    rawTokens.push(match[1]);
+    rawSegments.push(match[1]);
   }
-  if (rawTokens.length === 0) rawTokens.push(clean);
+  if (rawSegments.length === 0) rawSegments.push(clean);
+
+  // 将纯标点与尾随空格智能合并至前一个发音词块，形成自然演唱单元
+  const mergedTokens: string[] = [];
+  for (const seg of rawSegments) {
+    if (/^[\s\p{P}]+$/u.test(seg) && mergedTokens.length > 0) {
+      mergedTokens[mergedTokens.length - 1] += seg;
+    } else {
+      mergedTokens.push(seg);
+    }
+  }
+
+  const rawTokens = mergedTokens.length > 0 ? mergedTokens : rawSegments;
 
   let totalWeight = 0;
   const tokenWeights = rawTokens.map((tok, idx) => {
-    if (/^[\s\p{P}]+$/u.test(tok)) {
-      return 0.15;
-    }
-    if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]$/u.test(tok)) {
+    const trimmed = tok.trim();
+    if (!trimmed) return 0.2;
+    // CJK 单字/音节
+    if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/.test(trimmed)) {
       return idx === rawTokens.length - 1 ? 1.35 : 1.0;
     }
-    return Math.max(1.0, tok.length * 0.35);
+    // 西方语言多字母单词加权
+    const coreLen = trimmed.replace(/[\p{P}\s]/gu, '').length;
+    return Math.max(1.0, coreLen * 0.35);
   });
   totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
 
+  // 保留句尾呼吸间隙
   const vocalDurationMs = Math.max(300, lineDurationMs - Math.min(250, lineDurationMs * 0.08));
   let currentStart = lineStartMs;
   const tokens: LyricWord[] = [];
@@ -755,7 +799,7 @@ export function hasWordSyncTags(raw: string): boolean {
   return false;
 }
 
-async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
+export async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
   try {
     const url = `https://music.163.com/api/song/lyric/v1?id=${encodeURIComponent(id)}&cp=false&tv=0&lv=0&rv=0&kv=0&yv=-1&ytv=0&yrv=0`;
     const resp = await fetch(url, {
@@ -777,7 +821,7 @@ async function fetchDirectNetEaseLyrics(id: string): Promise<string> {
   return '';
 }
 
-async function fetchDirectQQLyrics(songmid: string): Promise<string> {
+export async function fetchDirectQQLyrics(songmid: string): Promise<string> {
   try {
     const url = `https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=${encodeURIComponent(songmid)}&format=json&nobase64=1`;
     const resp = await fetch(url, {
@@ -1076,11 +1120,15 @@ async function crawlKugouBySearch(
           score -= 120;
         }
 
-        // 3. 歌手匹配权重
+        // 3. 歌手匹配权重与严密防线
         if (targetArtist) {
-          const normArtist = targetArtist.toLowerCase().split(/[\/,]/)[0].trim();
-          if (normArtist && c.singer.toLowerCase().includes(normArtist)) {
-            score += 40;
+          const normTarget = targetArtist.toLowerCase().split(/[\/,]/)[0].trim();
+          const normSinger = c.singer.toLowerCase().trim();
+          if (normTarget && (normSinger.includes(normTarget) || normTarget.includes(normSinger))) {
+            score += 60;
+          } else if (normTarget.length >= 2) {
+            // 歌手完全不匹配，严厉惩罚翻唱与张冠李戴填词，杜绝纯音乐被李代桃僵
+            score -= 150;
           }
         }
 
@@ -1291,16 +1339,27 @@ async function crawlMusixmatchBySearch(
     const macro = subData?.message?.body?.macro_calls;
     const trackInfo = macro?.['matcher.track.get']?.message?.body?.track;
     const subtitleBody = macro?.['track.subtitles.get']?.message?.body?.subtitle_list?.[0]?.subtitle?.subtitle_body;
-    if (subtitleBody && isValidLyric(subtitleBody)) {
+    if (subtitleBody && isValidLyric(subtitleBody) && trackInfo?.track_name) {
+      const cleanTarget = title.toLowerCase().replace(/[\s\-_—·.,!?'"()[\]{}<>《》「」【】]/g, '');
+      const cleanFound = String(trackInfo.track_name).toLowerCase().replace(/[\s\-_—·.,!?'"()[\]{}<>《》「」【】]/g, '');
+      const isMatch =
+        cleanTarget.length >= 2 &&
+        (cleanTarget.includes(cleanFound) ||
+          cleanFound.includes(cleanTarget) ||
+          (cleanTarget.length >= 3 && cleanFound.slice(0, 3) === cleanTarget.slice(0, 3)));
+      if (!isMatch) {
+        return null;
+      }
       return {
         raw: subtitleBody,
-        id: String(trackInfo?.track_id || ''),
-        title: trackInfo?.track_name || title,
-        artist: trackInfo?.artist_name || artist || '',
+        id: String(trackInfo.track_id || ''),
+        title: trackInfo.track_name,
+        artist: trackInfo.artist_name || artist || '',
       };
     }
   } catch {}
   return null;
+
 }
 
 function formatLrcTimestamp(ms: number): string {
