@@ -378,11 +378,22 @@ export async function resolveNexusLyrics(
     for (const line of interpolatedFallback.data.syncedLyrics) {
       if (!line.words || line.words.length === 0) {
         const words = interpolateWordTimestamps(line.text, line.startMs, line.durationMs || 3000);
-        line.words = words.map((w) => ({
-          text: w.text,
-          startMs: w.start,
-          durationMs: w.duration,
-        }));
+        line.words = words.map((w) => {
+          const wStart = typeof w.start === 'number' ? w.start : line.startMs;
+          const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
+          const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+          return {
+            text: w.text,
+            startMs: wStart,
+            durationMs: wDur,
+            start: wStart,
+            startSec: parseFloat((wStart / 1000).toFixed(3)),
+            end: wEnd,
+            endSec: parseFloat((wEnd / 1000).toFixed(3)),
+            duration: wDur,
+            durationSec: parseFloat((wDur / 1000).toFixed(3)),
+          };
+        });
       }
     }
     interpolatedFallback.data.level = 'word';

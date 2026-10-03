@@ -34,6 +34,12 @@ export interface SonicWord {
   text: string;
   startMs: number;
   durationMs: number;
+  start?: number;
+  startSec?: number;
+  end?: number;
+  endSec?: number;
+  duration?: number;
+  durationSec?: number;
 }
 
 export interface SonicSyncedLine {

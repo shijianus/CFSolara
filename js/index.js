@@ -2354,6 +2354,8 @@ function setupInteractions() {
         if (restoredSong) {
             state.currentSong = restoredSong;
             updatePlaylistHighlight();
+            preloadLyrics(restoredSong);
+            scheduleAdjacentPreload(restoredSong);
             updateCurrentSongInfo(restoredSong).catch(error => {
                 console.error("恢复歌曲信息失败:", error);
             });
@@ -2598,6 +2600,9 @@ function createSearchResultItem(song, index) {
     const item = document.createElement("div");
     item.className = "search-result-item";
     item.dataset.index = String(index);
+    item.addEventListener("pointerenter", () => {
+        preloadLyrics(song);
+    }, { once: true, passive: true });
 
     const info = document.createElement("div");
     info.className = "search-result-info";
@@ -2717,6 +2722,12 @@ function displaySearchResults(newItems, options = {}) {
         });
         container.appendChild(fragment);
         state.renderedSearchCount += itemsToAppend.length;
+
+        if (startIndex === 0 && itemsToAppend.length > 0) {
+            itemsToAppend.slice(0, 3).forEach((s, sIdx) => {
+                setTimeout(() => preloadLyrics(s), (sIdx + 1) * 200);
+            });
+        }
     }
 
     if (state.hasMoreResults) {
@@ -2873,6 +2884,19 @@ function renderPlaylist() {
     ).join("");
 
     dom.playlistItems.innerHTML = playlistHtml;
+
+    if (!dom.playlistItems._hasPreloadListener) {
+        dom.playlistItems.addEventListener("pointerover", (event) => {
+            const item = event.target.closest(".playlist-item");
+            if (!item) return;
+            const idx = Number(item.dataset.index);
+            if (!Number.isNaN(idx) && state.playlistSongs[idx]) {
+                preloadLyrics(state.playlistSongs[idx]);
+            }
+        }, { passive: true });
+        dom.playlistItems._hasPreloadListener = true;
+    }
+
     savePlayerState();
     updatePlaylistHighlight();
     updateMobileClearPlaylistVisibility();
@@ -3490,10 +3514,13 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
         tokens.push({
             text: tok,
             start: currentStart,
+            startMs: currentStart,
             startSec: parseFloat((currentStart / 1000).toFixed(3)),
             end: tokEnd,
+            endMs: tokEnd,
             endSec: parseFloat((tokEnd / 1000).toFixed(3)),
             duration: tokDur,
+            durationMs: tokDur,
             durationSec: parseFloat((tokDur / 1000).toFixed(3)),
         });
         currentStart = tokEnd;
@@ -3501,112 +3528,196 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
     return tokens;
 }
 
-// 加载歌词 - 100% 逐字卡拉OK与行级兜底保障体系
-async function loadLyrics(song) {
-    if (!song) return;
-    try {
-        if (state.currentSong === song && (!state.lyricsData || state.lyricsData.length === 0)) {
-            setLyricsContentHtml("<div class=\"lyric-loading\">歌词加载中...</div>");
-        }
+// ==========================================
+// 歌词智能预加载与高性能多级内存缓存管理器
+// ==========================================
+const lyricsCache = new Map();
+const lyricsPreloadPending = new Map();
+const MAX_LYRICS_CACHE = 60;
 
-        // ── Sonic Lyrics Gateway 优先：AMLL 逐词 TTML → LRCLIB 行级兜底 ──
-        let sonicOk = false;
+function getLyricCacheKey(song) {
+    if (!song) return '';
+    const id = song.id !== undefined && song.id !== null ? String(song.id) : '';
+    const source = song.source || 'netease';
+    const name = String(song.name || song.title || '').trim().toLowerCase();
+    const artist = Array.isArray(song.artist) ? song.artist.join('/') : String(song.artist || '').trim().toLowerCase();
+    return `${source}:${id}:${name}:${artist}`;
+}
+
+function setLyricsCache(key, payload) {
+    if (!key || !payload) return;
+    if (lyricsCache.size >= MAX_LYRICS_CACHE) {
+        const oldestKey = lyricsCache.keys().next().value;
+        lyricsCache.delete(oldestKey);
+    }
+    lyricsCache.set(key, payload);
+}
+
+function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
+    if (!w) return null;
+    let startMs = Number.isFinite(w.startMs) ? w.startMs :
+                  Number.isFinite(w.start) ? w.start :
+                  Number.isFinite(w.startSec) ? Math.round(w.startSec * 1000) : lineStartMs;
+
+    let durMs = (Number.isFinite(w.durationMs) && w.durationMs > 0) ? w.durationMs :
+                (Number.isFinite(w.duration) && w.duration > 0) ? w.duration :
+                (Number.isFinite(w.durationSec) && w.durationSec > 0) ? Math.round(w.durationSec * 1000) :
+                (Number.isFinite(w.end) && w.end > startMs) ? (w.end - startMs) :
+                (Number.isFinite(w.endSec) && w.endSec * 1000 > startMs) ? Math.round(w.endSec * 1000 - startMs) : fallbackDurMs;
+
+    if (!Number.isFinite(startMs)) startMs = lineStartMs || 0;
+    if (!Number.isFinite(durMs) || durMs <= 0) durMs = 300;
+
+    const endMs = startMs + durMs;
+    const startSec = parseFloat((startMs / 1000).toFixed(3));
+    const endSec = parseFloat((endMs / 1000).toFixed(3));
+    const durationSec = parseFloat((durMs / 1000).toFixed(3));
+
+    return {
+        text: String(w.text || ''),
+        startMs,
+        start: startMs,
+        startSec,
+        durationMs: durMs,
+        duration: durMs,
+        durationSec,
+        endMs,
+        end: endMs,
+        endSec,
+    };
+}
+
+function parseSonicLyricsResponse(sonicData, sonicMeta = {}) {
+    if (sonicData.instrumental) {
+        return {
+            type: 'instrumental',
+            lyricsData: [],
+            lyricSyncType: 'none',
+            lyricSourceQuality: 'none',
+        };
+    }
+
+    if (sonicData.level !== 'none' && Array.isArray(sonicData.syncedLyrics) && sonicData.syncedLyrics.length > 0) {
+        const syncedLines = sonicData.syncedLyrics;
+        const lyricSyncType = sonicData.level === 'word' ? 'word' : 'line';
+        const lyricSourceQuality = sonicData.sourceQuality || (sonicData.level === 'word' ? 'real' : 'none');
+
+        const lyricsData = syncedLines.map((line, idx, arr) => {
+            const timeMs = Number.isFinite(line.startMs) ? line.startMs : (Number.isFinite(line.time) ? line.time : 0);
+            const timeSec = parseFloat((timeMs / 1000).toFixed(3));
+            const nextLine = arr[idx + 1];
+            const nextStartMs = nextLine ? (Number.isFinite(nextLine.startMs) ? nextLine.startMs : nextLine.time) : null;
+            const durMs = (Number.isFinite(line.durationMs) && line.durationMs > 0) ? line.durationMs :
+                          (Number.isFinite(nextStartMs) ? Math.max(500, nextStartMs - timeMs) : 3500);
+
+            const rawWords = (Array.isArray(line.words) && line.words.length > 0)
+                ? line.words
+                : interpolateWordTimestamps(line.text || '', timeMs, durMs);
+
+            const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, timeMs + wIdx * 250, 300)).filter(Boolean);
+
+            return {
+                time: timeSec,
+                timeMs: timeMs,
+                duration: durMs,
+                durationSec: parseFloat((durMs / 1000).toFixed(3)),
+                text: String(line.text || ''),
+                words: words,
+            };
+        }).sort((a, b) => a.time - b.time);
+
+        return {
+            type: 'synced',
+            lyricsData,
+            lyricSyncType,
+            lyricSourceQuality,
+            provider: sonicMeta.provider || sonicData.provider,
+            quality: sonicMeta.qualityScore,
+        };
+    }
+    return null;
+}
+
+function applyLyricsPayload(payload, song) {
+    if (state.currentSong !== song) return;
+
+    if (payload.type === 'instrumental') {
+        setLyricsContentHtml("<div class=\"lyric-instrumental\"><i class=\"fas fa-music\"></i> 纯音乐，请欣赏</div>");
+        dom.lyrics.classList.remove("empty");
+        dom.lyrics.dataset.placeholder = "default";
+        state.lyricsData = [];
+        state.currentLyricLine = -1;
+        state.lyricSyncType = 'none';
+        state.lyricSourceQuality = 'none';
+        updateLyricsSyncBadge('');
+        return;
+    }
+
+    if (payload.type === 'synced' && payload.lyricsData && payload.lyricsData.length > 0) {
+        state.lyricsData = payload.lyricsData;
+        state.lyricSyncType = payload.lyricSyncType || 'word';
+        state.lyricSourceQuality = payload.lyricSourceQuality || 'real';
+        state.lyricOffset = 0;
+        dom.lyrics.classList.remove("empty");
+        dom.lyrics.dataset.placeholder = "default";
+        displayLyrics();
+        debugLog(`[Lyrics] 应用${payload.provider ? `(${payload.provider})` : ''}逐字歌词: 行数=${payload.lyricsData.length}, 类型=${state.lyricSyncType}`);
+        return;
+    }
+
+    if (payload.type === 'plain' && payload.raw) {
+        parseLyrics(payload.raw);
+        dom.lyrics.classList.remove("empty");
+        dom.lyrics.dataset.placeholder = "default";
+        return;
+    }
+
+    setLyricsContentHtml("<div>暂无歌词</div>");
+    dom.lyrics.classList.add("empty");
+    dom.lyrics.dataset.placeholder = "message";
+    state.lyricsData = [];
+    state.currentLyricLine = -1;
+    updateLyricsSyncBadge('');
+}
+
+// 异步静默预加载歌曲歌词（多级缓存）
+async function preloadLyrics(song) {
+    if (!song) return null;
+    const key = getLyricCacheKey(song);
+    if (!key) return null;
+    if (lyricsCache.has(key)) return lyricsCache.get(key);
+    if (lyricsPreloadPending.has(key)) return lyricsPreloadPending.get(key);
+
+    const promise = (async () => {
         try {
             const sonicUrl = API.getSonicLyric(song);
-            debugLog(`[Sonic] 请求逐字歌词: ${sonicUrl}`);
             const sonicResp = await API.fetchJson(sonicUrl);
-            if (state.currentSong !== song) return;
-
             if (sonicResp && sonicResp.brand === 'Sonic' && sonicResp.data) {
-                const sonicData = sonicResp.data;
-                const sonicMeta = sonicResp.meta || {};
-
-                // 纯音乐优雅占位，不抛错，不破坏界面
-                if (sonicData.instrumental) {
-                    setLyricsContentHtml("<div class=\"lyric-instrumental\"><i class=\"fas fa-music\"></i> 纯音乐，请欣赏</div>");
-                    dom.lyrics.classList.remove("empty");
-                    dom.lyrics.dataset.placeholder = "default";
-                    state.lyricsData = [];
-                    state.currentLyricLine = -1;
-                    state.lyricSyncType = 'none';
-                    state.lyricSourceQuality = 'none';
-                    updateLyricsSyncBadge('');
-                    sonicOk = true;
-                    return;
-                }
-
-                if (sonicData.level !== 'none') {
-                    const syncedLines = sonicData.syncedLyrics;
-                    if (Array.isArray(syncedLines) && syncedLines.length > 0) {
-                        state.lyricSyncType = sonicData.level === 'word' ? 'word' : 'line';
-                        state.lyricSourceQuality = sonicData.sourceQuality || (sonicData.level === 'word' ? 'real' : 'none');
-                        state.lyricOffset = 0;
-                    state.lyricsData = syncedLines.map((line, idx, arr) => {
-                        const timeMs = line.startMs;
-                        const timeSec = timeMs / 1000;
-                        const durMs = line.durationMs || (arr[idx + 1] ? Math.max(500, arr[idx + 1].startMs - timeMs) : 3500);
-
-                        // Convert Sonic words (startMs/durationMs) → internal format (startSec/endSec)
-                        const words = (Array.isArray(line.words) && line.words.length > 0)
-                            ? line.words.map(w => {
-                                const wStartMs = w.startMs;
-                                const wDurMs = w.durationMs || 300;
-                                const wEndMs = wStartMs + wDurMs;
-                                return {
-                                    text: w.text,
-                                    start: wStartMs,
-                                    startSec: parseFloat((wStartMs / 1000).toFixed(3)),
-                                    end: wEndMs,
-                                    endSec: parseFloat((wEndMs / 1000).toFixed(3)),
-                                    duration: wDurMs,
-                                    durationSec: parseFloat((wDurMs / 1000).toFixed(3)),
-                                };
-                            })
-                            : interpolateWordTimestamps(line.text, timeMs, durMs);
-
-                        return {
-                            time: timeSec,
-                            timeMs: timeMs,
-                            duration: durMs,
-                            durationSec: parseFloat((durMs / 1000).toFixed(3)),
-                            text: line.text,
-                            words: words,
-                        };
-                    }).sort((a, b) => a.time - b.time);
-
-                    dom.lyrics.classList.remove("empty");
-                    dom.lyrics.dataset.placeholder = "default";
-                    displayLyrics();
-                    sonicOk = true;
-                    debugLog(`[Sonic] 逐字歌词加载成功: provider=${sonicMeta.provider}, level=${sonicData.level}, lines=${syncedLines.length}, quality=${sonicMeta.qualityScore}`);
+                const parsed = parseSonicLyricsResponse(sonicResp.data, sonicResp.meta || {});
+                if (parsed) {
+                    setLyricsCache(key, parsed);
+                    debugLog(`[Preload] 成功预加载逐字歌词: ${song.name || song.title}`);
+                    return parsed;
                 }
             }
-        }
-    } catch (sonicErr) {
-            debugLog(`[Sonic] 逐字歌词请求失败，降级到传统引擎: ${sonicErr.message}`);
+        } catch (e) {
+            debugLog(`[Preload] Sonic预加载失败: ${e.message}`);
         }
 
-        // ── 若 Sonic 未命中，降级到传统多源引擎 ──
-        if (!sonicOk) {
-            if (state.currentSong !== song) return;
+        try {
             const lyricUrl = API.getLyric(song);
-            debugLog(`获取歌词URL: ${lyricUrl}`);
-
             const lyricData = await API.fetchJson(lyricUrl);
-            if (state.currentSong !== song) return;
-
             if (lyricData && lyricData.ok && Array.isArray(lyricData.lines) && lyricData.lines.length > 0) {
-                state.lyricSyncType = lyricData.syncType || (lyricData.lines.some(l => l.words && l.words.length > 1) ? 'word' : 'line');
-                state.lyricOffset = lyricData.offset || 0;
-                state.lyricsData = lyricData.lines.map((line, idx, arr) => {
-                    const timeSec = typeof line.timeSec === 'number' ? line.timeSec : (line.time / 1000);
-                    const timeMs = line.time;
+                const lyricsData = lyricData.lines.map((line, idx, arr) => {
+                    const timeMs = Number.isFinite(line.time) ? line.time : Math.round((line.timeSec || 0) * 1000);
+                    const timeSec = parseFloat((timeMs / 1000).toFixed(3));
                     const nextLine = arr[idx + 1];
-                    const durMs = line.duration || (nextLine ? Math.max(500, nextLine.time - line.time) : 3500);
-                    const words = (line.words && line.words.length > 0)
+                    const nextMs = nextLine ? (Number.isFinite(nextLine.time) ? nextLine.time : Math.round((nextLine.timeSec || 0) * 1000)) : null;
+                    const durMs = line.duration || (nextMs ? Math.max(500, nextMs - timeMs) : 3500);
+                    const rawWords = (line.words && line.words.length > 0)
                         ? line.words
                         : interpolateWordTimestamps(line.text, timeMs, durMs);
-
+                    const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, timeMs + wIdx * 250, 300)).filter(Boolean);
                     return {
                         time: timeSec,
                         timeMs: timeMs,
@@ -3617,13 +3728,90 @@ async function loadLyrics(song) {
                     };
                 }).sort((a, b) => a.time - b.time);
 
-                dom.lyrics.classList.remove("empty");
-                dom.lyrics.dataset.placeholder = "default";
-                displayLyrics();
+                const parsed = {
+                    type: 'synced',
+                    lyricsData,
+                    lyricSyncType: lyricData.syncType || (lyricData.lines.some(l => l.words && l.words.length > 1) ? 'word' : 'line'),
+                    lyricSourceQuality: 'real',
+                    provider: 'fallback',
+                };
+                setLyricsCache(key, parsed);
+                return parsed;
             } else if (lyricData && lyricData.lyric) {
-                parseLyrics(lyricData.lyric);
-                dom.lyrics.classList.remove("empty");
-                dom.lyrics.dataset.placeholder = "default";
+                const parsed = { type: 'plain', raw: lyricData.lyric };
+                setLyricsCache(key, parsed);
+                return parsed;
+            }
+        } catch (e) {}
+
+        const emptyPayload = { type: 'empty' };
+        setLyricsCache(key, emptyPayload);
+        return emptyPayload;
+    })().finally(() => {
+        lyricsPreloadPending.delete(key);
+    });
+
+    lyricsPreloadPending.set(key, promise);
+    return promise;
+}
+
+// 调度播放列表中相邻歌曲的自动后台预加载
+function scheduleAdjacentPreload(currentSong) {
+    if (!currentSong || !Array.isArray(state.playlistSongs) || state.playlistSongs.length <= 1) return;
+    const curIdx = state.playlistSongs.findIndex(s => s.id === currentSong.id && s.source === currentSong.source);
+    if (curIdx === -1) return;
+
+    const nextIdx = (curIdx + 1) % state.playlistSongs.length;
+    const prevIdx = (curIdx - 1 + state.playlistSongs.length) % state.playlistSongs.length;
+
+    const nextSong = state.playlistSongs[nextIdx];
+    if (nextSong && nextSong !== currentSong) {
+        setTimeout(() => preloadLyrics(nextSong), 60);
+    }
+    const prevSong = state.playlistSongs[prevIdx];
+    if (prevSong && prevSong !== currentSong && prevSong !== nextSong) {
+        setTimeout(() => preloadLyrics(prevSong), 400);
+    }
+}
+
+// 加载歌词 - 内存秒开预加载 + 100% 逐字卡拉OK与行级兜底保障体系
+async function loadLyrics(song) {
+    if (!song) return;
+    const key = getLyricCacheKey(song);
+
+    // 1. 命中内存预加载缓存 -> 零延迟秒开
+    if (key && lyricsCache.has(key)) {
+        const cached = lyricsCache.get(key);
+        debugLog(`[Lyrics] 命中预加载缓存: ${song.name || song.title}`);
+        applyLyricsPayload(cached, song);
+        scheduleAdjacentPreload(song);
+        return;
+    }
+
+    // 2. 若正在后台预加载中 -> 优雅等待已有 Promise
+    if (key && lyricsPreloadPending.has(key)) {
+        if (state.currentSong === song && (!state.lyricsData || state.lyricsData.length === 0)) {
+            setLyricsContentHtml("<div class=\"lyric-loading\">歌词加载中...</div>");
+        }
+        try {
+            const res = await lyricsPreloadPending.get(key);
+            if (state.currentSong === song && res) {
+                applyLyricsPayload(res, song);
+                scheduleAdjacentPreload(song);
+                return;
+            }
+        } catch (e) {}
+    }
+
+    // 3. 实时从网络拉取并预填充相邻歌曲
+    try {
+        if (state.currentSong === song && (!state.lyricsData || state.lyricsData.length === 0)) {
+            setLyricsContentHtml("<div class=\"lyric-loading\">歌词加载中...</div>");
+        }
+        const res = await preloadLyrics(song);
+        if (state.currentSong === song) {
+            if (res) {
+                applyLyricsPayload(res, song);
             } else {
                 setLyricsContentHtml("<div>暂无歌词</div>");
                 dom.lyrics.classList.add("empty");
@@ -3633,6 +3821,7 @@ async function loadLyrics(song) {
                 updateLyricsSyncBadge('');
             }
         }
+        scheduleAdjacentPreload(song);
     } catch (error) {
         if (state.currentSong !== song) return;
         console.error("加载歌词失败:", error);
@@ -3708,8 +3897,8 @@ function displayLyrics() {
     const lyricsHtml = state.lyricsData.map((lyric, index) => {
         const words = (lyric.words && lyric.words.length > 0) ? lyric.words : [{ text: lyric.text, startSec: lyric.time, endSec: lyric.time + (lyric.durationSec || 3) }];
         const wordsHtml = words.map((w, wIdx) => {
-            const sAttr = typeof w.startSec === 'number' ? ` data-start="${w.startSec}"` : '';
-            const eAttr = typeof w.endSec === 'number' ? ` data-end="${w.endSec}"` : '';
+            const sAttr = Number.isFinite(w.startSec) ? ` data-start="${w.startSec}"` : '';
+            const eAttr = Number.isFinite(w.endSec) ? ` data-end="${w.endSec}"` : '';
             let rawText = w.text || '';
             const nextWord = words[wIdx + 1];
             if (nextWord && /[a-zA-Z0-9]$/.test(rawText) && /^[a-zA-Z0-9]/.test(nextWord.text || '') && !rawText.endsWith(' ')) {
@@ -3780,12 +3969,14 @@ function syncLyrics(timeOverride) {
                 if (index < currentIndex) {
                     element.querySelectorAll(".word-char").forEach(c => {
                         c.style.setProperty('--fill', '100%');
+                        c.style.backgroundImage = '';
                         c.classList.add("word-sung");
                         c.classList.remove("word-singing");
                     });
                 } else if (index > currentIndex) {
                     element.querySelectorAll(".word-char").forEach(c => {
                         c.style.setProperty('--fill', '0%');
+                        c.style.backgroundImage = '';
                         c.classList.remove("word-sung", "word-singing");
                     });
                 }
@@ -3806,8 +3997,8 @@ function syncLyrics(timeOverride) {
             let activeWordIdx = -1;
             for (let wIdx = 0; wIdx < curLine.words.length; wIdx++) {
                 const w = curLine.words[wIdx];
-                const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
-                const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
+                const start = Number.isFinite(w.startSec) ? w.startSec : (Number.isFinite(w.startMs) ? w.startMs / 1000 : 0);
+                const end = Number.isFinite(w.endSec) ? w.endSec : (Number.isFinite(w.endMs) ? w.endMs / 1000 : (start + 0.3));
                 if (currentTime >= start && currentTime < end) {
                     activeWordIdx = wIdx;
                     break;
@@ -3820,32 +4011,38 @@ function syncLyrics(timeOverride) {
                     const charSpan = charSpans[wIdx];
                     if (!charSpan) continue;
                     const w = curLine.words[wIdx];
-                    const start = typeof w.startSec === 'number' ? w.startSec : (w.start / 1000);
-                    const end = typeof w.endSec === 'number' ? w.endSec : (w.end / 1000);
+                    const start = Number.isFinite(w.startSec) ? w.startSec : (Number.isFinite(w.startMs) ? w.startMs / 1000 : 0);
+                    const end = Number.isFinite(w.endSec) ? w.endSec : (Number.isFinite(w.endMs) ? w.endMs / 1000 : (start + 0.3));
 
                     if (activeWordIdx !== -1) {
                         if (wIdx < activeWordIdx) {
                             charSpan.style.setProperty('--fill', '100%');
+                            charSpan.style.backgroundImage = '';
                             charSpan.classList.add("word-sung");
                             charSpan.classList.remove("word-singing");
                         } else if (wIdx === activeWordIdx) {
                             const dur = Math.max(0.04, end - start);
                             const pct = Math.min(100, Math.max(0, ((currentTime - start) / dur) * 100));
-                            charSpan.style.setProperty('--fill', `${pct.toFixed(1)}%`);
+                            const pctStr = `${pct.toFixed(1)}%`;
+                            charSpan.style.setProperty('--fill', pctStr);
+                            charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 100%)`;
                             charSpan.classList.add("word-singing");
                             charSpan.classList.remove("word-sung");
                         } else {
                             charSpan.style.setProperty('--fill', '0%');
+                            charSpan.style.backgroundImage = '';
                             charSpan.classList.remove("word-sung", "word-singing");
                         }
                     } else {
                         // 当前时间处于词间间隙或尚未发音/发音已完毕
                         if (currentTime >= end) {
                             charSpan.style.setProperty('--fill', '100%');
+                            charSpan.style.backgroundImage = '';
                             charSpan.classList.add("word-sung");
                             charSpan.classList.remove("word-singing");
                         } else {
                             charSpan.style.setProperty('--fill', '0%');
+                            charSpan.style.backgroundImage = '';
                             charSpan.classList.remove("word-sung", "word-singing");
                         }
                     }

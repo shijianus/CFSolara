@@ -9,12 +9,33 @@ export function internalLinesToSonicLines(lines: LyricLine[]): SonicSyncedLine[]
     const durationMs = line.duration || 3000;
     const words: SonicWord[] =
       line.words && line.words.length > 0
-        ? line.words.map((w) => ({
-            text: w.text,
-            startMs: w.start,
-            durationMs: w.duration,
-          }))
-        : [{ text: line.text, startMs, durationMs }];
+        ? line.words.map((w) => {
+            const wStart = typeof w.start === 'number' ? w.start : (typeof (w as any).startMs === 'number' ? (w as any).startMs : startMs);
+            const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : (typeof (w as any).durationMs === 'number' && (w as any).durationMs > 0 ? (w as any).durationMs : 300);
+            const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+            return {
+              text: w.text,
+              startMs: wStart,
+              durationMs: wDur,
+              start: wStart,
+              startSec: parseFloat((wStart / 1000).toFixed(3)),
+              end: wEnd,
+              endSec: parseFloat((wEnd / 1000).toFixed(3)),
+              duration: wDur,
+              durationSec: parseFloat((wDur / 1000).toFixed(3)),
+            };
+          })
+        : [{
+            text: line.text,
+            startMs,
+            durationMs,
+            start: startMs,
+            startSec: parseFloat((startMs / 1000).toFixed(3)),
+            end: startMs + durationMs,
+            endSec: parseFloat(((startMs + durationMs) / 1000).toFixed(3)),
+            duration: durationMs,
+            durationSec: parseFloat((durationMs / 1000).toFixed(3)),
+          }];
     return {
       text: line.text,
       startMs,

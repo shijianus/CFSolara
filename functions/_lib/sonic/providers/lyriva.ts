@@ -119,14 +119,41 @@ export const lyrivaProvider: SonicProviderAdapter = {
 
           let words: SonicWord[] = [];
           if (Array.isArray(line.words) && line.words.length > 0) {
-            words = line.words.map((w: any) => ({
-              text: String(w.text || ''),
-              startMs: typeof w.startMs === 'number' ? w.startMs : startMs,
-              durationMs: typeof w.durationMs === 'number' && w.durationMs > 0 ? w.durationMs : 300,
-            }));
+            words = line.words.map((w: any) => {
+              const wStart = typeof w.startMs === 'number' ? w.startMs : (typeof w.start === 'number' ? w.start : startMs);
+              const wDur = typeof w.durationMs === 'number' && w.durationMs > 0 ? w.durationMs : (typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300);
+              const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+              return {
+                text: String(w.text || ''),
+                startMs: wStart,
+                durationMs: wDur,
+                start: wStart,
+                startSec: parseFloat((wStart / 1000).toFixed(3)),
+                end: wEnd,
+                endSec: parseFloat((wEnd / 1000).toFixed(3)),
+                duration: wDur,
+                durationSec: parseFloat((wDur / 1000).toFixed(3)),
+              };
+            });
           } else {
             // Interpolate words for lines without word timestamps
-            words = interpolateWordTimestamps(line.text || '', startMs, durationMs);
+            const interp = interpolateWordTimestamps(line.text || '', startMs, durationMs);
+            words = interp.map((w) => {
+              const wStart = typeof w.start === 'number' ? w.start : startMs;
+              const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
+              const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+              return {
+                text: w.text,
+                startMs: wStart,
+                durationMs: wDur,
+                start: wStart,
+                startSec: parseFloat((wStart / 1000).toFixed(3)),
+                end: wEnd,
+                endSec: parseFloat((wEnd / 1000).toFixed(3)),
+                duration: wDur,
+                durationSec: parseFloat((wDur / 1000).toFixed(3)),
+              };
+            });
           }
 
           return {
