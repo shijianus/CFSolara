@@ -36,10 +36,18 @@ export function internalLinesToSonicLines(lines: LyricLine[]): SonicSyncedLine[]
             duration: durationMs,
             durationSec: parseFloat((durationMs / 1000).toFixed(3)),
           }];
+    const endMs = startMs + durationMs;
     return {
       text: line.text,
       startMs,
+      start: startMs,
+      startSec: parseFloat((startMs / 1000).toFixed(3)),
       durationMs,
+      duration: durationMs,
+      durationSec: parseFloat((durationMs / 1000).toFixed(3)),
+      endMs,
+      end: endMs,
+      endSec: parseFloat((endMs / 1000).toFixed(3)),
       words,
     };
   });

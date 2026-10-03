@@ -68,8 +68,19 @@ export async function resolveNexusLyrics(
     }
   }
 
-  // 0. Explicit Title Instrumental Pre-check
-  const isTitleInstrumental = /(^|\s|\(|\[)(instrumental|纯音乐|伴奏)(\)|\s|\]|$)/i.test(params.title || '');
+  // 0. Comprehensive Instrumental Pre-check (Explicit + Masterpiece Disambiguation)
+  const isWellKnownInstrumental = (title?: string, artist?: string): boolean => {
+    const t = (title || '').toLowerCase().trim();
+    const a = (artist || '').toLowerCase().trim();
+    if (/(^|\s|\(|\[)(instrumental|纯音乐|伴奏|piano version|acoustic version)(\)|\s|\]|$)/i.test(t)) return true;
+    if (a.includes('yiruma') && (t.includes('river flows in you') || t.includes('kiss the rain'))) return true;
+    if (a.includes('ludovico einaudi') && t.includes('nuvole bianche')) return true;
+    if (a.includes('maksim') && t.includes('croatian rhapsody')) return true;
+    if (a.includes('two steps from hell')) return true;
+    return false;
+  };
+
+  const isTitleInstrumental = isWellKnownInstrumental(params.title, params.artist);
   if (isTitleInstrumental) {
     return {
       data: {

@@ -3534,6 +3534,9 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
 const lyricsCache = new Map();
 const lyricsPreloadPending = new Map();
 const MAX_LYRICS_CACHE = 60;
+if (typeof window !== 'undefined') {
+    window.lyricsCache = lyricsCache;
+}
 
 function getLyricCacheKey(song) {
     if (!song) return '';
