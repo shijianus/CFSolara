@@ -1,6 +1,7 @@
 // Sonic Providers — Registry & Exporter
 
 export * from './adapter';
+export * from './lyriva';
 export * from './amll';
 export * from './lrclib';
 export * from './netease';
@@ -10,6 +11,7 @@ export * from './gdstudio';
 export * from './apple';
 export * from './ytmusic';
 
+import { lyrivaProvider } from './lyriva';
 import { amllProvider } from './amll';
 import { lrclibProvider } from './lrclib';
 import { neteaseProvider } from './netease';
@@ -48,6 +50,7 @@ export const jooxProvider: SonicProviderAdapter = {
 };
 
 export const SONIC_PROVIDERS: Record<string, SonicProviderAdapter> = {
+  lyriva: lyrivaProvider,
   amll: amllProvider,
   lrclib: lrclibProvider,
   netease: neteaseProvider,

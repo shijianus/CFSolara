@@ -5,6 +5,7 @@ export type SonicLyricLevel = 'word' | 'line' | 'none';
 export type SonicSourceQuality = 'real' | 'interpolated' | 'none';
 export type SonicProvider =
   | 'nexus'
+  | 'lyriva'
   | 'amll'
   | 'lrclib'
   | 'netease'

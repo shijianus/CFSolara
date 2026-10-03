@@ -22,9 +22,10 @@ import type {
 import type { ProviderLyricResult } from './providers/adapter';
 import { getSonicConfig } from './config';
 import { getProvider } from './providers';
+import { lyrivaProvider } from './providers/lyriva';
 import { fetchAmllByIds, fetchAmllBySearch } from './providers/amll';
 import { lrclibProvider } from './providers/lrclib';
-import { internalLinesToSonicLines, extractPlainLyrics, computeQualityScore } from './utils';
+import { internalLinesToSonicLines, extractPlainLyrics, computeQualityScore, isInstrumentalText } from './utils';
 import {
   parseTtmlLyrics,
   interpolateWordTimestamps,
@@ -99,6 +100,29 @@ export async function resolveNexusLyrics(
 
   let interpolatedFallback: ProviderLyricResult | null = null;
 
+  // ── [Lyriva Sync Engine] Default Synchronized Lyrics Provider ──
+  // Per requirement: Use Lyriva by default, with complete and robust multi-source fallback
+  if (config.enableLyriva && (params.title || params.artist || params.platformId)) {
+    const lyrivaStart = Date.now();
+    try {
+      const lyrivaSignal = AbortSignal.timeout(config.timeoutMs);
+      const lyrivaResult = await lyrivaProvider.getLyrics(params, { env, signal: lyrivaSignal });
+      if (lyrivaResult && (lyrivaResult.data.instrumental || lyrivaResult.data.syncedLyrics.length > 0)) {
+        recordAttempt('lyriva', true, lyrivaStart);
+        if (lyrivaResult.data.instrumental || lyrivaResult.data.sourceQuality === 'real' || params.prefer !== 'real') {
+          return { ...lyrivaResult, attempts };
+        }
+        if (!interpolatedFallback) {
+          interpolatedFallback = lyrivaResult;
+        }
+      } else {
+        recordAttempt('lyriva', false, lyrivaStart, 'No synced lyrics from Lyriva');
+      }
+    } catch (err: any) {
+      recordAttempt('lyriva', false, lyrivaStart, err?.message || 'Lyriva sync error');
+    }
+  }
+
   // Helper to build a resolved result
   function buildResult(
     provider: string,
@@ -108,34 +132,42 @@ export async function resolveNexusLyrics(
     matchScore: number,
     extra?: Partial<SonicLyricsData>,
   ): ProviderLyricResult {
-    const avgWords = sonicLines.length > 0
-      ? sonicLines.reduce((sum, l) => sum + l.words.length, 0) / sonicLines.length
+    const rawPlain = extra?.plainLyrics ?? extractPlainLyrics(sonicLines);
+    const isInst = Boolean(extra?.instrumental) ||
+      isInstrumentalText(rawPlain) ||
+      (sonicLines.length > 0 && sonicLines.every((l) => isInstrumentalText(l.text)));
+
+    const finalSonicLines = isInst ? [] : sonicLines;
+    const finalLevel: SonicLyricLevel = (!isInst && finalSonicLines.length > 0 && sourceQuality !== 'none') ? 'word' : 'none';
+    const finalSourceQuality: SonicSourceQuality = isInst ? 'none' : sourceQuality;
+
+    const avgWords = finalSonicLines.length > 0
+      ? finalSonicLines.reduce((sum, l) => sum + l.words.length, 0) / finalSonicLines.length
       : 0;
-    const level: SonicLyricLevel = (sonicLines.length > 0 && sourceQuality !== 'none') ? 'word' : 'none';
 
     return {
       data: {
         provider,
-        level,
-        sourceQuality,
+        level: finalLevel,
+        sourceQuality: finalSourceQuality,
         track: extra?.track ?? {
           title: params.title || '',
           artist: params.artist || '',
           album: params.album || '',
           isrc: params.isrc || '',
         },
-        plainLyrics: extra?.plainLyrics ?? extractPlainLyrics(sonicLines),
-        syncedLyrics: sonicLines,
-        rawTtml: extra?.rawTtml ?? '',
+        plainLyrics: isInst ? (rawPlain || '纯音乐，请欣赏') : rawPlain,
+        syncedLyrics: finalSonicLines,
+        rawTtml: isInst ? '' : (extra?.rawTtml ?? ''),
         ttmlMetadata: extra?.ttmlMetadata ?? {},
-        instrumental: extra?.instrumental ?? false,
+        instrumental: isInst,
         sourceId: extra?.sourceId ?? '',
         sourceUrl: extra?.sourceUrl ?? '',
       },
       matchLevel,
       matchScore,
       provider,
-      qualityScore: computeQualityScore(level, sonicLines.length, avgWords),
+      qualityScore: isInst ? 100 : computeQualityScore(finalLevel, finalSonicLines.length, avgWords),
     };
   }
 
@@ -149,9 +181,9 @@ export async function resolveNexusLyrics(
       try {
         const timeoutSignal = AbortSignal.timeout(config.timeoutMs);
         const nativeResult = await adapter.getLyrics(params, { env, signal: timeoutSignal });
-        if (nativeResult && nativeResult.data && nativeResult.data.syncedLyrics.length > 0) {
+        if (nativeResult && nativeResult.data && (nativeResult.data.instrumental || nativeResult.data.syncedLyrics.length > 0)) {
           recordAttempt(adapter.name, true, pStart);
-          if (nativeResult.data.sourceQuality === 'real') {
+          if (nativeResult.data.instrumental || nativeResult.data.sourceQuality === 'real') {
             return { ...nativeResult, attempts };
           }
           if (!interpolatedFallback) {
@@ -202,7 +234,7 @@ export async function resolveNexusLyrics(
               },
             },
           );
-          if (hasWords) return { ...result, attempts };
+          if (result.data.instrumental || hasWords) return { ...result, attempts };
           if (!interpolatedFallback) interpolatedFallback = result;
         } else {
           recordAttempt('amll', false, aStart, 'Empty lines parsed from TTML');
@@ -251,7 +283,7 @@ export async function resolveNexusLyrics(
               },
             },
           );
-          if (hasWords) return { ...result, attempts };
+          if (result.data.instrumental || hasWords) return { ...result, attempts };
           if (!interpolatedFallback) interpolatedFallback = result;
         } else {
           recordAttempt('amll', false, sStart, 'Empty lines parsed from TTML search');
@@ -294,15 +326,21 @@ export async function resolveNexusLyrics(
     const uStart = Date.now();
     try {
       const uSource = (params.platform === 'qq' || params.platform === 'tencent') ? 'tencent' : 'netease';
-      const uResult = await getUniversalLyrics(env, {
+      const uTimeoutMs = Math.min(config.timeoutMs, 6000);
+      const uPromise = getUniversalLyrics(env, {
         id: params.platformId || '',
         source: uSource,
         title: params.title || '',
         artist: params.artist || '',
         duration: params.duration,
       });
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Universal engine timeout')), uTimeoutMs)
+      );
 
-      if (uResult && uResult.lines.length > 0) {
+      const uResult = await Promise.race([uPromise, timeoutPromise]);
+
+      if (uResult && (uResult.lines.length > 0 || isInstrumentalText(uResult.title || '') || isInstrumentalText(uResult.lyric || ''))) {
         const sonicLines = internalLinesToSonicLines(uResult.lines);
         const isReal = uResult.syncType === 'word';
         const providerName = uResult.source || 'universal';
@@ -324,7 +362,7 @@ export async function resolveNexusLyrics(
             },
           },
         );
-        if (isReal) return { ...result, attempts };
+        if (result.data.instrumental || isReal) return { ...result, attempts };
         if (!interpolatedFallback) interpolatedFallback = result;
       } else {
         recordAttempt('universal', false, uStart, 'Universal engine returned empty lines');

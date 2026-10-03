@@ -54,3 +54,76 @@ export function normalizeArtistString(artist: unknown): string {
   if (typeof artist === 'string') return artist;
   return '未知歌手';
 }
+
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+export function isInstrumentalText(text: string): boolean {
+  if (!text) return false;
+  return /纯音乐|没有填词|请您?欣赏|instrumental|accompaniment|no lyrics/i.test(text);
+}
+
+export function sonicLinesToLrc(lines: SonicSyncedLine[], title?: string, artist?: string): string {
+  const result: string[] = [];
+  if (title) result.push(`[ti:${title}]`);
+  if (artist) result.push(`[ar:${artist}]`);
+  if (lines.length === 0) {
+    result.push(`[00:00.00]纯音乐，请欣赏`);
+    return result.join('\n');
+  }
+
+  for (const line of lines) {
+    const totalSec = Math.max(0, line.startMs / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = Math.floor(totalSec % 60);
+    const ms = Math.floor((line.startMs % 1000) / 10);
+    const timeTag = `[${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(ms).padStart(2, '0')}]`;
+    result.push(`${timeTag}${line.text}`);
+  }
+
+  return result.join('\n');
+}
+
+export function sonicLinesToTtml(lines: SonicSyncedLine[], title?: string, artist?: string): string {
+  const formatTime = (ms: number) => {
+    const totalSec = Math.max(0, ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = (totalSec % 60).toFixed(3);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(6, '0')}`;
+  };
+
+  const bodyLines = lines.map((line) => {
+    const begin = formatTime(line.startMs);
+    const end = formatTime(line.startMs + (line.durationMs || 3000));
+    if (line.words && line.words.length > 0) {
+      const spans = line.words.map((w) => {
+        const wBegin = formatTime(w.startMs);
+        const wEnd = formatTime(w.startMs + (w.durationMs || 300));
+        return `<span begin="${wBegin}" end="${wEnd}">${escapeXml(w.text)}</span>`;
+      }).join('');
+      return `      <p begin="${begin}" end="${end}">${spans}</p>`;
+    }
+    return `      <p begin="${begin}" end="${end}">${escapeXml(line.text)}</p>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="utf-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata">
+  <head>
+    <metadata>
+      <ttm:title>${escapeXml(title || '')}</ttm:title>
+      <ttm:agent type="person">${escapeXml(artist || '')}</ttm:agent>
+    </metadata>
+  </head>
+  <body>
+    <div>
+${bodyLines}
+    </div>
+  </body>
+</tt>`;
+}
