@@ -3637,12 +3637,7 @@ function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
     if (!Number.isFinite(startMs)) startMs = lineStartMs || 0;
     if (!Number.isFinite(durMs) || durMs <= 0) durMs = 300;
 
-    // 单字自然持续发音安全上限保护 (防止脏数据或误将间奏拉伸进单字)
-    if (durMs > 3500) {
-        durMs = 3000;
-    }
-
-    const endMs = Number.isFinite(w.endMs) ? w.endMs : (Number.isFinite(w.end) ? w.end : (startMs + durMs));
+    const endMs = startMs + durMs;
     const startSec = parseFloat((startMs / 1000).toFixed(3));
     const endSec = parseFloat((endMs / 1000).toFixed(3));
     const durationSec = parseFloat((durMs / 1000).toFixed(3));
@@ -3659,6 +3654,68 @@ function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
         end: endMs,
         endSec,
     };
+}
+
+// 核心隔离：严密剔除字内吞入的纯音乐间奏时间 (Client-Side Interlude Isolation Protection)
+// 确保每个字的高亮时间严格代表真实开口唱的时长，间奏时间必须被隔离为静止停驻！
+function calibrateWordsInterludeIsolation(words, nextLineStartMs) {
+    if (!words || words.length === 0) return [];
+
+    return words.map((w, i) => {
+        const start = Number.isFinite(w.startMs) ? w.startMs : (Number.isFinite(w.start) ? w.start : 0);
+        const rawDur = (Number.isFinite(w.durationMs) && w.durationMs > 0)
+            ? w.durationMs
+            : ((Number.isFinite(w.duration) && w.duration > 0) ? w.duration : 300);
+        const text = String(w.text || '');
+
+        let nextStart;
+        if (i + 1 < words.length) {
+            const nextW = words[i + 1];
+            nextStart = Number.isFinite(nextW.startMs) ? nextW.startMs : (Number.isFinite(nextW.start) ? nextW.start : (start + rawDur));
+        } else if (Number.isFinite(nextLineStartMs) && nextLineStartMs > start) {
+            nextStart = nextLineStartMs;
+        } else {
+            nextStart = start + rawDur;
+        }
+
+        const gap = Math.max(0, nextStart - start);
+
+        // 发音生理学上限保护：塞音、入声字、短辅音字无法产生长时间发音拖音
+        const isClosedSyllable = /[次了的着过得是不在拜出客没日白发接一七八十国吧吗呢啊呀啦]/.test(text.trim());
+        let maxVocalMs;
+        if (isClosedSyllable) {
+            maxVocalMs = 420;
+        } else if (text.trim().length > 1) {
+            maxVocalMs = Math.max(450, Math.min(800, text.trim().length * 150));
+        } else {
+            maxVocalMs = 650;
+        }
+
+        // 若该字后面紧接着音乐间奏 (gap > 750ms) 或该字原始时长异常偏大 (rawDur > 800ms)
+        // 严禁将间奏包含在字的高亮时间内！字的高亮时间必须严格限制在真实发音自然时长之内！
+        let vocalDur;
+        if (gap > 750 || rawDur > 800) {
+            vocalDur = Math.min(rawDur, maxVocalMs);
+        } else {
+            vocalDur = gap > 0 ? Math.min(rawDur, gap) : rawDur;
+        }
+
+        vocalDur = Math.max(80, vocalDur);
+        const end = start + vocalDur;
+
+        return {
+            text,
+            startMs: start,
+            start: start,
+            startSec: parseFloat((start / 1000).toFixed(3)),
+            endMs: end,
+            end: end,
+            endSec: parseFloat((end / 1000).toFixed(3)),
+            durationMs: vocalDur,
+            duration: vocalDur,
+            durationSec: parseFloat((vocalDur / 1000).toFixed(3)),
+        };
+    });
 }
 
 function parseSonicLyricsResponse(sonicData, sonicMeta = {}) {
@@ -3689,7 +3746,8 @@ function parseSonicLyricsResponse(sonicData, sonicMeta = {}) {
                 ? line.words
                 : interpolateWordTimestamps(line.text || '', rawStartMs, durMs);
 
-            const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, rawStartMs + wIdx * 250, 300)).filter(Boolean);
+            const normalizedWords = rawWords.map((w, wIdx) => normalizeLyricWord(w, rawStartMs + wIdx * 250, 300)).filter(Boolean);
+            const words = calibrateWordsInterludeIsolation(normalizedWords, nextStartMs);
 
             // 核心对齐原则：行起始时间严格与第一个发音字起始时间对齐（杜绝前导空白导致的高亮空档）
             const lineStartMs = words.length > 0 ? words[0].startMs : rawStartMs;
@@ -3944,8 +4002,10 @@ function parseLyrics(lyricText) {
     state.lyricSyncType = 'line';
     state.lyricsData = rawList.map((item, idx, arr) => {
         const next = arr[idx + 1];
+        const nextStartMs = next ? next.timeMs : null;
         const durMs = next ? Math.max(500, next.timeMs - item.timeMs) : 3500;
-        const words = interpolateWordTimestamps(item.text, item.timeMs, durMs);
+        const rawWords = interpolateWordTimestamps(item.text, item.timeMs, durMs);
+        const words = calibrateWordsInterludeIsolation(rawWords, nextStartMs);
         const lineStartMs = words.length > 0 ? words[0].startMs : item.timeMs;
         const lineStartSec = parseFloat((lineStartMs / 1000).toFixed(3));
         const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (lineStartMs + durMs);

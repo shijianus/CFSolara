@@ -142,7 +142,7 @@ export async function handleSingleProviderLyricsRequest(
   const cache = typeof caches !== 'undefined' ? (caches as any).default : null;
   const cacheKeyUrl = new URL(request.url);
   cacheKeyUrl.searchParams.sort();
-  cacheKeyUrl.searchParams.set('_sonic_prov_v', `${p}_v2.1`);
+  cacheKeyUrl.searchParams.set('_sonic_prov_v', `${p}_v3.0`);
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: 'GET' });
 
   if (cache && !params.nocache) {

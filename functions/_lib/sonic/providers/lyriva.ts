@@ -13,7 +13,7 @@ import type {
 } from '../types';
 import type { SonicProviderAdapter, ProviderLyricResult } from './adapter';
 import { getSonicConfig, SONIC_UA } from '../config';
-import { extractPlainLyrics, computeQualityScore, isInstrumentalText } from '../utils';
+import { extractPlainLyrics, computeQualityScore, isInstrumentalText, calibrateWordsInterludeIsolation } from '../utils';
 import { interpolateWordTimestamps, parseHighPrecisionLyrics, isMetadataLine } from '../../music';
 
 export const lyrivaProvider: SonicProviderAdapter = {
@@ -165,11 +165,15 @@ export const lyrivaProvider: SonicProviderAdapter = {
             });
           }
 
+          // 严密隔离：彻底剔除字内吞入的纯音乐间奏时间 (Interlude Isolation Protection)
+          const nextLineStartMs = nextLine ? (typeof nextLine.startMs === 'number' ? nextLine.startMs : nextLine.time) : null;
+          const calibratedWords = calibrateWordsInterludeIsolation(words, nextLineStartMs);
+
           // 核心对齐原则：行起始时间严格与第一个发音字起始时间对齐（杜绝前导空白导致的高亮空档）
-          const lineStartMs = words.length > 0 ? words[0].startMs : rawStartMs;
+          const lineStartMs = calibratedWords.length > 0 ? calibratedWords[0].startMs : rawStartMs;
           // 真实发音截止时间：严格以本行最后一个字实际唱完为准，严禁将歌曲间奏算入逐字发音中！
-          const vocalEndMs = words.length > 0
-            ? (typeof words[words.length - 1].end === 'number' ? words[words.length - 1].end : (words[words.length - 1].start + words[words.length - 1].duration))
+          const vocalEndMs = calibratedWords.length > 0
+            ? calibratedWords[calibratedWords.length - 1].endMs
             : (lineStartMs + rawDurationMs);
           const vocalDurationMs = Math.max(300, vocalEndMs - lineStartMs);
 
@@ -184,7 +188,7 @@ export const lyrivaProvider: SonicProviderAdapter = {
             endMs: vocalEndMs,
             end: vocalEndMs,
             endSec: parseFloat((vocalEndMs / 1000).toFixed(3)),
-            words,
+            words: calibratedWords,
           };
         });
 
@@ -230,13 +234,15 @@ export const lyrivaProvider: SonicProviderAdapter = {
           const rawLines = parsed.lines.filter((l) => !isMetadataLine(l.text, params.title, params.artist));
           const linesToProcess = rawLines.length > 0 ? rawLines : parsed.lines;
 
-          const sonicLines: SonicSyncedLine[] = linesToProcess.map((line) => {
+          const sonicLines: SonicSyncedLine[] = linesToProcess.map((line, idx, arr) => {
             const timeMs = line.time;
+            const nextLine = arr[idx + 1];
+            const nextLineStartMs = nextLine ? nextLine.time : null;
             const rawDurMs = line.duration || 3500;
             const interp = (line.words && line.words.length > 0)
               ? line.words
               : interpolateWordTimestamps(line.text, timeMs, rawDurMs);
-            const words: SonicWord[] = interp.map((w) => {
+            const rawWords: SonicWord[] = interp.map((w) => {
               const wStart = typeof w.start === 'number' ? w.start : timeMs;
               const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
               const wEnd = typeof w.end === 'number' ? w.end : (typeof (w as any).endMs === 'number' ? (w as any).endMs : (wStart + wDur));
@@ -254,9 +260,10 @@ export const lyrivaProvider: SonicProviderAdapter = {
               };
             });
 
+            const words = calibrateWordsInterludeIsolation(rawWords, nextLineStartMs);
             const lineStartMs = words.length > 0 ? words[0].startMs : timeMs;
             const vocalEndMs = words.length > 0
-              ? (typeof words[words.length - 1].endMs === 'number' ? words[words.length - 1].endMs : (words[words.length - 1].start + words[words.length - 1].duration))
+              ? words[words.length - 1].endMs
               : (lineStartMs + rawDurMs);
             const vocalDurationMs = Math.max(300, vocalEndMs - lineStartMs);
 
