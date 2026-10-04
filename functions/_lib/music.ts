@@ -740,8 +740,27 @@ export function interpolateWordTimestamps(lineText: string, lineStartMs: number,
   });
   totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
 
-  // 保留句尾呼吸间隙
-  const vocalDurationMs = Math.max(300, lineDurationMs - Math.min(250, lineDurationMs * 0.08));
+  // 1. 根据音节与字数严格计算真实发音自然时长 (Natural Vocal Duration)
+  // CJK 音节与英文基准发音单元约为 300ms ~ 330ms
+  const naturalVocalMs = Math.max(450, Math.round(totalWeight * 320));
+
+  // 2. 严格间奏感知与隔离保护 (Interlude Isolation Protection)：
+  // 严禁将两行歌词之间的乐器间奏 (Gap) 吞入逐字发音时长中！
+  // 逐字发音严格指歌手实际开口唱的时间，唱完后剩余时间严格归属为乐器间奏。
+  let vocalDurationMs: number;
+  if (lineDurationMs && lineDurationMs > 0) {
+    if (lineDurationMs <= naturalVocalMs * 1.35) {
+      // 连续歌词紧凑连接，占满当前行并在尾部保留约 200ms 自然换气微停顿
+      vocalDurationMs = Math.max(350, Math.min(naturalVocalMs, lineDurationMs - 200));
+    } else {
+      // 间隙远大于发音语速 -> 存在纯音乐乐器演奏/间奏！
+      // 严禁向后故意拉伸！唱完即止，后续时间全部作为间奏停驻高亮！
+      vocalDurationMs = naturalVocalMs;
+    }
+  } else {
+    vocalDurationMs = naturalVocalMs;
+  }
+
   let currentStart = lineStartMs;
   const tokens: LyricWord[] = [];
 

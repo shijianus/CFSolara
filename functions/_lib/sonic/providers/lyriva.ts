@@ -113,7 +113,7 @@ export const lyrivaProvider: SonicProviderAdapter = {
         const sonicLines: SonicSyncedLine[] = data.syncedLyrics.map((line: any, idx: number, arr: any[]) => {
           const startMs = typeof line.startMs === 'number' ? line.startMs : 0;
           const nextLine = arr[idx + 1];
-          const durationMs = typeof line.durationMs === 'number' && line.durationMs > 0
+          const rawDurationMs = typeof line.durationMs === 'number' && line.durationMs > 0
             ? line.durationMs
             : (nextLine && typeof nextLine.startMs === 'number' ? Math.max(500, nextLine.startMs - startMs) : 3500);
 
@@ -136,8 +136,8 @@ export const lyrivaProvider: SonicProviderAdapter = {
               };
             });
           } else {
-            // Interpolate words for lines without word timestamps
-            const interp = interpolateWordTimestamps(line.text || '', startMs, durationMs);
+            // Interpolate words for lines without word timestamps (with strict interlude isolation)
+            const interp = interpolateWordTimestamps(line.text || '', startMs, rawDurationMs);
             words = interp.map((w) => {
               const wStart = typeof w.start === 'number' ? w.start : startMs;
               const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
@@ -156,18 +156,23 @@ export const lyrivaProvider: SonicProviderAdapter = {
             });
           }
 
-          const endMs = startMs + durationMs;
+          // 真实发音截止时间：严格以本行最后一个字实际唱完为准，严禁将歌曲间奏算入逐字发音中！
+          const vocalEndMs = words.length > 0
+            ? (typeof words[words.length - 1].end === 'number' ? words[words.length - 1].end : (words[words.length - 1].start + words[words.length - 1].duration))
+            : (startMs + rawDurationMs);
+          const vocalDurationMs = Math.max(300, vocalEndMs - startMs);
+
           return {
             text: String(line.text || ''),
             startMs,
             start: startMs,
             startSec: parseFloat((startMs / 1000).toFixed(3)),
-            durationMs,
-            duration: durationMs,
-            durationSec: parseFloat((durationMs / 1000).toFixed(3)),
-            endMs,
-            end: endMs,
-            endSec: parseFloat((endMs / 1000).toFixed(3)),
+            durationMs: vocalDurationMs,
+            duration: vocalDurationMs,
+            durationSec: parseFloat((vocalDurationMs / 1000).toFixed(3)),
+            endMs: vocalEndMs,
+            end: vocalEndMs,
+            endSec: parseFloat((vocalEndMs / 1000).toFixed(3)),
             words,
           };
         });
@@ -213,19 +218,43 @@ export const lyrivaProvider: SonicProviderAdapter = {
         if (parsed.lines && parsed.lines.length > 0) {
           const sonicLines: SonicSyncedLine[] = parsed.lines.map((line) => {
             const timeMs = line.time;
-            const durMs = line.duration || 3500;
-            const words: SonicWord[] = (line.words && line.words.length > 0)
-              ? line.words.map((w) => ({
-                  text: w.text,
-                  startMs: w.start,
-                  durationMs: w.duration || 300,
-                }))
-              : interpolateWordTimestamps(line.text, timeMs, durMs);
+            const rawDurMs = line.duration || 3500;
+            const interp = (line.words && line.words.length > 0)
+              ? line.words
+              : interpolateWordTimestamps(line.text, timeMs, rawDurMs);
+            const words: SonicWord[] = interp.map((w) => {
+              const wStart = typeof w.start === 'number' ? w.start : timeMs;
+              const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
+              const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+              return {
+                text: w.text,
+                startMs: wStart,
+                durationMs: wDur,
+                start: wStart,
+                startSec: parseFloat((wStart / 1000).toFixed(3)),
+                end: wEnd,
+                endSec: parseFloat((wEnd / 1000).toFixed(3)),
+                duration: wDur,
+                durationSec: parseFloat((wDur / 1000).toFixed(3)),
+              };
+            });
+
+            const vocalEndMs = words.length > 0
+              ? (typeof words[words.length - 1].end === 'number' ? words[words.length - 1].end : (words[words.length - 1].start + words[words.length - 1].duration))
+              : (timeMs + rawDurMs);
+            const vocalDurationMs = Math.max(300, vocalEndMs - timeMs);
 
             return {
               text: line.text,
               startMs: timeMs,
-              durationMs: durMs,
+              start: timeMs,
+              startSec: parseFloat((timeMs / 1000).toFixed(3)),
+              durationMs: vocalDurationMs,
+              duration: vocalDurationMs,
+              durationSec: parseFloat((vocalDurationMs / 1000).toFixed(3)),
+              endMs: vocalEndMs,
+              end: vocalEndMs,
+              endSec: parseFloat((vocalEndMs / 1000).toFixed(3)),
               words,
             };
           });

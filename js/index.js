@@ -3502,7 +3502,27 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
     });
     totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
 
-    const vocalDurationMs = Math.max(300, lineDurationMs - Math.min(250, lineDurationMs * 0.08));
+    // 1. 根据音节与字数严格计算真实发音自然时长 (Natural Vocal Duration)
+    // CJK 音节与英文基准发音单元约为 300ms ~ 330ms
+    const naturalVocalMs = Math.max(450, Math.round(totalWeight * 320));
+
+    // 2. 严格间奏感知与隔离保护 (Interlude Isolation Protection)：
+    // 严禁将两行歌词之间的乐器间奏 (Gap) 吞入逐字发音时长中！
+    // 逐字发音严格指歌手实际开口唱的时间，唱完后剩余时间严格归属为乐器间奏。
+    let vocalDurationMs;
+    if (lineDurationMs && lineDurationMs > 0) {
+        if (lineDurationMs <= naturalVocalMs * 1.35) {
+            // 连续歌词紧凑连接，占满当前行并在尾部保留约 200ms 自然换气微停顿
+            vocalDurationMs = Math.max(350, Math.min(naturalVocalMs, lineDurationMs - 200));
+        } else {
+            // 间隙远大于发音语速 -> 存在纯音乐乐器演奏/间奏！
+            // 严禁向后故意拉伸！唱完即止，后续时间全部作为间奏停驻高亮！
+            vocalDurationMs = naturalVocalMs;
+        }
+    } else {
+        vocalDurationMs = naturalVocalMs;
+    }
+
     let currentStart = lineStartMs;
     const tokens = [];
 
@@ -3571,6 +3591,11 @@ function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
     if (!Number.isFinite(startMs)) startMs = lineStartMs || 0;
     if (!Number.isFinite(durMs) || durMs <= 0) durMs = 300;
 
+    // 单字自然持续发音安全上限保护 (防止脏数据或误将间奏拉伸进单字)
+    if (durMs > 3500) {
+        durMs = 3000;
+    }
+
     const endMs = startMs + durMs;
     const startSec = parseFloat((startMs / 1000).toFixed(3));
     const endSec = parseFloat((endMs / 1000).toFixed(3));
@@ -3619,11 +3644,15 @@ function parseSonicLyricsResponse(sonicData, sonicMeta = {}) {
 
             const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, timeMs + wIdx * 250, 300)).filter(Boolean);
 
+            // 真实声乐发音截止点 (Vocal End Time) 与发音纯时长
+            const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (timeMs + durMs);
+            const vocalDurMs = Math.max(300, vocalEndMs - timeMs);
+
             return {
                 time: timeSec,
                 timeMs: timeMs,
-                duration: durMs,
-                durationSec: parseFloat((durMs / 1000).toFixed(3)),
+                duration: vocalDurMs,
+                durationSec: parseFloat((vocalDurMs / 1000).toFixed(3)),
                 text: String(line.text || ''),
                 words: words,
             };
@@ -3721,11 +3750,13 @@ async function preloadLyrics(song) {
                         ? line.words
                         : interpolateWordTimestamps(line.text, timeMs, durMs);
                     const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, timeMs + wIdx * 250, 300)).filter(Boolean);
+                    const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (timeMs + durMs);
+                    const vocalDurMs = Math.max(300, vocalEndMs - timeMs);
                     return {
                         time: timeSec,
                         timeMs: timeMs,
-                        duration: durMs,
-                        durationSec: parseFloat((durMs / 1000).toFixed(3)),
+                        duration: vocalDurMs,
+                        durationSec: parseFloat((vocalDurMs / 1000).toFixed(3)),
                         text: line.text,
                         words: words,
                     };
@@ -3864,11 +3895,13 @@ function parseLyrics(lyricText) {
         const next = arr[idx + 1];
         const durMs = next ? Math.max(500, next.timeMs - item.timeMs) : 3500;
         const words = interpolateWordTimestamps(item.text, item.timeMs, durMs);
+        const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (item.timeMs + durMs);
+        const vocalDurMs = Math.max(300, vocalEndMs - item.timeMs);
         return {
             time: item.time,
             timeMs: item.timeMs,
-            duration: durMs,
-            durationSec: parseFloat((durMs / 1000).toFixed(3)),
+            duration: vocalDurMs,
+            durationSec: parseFloat((vocalDurMs / 1000).toFixed(3)),
             text: item.text,
             words: words,
         };
