@@ -3,16 +3,21 @@
 import type { LyricLine } from '../types';
 import type { SonicSyncedLine, SonicWord, SonicLyricLevel } from './types';
 
+import { isMetadataLine } from '../music';
+
 export function internalLinesToSonicLines(lines: LyricLine[]): SonicSyncedLine[] {
-  return lines.map((line) => {
-    const startMs = line.time;
-    const durationMs = line.duration || 3000;
+  const filtered = lines.filter((l) => !isMetadataLine(l.text));
+  const targetLines = filtered.length > 0 ? filtered : lines;
+
+  return targetLines.map((line) => {
+    const rawStartMs = line.time;
+    const rawDurationMs = line.duration || 3000;
     const words: SonicWord[] =
       line.words && line.words.length > 0
         ? line.words.map((w) => {
-            const wStart = typeof w.start === 'number' ? w.start : (typeof (w as any).startMs === 'number' ? (w as any).startMs : startMs);
+            const wStart = typeof w.start === 'number' ? w.start : (typeof (w as any).startMs === 'number' ? (w as any).startMs : rawStartMs);
             const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : (typeof (w as any).durationMs === 'number' && (w as any).durationMs > 0 ? (w as any).durationMs : 300);
-            const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+            const wEnd = typeof w.end === 'number' ? w.end : (typeof (w as any).endMs === 'number' ? (w as any).endMs : (wStart + wDur));
             return {
               text: w.text,
               startMs: wStart,
@@ -20,6 +25,7 @@ export function internalLinesToSonicLines(lines: LyricLine[]): SonicSyncedLine[]
               start: wStart,
               startSec: parseFloat((wStart / 1000).toFixed(3)),
               end: wEnd,
+              endMs: wEnd,
               endSec: parseFloat((wEnd / 1000).toFixed(3)),
               duration: wDur,
               durationSec: parseFloat((wDur / 1000).toFixed(3)),
@@ -27,27 +33,35 @@ export function internalLinesToSonicLines(lines: LyricLine[]): SonicSyncedLine[]
           })
         : [{
             text: line.text,
-            startMs,
-            durationMs,
-            start: startMs,
-            startSec: parseFloat((startMs / 1000).toFixed(3)),
-            end: startMs + durationMs,
-            endSec: parseFloat(((startMs + durationMs) / 1000).toFixed(3)),
-            duration: durationMs,
-            durationSec: parseFloat((durationMs / 1000).toFixed(3)),
+            startMs: rawStartMs,
+            durationMs: rawDurationMs,
+            start: rawStartMs,
+            startSec: parseFloat((rawStartMs / 1000).toFixed(3)),
+            end: rawStartMs + rawDurationMs,
+            endMs: rawStartMs + rawDurationMs,
+            endSec: parseFloat(((rawStartMs + rawDurationMs) / 1000).toFixed(3)),
+            duration: rawDurationMs,
+            durationSec: parseFloat((rawDurationMs / 1000).toFixed(3)),
           }];
-    const endMs = startMs + durationMs;
+
+    // 核心对齐原则：行起始时间严格与第一个发音字对齐，真实发音截止严格以最后一个字唱完为准
+    const lineStartMs = words.length > 0 ? words[0].startMs : rawStartMs;
+    const vocalEndMs = words.length > 0
+      ? (typeof words[words.length - 1].endMs === 'number' ? words[words.length - 1].endMs : (words[words.length - 1].startMs + words[words.length - 1].durationMs))
+      : (lineStartMs + rawDurationMs);
+    const vocalDurationMs = Math.max(300, vocalEndMs - lineStartMs);
+
     return {
       text: line.text,
-      startMs,
-      start: startMs,
-      startSec: parseFloat((startMs / 1000).toFixed(3)),
-      durationMs,
-      duration: durationMs,
-      durationSec: parseFloat((durationMs / 1000).toFixed(3)),
-      endMs,
-      end: endMs,
-      endSec: parseFloat((endMs / 1000).toFixed(3)),
+      startMs: lineStartMs,
+      start: lineStartMs,
+      startSec: parseFloat((lineStartMs / 1000).toFixed(3)),
+      durationMs: vocalDurationMs,
+      duration: vocalDurationMs,
+      durationSec: parseFloat((vocalDurationMs / 1000).toFixed(3)),
+      endMs: vocalEndMs,
+      end: vocalEndMs,
+      endSec: parseFloat((vocalEndMs / 1000).toFixed(3)),
       words,
     };
   });

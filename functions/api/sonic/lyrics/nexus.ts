@@ -35,7 +35,7 @@ export async function handleNexusLyricsRequest(
   const cache = typeof caches !== 'undefined' ? (caches as any).default : null;
   const cacheKeyUrl = new URL(request.url);
   cacheKeyUrl.searchParams.sort();
-  cacheKeyUrl.searchParams.set('_sonic_cache_v', '2.0');
+  cacheKeyUrl.searchParams.set('_sonic_cache_v', '2.1');
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: 'GET' });
 
   if (cache && !params.nocache) {

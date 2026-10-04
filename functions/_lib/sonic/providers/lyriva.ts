@@ -14,7 +14,7 @@ import type {
 import type { SonicProviderAdapter, ProviderLyricResult } from './adapter';
 import { getSonicConfig, SONIC_UA } from '../config';
 import { extractPlainLyrics, computeQualityScore, isInstrumentalText } from '../utils';
-import { interpolateWordTimestamps, parseHighPrecisionLyrics } from '../../music';
+import { interpolateWordTimestamps, parseHighPrecisionLyrics, isMetadataLine } from '../../music';
 
 export const lyrivaProvider: SonicProviderAdapter = {
   name: 'lyriva',
@@ -106,23 +106,30 @@ export const lyrivaProvider: SonicProviderAdapter = {
 
       // Check syncedLyrics
       if (Array.isArray(data.syncedLyrics) && data.syncedLyrics.length > 0) {
-        const hasRealWords = data.syncedLyrics.some(
+        // 关键过滤：彻底剔除前奏/间奏中混入的“作词/作曲/吉他/录音”等元数据假歌词行，防止长间奏字词严重错位！
+        const rawLines = data.syncedLyrics.filter(
+          (l: any) => !isMetadataLine(String(l.text || ''), params.title, params.artist)
+        );
+
+        const linesToProcess = rawLines.length > 0 ? rawLines : data.syncedLyrics;
+
+        const hasRealWords = linesToProcess.some(
           (l: any) => Array.isArray(l.words) && l.words.length > 0 && typeof l.words[0].startMs === 'number',
         );
 
-        const sonicLines: SonicSyncedLine[] = data.syncedLyrics.map((line: any, idx: number, arr: any[]) => {
-          const startMs = typeof line.startMs === 'number' ? line.startMs : 0;
+        const sonicLines: SonicSyncedLine[] = linesToProcess.map((line: any, idx: number, arr: any[]) => {
+          const rawStartMs = typeof line.startMs === 'number' ? line.startMs : 0;
           const nextLine = arr[idx + 1];
           const rawDurationMs = typeof line.durationMs === 'number' && line.durationMs > 0
             ? line.durationMs
-            : (nextLine && typeof nextLine.startMs === 'number' ? Math.max(500, nextLine.startMs - startMs) : 3500);
+            : (nextLine && typeof nextLine.startMs === 'number' ? Math.max(500, nextLine.startMs - rawStartMs) : 3500);
 
           let words: SonicWord[] = [];
           if (Array.isArray(line.words) && line.words.length > 0) {
             words = line.words.map((w: any) => {
-              const wStart = typeof w.startMs === 'number' ? w.startMs : (typeof w.start === 'number' ? w.start : startMs);
+              const wStart = typeof w.startMs === 'number' ? w.startMs : (typeof w.start === 'number' ? w.start : rawStartMs);
               const wDur = typeof w.durationMs === 'number' && w.durationMs > 0 ? w.durationMs : (typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300);
-              const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+              const wEnd = typeof w.end === 'number' ? w.end : (typeof w.endMs === 'number' ? w.endMs : (wStart + wDur));
               return {
                 text: String(w.text || ''),
                 startMs: wStart,
@@ -130,6 +137,7 @@ export const lyrivaProvider: SonicProviderAdapter = {
                 start: wStart,
                 startSec: parseFloat((wStart / 1000).toFixed(3)),
                 end: wEnd,
+                endMs: wEnd,
                 endSec: parseFloat((wEnd / 1000).toFixed(3)),
                 duration: wDur,
                 durationSec: parseFloat((wDur / 1000).toFixed(3)),
@@ -137,9 +145,9 @@ export const lyrivaProvider: SonicProviderAdapter = {
             });
           } else {
             // Interpolate words for lines without word timestamps (with strict interlude isolation)
-            const interp = interpolateWordTimestamps(line.text || '', startMs, rawDurationMs);
+            const interp = interpolateWordTimestamps(line.text || '', rawStartMs, rawDurationMs);
             words = interp.map((w) => {
-              const wStart = typeof w.start === 'number' ? w.start : startMs;
+              const wStart = typeof w.start === 'number' ? w.start : rawStartMs;
               const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
               const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
               return {
@@ -149,6 +157,7 @@ export const lyrivaProvider: SonicProviderAdapter = {
                 start: wStart,
                 startSec: parseFloat((wStart / 1000).toFixed(3)),
                 end: wEnd,
+                endMs: wEnd,
                 endSec: parseFloat((wEnd / 1000).toFixed(3)),
                 duration: wDur,
                 durationSec: parseFloat((wDur / 1000).toFixed(3)),
@@ -156,17 +165,19 @@ export const lyrivaProvider: SonicProviderAdapter = {
             });
           }
 
+          // 核心对齐原则：行起始时间严格与第一个发音字起始时间对齐（杜绝前导空白导致的高亮空档）
+          const lineStartMs = words.length > 0 ? words[0].startMs : rawStartMs;
           // 真实发音截止时间：严格以本行最后一个字实际唱完为准，严禁将歌曲间奏算入逐字发音中！
           const vocalEndMs = words.length > 0
             ? (typeof words[words.length - 1].end === 'number' ? words[words.length - 1].end : (words[words.length - 1].start + words[words.length - 1].duration))
-            : (startMs + rawDurationMs);
-          const vocalDurationMs = Math.max(300, vocalEndMs - startMs);
+            : (lineStartMs + rawDurationMs);
+          const vocalDurationMs = Math.max(300, vocalEndMs - lineStartMs);
 
           return {
             text: String(line.text || ''),
-            startMs,
-            start: startMs,
-            startSec: parseFloat((startMs / 1000).toFixed(3)),
+            startMs: lineStartMs,
+            start: lineStartMs,
+            startSec: parseFloat((lineStartMs / 1000).toFixed(3)),
             durationMs: vocalDurationMs,
             duration: vocalDurationMs,
             durationSec: parseFloat((vocalDurationMs / 1000).toFixed(3)),
@@ -216,7 +227,10 @@ export const lyrivaProvider: SonicProviderAdapter = {
       if (plainLyrics && /\[\d{2}:\d{2}/.test(plainLyrics)) {
         const parsed = parseHighPrecisionLyrics(plainLyrics);
         if (parsed.lines && parsed.lines.length > 0) {
-          const sonicLines: SonicSyncedLine[] = parsed.lines.map((line) => {
+          const rawLines = parsed.lines.filter((l) => !isMetadataLine(l.text, params.title, params.artist));
+          const linesToProcess = rawLines.length > 0 ? rawLines : parsed.lines;
+
+          const sonicLines: SonicSyncedLine[] = linesToProcess.map((line) => {
             const timeMs = line.time;
             const rawDurMs = line.duration || 3500;
             const interp = (line.words && line.words.length > 0)
@@ -225,7 +239,7 @@ export const lyrivaProvider: SonicProviderAdapter = {
             const words: SonicWord[] = interp.map((w) => {
               const wStart = typeof w.start === 'number' ? w.start : timeMs;
               const wDur = typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300;
-              const wEnd = typeof w.end === 'number' ? w.end : (wStart + wDur);
+              const wEnd = typeof w.end === 'number' ? w.end : (typeof (w as any).endMs === 'number' ? (w as any).endMs : (wStart + wDur));
               return {
                 text: w.text,
                 startMs: wStart,
@@ -233,22 +247,24 @@ export const lyrivaProvider: SonicProviderAdapter = {
                 start: wStart,
                 startSec: parseFloat((wStart / 1000).toFixed(3)),
                 end: wEnd,
+                endMs: wEnd,
                 endSec: parseFloat((wEnd / 1000).toFixed(3)),
                 duration: wDur,
                 durationSec: parseFloat((wDur / 1000).toFixed(3)),
               };
             });
 
+            const lineStartMs = words.length > 0 ? words[0].startMs : timeMs;
             const vocalEndMs = words.length > 0
-              ? (typeof words[words.length - 1].end === 'number' ? words[words.length - 1].end : (words[words.length - 1].start + words[words.length - 1].duration))
-              : (timeMs + rawDurMs);
-            const vocalDurationMs = Math.max(300, vocalEndMs - timeMs);
+              ? (typeof words[words.length - 1].endMs === 'number' ? words[words.length - 1].endMs : (words[words.length - 1].start + words[words.length - 1].duration))
+              : (lineStartMs + rawDurMs);
+            const vocalDurationMs = Math.max(300, vocalEndMs - lineStartMs);
 
             return {
               text: line.text,
-              startMs: timeMs,
-              start: timeMs,
-              startSec: parseFloat((timeMs / 1000).toFixed(3)),
+              startMs: lineStartMs,
+              start: lineStartMs,
+              startSec: parseFloat((lineStartMs / 1000).toFixed(3)),
               durationMs: vocalDurationMs,
               duration: vocalDurationMs,
               durationSec: parseFloat((vocalDurationMs / 1000).toFixed(3)),

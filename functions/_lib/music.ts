@@ -702,7 +702,7 @@ export function parseHighPrecisionLyrics(
 }
 
 export function interpolateWordTimestamps(lineText: string, lineStartMs: number, lineDurationMs: number): LyricWord[] {
-  const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
+  const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').trim();
   if (!clean) return [];
 
   // 匹配汉字/日韩假名音节、英文/拉丁单词、或标点符号

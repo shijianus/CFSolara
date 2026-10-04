@@ -3478,27 +3478,72 @@ function attachLyricClickToSeek() {
     }
 }
 
+function isMetadataLine(text, title, artist) {
+    if (!text) return true;
+    const trimmed = String(text).trim();
+    if (
+        /^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|钢琴|小提琴|中提琴|大提琴|小提琴独奏|大提琴独奏|萨克斯|长笛|笛子|二胡|古筝|琵琶|打击乐|管乐|铜管|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|发行人|出品|出品人|出品公司|发行公司|版权|版权所有|特别支持|特别鸣谢|鸣谢|鸣谢单位|致谢|文案|插画|封面|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|营销|宣发|商务|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director|Special Thanks|Presented by|Published by)[\u4e00-\u9fa5a-zA-Z0-9\s.·()（）]*[:：\/—–-]/i.test(
+            trimmed
+        )
+    ) {
+        return true;
+    }
+    if (/^[^-–—]+[-–—][^-–—]+$/.test(trimmed) && trimmed.length < 60 && /(唱|曲|词|编|混|录|室)/.test(trimmed)) {
+        return true;
+    }
+    // Title / Artist delimiter check (e.g. "晴天 - 周杰伦 (Jay Chou)", "Shape of You - Ed Sheeran")
+    if (/^([^-–—]+)[-–—]([^-–—]+)$/.test(trimmed)) {
+        const parts = trimmed.split(/[-–—]/).map(p => p.trim().toLowerCase());
+        const rawTitle = title || (typeof state !== 'undefined' ? (state.currentSong?.name || state.currentSong?.title) : '') || '';
+        const rawArtist = artist || (typeof state !== 'undefined' ? (Array.isArray(state.currentSong?.artist) ? state.currentSong.artist.join('/') : state.currentSong?.artist) : '') || '';
+        const cleanTitle = String(rawTitle).toLowerCase().replace(/\([^)]+\)/g, '').trim();
+        const cleanArtist = String(rawArtist).toLowerCase().replace(/\([^)]+\)/g, '').trim();
+        if (
+            (cleanTitle && (parts[0].includes(cleanTitle) || parts[1].includes(cleanTitle))) ||
+            (cleanArtist && (parts[0].includes(cleanArtist) || parts[1].includes(cleanArtist)))
+        ) {
+            return true;
+        }
+    }
+    const rawTitleOnly = title || (typeof state !== 'undefined' ? (state.currentSong?.name || state.currentSong?.title) : '') || '';
+    const cleanTitleOnly = String(rawTitleOnly).toLowerCase().replace(/\([^)]+\)/g, '').trim();
+    if (cleanTitleOnly && cleanTitleOnly.length >= 2 && trimmed.toLowerCase().replace(/\([^)]+\)/g, '').trim() === cleanTitleOnly) {
+        return true;
+    }
+    return false;
+}
+
 function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
-    const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').replace(/\([^)]+\)/g, '').trim();
+    const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').trim();
     if (!clean) return [];
 
-    const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[\s\p{P}]+)/gu;
+    const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[^\s\w\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]+|\s+)/gu;
     let match;
-    const rawTokens = [];
+    const rawSegments = [];
     while ((match = regex.exec(clean)) !== null) {
-        rawTokens.push(match[1]);
+        rawSegments.push(match[1]);
     }
-    if (rawTokens.length === 0) rawTokens = [clean];
+    if (rawSegments.length === 0) rawSegments.push(clean);
+
+    // 将纯标点与尾随空格智能合并至前一个发音词块，形成自然演唱单元
+    const rawTokens = [];
+    for (const seg of rawSegments) {
+        if (/^[\s\p{P}]+$/u.test(seg) && rawTokens.length > 0) {
+            rawTokens[rawTokens.length - 1] += seg;
+        } else {
+            rawTokens.push(seg);
+        }
+    }
 
     let totalWeight = 0;
     const tokenWeights = rawTokens.map((tok, idx) => {
-        if (/^[\s\p{P}]+$/u.test(tok)) {
-            return 0.15;
-        }
-        if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]$/u.test(tok)) {
+        const trimmed = tok.trim();
+        if (!trimmed) return 0.2;
+        if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/.test(trimmed)) {
             return idx === rawTokens.length - 1 ? 1.35 : 1.0;
         }
-        return Math.max(1.0, tok.length * 0.35);
+        const coreLen = trimmed.replace(/[\p{P}\s]/gu, '').length;
+        return Math.max(1.0, coreLen * 0.35);
     });
     totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
 
@@ -3585,6 +3630,7 @@ function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
     let durMs = (Number.isFinite(w.durationMs) && w.durationMs > 0) ? w.durationMs :
                 (Number.isFinite(w.duration) && w.duration > 0) ? w.duration :
                 (Number.isFinite(w.durationSec) && w.durationSec > 0) ? Math.round(w.durationSec * 1000) :
+                (Number.isFinite(w.endMs) && w.endMs > startMs) ? (w.endMs - startMs) :
                 (Number.isFinite(w.end) && w.end > startMs) ? (w.end - startMs) :
                 (Number.isFinite(w.endSec) && w.endSec * 1000 > startMs) ? Math.round(w.endSec * 1000 - startMs) : fallbackDurMs;
 
@@ -3596,7 +3642,7 @@ function normalizeLyricWord(w, lineStartMs, fallbackDurMs = 300) {
         durMs = 3000;
     }
 
-    const endMs = startMs + durMs;
+    const endMs = Number.isFinite(w.endMs) ? w.endMs : (Number.isFinite(w.end) ? w.end : (startMs + durMs));
     const startSec = parseFloat((startMs / 1000).toFixed(3));
     const endSec = parseFloat((endMs / 1000).toFixed(3));
     const durationSec = parseFloat((durMs / 1000).toFixed(3));
@@ -3626,31 +3672,36 @@ function parseSonicLyricsResponse(sonicData, sonicMeta = {}) {
     }
 
     if (sonicData.level !== 'none' && Array.isArray(sonicData.syncedLyrics) && sonicData.syncedLyrics.length > 0) {
-        const syncedLines = sonicData.syncedLyrics;
+        // 关键过滤：彻底剔除前奏/间奏中混入的元数据假歌词行，防止长间奏字词严重错位！
+        const rawSynced = sonicData.syncedLyrics.filter(l => !isMetadataLine(l.text));
+        const syncedLines = rawSynced.length > 0 ? rawSynced : sonicData.syncedLyrics;
         const lyricSyncType = sonicData.level === 'word' ? 'word' : 'line';
         const lyricSourceQuality = sonicData.sourceQuality || (sonicData.level === 'word' ? 'real' : 'none');
 
         const lyricsData = syncedLines.map((line, idx, arr) => {
-            const timeMs = Number.isFinite(line.startMs) ? line.startMs : (Number.isFinite(line.time) ? line.time : 0);
-            const timeSec = parseFloat((timeMs / 1000).toFixed(3));
+            const rawStartMs = Number.isFinite(line.startMs) ? line.startMs : (Number.isFinite(line.time) ? line.time : 0);
             const nextLine = arr[idx + 1];
             const nextStartMs = nextLine ? (Number.isFinite(nextLine.startMs) ? nextLine.startMs : nextLine.time) : null;
             const durMs = (Number.isFinite(line.durationMs) && line.durationMs > 0) ? line.durationMs :
-                          (Number.isFinite(nextStartMs) ? Math.max(500, nextStartMs - timeMs) : 3500);
+                          (Number.isFinite(nextStartMs) ? Math.max(500, nextStartMs - rawStartMs) : 3500);
 
             const rawWords = (Array.isArray(line.words) && line.words.length > 0)
                 ? line.words
-                : interpolateWordTimestamps(line.text || '', timeMs, durMs);
+                : interpolateWordTimestamps(line.text || '', rawStartMs, durMs);
 
-            const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, timeMs + wIdx * 250, 300)).filter(Boolean);
+            const words = rawWords.map((w, wIdx) => normalizeLyricWord(w, rawStartMs + wIdx * 250, 300)).filter(Boolean);
+
+            // 核心对齐原则：行起始时间严格与第一个发音字起始时间对齐（杜绝前导空白导致的高亮空档）
+            const lineStartMs = words.length > 0 ? words[0].startMs : rawStartMs;
+            const lineStartSec = parseFloat((lineStartMs / 1000).toFixed(3));
 
             // 真实声乐发音截止点 (Vocal End Time) 与发音纯时长
-            const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (timeMs + durMs);
-            const vocalDurMs = Math.max(300, vocalEndMs - timeMs);
+            const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (lineStartMs + durMs);
+            const vocalDurMs = Math.max(300, vocalEndMs - lineStartMs);
 
             return {
-                time: timeSec,
-                timeMs: timeMs,
+                time: lineStartSec,
+                timeMs: lineStartMs,
                 duration: vocalDurMs,
                 durationSec: parseFloat((vocalDurMs / 1000).toFixed(3)),
                 text: String(line.text || ''),
@@ -3882,7 +3933,7 @@ function parseLyrics(lyricText) {
             const time = minutes * 60 + seconds + milliseconds / 1000;
             const text = match[4].replace(/<[^>]+>/g, '').trim();
 
-            if (text) {
+            if (text && !isMetadataLine(text)) {
                 rawList.push({ time, timeMs: Math.round(time * 1000), text });
             }
         }
@@ -3895,11 +3946,13 @@ function parseLyrics(lyricText) {
         const next = arr[idx + 1];
         const durMs = next ? Math.max(500, next.timeMs - item.timeMs) : 3500;
         const words = interpolateWordTimestamps(item.text, item.timeMs, durMs);
-        const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (item.timeMs + durMs);
-        const vocalDurMs = Math.max(300, vocalEndMs - item.timeMs);
+        const lineStartMs = words.length > 0 ? words[0].startMs : item.timeMs;
+        const lineStartSec = parseFloat((lineStartMs / 1000).toFixed(3));
+        const vocalEndMs = words.length > 0 ? words[words.length - 1].endMs : (lineStartMs + durMs);
+        const vocalDurMs = Math.max(300, vocalEndMs - lineStartMs);
         return {
-            time: item.time,
-            timeMs: item.timeMs,
+            time: lineStartSec,
+            timeMs: lineStartMs,
             duration: vocalDurMs,
             durationSec: parseFloat((vocalDurMs / 1000).toFixed(3)),
             text: item.text,
@@ -3955,7 +4008,7 @@ function displayLyrics() {
     syncLyrics();
 }
 
-// 同步歌词 - 60fps 毫秒级字级/音节级平滑发音流动跟随
+// 同步歌词 - 60fps 毫秒级显式切片逐字高亮追随 (Strict Explicit-Segment Highlight Follower)
 function syncLyrics(timeOverride) {
     if (!state.lyricsData || state.lyricsData.length === 0) return;
 
@@ -3990,6 +4043,22 @@ function syncLyrics(timeOverride) {
         }
 
         lyricTargets.forEach(({ elements, container, inline }) => {
+            if (currentIndex === -1) {
+                // 前奏纯音乐间奏：全部非当前行，容器复位至顶部
+                elements.forEach(element => {
+                    element.classList.remove("current");
+                    element.querySelectorAll(".word-char").forEach(c => {
+                        c.style.setProperty('--fill', '0%');
+                        c.style.backgroundImage = '';
+                        c.classList.remove("word-sung", "word-singing");
+                    });
+                });
+                if (container && container.scrollTop > 0) {
+                    container.scrollTop = 0;
+                }
+                return;
+            }
+
             elements.forEach((element, index) => {
                 if (index === currentIndex) {
                     element.classList.add("current");
@@ -4003,6 +4072,7 @@ function syncLyrics(timeOverride) {
                 }
 
                 if (index < currentIndex) {
+                    // 过去行：100% 已唱过
                     element.querySelectorAll(".word-char").forEach(c => {
                         c.style.setProperty('--fill', '100%');
                         c.style.backgroundImage = '';
@@ -4010,6 +4080,7 @@ function syncLyrics(timeOverride) {
                         c.classList.remove("word-singing");
                     });
                 } else if (index > currentIndex) {
+                    // 未来行：0% 还没唱到
                     element.querySelectorAll(".word-char").forEach(c => {
                         c.style.setProperty('--fill', '0%');
                         c.style.backgroundImage = '';
@@ -4020,7 +4091,14 @@ function syncLyrics(timeOverride) {
         });
     }
 
-    // 逐字卡拉OK平滑发音填充 (60fps Progressive Syllable Wipe)
+    // 核心重构：显式时间段切片追随 (Explicit-Segment Word Highlight Follower)
+    // 每个字拥有绝对独立的 [startSec, endSec] 发音时间窗口：
+    // ① t < startSec: 还没唱到 -> 保持整体未唱样式 (--fill: 0%, 移除所有唱/正在唱类名)
+    // ② startSec <= t < endSec: 正在唱 -> 显式高亮渐变填充 (--fill: pct%, word-singing, 放大高亮)
+    // ③ t >= endSec: 已经唱过 -> 保持完整已唱样式 (--fill: 100%, word-sung)
+    // 间奏行为（纯音乐）：
+    // - 句中词间间奏：已唱字停在 100%，未唱字停在 0%，当前行无 word-singing，字不对齐问题彻底杜绝
+    // - 句间长间奏：全句所有字均满足 t >= endSec，整句保持 100% 高亮停驻，直到下一句开口时间精确切换
     if (currentIndex >= 0 && currentIndex < state.lyricsData.length) {
         const curLine = state.lyricsData[currentIndex];
         if (curLine.words && curLine.words.length > 0) {
@@ -4028,18 +4106,6 @@ function syncLyrics(timeOverride) {
                 dom.lyricsContent?.querySelector(`div[data-index="${currentIndex}"]`),
                 dom.mobileInlineLyricsContent?.querySelector(`div[data-index="${currentIndex}"]`),
             ].filter(Boolean);
-
-            // 严密计算当前正在唱的唯一字 (Active Word)，确保同一瞬间最多只有1个字获得 word-singing
-            let activeWordIdx = -1;
-            for (let wIdx = 0; wIdx < curLine.words.length; wIdx++) {
-                const w = curLine.words[wIdx];
-                const start = Number.isFinite(w.startSec) ? w.startSec : (Number.isFinite(w.startMs) ? w.startMs / 1000 : 0);
-                const end = Number.isFinite(w.endSec) ? w.endSec : (Number.isFinite(w.endMs) ? w.endMs / 1000 : (start + 0.3));
-                if (currentTime >= start && currentTime < end) {
-                    activeWordIdx = wIdx;
-                    break;
-                }
-            }
 
             lineContainers.forEach(containerEl => {
                 const charSpans = containerEl.querySelectorAll('.word-char');
@@ -4050,37 +4116,26 @@ function syncLyrics(timeOverride) {
                     const start = Number.isFinite(w.startSec) ? w.startSec : (Number.isFinite(w.startMs) ? w.startMs / 1000 : 0);
                     const end = Number.isFinite(w.endSec) ? w.endSec : (Number.isFinite(w.endMs) ? w.endMs / 1000 : (start + 0.3));
 
-                    if (activeWordIdx !== -1) {
-                        if (wIdx < activeWordIdx) {
-                            charSpan.style.setProperty('--fill', '100%');
-                            charSpan.style.backgroundImage = '';
-                            charSpan.classList.add("word-sung");
-                            charSpan.classList.remove("word-singing");
-                        } else if (wIdx === activeWordIdx) {
-                            const dur = Math.max(0.04, end - start);
-                            const pct = Math.min(100, Math.max(0, ((currentTime - start) / dur) * 100));
-                            const pctStr = `${pct.toFixed(1)}%`;
-                            charSpan.style.setProperty('--fill', pctStr);
-                            charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 100%)`;
-                            charSpan.classList.add("word-singing");
-                            charSpan.classList.remove("word-sung");
-                        } else {
-                            charSpan.style.setProperty('--fill', '0%');
-                            charSpan.style.backgroundImage = '';
-                            charSpan.classList.remove("word-sung", "word-singing");
-                        }
+                    if (currentTime < start) {
+                        // 状态 ①：还没唱到
+                        charSpan.style.setProperty('--fill', '0%');
+                        charSpan.style.backgroundImage = '';
+                        charSpan.classList.remove("word-sung", "word-singing");
+                    } else if (currentTime < end) {
+                        // 状态 ②：正在唱到这里（必须显式高亮）
+                        const dur = Math.max(0.04, end - start);
+                        const pct = Math.min(100, Math.max(0, ((currentTime - start) / dur) * 100));
+                        const pctStr = `${pct.toFixed(1)}%`;
+                        charSpan.style.setProperty('--fill', pctStr);
+                        charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 100%)`;
+                        charSpan.classList.add("word-singing");
+                        charSpan.classList.remove("word-sung");
                     } else {
-                        // 当前时间处于词间间隙或尚未发音/发音已完毕
-                        if (currentTime >= end) {
-                            charSpan.style.setProperty('--fill', '100%');
-                            charSpan.style.backgroundImage = '';
-                            charSpan.classList.add("word-sung");
-                            charSpan.classList.remove("word-singing");
-                        } else {
-                            charSpan.style.setProperty('--fill', '0%');
-                            charSpan.style.backgroundImage = '';
-                            charSpan.classList.remove("word-sung", "word-singing");
-                        }
+                        // 状态 ③：已经唱过（保持已唱完高亮）
+                        charSpan.style.setProperty('--fill', '100%');
+                        charSpan.style.backgroundImage = '';
+                        charSpan.classList.add("word-sung");
+                        charSpan.classList.remove("word-singing");
                     }
                 }
             });
