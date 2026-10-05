@@ -17,40 +17,29 @@ export function calibrateWordsInterludeIsolation(words: SonicWord[], nextLineSta
       : (typeof w.duration === 'number' && w.duration > 0 ? w.duration : 300);
     const text = String(w.text || '');
 
-    // 计算到下一个发音单元起始点的物理时间跨度 (Gap)
-    let nextStart: number;
-    if (i + 1 < words.length) {
+    const isLastWord = i === words.length - 1;
+    let maxAllowedDur = rawDur;
+
+    if (!isLastWord) {
+      // 句中字：发音时长严禁越界侵入下一个发音字起始时间
       const nextW = words[i + 1];
-      nextStart = typeof nextW.startMs === 'number' ? nextW.startMs : (typeof nextW.start === 'number' ? nextW.start : (start + rawDur));
-    } else if (typeof nextLineStartMs === 'number' && nextLineStartMs > start) {
-      nextStart = nextLineStartMs;
+      const nextStart = typeof nextW.startMs === 'number' ? nextW.startMs : (typeof nextW.start === 'number' ? nextW.start : (start + rawDur));
+      const gapToNext = Math.max(60, nextStart - start);
+      maxAllowedDur = Math.min(rawDur, gapToNext);
     } else {
-      nextStart = start + rawDur;
+      // 句末尾字：若后方紧邻下一行起始时间，尾字不得越界侵入下一行
+      if (typeof nextLineStartMs === 'number' && nextLineStartMs > start) {
+        const gapToNextLine = Math.max(100, nextLineStartMs - start - 50);
+        // 若后方有长达数秒的纯音乐大间奏且原始时长异乎寻常巨大(>4000ms)，才将尾字延音保护性收敛为自然长拖音上限(3200ms)
+        if (gapToNextLine > 4000 && rawDur > 4000) {
+          maxAllowedDur = 3200;
+        } else {
+          maxAllowedDur = Math.min(rawDur, gapToNextLine);
+        }
+      }
     }
 
-    const gap = Math.max(0, nextStart - start);
-
-    // 发音生理学上限保护：塞音、入声字、短辅音字无法产生长时间发音拖音
-    const isClosedSyllable = /[次了的着过得是不在拜出客没日白发接一七八十国吧吗呢啊呀啦]/.test(text.trim());
-    let maxVocalMs: number;
-    if (isClosedSyllable) {
-      maxVocalMs = 420;
-    } else if (text.trim().length > 1) {
-      maxVocalMs = Math.max(450, Math.min(800, text.trim().length * 150));
-    } else {
-      maxVocalMs = 650;
-    }
-
-    // 若该字后面紧接着音乐间奏 (gap > 750ms) 或该字原始时长异常偏大 (rawDur > 800ms)
-    // 严禁将间奏包含在字的高亮时间内！字的高亮时间必须严格限制在真实发音自然时长之内！
-    let vocalDur: number;
-    if (gap > 750 || rawDur > 800) {
-      vocalDur = Math.min(rawDur, maxVocalMs);
-    } else {
-      vocalDur = gap > 0 ? Math.min(rawDur, gap) : rawDur;
-    }
-
-    vocalDur = Math.max(80, vocalDur);
+    const vocalDur = Math.max(60, maxAllowedDur);
     const end = start + vocalDur;
 
     return {

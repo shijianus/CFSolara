@@ -3517,65 +3517,131 @@ function interpolateWordTimestamps(lineText, lineStartMs, lineDurationMs) {
     const clean = lineText.replace(/\[[^\]]+\]/g, '').replace(/<[^>]+>/g, '').trim();
     if (!clean) return [];
 
-    const regex = /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[^\s\w\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]+|\s+)/gu;
-    let match;
+    const isJapanese = /[\u3040-\u30ff]/.test(clean);
+
+    // 1. 智能语言感知分词流 (Language-Aware Syllable/Token Stream)
+    // - 日文平假名/片假名 + 拗音小假名/长音符自动结合为单一发音拍单元
+    // - 汉字单个成字
+    // - 西方语言按单词
+    // - 标点符号与空白提取并智能吸附
+    const tokenRegex = isJapanese
+        ? /([\u3040-\u30ff][ぁぃぅぇぉゃゅょゎァィゥェォャュョヮー〜~]?|[\u4e00-\u9fa5]|[\uac00-\ud7af]|[a-zA-Z0-9'’]+|[^\s\w\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]+|\s+)/gu
+        : /([\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]|[a-zA-Z0-9'’]+|[^\s\w\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]+|\s+)/gu;
+
     const rawSegments = [];
-    while ((match = regex.exec(clean)) !== null) {
-        rawSegments.push(match[1]);
+    let match;
+    while ((match = tokenRegex.exec(clean)) !== null) {
+        if (match[1]) rawSegments.push(match[1]);
     }
     if (rawSegments.length === 0) rawSegments.push(clean);
 
-    // 将纯标点与尾随空格智能合并至前一个发音词块，形成自然演唱单元
-    const rawTokens = [];
+    // 2. 标点符号与空白智能吸附绑定（Punctuation & Whitespace Binding）
+    // 严格杜绝行首标点（如日文引号「、中文括号（）被当作独立字占用时间！
+    const mergedTokens = [];
+    let pendingLeadingPunct = '';
+
     for (const seg of rawSegments) {
-        if (/^[\s\p{P}]+$/u.test(seg) && rawTokens.length > 0) {
-            rawTokens[rawTokens.length - 1] += seg;
+        const isPunctOrSpace = /^[\s\p{P}\p{S}]+$/u.test(seg);
+        if (isPunctOrSpace) {
+            if (mergedTokens.length === 0) {
+                // 行首标点暂存，待绑定至首个真实发音字
+                pendingLeadingPunct += seg;
+            } else {
+                // 行间/行末标点吸附于前一个字
+                mergedTokens[mergedTokens.length - 1] += seg;
+            }
         } else {
-            rawTokens.push(seg);
+            if (pendingLeadingPunct) {
+                mergedTokens.push(pendingLeadingPunct + seg);
+                pendingLeadingPunct = '';
+            } else {
+                mergedTokens.push(seg);
+            }
         }
     }
 
-    let totalWeight = 0;
-    const tokenWeights = rawTokens.map((tok, idx) => {
-        const trimmed = tok.trim();
-        if (!trimmed) return 0.2;
-        if (/^[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/.test(trimmed)) {
-            return idx === rawTokens.length - 1 ? 1.35 : 1.0;
+    if (mergedTokens.length === 0 && pendingLeadingPunct) {
+        mergedTokens.push(pendingLeadingPunct);
+    }
+
+    const tokensList = mergedTokens.length > 0 ? mergedTokens : rawSegments;
+
+    // 3. 计算各发音单元的语言学生理学权重 (Mora / Syllable Acoustic Weights)
+    const tokenWeights = tokensList.map((tok, idx) => {
+        const core = tok.replace(/[\s\p{P}\p{S}]/gu, '');
+        if (!core) return 0.2;
+
+        const isLast = idx === tokensList.length - 1;
+        const cadenceMultiplier = isLast ? 1.5 : 1.0;
+
+        if (isJapanese) {
+            // 日语语境：
+            // - 汉字（Kanji）通常为双拍甚至三拍（如「愛」「夢」「心」），赋予 1.95 基准权重
+            if (/[\u4e00-\u9fa5]/.test(core)) {
+                return 1.95 * cadenceMultiplier;
+            }
+            // - 促音「っ/ッ」为顿音，赋予 0.75 权重
+            if (/[っッ]/.test(core)) {
+                return 0.75 * cadenceMultiplier;
+            }
+            // - 含长音符或复合拗音
+            if (/[ー〜~ぁぃぅぇぉゃゅょゎァィゥェォャュョヮ]/.test(core)) {
+                return 1.35 * cadenceMultiplier;
+            }
+            // - 单假名标准拍 (1 Mora)
+            return 1.0 * cadenceMultiplier;
         }
-        const coreLen = trimmed.replace(/[\p{P}\s]/gu, '').length;
-        return Math.max(1.0, coreLen * 0.35);
+
+        // 中文语境：单字 1.0，句尾延音 1.45
+        if (/[\u4e00-\u9fa5]/.test(core)) {
+            return 1.0 * (isLast ? 1.45 : 1.0);
+        }
+
+        // 韩文音节
+        if (/[\uac00-\ud7af]/.test(core)) {
+            return 1.0 * (isLast ? 1.4 : 1.0);
+        }
+
+        // 西方语言多字母单词
+        const coreLen = core.length;
+        return Math.max(1.0, coreLen * 0.45) * (isLast ? 1.35 : 1.0);
     });
-    totalWeight = tokenWeights.reduce((a, b) => a + b, 0);
 
-    // 1. 根据音节与字数严格计算真实发音自然时长 (Natural Vocal Duration)
-    // CJK 音节与英文基准发音单元约为 300ms ~ 330ms
-    const naturalVocalMs = Math.max(450, Math.round(totalWeight * 320));
+    const totalWeight = Math.max(0.1, tokenWeights.reduce((a, b) => a + b, 0));
 
-    // 2. 严格间奏感知与隔离保护 (Interlude Isolation Protection)：
-    // 严禁将两行歌词之间的乐器间奏 (Gap) 吞入逐字发音时长中！
-    // 逐字发音严格指歌手实际开口唱的时间，唱完后剩余时间严格归属为乐器间奏。
+    // 4. 科学合理的整行声乐发音时长分配 (Dynamic Vocal Duration Allocation)
+    // 彻底废除 Math.round(totalWeight * 320) 的强行腰斩截断！
     let vocalDurationMs;
     if (lineDurationMs && lineDurationMs > 0) {
-        if (lineDurationMs <= naturalVocalMs * 1.35) {
-            // 连续歌词紧凑连接，占满当前行并在尾部保留约 200ms 自然换气微停顿
-            vocalDurationMs = Math.max(350, Math.min(naturalVocalMs, lineDurationMs - 200));
+        // 留出 120ms~450ms 自然呼吸换气微歇
+        const breathPauseMs = Math.min(450, Math.max(120, Math.round(lineDurationMs * 0.09)));
+        const usableLineMs = Math.max(400, lineDurationMs - breathPauseMs);
+
+        // 只有当平均每拍时长异常巨大 (> 850ms，且总时长 > 7000ms) 时，才判定为长器乐伴奏间奏
+        if (lineDurationMs > 7000 && (usableLineMs / totalWeight) > 850) {
+            // 长间奏下的合理发音时长（慢歌优雅展开，其余为纯音乐间奏）
+            const interludeVocal = Math.round(totalWeight * 650);
+            vocalDurationMs = Math.min(usableLineMs, Math.max(3500, interludeVocal));
         } else {
-            // 间隙远大于发音语速 -> 存在纯音乐乐器演奏/间奏！
-            // 严禁向后故意拉伸！唱完即止，后续时间全部作为间奏停驻高亮！
-            vocalDurationMs = naturalVocalMs;
+            // 绝大多数正常演唱行：全额平滑使用该行自然演唱时段，绝不提前跑完！
+            vocalDurationMs = usableLineMs;
         }
     } else {
-        vocalDurationMs = naturalVocalMs;
+        // 无时长参考时按自然歌唱 450ms/拍 估算
+        vocalDurationMs = Math.max(1500, Math.round(totalWeight * 450));
     }
 
     let currentStart = lineStartMs;
     const tokens = [];
 
-    for (let i = 0; i < rawTokens.length; i++) {
-        const tok = rawTokens[i];
+    for (let i = 0; i < tokensList.length; i++) {
+        const tok = tokensList[i];
         const weight = tokenWeights[i];
-        const tokDur = Math.max(50, Math.round((weight / totalWeight) * vocalDurationMs));
+        const tokDur = (i === tokensList.length - 1)
+            ? Math.max(60, Math.round(lineStartMs + vocalDurationMs - currentStart))
+            : Math.max(60, Math.round((weight / totalWeight) * vocalDurationMs));
         const tokEnd = currentStart + tokDur;
+
         tokens.push({
             text: tok,
             start: currentStart,
@@ -3668,39 +3734,29 @@ function calibrateWordsInterludeIsolation(words, nextLineStartMs) {
             : ((Number.isFinite(w.duration) && w.duration > 0) ? w.duration : 300);
         const text = String(w.text || '');
 
-        let nextStart;
-        if (i + 1 < words.length) {
+        const isLastWord = i === words.length - 1;
+        let maxAllowedDur = rawDur;
+
+        if (!isLastWord) {
+            // 句中字：发音时长严禁越界侵入下一个发音字起始时间
             const nextW = words[i + 1];
-            nextStart = Number.isFinite(nextW.startMs) ? nextW.startMs : (Number.isFinite(nextW.start) ? nextW.start : (start + rawDur));
-        } else if (Number.isFinite(nextLineStartMs) && nextLineStartMs > start) {
-            nextStart = nextLineStartMs;
+            const nextStart = Number.isFinite(nextW.startMs) ? nextW.startMs : (Number.isFinite(nextW.start) ? nextW.start : (start + rawDur));
+            const gapToNext = Math.max(60, nextStart - start);
+            maxAllowedDur = Math.min(rawDur, gapToNext);
         } else {
-            nextStart = start + rawDur;
+            // 句末尾字：若后方紧邻下一行起始时间，尾字不得越界侵入下一行
+            if (Number.isFinite(nextLineStartMs) && nextLineStartMs > start) {
+                const gapToNextLine = Math.max(100, nextLineStartMs - start - 50);
+                // 若后方有长达数秒的纯音乐大间奏且原始时长异乎寻常巨大(>4000ms)，才将尾字延音保护性收敛为自然长拖音上限(3200ms)
+                if (gapToNextLine > 4000 && rawDur > 4000) {
+                    maxAllowedDur = 3200;
+                } else {
+                    maxAllowedDur = Math.min(rawDur, gapToNextLine);
+                }
+            }
         }
 
-        const gap = Math.max(0, nextStart - start);
-
-        // 发音生理学上限保护：塞音、入声字、短辅音字无法产生长时间发音拖音
-        const isClosedSyllable = /[次了的着过得是不在拜出客没日白发接一七八十国吧吗呢啊呀啦]/.test(text.trim());
-        let maxVocalMs;
-        if (isClosedSyllable) {
-            maxVocalMs = 420;
-        } else if (text.trim().length > 1) {
-            maxVocalMs = Math.max(450, Math.min(800, text.trim().length * 150));
-        } else {
-            maxVocalMs = 650;
-        }
-
-        // 若该字后面紧接着音乐间奏 (gap > 750ms) 或该字原始时长异常偏大 (rawDur > 800ms)
-        // 严禁将间奏包含在字的高亮时间内！字的高亮时间必须严格限制在真实发音自然时长之内！
-        let vocalDur;
-        if (gap > 750 || rawDur > 800) {
-            vocalDur = Math.min(rawDur, maxVocalMs);
-        } else {
-            vocalDur = gap > 0 ? Math.min(rawDur, gap) : rawDur;
-        }
-
-        vocalDur = Math.max(80, vocalDur);
+        const vocalDur = Math.max(60, maxAllowedDur);
         const end = start + vocalDur;
 
         return {
