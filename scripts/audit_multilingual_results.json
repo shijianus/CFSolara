@@ -1,0 +1,134 @@
+{
+  "timestamp": "2026-10-06T17:32:59.278Z",
+  "testedUrl": "https://sonic.epocanvas.com/",
+  "testCases": [
+    {
+      "language": "粤语",
+      "song": "海阔天空",
+      "artist": "Beyond",
+      "checks": [
+        {
+          "name": "Cantonese Prelude Isolation",
+          "passed": true,
+          "state": {
+            "hasCurrent": false,
+            "singing": 0,
+            "sung": 0
+          }
+        },
+        {
+          "name": "Cantonese Opening Word Sync",
+          "passed": true,
+          "state": {
+            "currentText": "今天我 寒夜里看雪飘过",
+            "singing": [
+              {
+                "text": "今",
+                "fill": "43.5%"
+              }
+            ],
+            "sung": []
+          }
+        },
+        {
+          "name": "Cantonese Sustained Vocal Hold",
+          "passed": true,
+          "state": {
+            "singing": [
+              {
+                "text": "我 ",
+                "fill": "63.9%"
+              }
+            ],
+            "sung": [
+              "今",
+              "天"
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_cantonese_haikuotiankong.png"
+    },
+    {
+      "language": "英语",
+      "song": "Someone Like You",
+      "artist": "Adele",
+      "checks": [
+        {
+          "name": "English Piano Prelude Isolation",
+          "passed": true,
+          "state": {
+            "hasCurrent": false,
+            "singing": 0
+          }
+        },
+        {
+          "name": "English Word \"I\" Sync",
+          "passed": true,
+          "state": {
+            "currentText": "I heard",
+            "singing": [
+              {
+                "text": "I ",
+                "fill": "60.0%"
+              }
+            ]
+          }
+        },
+        {
+          "name": "English Word \"heard\" Hold & Space Binding",
+          "passed": true,
+          "state": {
+            "singing": [
+              {
+                "text": "heard",
+                "fill": "40.0%"
+              }
+            ],
+            "sung": [
+              "I"
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_english_adele.png"
+    },
+    {
+      "language": "韩语",
+      "song": "Celebrity",
+      "artist": "IU",
+      "checks": [
+        {
+          "name": "Korean Hangul Syllable \"세\" Sync",
+          "passed": true,
+          "state": {
+            "currentText": "세상의 모서리",
+            "singing": [
+              {
+                "text": "세",
+                "fill": "88.1%"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Korean Sequential Syllable Progression",
+          "passed": true,
+          "state": {
+            "singing": [
+              {
+                "text": "의 ",
+                "fill": "28.9%"
+              }
+            ],
+            "sung": [
+              "세",
+              "상"
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_korean_iu.png"
+    }
+  ]
+}
