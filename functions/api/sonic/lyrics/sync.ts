@@ -32,7 +32,7 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
   const cache = typeof caches !== 'undefined' ? (caches as any).default : null;
   const cacheKeyUrl = new URL(request.url);
   cacheKeyUrl.searchParams.sort();
-  cacheKeyUrl.searchParams.set('_sonic_cache_v', '4.0');
+  cacheKeyUrl.searchParams.set('_sonic_cache_v', '5.1');
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: 'GET' });
 
   if (cache && !params.nocache) {

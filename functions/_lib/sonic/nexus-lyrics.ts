@@ -23,6 +23,7 @@ import type { ProviderLyricResult } from './providers/adapter';
 import { getSonicConfig } from './config';
 import { getProvider } from './providers';
 import { lyrivaProvider } from './providers/lyriva';
+import { kugouProvider } from './providers/kugou';
 import { fetchAmllByIds, fetchAmllBySearch } from './providers/amll';
 import { lrclibProvider } from './providers/lrclib';
 import { internalLinesToSonicLines, extractPlainLyrics, computeQualityScore, isInstrumentalText } from './utils';
@@ -120,7 +121,7 @@ export async function resolveNexusLyrics(
       const lyrivaResult = await lyrivaProvider.getLyrics(params, { env, signal: lyrivaSignal });
       if (lyrivaResult && (lyrivaResult.data.instrumental || lyrivaResult.data.syncedLyrics.length > 0)) {
         recordAttempt('lyriva', true, lyrivaStart);
-        if (lyrivaResult.data.instrumental || lyrivaResult.data.sourceQuality === 'real' || params.prefer !== 'real') {
+        if (lyrivaResult.data.instrumental || lyrivaResult.data.sourceQuality === 'real') {
           return { ...lyrivaResult, attempts };
         }
         if (!interpolatedFallback) {
@@ -307,7 +308,29 @@ export async function resolveNexusLyrics(
     }
   }
 
-  // ④ LRCLIB Instrumental Pre-check & Synced LRC Fallback
+  // ④ Kugou KRC True Word-Level Lyrics (Highest Multi-language Syllable Precision)
+  if (config.enableKugou && (params.title || params.artist || params.platformId)) {
+    const kStart = Date.now();
+    try {
+      const kSignal = AbortSignal.timeout(config.timeoutMs);
+      const kugouResult = await kugouProvider.getLyrics(params, { env, signal: kSignal });
+      if (kugouResult && (kugouResult.data.instrumental || kugouResult.data.syncedLyrics.length > 0)) {
+        recordAttempt('kugou', true, kStart);
+        if (kugouResult.data.instrumental || kugouResult.data.sourceQuality === 'real') {
+          return { ...kugouResult, attempts };
+        }
+        if (!interpolatedFallback) {
+          interpolatedFallback = kugouResult;
+        }
+      } else {
+        recordAttempt('kugou', false, kStart, 'No lyrics from Kugou');
+      }
+    } catch (err: any) {
+      recordAttempt('kugou', false, kStart, err?.message || 'Kugou KRC error');
+    }
+  }
+
+  // ⑤ LRCLIB Instrumental Pre-check & Synced LRC Fallback
   if (config.enableLrclib) {
     const lStart = Date.now();
     try {
@@ -332,7 +355,7 @@ export async function resolveNexusLyrics(
     }
   }
 
-  // ⑤ Other Connected Multi-sources (Kugou KRC / Musixmatch richsync / Universal Engine)
+  // ⑥ Other Connected Multi-sources (Musixmatch richsync / Universal Engine)
   if (env && (params.title || params.artist || params.platformId)) {
     const uStart = Date.now();
     try {
@@ -383,7 +406,7 @@ export async function resolveNexusLyrics(
     }
   }
 
-  // ⑥ Return best interpolated fallback if available (words[] guaranteed populated)
+  // ⑦ Return best interpolated fallback if available (words[] guaranteed populated)
   if (interpolatedFallback) {
     // Ensure every line has words[]
     for (const line of interpolatedFallback.data.syncedLyrics) {
@@ -412,7 +435,7 @@ export async function resolveNexusLyrics(
     return { ...interpolatedFallback, attempts };
   }
 
-  // ⑦ No lyrics found
+  // ⑧ No lyrics found
   const emptyResult = buildResult('none', [], 'none', 'NONE', 0);
   return { ...emptyResult, attempts };
 }

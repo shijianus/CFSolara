@@ -3482,7 +3482,7 @@ function isMetadataLine(text, title, artist) {
     if (!text) return true;
     const trimmed = String(text).trim();
     if (
-        /^(作词|作曲|编曲|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|钢琴|小提琴|中提琴|大提琴|小提琴独奏|大提琴独奏|萨克斯|长笛|笛子|二胡|古筝|琵琶|打击乐|管乐|铜管|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|发行人|出品|出品人|出品公司|发行公司|版权|版权所有|特别支持|特别鸣谢|鸣谢|鸣谢单位|致谢|文案|插画|封面|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|营销|宣发|商务|Written|Composed|Arranged|Produced|Lyrics|Music|Vocal|Singer|Mixed|Mastered|Recorded|Sound Engineer|Executive Producer|Music Director|Special Thanks|Presented by|Published by)[\u4e00-\u9fa5a-zA-Z0-9\s.·()（）]*[:：\/—–-]/i.test(
+        /^(作词|作詞|作曲|编曲|編曲|歌|唄|演奏|プロデュース|レコーディング|ミキシング|マスタリング|词|曲|制作|制作人|监制|总监制|录音|录音师|录音室|混音|混音师|混音室|母带|母带后期|母带工程|吉他|贝斯|鼓|和声|合声|和声编写|合声编写|和声配唱|弦乐|弦乐编写|键盘|钢琴|小提琴|中提琴|大提琴|小提琴独奏|大提琴独奏|萨克斯|长笛|笛子|二胡|古筝|琵琶|打击乐|管乐|铜管|企划|统筹|OP|SP|演唱|原唱|歌手|专辑|发行|发行人|出品|出品人|出品公司|发行公司|版权|版权所有|特别支持|特别鸣谢|鸣谢|鸣谢单位|致谢|文案|插画|封面|总策划|音乐总监|人声编辑|音频编辑|录音工程|录音助理|混音助理|项目经理|营销|宣发|商务|Written|Composed|Arranged|Arrangement|Produced|Production|Lyrics|Music|Vocal|Singer|Mixed|Mixing|Mastered|Mastering|Recorded|Recording|Sound Engineer|Executive Producer|Music Director|Special Thanks|Presented by|Published by|Strings|Strings Arrange|Guitar|Bass|Drums|Keyboard|Piano|Synthesizer|Programming)[\u4e00-\u9fa5\u3040-\u30ffa-zA-Z0-9\s.·()（）]*[:：\/—–-]/i.test(
             trimmed
         )
     ) {

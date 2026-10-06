@@ -1,0 +1,115 @@
+{
+  "timestamp": "2026-10-06T13:03:51.156Z",
+  "testedUrl": "https://sonic.epocanvas.com/",
+  "testCases": [
+    {
+      "song": "First Love",
+      "artist": "宇多田ヒカル",
+      "checks": [
+        {
+          "name": "Staff Credit Cleanliness",
+          "passed": true,
+          "detail": "最后（さいご）のキスは"
+        },
+        {
+          "name": "Prelude Isolation (t=10.0s)",
+          "passed": true,
+          "state": {
+            "hasCurrentLine": false,
+            "singingCount": 0,
+            "sungCount": 0
+          }
+        },
+        {
+          "name": "Accurate Word Progression (t=22.5s)",
+          "passed": true,
+          "state": {
+            "lineText": "最后（さいご）のキスは",
+            "singingWords": [
+              {
+                "text": "最",
+                "fill": "81.2%"
+              }
+            ],
+            "sungWords": []
+          }
+        },
+        {
+          "name": "Sequential Mora Progression (t=23.2s)",
+          "passed": true,
+          "state": {
+            "singingWords": [
+              {
+                "text": "后",
+                "fill": "47.1%"
+              }
+            ],
+            "sungWords": [
+              "最"
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_first_love_sync.png"
+    },
+    {
+      "song": "Lemon",
+      "artist": "米津玄師",
+      "checks": [
+        {
+          "name": "Lemon Prelude Isolation (Zero Premature Highlight)",
+          "passed": true,
+          "state": {
+            "singing": [],
+            "sung": []
+          }
+        },
+        {
+          "name": "Lemon Opening Word Sync (t=1.5s)",
+          "passed": true,
+          "state": {
+            "currentText": "夢ならば",
+            "singing": [
+              {
+                "text": "夢",
+                "fill": "34.0%"
+              }
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_lemon_sync.png"
+    },
+    {
+      "song": "晴天",
+      "artist": "周杰伦",
+      "checks": [
+        {
+          "name": "Chinese Prelude Isolation",
+          "passed": true,
+          "state": {
+            "hasCurrent": false,
+            "singingCount": 0
+          }
+        },
+        {
+          "name": "Chinese Vocal Sync (t=31.5s)",
+          "passed": true,
+          "state": {
+            "currentText": "故事的小黄花",
+            "singing": [
+              {
+                "text": "事",
+                "fill": "87.5%"
+              }
+            ],
+            "sung": [
+              "故"
+            ]
+          }
+        }
+      ],
+      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_qingtian_sync.png"
+    }
+  ]
+}
