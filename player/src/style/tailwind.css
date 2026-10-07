@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import './glass.css';
+
+@plugin '@iconify/tailwind4';

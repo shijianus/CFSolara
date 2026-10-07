@@ -99,7 +99,7 @@ export const kugouProvider: SonicProviderAdapter = {
     try {
       const sUrl = `http://mobilecdn.kugou.com/api/v3/search/song?keyword=${encodeURIComponent(query)}&page=${page}&pagesize=${count}`;
       const sRes = await fetch(sUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CFSolara/2.0' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Sonic/2.1.0' },
         signal: options?.signal || AbortSignal.timeout(config.timeoutMs),
       });
       if (!sRes.ok) return [];

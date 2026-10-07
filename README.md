@@ -1,4 +1,4 @@
-# 🎶 Solara（光域）& Sonic 多源聚合网关 (v2.1.0 稳定发行版)
+# 🎶 Sonic 多源聚合音乐云平台 & 网关 (v2.1.0 稳定发行版)
 
 > 🌐 基于 Cloudflare Pages Functions 打造的现代化网页音乐播放器与 **Sonic 多源聚合网关**。具备品牌化路由、并行多上游检索去重、多语言毫秒级真逐字歌词（中/英/日/粤/韩）与自适应插值兜底。
 > 
@@ -8,7 +8,7 @@
 
 ## ⚡ Sonic 多源聚合网关 (Sonic Gateway)
 
-Solara 现已全面接入 **Sonic 网关协议**。所有开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式与 `sonic:` 缓存前缀。
+Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式与 `sonic:` 缓存前缀。
 
 ### 统一响应结构
 所有 `/api/sonic/*` 接口遵循一致的顶层契约：
@@ -157,5 +157,6 @@ curl -s "http://localhost/api/sonic/lyrics?title=年少有为&platformId=1293886
 
 ---
 
-## 📄 许可证
-本项目采用 CC BY-NC-SA 协议，禁止商业化行为，任何衍生项目必须保留本项目地址并以相同协议开源。
+## 📄 许可证与版权 (Copyright & License)
+Copyright © 2026 EpoCanvas. All rights reserved.  
+本项目采用 CC BY-NC-SA 协议，禁止商业化转售行为，任何衍生项目必须保留本项目地址并以相同协议开源。

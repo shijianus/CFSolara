@@ -7,7 +7,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
   const url = new URL(request.url);
   const redirectMode = url.searchParams.get('mode') === 'json' ? 'json' : 'redirect';
-  const state = url.searchParams.get('state') || 'solara_login';
+  const state = url.searchParams.get('state') || 'sonic_login';
   const authorizeUrl = buildAuthorizeUrl(env, url.origin, state);
 
   if (redirectMode === 'json') {

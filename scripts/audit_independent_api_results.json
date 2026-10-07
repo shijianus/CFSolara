@@ -1,0 +1,750 @@
+{
+  "timestamp": "2026-10-05 21:04:17 UTC",
+  "targetUrl": "https://sonic.epocanvas.com/api/sonic/lyrics/nexus",
+  "overallPassed": false,
+  "totalTested": 5,
+  "totalPassed": 2,
+  "songs": [
+    {
+      "song": "Lemon - 米津玄師",
+      "language": "ja",
+      "category": "Japanese Rapid Mora",
+      "passed": false,
+      "latency_ms": 5844.0,
+      "provider": "kugou",
+      "sourceQuality": "real",
+      "level": "word",
+      "totalLines": 54,
+      "linesWithWords": 54,
+      "totalWords": 520,
+      "checks": {
+        "sourceQualityReal": true,
+        "hasLines": true,
+        "wordsCoverage": true,
+        "alignmentOk": true,
+        "progressionOk": false,
+        "staffCleanOk": true
+      },
+      "sampleLines": [
+        {
+          "lineIndex": 0,
+          "text": "夢ならば",
+          "start": 1134,
+          "wordsCount": 4,
+          "words": [
+            {
+              "text": "夢",
+              "startMs": 1134,
+              "start": 1134,
+              "startSec": 1.134,
+              "endMs": 1462,
+              "end": 1462,
+              "endSec": 1.462,
+              "durationMs": 328,
+              "duration": 328,
+              "durationSec": 0.328
+            },
+            {
+              "text": "な",
+              "startMs": 1462,
+              "start": 1462,
+              "startSec": 1.462,
+              "endMs": 1734,
+              "end": 1734,
+              "endSec": 1.734,
+              "durationMs": 272,
+              "duration": 272,
+              "durationSec": 0.272
+            },
+            {
+              "text": "ら",
+              "startMs": 1734,
+              "start": 1734,
+              "startSec": 1.734,
+              "endMs": 1902,
+              "end": 1902,
+              "endSec": 1.902,
+              "durationMs": 168,
+              "duration": 168,
+              "durationSec": 0.168
+            },
+            {
+              "text": "ば",
+              "startMs": 1902,
+              "start": 1902,
+              "startSec": 1.902,
+              "endMs": 2214,
+              "end": 2214,
+              "endSec": 2.214,
+              "durationMs": 312,
+              "duration": 312,
+              "durationSec": 0.312
+            }
+          ]
+        },
+        {
+          "lineIndex": 1,
+          "text": "どれほどよかったでしょう",
+          "start": 2380,
+          "wordsCount": 12,
+          "words": [
+            {
+              "text": "ど",
+              "startMs": 2380,
+              "start": 2380,
+              "startSec": 2.38,
+              "endMs": 2684,
+              "end": 2684,
+              "endSec": 2.684,
+              "durationMs": 304,
+              "duration": 304,
+              "durationSec": 0.304
+            },
+            {
+              "text": "れ",
+              "startMs": 2684,
+              "start": 2684,
+              "startSec": 2.684,
+              "endMs": 3036,
+              "end": 3036,
+              "endSec": 3.036,
+              "durationMs": 352,
+              "duration": 352,
+              "durationSec": 0.352
+            },
+            {
+              "text": "ほ",
+              "startMs": 3036,
+              "start": 3036,
+              "startSec": 3.036,
+              "endMs": 3204,
+              "end": 3204,
+              "endSec": 3.204,
+              "durationMs": 168,
+              "duration": 168,
+              "durationSec": 0.168
+            },
+            {
+              "text": "ど",
+              "startMs": 3204,
+              "start": 3204,
+              "startSec": 3.204,
+              "endMs": 3652,
+              "end": 3652,
+              "endSec": 3.652,
+              "durationMs": 448,
+              "duration": 448,
+              "durationSec": 0.448
+            }
+          ]
+        }
+      ],
+      "staffLinesFound": [],
+      "alignmentErrors": [],
+      "progressionErrors": [
+        {
+          "lineIndex": 1,
+          "wordIndex": 9,
+          "wordText": "し",
+          "error": "Start (2604) regressed before previous End (4608)"
+        }
+      ]
+    },
+    {
+      "song": "First Love - 宇多田ヒカル",
+      "language": "ja",
+      "category": "Japanese Ballad / Long Vowels",
+      "passed": false,
+      "latency_ms": 753.8,
+      "provider": "kugou",
+      "sourceQuality": "real",
+      "level": "word",
+      "totalLines": 33,
+      "linesWithWords": 33,
+      "totalWords": 274,
+      "checks": {
+        "sourceQualityReal": true,
+        "hasLines": true,
+        "wordsCoverage": true,
+        "alignmentOk": true,
+        "progressionOk": false,
+        "staffCleanOk": true
+      },
+      "sampleLines": [
+        {
+          "lineIndex": 0,
+          "text": "最後のキスは",
+          "start": 21899,
+          "wordsCount": 6,
+          "words": [
+            {
+              "text": "最",
+              "startMs": 21899,
+              "start": 21899,
+              "startSec": 21.899,
+              "endMs": 23899,
+              "end": 23899,
+              "endSec": 23.899,
+              "durationMs": 2000,
+              "duration": 2000,
+              "durationSec": 2
+            },
+            {
+              "text": "後",
+              "startMs": 23899,
+              "start": 23899,
+              "startSec": 23.899,
+              "endMs": 24659,
+              "end": 24659,
+              "endSec": 24.659,
+              "durationMs": 760,
+              "duration": 760,
+              "durationSec": 0.76
+            },
+            {
+              "text": "の",
+              "startMs": 24659,
+              "start": 24659,
+              "startSec": 24.659,
+              "endMs": 25539,
+              "end": 25539,
+              "endSec": 25.539,
+              "durationMs": 880,
+              "duration": 880,
+              "durationSec": 0.88
+            },
+            {
+              "text": "キ",
+              "startMs": 25539,
+              "start": 25539,
+              "startSec": 25.539,
+              "endMs": 26083,
+              "end": 26083,
+              "endSec": 26.083,
+              "durationMs": 544,
+              "duration": 544,
+              "durationSec": 0.544
+            }
+          ]
+        },
+        {
+          "lineIndex": 1,
+          "text": "タバコのflavorがした",
+          "start": 26891,
+          "wordsCount": 8,
+          "words": [
+            {
+              "text": "タ",
+              "startMs": 26891,
+              "start": 26891,
+              "startSec": 26.891,
+              "endMs": 27251,
+              "end": 27251,
+              "endSec": 27.251,
+              "durationMs": 360,
+              "duration": 360,
+              "durationSec": 0.36
+            },
+            {
+              "text": "バ",
+              "startMs": 27251,
+              "start": 27251,
+              "startSec": 27.251,
+              "endMs": 28211,
+              "end": 28211,
+              "endSec": 28.211,
+              "durationMs": 960,
+              "duration": 960,
+              "durationSec": 0.96
+            },
+            {
+              "text": "コ",
+              "startMs": 28211,
+              "start": 28211,
+              "startSec": 28.211,
+              "endMs": 28356,
+              "end": 28356,
+              "endSec": 28.356,
+              "durationMs": 145,
+              "duration": 145,
+              "durationSec": 0.145
+            },
+            {
+              "text": "の",
+              "startMs": 28356,
+              "start": 28356,
+              "startSec": 28.356,
+              "endMs": 28844,
+              "end": 28844,
+              "endSec": 28.844,
+              "durationMs": 488,
+              "duration": 488,
+              "durationSec": 0.488
+            }
+          ]
+        }
+      ],
+      "staffLinesFound": [],
+      "alignmentErrors": [],
+      "progressionErrors": [
+        {
+          "lineIndex": 12,
+          "wordIndex": 5,
+          "wordText": "う",
+          "error": "Start (94506) regressed before previous End (94566)"
+        },
+        {
+          "lineIndex": 25,
+          "wordIndex": 5,
+          "wordText": "う",
+          "error": "Start (185235) regressed before previous End (185295)"
+        }
+      ]
+    },
+    {
+      "song": "夜に駆ける - YOASOBI",
+      "language": "ja",
+      "category": "Japanese Modern J-Pop",
+      "passed": false,
+      "latency_ms": 731.7,
+      "provider": "amll",
+      "sourceQuality": "real",
+      "level": "word",
+      "totalLines": 56,
+      "linesWithWords": 56,
+      "totalWords": 692,
+      "checks": {
+        "sourceQualityReal": true,
+        "hasLines": true,
+        "wordsCoverage": true,
+        "alignmentOk": true,
+        "progressionOk": false,
+        "staffCleanOk": true
+      },
+      "sampleLines": [
+        {
+          "lineIndex": 0,
+          "text": "沈むように溶けてゆくように",
+          "start": 1737,
+          "wordsCount": 13,
+          "words": [
+            {
+              "text": "沈",
+              "startMs": 1737,
+              "start": 1737,
+              "startSec": 1.737,
+              "endMs": 2175,
+              "end": 2175,
+              "endSec": 2.175,
+              "durationMs": 438,
+              "duration": 438,
+              "durationSec": 0.438
+            },
+            {
+              "text": "む",
+              "startMs": 2175,
+              "start": 2175,
+              "startSec": 2.175,
+              "endMs": 2592,
+              "end": 2592,
+              "endSec": 2.592,
+              "durationMs": 417,
+              "duration": 417,
+              "durationSec": 0.417
+            },
+            {
+              "text": "よ",
+              "startMs": 2592,
+              "start": 2592,
+              "startSec": 2.592,
+              "endMs": 2896,
+              "end": 2896,
+              "endSec": 2.896,
+              "durationMs": 304,
+              "duration": 304,
+              "durationSec": 0.304
+            },
+            {
+              "text": "う",
+              "startMs": 2896,
+              "start": 2896,
+              "startSec": 2.896,
+              "endMs": 3122,
+              "end": 3122,
+              "endSec": 3.122,
+              "durationMs": 226,
+              "duration": 226,
+              "durationSec": 0.226
+            }
+          ]
+        },
+        {
+          "lineIndex": 1,
+          "text": "二人だけの空が広がる夜に",
+          "start": 9142,
+          "wordsCount": 11,
+          "words": [
+            {
+              "text": "二人",
+              "startMs": 9142,
+              "start": 9142,
+              "startSec": 9.142,
+              "endMs": 9961,
+              "end": 9961,
+              "endSec": 9.961,
+              "durationMs": 819,
+              "duration": 819,
+              "durationSec": 0.819
+            },
+            {
+              "text": "だ",
+              "startMs": 9961,
+              "start": 9961,
+              "startSec": 9.961,
+              "endMs": 10272,
+              "end": 10272,
+              "endSec": 10.272,
+              "durationMs": 311,
+              "duration": 311,
+              "durationSec": 0.311
+            },
+            {
+              "text": "け",
+              "startMs": 10272,
+              "start": 10272,
+              "startSec": 10.272,
+              "endMs": 10571,
+              "end": 10571,
+              "endSec": 10.571,
+              "durationMs": 299,
+              "duration": 299,
+              "durationSec": 0.299
+            },
+            {
+              "text": "の",
+              "startMs": 10571,
+              "start": 10571,
+              "startSec": 10.571,
+              "endMs": 10754,
+              "end": 10754,
+              "endSec": 10.754,
+              "durationMs": 183,
+              "duration": 183,
+              "durationSec": 0.183
+            }
+          ]
+        }
+      ],
+      "staffLinesFound": [],
+      "alignmentErrors": [],
+      "progressionErrors": [
+        {
+          "lineIndex": 11,
+          "wordIndex": 7,
+          "wordText": "て",
+          "error": "Start (63794) regressed before previous End (63803)"
+        },
+        {
+          "lineIndex": 28,
+          "wordIndex": 1,
+          "wordText": "ん",
+          "error": "Start (134689) regressed before previous End (134743)"
+        },
+        {
+          "lineIndex": 29,
+          "wordIndex": 6,
+          "wordText": "て",
+          "error": "Start (137247) regressed before previous End (137278)"
+        },
+        {
+          "lineIndex": 31,
+          "wordIndex": 8,
+          "wordText": "つ",
+          "error": "Start (141038) regressed before previous End (141048)"
+        },
+        {
+          "lineIndex": 43,
+          "wordIndex": 13,
+          "wordText": "て",
+          "error": "Start (194874) regressed before previous End (194893)"
+        }
+      ]
+    },
+    {
+      "song": "前前前世 - RADWIMPS",
+      "language": "ja",
+      "category": "Japanese Rock / Fast Tempo",
+      "passed": true,
+      "latency_ms": 794.6,
+      "provider": "kugou",
+      "sourceQuality": "real",
+      "level": "word",
+      "totalLines": 55,
+      "linesWithWords": 55,
+      "totalWords": 540,
+      "checks": {
+        "sourceQualityReal": true,
+        "hasLines": true,
+        "wordsCoverage": true,
+        "alignmentOk": true,
+        "progressionOk": true,
+        "staffCleanOk": true
+      },
+      "sampleLines": [
+        {
+          "lineIndex": 0,
+          "text": "やっと眼を覚ましたかい",
+          "start": 20333,
+          "wordsCount": 11,
+          "words": [
+            {
+              "text": "や",
+              "startMs": 20333,
+              "start": 20333,
+              "startSec": 20.333,
+              "endMs": 20493,
+              "end": 20493,
+              "endSec": 20.493,
+              "durationMs": 160,
+              "duration": 160,
+              "durationSec": 0.16
+            },
+            {
+              "text": "っ",
+              "startMs": 20493,
+              "start": 20493,
+              "startSec": 20.493,
+              "endMs": 20627,
+              "end": 20627,
+              "endSec": 20.627,
+              "durationMs": 134,
+              "duration": 134,
+              "durationSec": 0.134
+            },
+            {
+              "text": "と",
+              "startMs": 20627,
+              "start": 20627,
+              "startSec": 20.627,
+              "endMs": 21042,
+              "end": 21042,
+              "endSec": 21.042,
+              "durationMs": 415,
+              "duration": 415,
+              "durationSec": 0.415
+            },
+            {
+              "text": "眼",
+              "startMs": 21042,
+              "start": 21042,
+              "startSec": 21.042,
+              "endMs": 21225,
+              "end": 21225,
+              "endSec": 21.225,
+              "durationMs": 183,
+              "duration": 183,
+              "durationSec": 0.183
+            }
+          ]
+        },
+        {
+          "lineIndex": 1,
+          "text": "それなのになぜ眼も",
+          "start": 24701,
+          "wordsCount": 9,
+          "words": [
+            {
+              "text": "そ",
+              "startMs": 24701,
+              "start": 24701,
+              "startSec": 24.701,
+              "endMs": 24989,
+              "end": 24989,
+              "endSec": 24.989,
+              "durationMs": 288,
+              "duration": 288,
+              "durationSec": 0.288
+            },
+            {
+              "text": "れ",
+              "startMs": 24989,
+              "start": 24989,
+              "startSec": 24.989,
+              "endMs": 25307,
+              "end": 25307,
+              "endSec": 25.307,
+              "durationMs": 318,
+              "duration": 318,
+              "durationSec": 0.318
+            },
+            {
+              "text": "な",
+              "startMs": 25307,
+              "start": 25307,
+              "startSec": 25.307,
+              "endMs": 25466,
+              "end": 25466,
+              "endSec": 25.466,
+              "durationMs": 159,
+              "duration": 159,
+              "durationSec": 0.159
+            },
+            {
+              "text": "の",
+              "startMs": 25466,
+              "start": 25466,
+              "startSec": 25.466,
+              "endMs": 25633,
+              "end": 25633,
+              "endSec": 25.633,
+              "durationMs": 167,
+              "duration": 167,
+              "durationSec": 0.167
+            }
+          ]
+        }
+      ],
+      "staffLinesFound": [],
+      "alignmentErrors": [],
+      "progressionErrors": []
+    },
+    {
+      "song": "晴天 - 周杰伦",
+      "language": "zh",
+      "category": "Mandarin Pop / Benchmark",
+      "passed": true,
+      "latency_ms": 709.9,
+      "provider": "lyriva",
+      "sourceQuality": "real",
+      "level": "word",
+      "totalLines": 50,
+      "linesWithWords": 50,
+      "totalWords": 494,
+      "checks": {
+        "sourceQualityReal": true,
+        "hasLines": true,
+        "wordsCoverage": true,
+        "alignmentOk": true,
+        "progressionOk": true,
+        "staffCleanOk": true
+      },
+      "sampleLines": [
+        {
+          "lineIndex": 0,
+          "text": "故事的小黄花",
+          "start": 29264,
+          "wordsCount": 6,
+          "words": [
+            {
+              "text": "故",
+              "startMs": 29264,
+              "start": 29264,
+              "startSec": 29.264,
+              "endMs": 29654,
+              "end": 29654,
+              "endSec": 29.654,
+              "durationMs": 390,
+              "duration": 390,
+              "durationSec": 0.39
+            },
+            {
+              "text": "事",
+              "startMs": 29654,
+              "start": 29654,
+              "startSec": 29.654,
+              "endMs": 30046,
+              "end": 30046,
+              "endSec": 30.046,
+              "durationMs": 392,
+              "duration": 392,
+              "durationSec": 0.392
+            },
+            {
+              "text": "的",
+              "startMs": 30046,
+              "start": 30046,
+              "startSec": 30.046,
+              "endMs": 30494,
+              "end": 30494,
+              "endSec": 30.494,
+              "durationMs": 448,
+              "duration": 448,
+              "durationSec": 0.448
+            },
+            {
+              "text": "小",
+              "startMs": 30494,
+              "start": 30494,
+              "startSec": 30.494,
+              "endMs": 31416,
+              "end": 31416,
+              "endSec": 31.416,
+              "durationMs": 922,
+              "duration": 922,
+              "durationSec": 0.922
+            }
+          ]
+        },
+        {
+          "lineIndex": 1,
+          "text": "从出生那年就飘着",
+          "start": 32710,
+          "wordsCount": 8,
+          "words": [
+            {
+              "text": "从",
+              "startMs": 32710,
+              "start": 32710,
+              "startSec": 32.71,
+              "endMs": 33162,
+              "end": 33162,
+              "endSec": 33.162,
+              "durationMs": 452,
+              "duration": 452,
+              "durationSec": 0.452
+            },
+            {
+              "text": "出",
+              "startMs": 33162,
+              "start": 33162,
+              "startSec": 33.162,
+              "endMs": 33542,
+              "end": 33542,
+              "endSec": 33.542,
+              "durationMs": 380,
+              "duration": 380,
+              "durationSec": 0.38
+            },
+            {
+              "text": "生",
+              "startMs": 33542,
+              "start": 33542,
+              "startSec": 33.542,
+              "endMs": 34079,
+              "end": 34079,
+              "endSec": 34.079,
+              "durationMs": 537,
+              "duration": 537,
+              "durationSec": 0.537
+            },
+            {
+              "text": "那",
+              "startMs": 34079,
+              "start": 34079,
+              "startSec": 34.079,
+              "endMs": 34561,
+              "end": 34561,
+              "endSec": 34.561,
+              "durationMs": 482,
+              "duration": 482,
+              "durationSec": 0.482
+            }
+          ]
+        }
+      ],
+      "staffLinesFound": [],
+      "alignmentErrors": [],
+      "progressionErrors": []
+    }
+  ]
+}

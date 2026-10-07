@@ -1,21 +1,22 @@
 (function () {
-    if (!window.__SOLARA_IS_MOBILE) {
+    if (!window.__SONIC_IS_MOBILE && !window.__SOLARA_IS_MOBILE) {
         return;
     }
 
-    const bridge = window.SolaraMobileBridge || {};
+    const bridge = window.SonicMobileBridge || window.SolaraMobileBridge || {};
     bridge.handlers = bridge.handlers || {};
     bridge.queue = Array.isArray(bridge.queue) ? bridge.queue : [];
+    window.SonicMobileBridge = bridge;
     window.SolaraMobileBridge = bridge;
 
-    const dom = window.SolaraDom || {};
+    const dom = window.SonicDom || window.SolaraDom || {};
     let initialized = false;
 
     function updateMobileToolbarTitleImpl() {
         if (!dom.mobileToolbarTitle) {
             return;
         }
-        dom.mobileToolbarTitle.textContent = "Solara";
+        dom.mobileToolbarTitle.textContent = "Sonic";
     }
 
     function updateMobileOverlayScrim() {

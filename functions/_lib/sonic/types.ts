@@ -143,7 +143,7 @@ export interface SonicSearchSource {
 }
 
 export interface SonicSearchTrack {
-  id: string; // for CFSolara player compatibility
+  id: string; // for Sonic player backward compatibility
   title: string;
   name: string; // alias for player compatibility
   artist: string;

@@ -1,0 +1,607 @@
+{
+  "timestamp": "2026-10-07T17:41:37.499Z",
+  "environment": "Cloudflare Pages Production",
+  "summary": {
+    "totalChecks": 62,
+    "passedChecks": 62,
+    "failedChecks": 0,
+    "status": "PASSED"
+  },
+  "domains": {
+    "https://cfsolara-dho.pages.dev": {
+      "htmlAudit": [
+        {
+          "check": "Home Page Status 200",
+          "passed": true,
+          "details": {
+            "status": 200
+          }
+        },
+        {
+          "check": "Title is \"Sonic - Cloud Music Platform\"",
+          "passed": true,
+          "details": {
+            "found": "Sonic - Cloud Music Platform",
+            "expected": "Sonic - Cloud Music Platform"
+          }
+        },
+        {
+          "check": "Meta Author is \"EpoCanvas\"",
+          "passed": true,
+          "details": {
+            "found": "EpoCanvas",
+            "expected": "EpoCanvas"
+          }
+        },
+        {
+          "check": "Meta Description is \"Sonic Music Cloud Platform (by EpoCanvas)\"",
+          "passed": true,
+          "details": {
+            "found": "Sonic Music Cloud Platform (by EpoCanvas)",
+            "expected": "Sonic Music Cloud Platform (by EpoCanvas)"
+          }
+        },
+        {
+          "check": "No Third-Party Tracking Scripts (Baidu Analytics & Google Analytics)",
+          "passed": true,
+          "details": {
+            "issues": []
+          }
+        }
+      ],
+      "staticAssetsAudit": [
+        {
+          "check": "Asset /logo.svg returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/logo.svg",
+            "status": 200,
+            "contentType": "image/svg+xml",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/css/index-DodZz9-S.css returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/css/index-DodZz9-S.css",
+            "status": 200,
+            "contentType": "text/css; charset=utf-8",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_core-base@11.4.13-9KWutKVV.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@intlify_core-base@11.4.13-9KWutKVV.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_message-compiler@11.4.13-Bye6nRil.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@intlify_message-compiler@11.4.13-Bye6nRil.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_shared@11.4.13-yte2mACy.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@intlify_shared@11.4.13-yte2mACy.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_reactivity@3.5.43-DwTD6fxY.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vue_reactivity@3.5.43-DwTD6fxY.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_runtime-core@3.5.43-bhzHlChM.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vue_runtime-core@3.5.43-bhzHlChM.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_runtime-dom@3.5.43-pCyh0Y74.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vue_runtime-dom@3.5.43-pCyh0Y74.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_shared@3.5.43-CoSKKFSB.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vue_shared@3.5.43-CoSKKFSB.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vueuse_core@13.9.0_vue@3.5.43_typescript@5.9.3_-DKHUAcH_.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vueuse_core@13.9.0_vue@3.5.43_typescript@5.9.3_-DKHUAcH_.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vueuse_shared@13.9.0_vue@3.5.43_typescript@5.9.3_-CTsgCXPy.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/@vueuse_shared@13.9.0_vue@3.5.43_typescript@5.9.3_-CTsgCXPy.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/gsap@3.15.0-a3sj5zmn.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/gsap@3.15.0-a3sj5zmn.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/index-CjrlgRWL.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/index-CjrlgRWL.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/pinia-plugin-persistedstate@4.7.1_pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3__-fFNy23FG.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/pinia-plugin-persistedstate@4.7.1_pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3__-fFNy23FG.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3_-CM4c1Knb.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3_-CM4c1Knb.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/vue-i18n@11.4.13_vue@3.5.43_typescript@5.9.3_-_aVWkmSd.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/vue-i18n@11.4.13_vue@3.5.43_typescript@5.9.3_-_aVWkmSd.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/vue-router@4.6.4_vue@3.5.43_typescript@5.9.3_-DIZxzZMY.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://cfsolara-dho.pages.dev/static/js/vue-router@4.6.4_vue@3.5.43_typescript@5.9.3_-DIZxzZMY.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        }
+      ],
+      "domHeaderAudit": [
+        {
+          "check": "Live <header> element rendered in DOM",
+          "passed": true,
+          "details": {
+            "found": true
+          }
+        },
+        {
+          "check": "Header contains \"Sonic\" branding",
+          "passed": true,
+          "details": {
+            "headerText": "Sonic"
+          }
+        },
+        {
+          "check": "Header has NO external GlassMusicPlayer doc links (github, miraitv, gm-doc, gmpd)",
+          "passed": true,
+          "details": {
+            "leakedLinks": [],
+            "totalLinksInHeader": 0
+          }
+        },
+        {
+          "check": "Header has NO Login button (cleanly removed)",
+          "passed": true,
+          "details": {
+            "loginTriggers": [],
+            "hasLoginInHtml": false
+          }
+        }
+      ],
+      "apiGatewayAudit": [
+        {
+          "check": "GET /api returns 200 with metadata (Platform: Sonic, Copyright: © EpoCanvas)",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "name": "Sonic Music Cloud Platform & Aggregation Gateway",
+            "copyright": "© EpoCanvas"
+          }
+        },
+        {
+          "check": "GET /api/sonic/search/nexus returns 200, brand \"Sonic\", and tracks array",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "brand": "Sonic",
+            "totalTracks": 31,
+            "sampleTrack": {
+              "title": "晴天",
+              "artist": "周杰伦",
+              "platform": "qq"
+            }
+          }
+        },
+        {
+          "check": "GET /api/sonic/lyrics/nexus returns 200, brand \"Sonic\", and synchronized lyrics",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "brand": "Sonic",
+            "level": "word",
+            "provider": "lyriva",
+            "samplePreview": "晴天 - 周杰伦 (Jay Chou)\n词：周杰伦\n曲：周杰伦\n编曲：周杰伦\n制作人：周杰伦\n合声：周杰伦\n合声编写：周杰伦\n吉他：蔡科俊Again\n贝斯：陈任佑\n鼓：陈柏州\n录音助理：刘勇志\n录音工"
+          }
+        }
+      ]
+    },
+    "https://sonic.epocanvas.com": {
+      "htmlAudit": [
+        {
+          "check": "Home Page Status 200",
+          "passed": true,
+          "details": {
+            "status": 200
+          }
+        },
+        {
+          "check": "Title is \"Sonic - Cloud Music Platform\"",
+          "passed": true,
+          "details": {
+            "found": "Sonic - Cloud Music Platform",
+            "expected": "Sonic - Cloud Music Platform"
+          }
+        },
+        {
+          "check": "Meta Author is \"EpoCanvas\"",
+          "passed": true,
+          "details": {
+            "found": "EpoCanvas",
+            "expected": "EpoCanvas"
+          }
+        },
+        {
+          "check": "Meta Description is \"Sonic Music Cloud Platform (by EpoCanvas)\"",
+          "passed": true,
+          "details": {
+            "found": "Sonic Music Cloud Platform (by EpoCanvas)",
+            "expected": "Sonic Music Cloud Platform (by EpoCanvas)"
+          }
+        },
+        {
+          "check": "No Third-Party Tracking Scripts (Baidu Analytics & Google Analytics)",
+          "passed": true,
+          "details": {
+            "issues": []
+          }
+        }
+      ],
+      "staticAssetsAudit": [
+        {
+          "check": "Asset /logo.svg returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/logo.svg",
+            "status": 200,
+            "contentType": "image/svg+xml",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/css/index-DodZz9-S.css returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/css/index-DodZz9-S.css",
+            "status": 200,
+            "contentType": "text/css; charset=utf-8",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_core-base@11.4.13-9KWutKVV.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@intlify_core-base@11.4.13-9KWutKVV.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_message-compiler@11.4.13-Bye6nRil.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@intlify_message-compiler@11.4.13-Bye6nRil.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@intlify_shared@11.4.13-yte2mACy.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@intlify_shared@11.4.13-yte2mACy.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_reactivity@3.5.43-DwTD6fxY.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vue_reactivity@3.5.43-DwTD6fxY.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_runtime-core@3.5.43-bhzHlChM.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vue_runtime-core@3.5.43-bhzHlChM.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_runtime-dom@3.5.43-pCyh0Y74.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vue_runtime-dom@3.5.43-pCyh0Y74.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vue_shared@3.5.43-CoSKKFSB.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vue_shared@3.5.43-CoSKKFSB.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vueuse_core@13.9.0_vue@3.5.43_typescript@5.9.3_-DKHUAcH_.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vueuse_core@13.9.0_vue@3.5.43_typescript@5.9.3_-DKHUAcH_.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/@vueuse_shared@13.9.0_vue@3.5.43_typescript@5.9.3_-CTsgCXPy.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/@vueuse_shared@13.9.0_vue@3.5.43_typescript@5.9.3_-CTsgCXPy.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/gsap@3.15.0-a3sj5zmn.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/gsap@3.15.0-a3sj5zmn.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/index-CjrlgRWL.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/index-CjrlgRWL.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/pinia-plugin-persistedstate@4.7.1_pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3__-fFNy23FG.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/pinia-plugin-persistedstate@4.7.1_pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3__-fFNy23FG.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3_-CM4c1Knb.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.43_typescript@5.9.3_-CM4c1Knb.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/vue-i18n@11.4.13_vue@3.5.43_typescript@5.9.3_-_aVWkmSd.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/vue-i18n@11.4.13_vue@3.5.43_typescript@5.9.3_-_aVWkmSd.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        },
+        {
+          "check": "Asset /static/js/vue-router@4.6.4_vue@3.5.43_typescript@5.9.3_-DIZxzZMY.js returned HTTP 200",
+          "passed": true,
+          "details": {
+            "fullUrl": "https://sonic.epocanvas.com/static/js/vue-router@4.6.4_vue@3.5.43_typescript@5.9.3_-DIZxzZMY.js",
+            "status": 200,
+            "contentType": "application/javascript",
+            "contentLength": 0
+          }
+        }
+      ],
+      "domHeaderAudit": [
+        {
+          "check": "Live <header> element rendered in DOM",
+          "passed": true,
+          "details": {
+            "found": true
+          }
+        },
+        {
+          "check": "Header contains \"Sonic\" branding",
+          "passed": true,
+          "details": {
+            "headerText": "Sonic"
+          }
+        },
+        {
+          "check": "Header has NO external GlassMusicPlayer doc links (github, miraitv, gm-doc, gmpd)",
+          "passed": true,
+          "details": {
+            "leakedLinks": [],
+            "totalLinksInHeader": 0
+          }
+        },
+        {
+          "check": "Header has NO Login button (cleanly removed)",
+          "passed": true,
+          "details": {
+            "loginTriggers": [],
+            "hasLoginInHtml": false
+          }
+        }
+      ],
+      "apiGatewayAudit": [
+        {
+          "check": "GET /api returns 200 with metadata (Platform: Sonic, Copyright: © EpoCanvas)",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "name": "Sonic Music Cloud Platform & Aggregation Gateway",
+            "copyright": "© EpoCanvas"
+          }
+        },
+        {
+          "check": "GET /api/sonic/search/nexus returns 200, brand \"Sonic\", and tracks array",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "brand": "Sonic",
+            "totalTracks": 50,
+            "sampleTrack": {
+              "title": "晴天(深情版)",
+              "artist": "Lucky小爱",
+              "platform": "netease"
+            }
+          }
+        },
+        {
+          "check": "GET /api/sonic/lyrics/nexus returns 200, brand \"Sonic\", and synchronized lyrics",
+          "passed": true,
+          "details": {
+            "status": 200,
+            "brand": "Sonic",
+            "level": "word",
+            "provider": "lyriva",
+            "samplePreview": "晴天 - 周杰伦 (Jay Chou)\n词：周杰伦\n曲：周杰伦\n编曲：周杰伦\n制作人：周杰伦\n合声：周杰伦\n合声编写：周杰伦\n吉他：蔡科俊Again\n贝斯：陈任佑\n鼓：陈柏州\n录音助理：刘勇志\n录音工"
+          }
+        }
+      ]
+    }
+  },
+  "gitAudit": [
+    {
+      "check": ".gitignore contains temp_glass_player/ and temp_sonic_ui/",
+      "passed": true,
+      "details": {
+        "hasGlassInIgnore": true,
+        "hasSonicInIgnore": true
+      }
+    },
+    {
+      "check": "git check-ignore confirms both temporary folders are ignored",
+      "passed": true,
+      "details": {
+        "output": "temp_glass_player\ntemp_sonic_ui"
+      }
+    },
+    {
+      "check": "Git index / staged changes are clean (no uncommitted source staged)",
+      "passed": true,
+      "details": {
+        "stagedFiles": []
+      }
+    },
+    {
+      "check": "Git history has zero commits containing temp_glass_player or temp_sonic_ui",
+      "passed": true,
+      "details": {
+        "commitCount": 0
+      }
+    }
+  ]
+}

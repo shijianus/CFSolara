@@ -5,6 +5,7 @@ export interface AppEnv {
   EPOMAIL_REDIRECT_URI?: string;
   MUSIC_API_BASE?: string;
   SOLARA_SECRET?: string;
+  SONIC_SECRET?: string;
   KV?: any;
   DB?: any;
   SONIC_UPSTREAM_GDSTUDIO?: string;

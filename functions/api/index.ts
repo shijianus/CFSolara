@@ -8,16 +8,17 @@ export async function onRequest({ request }: { request: Request; env: AppEnv }):
   const base = url.origin;
 
   return jsonResponse({
-    name: 'CFSolara Music API Platform',
-    version: '2.0.0',
-    description: '轻量化音乐服务与开放平台，支持 Epomail OAuth 统一接入与细粒度 API 连结',
+    name: 'Sonic Music Cloud Platform & Aggregation Gateway',
+    version: '2.1.0',
+    copyright: '© EpoCanvas',
+    description: '轻量化音乐云平台与开放聚合网关，支持 Epomail OAuth 真人验证与细粒度 API 连结',
     auth: {
       provider: 'Epomail OAuth 2.0',
       loginUrl: `${base}/api/auth/login`,
       callbackUrl: `${base}/api/auth/callback`,
       userUrl: `${base}/api/auth/user`,
       keyManagementUrl: `${base}/api/auth/key`,
-      header: 'X-CFSolara-Key: <your_key> or Authorization: Bearer <your_key>',
+      header: 'X-Sonic-Key: <your_key> or Authorization: Bearer <your_key> (亦兼容 X-CFSolara-Key)',
     },
     endpoints: [
       { path: '/api/music/search', method: 'GET', desc: '搜索歌曲 (params: q, source, count, page)' },

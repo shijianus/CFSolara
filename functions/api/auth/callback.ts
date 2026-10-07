@@ -45,7 +45,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
     return Response.redirect(targetUrl.toString(), 302);
   } catch (err: any) {
-    console.error('[CFSolara Auth Callback Error]', err);
+    console.error('[Sonic Auth Callback Error]', err);
     return errorResponse(err?.message || 'OAuth 登录授权处理失败', 500);
   }
 }

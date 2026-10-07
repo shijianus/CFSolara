@@ -1502,6 +1502,7 @@ body.dark-mode .epomail-auth-btn {
 }
 
 /* API Modal & Auth Styles */
+.sonic-modal-backdrop,
 .solara-modal-backdrop {
     position: fixed;
     inset: 0;
@@ -1514,6 +1515,7 @@ body.dark-mode .epomail-auth-btn {
     padding: 20px;
 }
 
+.sonic-modal-card,
 .solara-modal-card {
     background: var(--container-bg, #1a1a24);
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
@@ -1530,6 +1532,7 @@ body.dark-mode .epomail-auth-btn {
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+.sonic-modal-header,
 .solara-modal-header {
     display: flex;
     align-items: center;
@@ -1538,6 +1541,7 @@ body.dark-mode .epomail-auth-btn {
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
+.sonic-modal-header h3,
 .solara-modal-header h3 {
     margin: 0;
     font-size: 16px;
@@ -1547,6 +1551,7 @@ body.dark-mode .epomail-auth-btn {
     color: var(--primary-color, #1abc9c);
 }
 
+.sonic-modal-close,
 .solara-modal-close {
     background: none;
     border: none;
@@ -1556,10 +1561,12 @@ body.dark-mode .epomail-auth-btn {
     line-height: 1;
 }
 
+.sonic-modal-body,
 .solara-modal-body {
     padding: 24px;
 }
 
+.sonic-user-badge,
 .solara-user-badge {
     display: flex;
     align-items: center;
@@ -1570,6 +1577,7 @@ body.dark-mode .epomail-auth-btn {
     margin-bottom: 16px;
 }
 
+.sonic-user-avatar,
 .solara-user-avatar {
     width: 44px;
     height: 44px;
@@ -1577,16 +1585,19 @@ body.dark-mode .epomail-auth-btn {
     border: 2px solid var(--primary-color, #1abc9c);
 }
 
+.sonic-user-badge strong,
 .solara-user-badge strong {
     display: block;
     font-size: 15px;
 }
 
+.sonic-user-badge small,
 .solara-user-badge small {
     color: var(--text-secondary, #999);
     font-size: 12px;
 }
 
+.sonic-modal-tip,
 .solara-modal-tip {
     font-size: 13px;
     line-height: 1.6;
@@ -1640,6 +1651,7 @@ body.dark-mode .epomail-auth-btn {
     margin-top: 4px;
 }
 
+.sonic-modal-footer,
 .solara-modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -1648,6 +1660,7 @@ body.dark-mode .epomail-auth-btn {
     border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
+.sonic-btn-primary,
 .solara-btn-primary {
     background: var(--primary-color, #1abc9c);
     color: #fff;
@@ -1658,6 +1671,7 @@ body.dark-mode .epomail-auth-btn {
     font-weight: 600;
 }
 
+.sonic-btn-danger,
 .solara-btn-danger {
     background: rgba(239, 68, 68, 0.15);
     color: #ef4444;

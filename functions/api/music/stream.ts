@@ -48,7 +48,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
         return errorResponse('解析到的音频流地址无效', 502);
       }
     } catch (err: any) {
-      console.error('[CFSolara Music Stream Error]', err);
+      console.error('[Sonic Music Stream Error]', err);
       return errorResponse(err?.message || '解析音频流失败', 502);
     }
   }

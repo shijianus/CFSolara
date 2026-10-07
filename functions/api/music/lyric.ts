@@ -100,7 +100,7 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
 
     return response;
   } catch (err: any) {
-    console.error('[CFSolara Music Lyric Error]', err);
+    console.error('[Sonic Music Lyric Error]', err);
     return errorResponse(err?.message || '获取歌词失败', 502, {
       'Cache-Control': 'public, max-age=30',
       'Access-Control-Allow-Origin': '*',

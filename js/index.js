@@ -52,13 +52,15 @@ const dom = {
     searchArea: document.getElementById("searchArea"),
 };
 
+window.SonicDom = dom;
 window.SolaraDom = dom;
 
-const isMobileView = Boolean(window.__SOLARA_IS_MOBILE);
+const isMobileView = Boolean(window.__SONIC_IS_MOBILE || window.__SOLARA_IS_MOBILE);
 
-const mobileBridge = window.SolaraMobileBridge || {};
+const mobileBridge = window.SonicMobileBridge || window.SolaraMobileBridge || {};
 mobileBridge.handlers = mobileBridge.handlers || {};
 mobileBridge.queue = Array.isArray(mobileBridge.queue) ? mobileBridge.queue : [];
+window.SonicMobileBridge = mobileBridge;
 window.SolaraMobileBridge = mobileBridge;
 
 function invokeMobileHook(name, ...args) {
@@ -4393,10 +4395,11 @@ function showNotification(message, type = "success") {
 }
 
 // -------------------------------------------------------------
-// CFSolara 平台化: EpoMail OAuth 登录与开发者 API 凭证管理
+// Sonic 平台化: EpoMail OAuth 真人验证与开发者 API 凭证管理
 // -------------------------------------------------------------
 (function initEpomailAuth() {
-    const STORAGE_KEY = "solara_epomail_session";
+    const STORAGE_KEY = "sonic_epomail_session";
+    const LEGACY_STORAGE_KEY = "solara_epomail_session";
     const loginBtn = document.getElementById("epomailLoginBtn");
     const userLabel = document.getElementById("epomailUserLabel");
     const modal = document.getElementById("apiKeyModal");
@@ -4411,7 +4414,15 @@ function showNotification(message, type = "success") {
 
     function getSavedSession() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            let raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+                if (raw) {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, raw);
+                    } catch {}
+                }
+            }
             return raw ? JSON.parse(raw) : null;
         } catch {
             return null;
@@ -4420,13 +4431,16 @@ function showNotification(message, type = "success") {
 
     function saveSession(session) {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+            const serialized = JSON.stringify(session);
+            localStorage.setItem(STORAGE_KEY, serialized);
+            localStorage.setItem(LEGACY_STORAGE_KEY, serialized);
         } catch {}
     }
 
     function clearSession() {
         try {
             localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(LEGACY_STORAGE_KEY);
         } catch {}
     }
 
@@ -4438,7 +4452,7 @@ function showNotification(message, type = "success") {
             if (parsed && parsed.apiKey) {
                 saveSession(parsed);
                 window.history.replaceState(null, "", window.location.pathname);
-                showNotification("EpoMail OAuth 验证成功，API Key 已就绪！", "success");
+                showNotification("EpoMail OAuth 验证成功，Sonic API Key 已就绪！", "success");
             }
         } catch (e) {
             console.warn("Failed to parse session from hash", e);
@@ -4455,13 +4469,13 @@ function showNotification(message, type = "success") {
             if (userAvatar && session.avatar) userAvatar.src = session.avatar;
             if (loginBtn) {
                 loginBtn.classList.add("is-authenticated");
-                loginBtn.title = "已登录: " + session.email + " (点击查看 API 连结凭证)";
+                loginBtn.title = "已登录: " + session.email + " (点击查看 Sonic API 连结凭证)";
             }
         } else {
             if (userLabel) userLabel.textContent = "EpoMail 登录";
             if (loginBtn) {
                 loginBtn.classList.remove("is-authenticated");
-                loginBtn.title = "使用 EpoMail 账号统一接入与获取 API Key";
+                loginBtn.title = "使用 EpoMail 账号统一接入与获取 Sonic API Key";
             }
         }
     }

@@ -1,0 +1,313 @@
+{
+  "cacheDump": [
+    {
+      "key": "qq:0039MnYb0qxYhV:晴天:周杰伦",
+      "type": "synced",
+      "provider": "lyriva",
+      "lyricSyncType": "word",
+      "lyricSourceQuality": "real",
+      "linesCount": 50
+    },
+    {
+      "key": "qq:001Bbywq2gicae:搁浅:周杰伦",
+      "type": "synced",
+      "provider": "lyriva",
+      "lyricSyncType": "word",
+      "lyricSourceQuality": "real",
+      "linesCount": 42
+    }
+  ],
+  "domInspection": [
+    {
+      "lineIndex": 0,
+      "lineDataTime": "29.264",
+      "lineDataIndex": "0",
+      "className": "lyric-line",
+      "text": "故事的小黄花",
+      "wordsCount": 6,
+      "words": [
+        {
+          "text": "故",
+          "dataStart": "29.264",
+          "dataEnd": "29.654",
+          "dataWindex": "0",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "事",
+          "dataStart": "29.654",
+          "dataEnd": "30.046",
+          "dataWindex": "1",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "的",
+          "dataStart": "30.046",
+          "dataEnd": "30.494",
+          "dataWindex": "2",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "小",
+          "dataStart": "30.494",
+          "dataEnd": "31.144",
+          "dataWindex": "3",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "黄",
+          "dataStart": "31.416",
+          "dataEnd": "31.79",
+          "dataWindex": "4",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "花",
+          "dataStart": "31.79",
+          "dataEnd": "32.294",
+          "dataWindex": "5",
+          "styleFill": "",
+          "className": "word-char"
+        }
+      ]
+    },
+    {
+      "lineIndex": 1,
+      "lineDataTime": "32.71",
+      "lineDataIndex": "1",
+      "className": "lyric-line",
+      "text": "从出生那年就飘着",
+      "wordsCount": 8,
+      "words": [
+        {
+          "text": "从",
+          "dataStart": "32.71",
+          "dataEnd": "33.162",
+          "dataWindex": "0",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "出",
+          "dataStart": "33.162",
+          "dataEnd": "33.542",
+          "dataWindex": "1",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "生",
+          "dataStart": "33.542",
+          "dataEnd": "34.079",
+          "dataWindex": "2",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "那",
+          "dataStart": "34.079",
+          "dataEnd": "34.561",
+          "dataWindex": "3",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "年",
+          "dataStart": "34.561",
+          "dataEnd": "34.744",
+          "dataWindex": "4",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "就",
+          "dataStart": "34.744",
+          "dataEnd": "35.015",
+          "dataWindex": "5",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "飘",
+          "dataStart": "35.015",
+          "dataEnd": "35.407",
+          "dataWindex": "6",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "着",
+          "dataStart": "35.407",
+          "dataEnd": "35.827",
+          "dataWindex": "7",
+          "styleFill": "",
+          "className": "word-char"
+        }
+      ]
+    },
+    {
+      "lineIndex": 2,
+      "lineDataTime": "36.247",
+      "lineDataIndex": "2",
+      "className": "lyric-line",
+      "text": "童年的荡秋千",
+      "wordsCount": 6,
+      "words": [
+        {
+          "text": "童",
+          "dataStart": "36.247",
+          "dataEnd": "36.703",
+          "dataWindex": "0",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "年",
+          "dataStart": "36.703",
+          "dataEnd": "37.128",
+          "dataWindex": "1",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "的",
+          "dataStart": "37.128",
+          "dataEnd": "37.568",
+          "dataWindex": "2",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "荡",
+          "dataStart": "37.568",
+          "dataEnd": "38.218",
+          "dataWindex": "3",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "秋",
+          "dataStart": "38.424",
+          "dataEnd": "38.816",
+          "dataWindex": "4",
+          "styleFill": "",
+          "className": "word-char"
+        },
+        {
+          "text": "千",
+          "dataStart": "38.816",
+          "dataEnd": "39.351",
+          "dataWindex": "5",
+          "styleFill": "",
+          "className": "word-char"
+        }
+      ]
+    }
+  ],
+  "syncTestPrelude": {
+    "hasCurrentLine": false,
+    "hasAnySingingWord": false,
+    "hasAnySungWord": false
+  },
+  "syncTestMidVocal": {
+    "line0Current": true,
+    "words": [
+      {
+        "text": "故",
+        "start": "29.264",
+        "end": "29.654",
+        "fill": "100%",
+        "classes": "word-char word-sung",
+        "bgImage": ""
+      },
+      {
+        "text": "事",
+        "start": "29.654",
+        "end": "30.046",
+        "fill": "37.2%",
+        "classes": "word-char word-singing",
+        "bgImage": "linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) 37.2%, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 37.2%, var(--lyric-word-inactive, rgba(255, 255, 255, 0.35)) 100%)"
+      },
+      {
+        "text": "的",
+        "start": "30.046",
+        "end": "30.494",
+        "fill": "0%",
+        "classes": "word-char",
+        "bgImage": ""
+      },
+      {
+        "text": "小",
+        "start": "30.494",
+        "end": "31.144",
+        "fill": "0%",
+        "classes": "word-char",
+        "bgImage": ""
+      },
+      {
+        "text": "黄",
+        "start": "31.416",
+        "end": "31.79",
+        "fill": "0%",
+        "classes": "word-char",
+        "bgImage": ""
+      },
+      {
+        "text": "花",
+        "start": "31.79",
+        "end": "32.294",
+        "fill": "0%",
+        "classes": "word-char",
+        "bgImage": ""
+      }
+    ]
+  },
+  "syncTestInterlude": {
+    "line0IsCurrent": true,
+    "line1IsCurrent": false,
+    "singingWordsInLine0": [],
+    "sungWordsCountInLine0": 6,
+    "totalWordsInLine0": 6,
+    "words": [
+      {
+        "text": "故",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      },
+      {
+        "text": "事",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      },
+      {
+        "text": "的",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      },
+      {
+        "text": "小",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      },
+      {
+        "text": "黄",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      },
+      {
+        "text": "花",
+        "fill": "100%",
+        "classes": "word-char word-sung"
+      }
+    ]
+  },
+  "pauseTest": {
+    "isPaused": true,
+    "lyricSyncRafId": null
+  }
+}

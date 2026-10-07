@@ -29,7 +29,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       tracks,
     });
   } catch (err: any) {
-    console.error('[CFSolara Music Search Error]', err);
+    console.error('[Sonic Music Search Error]', err);
     return errorResponse(err?.message || '搜索曲库失败', 502);
   }
 }

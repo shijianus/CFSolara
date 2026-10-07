@@ -37,6 +37,6 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       allowedSources: ['netease', 'kuwo', 'qq'],
       allowedBitrates: ['128', '192', '320', 'flac'],
     },
-    instructions: '在外部专案的请求头中添加 X-CFSolara-Key: <your_api_key> 或 Authorization: Bearer <your_api_key> 即可使用全量音乐 API。',
+    instructions: '在外部专案的请求头中添加 X-Sonic-Key: <your_api_key> (亦兼容 X-CFSolara-Key 或 Authorization: Bearer <your_api_key>) 即可使用全量音乐 API。',
   });
 }

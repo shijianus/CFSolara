@@ -1,0 +1,44 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sonicAura" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="50%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <radialGradient id="sonicCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="80%" stop-color="#E0E7FF" />
+      <stop offset="100%" stop-color="#A5B4FC" />
+    </radialGradient>
+    <filter id="sonicGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 外层极光流光圆环 -->
+  <circle cx="100" cy="100" r="88" stroke="url(#sonicAura)" stroke-width="6" opacity="0.4" />
+  
+  <!-- 核心主渐变球体 -->
+  <circle cx="100" cy="100" r="80" fill="url(#sonicAura)" filter="url(#sonicGlow)" />
+  
+  <!-- 内嵌玻璃高光质感 -->
+  <circle cx="100" cy="100" r="76" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.5" fill="none" />
+  <circle cx="100" cy="100" r="64" fill="rgba(10, 10, 20, 0.35)" />
+
+  <!-- Sonic 声学波动同心环与中心律动原点 -->
+  <g stroke="rgba(255, 255, 255, 0.9)" stroke-linecap="round" fill="none">
+    <!-- 声波柱形律动 -->
+    <line x1="68" y1="90" x2="68" y2="110" stroke-width="4.5" />
+    <line x1="84" y1="78" x2="84" y2="122" stroke-width="5" />
+    <line x1="100" y1="64" x2="100" y2="136" stroke-width="5.5" stroke="#FFFFFF" />
+    <line x1="116" y1="78" x2="116" y2="122" stroke-width="5" />
+    <line x1="132" y1="90" x2="132" y2="110" stroke-width="4.5" />
+  </g>
+
+  <!-- 顶部微光点 -->
+  <circle cx="100" cy="42" r="3.5" fill="#FFFFFF" opacity="0.9" />
+</svg>

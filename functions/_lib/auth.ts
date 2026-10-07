@@ -1,9 +1,9 @@
 import type { AppEnv, UserSession } from './types';
 
 const DEFAULT_EPOMAIL_BASE = 'https://mail.epocanvas.com';
-const DEFAULT_CLIENT_ID = 'solara_music_platform';
-const DEFAULT_CLIENT_SECRET = 'solara_secret_2026';
-const DEFAULT_SIGNING_SECRET = 'solara_secret_key_sig_v1';
+const DEFAULT_CLIENT_ID = 'sonic_music_platform';
+const DEFAULT_CLIENT_SECRET = 'sonic_secret_2026';
+const DEFAULT_SIGNING_SECRET = 'sonic_secret_key_sig_v1';
 
 export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {
   const baseUrl = (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
@@ -29,7 +29,7 @@ export function buildAuthorizeUrl(env: AppEnv, origin: string, state?: string): 
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: 'openid profile email',
-    state: state || 'solara_auth',
+    state: state || 'sonic_auth',
   });
   return `${config.authorizeUrl}?${params.toString()}`;
 }
@@ -91,7 +91,7 @@ const memorySessions = new Map<string, UserSession>();
 const memoryKeyToSession = new Map<string, UserSession>();
 
 export async function createSession(env: AppEnv, userInfo: { email: string; name: string; avatar: string; role?: string; id?: string }): Promise<UserSession> {
-  const secret = env.SOLARA_SECRET || DEFAULT_SIGNING_SECRET;
+  const secret = env.SONIC_SECRET || env.SOLARA_SECRET || DEFAULT_SIGNING_SECRET;
   const now = Date.now();
   const expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString(); // 30 days
   const id = userInfo.id || `usr_${Math.random().toString(36).slice(2, 10)}`;
@@ -109,7 +109,7 @@ export async function createSession(env: AppEnv, userInfo: { email: string; name
   }
 
   const encodedEmail = btoa(userInfo.email).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const apiKey = `solara_live_${encodedEmail}_${keySig}`;
+  const apiKey = `sonic_live_${encodedEmail}_${keySig}`;
 
   const session: UserSession = {
     id,
@@ -130,7 +130,7 @@ export async function createSession(env: AppEnv, userInfo: { email: string; name
 export function extractAuthCredentials(request: Request): { token?: string; apiKey?: string } {
   const url = new URL(request.url);
   const queryKey = url.searchParams.get('api_key') || url.searchParams.get('key');
-  const headerKey = request.headers.get('x-cfsolara-key') || request.headers.get('x-api-key');
+  const headerKey = request.headers.get('x-sonic-key') || request.headers.get('x-cfsolara-key') || request.headers.get('x-api-key');
   const authHeader = request.headers.get('authorization') || '';
 
   let bearerToken: string | undefined;
@@ -138,9 +138,11 @@ export function extractAuthCredentials(request: Request): { token?: string; apiK
     bearerToken = authHeader.substring(7).trim();
   }
 
+  const isSonicBearer = bearerToken?.startsWith('sonic_live_') || bearerToken?.startsWith('solara_live_');
+
   return {
     token: bearerToken,
-    apiKey: headerKey || queryKey || (bearerToken?.startsWith('solara_live_') ? bearerToken : undefined),
+    apiKey: headerKey || queryKey || (isSonicBearer ? bearerToken : undefined),
   };
 }
 
@@ -152,9 +154,10 @@ export async function verifyAuth(request: Request, env: AppEnv): Promise<{ authe
     if (cached) {
       return { authenticated: true, user: cached };
     }
-    // Verifiable signature check
-    if (apiKey.startsWith('solara_live_')) {
-      const parts = apiKey.replace('solara_live_', '').split('_');
+    // Verifiable signature check for both sonic_live_ and solara_live_
+    if (apiKey.startsWith('sonic_live_') || apiKey.startsWith('solara_live_')) {
+      const prefix = apiKey.startsWith('sonic_live_') ? 'sonic_live_' : 'solara_live_';
+      const parts = apiKey.replace(prefix, '').split('_');
       if (parts.length >= 2) {
         try {
           const rawEmail = atob(parts[0].replace(/-/g, '+').replace(/_/g, '/'));
