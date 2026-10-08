@@ -32,6 +32,10 @@ export interface SongData {
   duration: number
   liked?: boolean
   mvId?: number | string
+  sha?: string
+  qualityBadge?: string
+  qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string }>
+  url?: string
 }
 
 export interface ArtistData {
@@ -228,6 +232,10 @@ export function transformSong(item: Record<string, unknown>): SongData {
     duration: (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0,
     liked: false,
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
+    sha: (item?.sha as string) || (song?.sha as string) || '',
+    qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || 'SQ',
+    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [],
+    url: (item?.streamUrl as string) || (item?.url as string) || (song?.url as string) || '',
   }
 }
 

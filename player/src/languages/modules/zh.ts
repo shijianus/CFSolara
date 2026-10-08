@@ -271,7 +271,7 @@ export default {
       all: '全部',
       official: '官方',
       live: '现场',
-      netease: '网易出品',
+      netease: 'Sonic 甄选',
     },
     actions: {
       loadMore: '加载更多',

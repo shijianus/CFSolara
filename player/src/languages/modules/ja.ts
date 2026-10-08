@@ -279,7 +279,7 @@ export default {
       all: '全部',
       official: '公式',
       live: 'ライブ',
-      netease: 'NetEase制作',
+      netease: 'Sonicオリジナル',
     },
     actions: {
       loadMore: 'もっと見る',

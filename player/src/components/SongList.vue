@@ -240,12 +240,26 @@ const downloadSong = (song: Song, index: number) => {
                 ></div>
               </div>
               <div class="min-w-0 flex-1">
-                <h3
-                  :title="song.name"
-                  class="text-primary truncate text-base font-medium transition-colors group-hover:text-pink-300"
-                >
-                  {{ song.name }}
-                </h3>
+                <div class="flex items-center gap-2">
+                  <h3
+                    :title="song.name"
+                    class="text-primary truncate text-base font-medium transition-colors group-hover:text-pink-300"
+                  >
+                    {{ song.name }}
+                  </h3>
+                  <!-- Sonic 统一音质分类标识 (替代第三方来源标记) -->
+                  <span
+                    v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider leading-none select-none transition-all"
+                    :class="[
+                      (song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless')
+                        ? 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.2)]'
+                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    ]"
+                  >
+                    {{ song.qualityBadge || (song.qualities?.[0]?.level === 'lossless' ? 'SQ 无损' : 'HQ 极高') }}
+                  </span>
+                </div>
                 <div class="mt-0.5 flex items-center gap-2 md:hidden">
                   <span class="text-primary/60 truncate text-xs">{{ song.artist }}</span>
                 </div>

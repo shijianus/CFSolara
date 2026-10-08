@@ -29,14 +29,18 @@ const playRelatedMV = (mv: any) => {
 
 const loadMV = async (id: number) => {
   try {
-    const [detailRes, urlRes, simiRes] = await Promise.all([
+    const [detailRes, urlRes, simiRes] = await Promise.allSettled([
       mvDetail({ mvid: id }),
       mvUrl({ id }),
       simiMv({ mvid: id }),
     ])
-    const d: any = (detailRes as any)?.data || (detailRes as any) || {}
-    const u: any = (urlRes as any)?.data || (urlRes as any) || {}
-    const sList: any[] = (simiRes as any)?.mvs || (simiRes as any)?.data || []
+    const d: any = detailRes.status === 'fulfilled' ? ((detailRes.value as any)?.data || (detailRes.value as any) || {}) : {}
+    const u: any = urlRes.status === 'fulfilled' ? ((urlRes.value as any)?.data || (urlRes.value as any) || {}) : {}
+    const sList: any[] = simiRes.status === 'fulfilled' ? ((simiRes.value as any)?.mvs || (simiRes.value as any)?.data || []) : []
+
+    const brs = d?.brs || {}
+    const fallbackUrl = brs['1080'] || brs['720'] || brs['480'] || brs['240'] || Object.values(brs)[0] || ''
+    const videoUrl = u?.url || u?.data?.url || fallbackUrl || ''
 
     state.currentMV = {
       id: Number(d?.id ?? id),
@@ -48,13 +52,13 @@ const loadMV = async (id: number) => {
       playCount: String(d?.playCount || d?.playCountTxt || ''),
       likes: String(d?.likedCount || ''),
       publishDate: d?.publishTime || d?.publishDate || '',
-      category: d?.subed ? '已订阅' : 'MV',
+      category: d?.subed ? '已订阅' : 'Sonic MV',
       emoji: '🎬',
       gradient: 'from-indigo-500 to-primary-600',
       liked: !!d?.liked,
       isNew: false,
       description: d?.desc || d?.briefDesc || '',
-      url: u?.data?.url || u?.url || '',
+      url: videoUrl,
     }
 
     state.relatedMVs = (sList || []).slice(0, 10).map(

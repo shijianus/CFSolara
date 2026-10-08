@@ -289,7 +289,7 @@ export async function handleNexusSearchRequest(
   const cache = typeof caches !== 'undefined' ? (caches as any).default : null;
   const cacheKeyUrl = new URL(request.url);
   cacheKeyUrl.searchParams.sort();
-  cacheKeyUrl.searchParams.set('_sonic_search_v', '1.0');
+  cacheKeyUrl.searchParams.set('_sonic_search_v', '2.0');
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: 'GET' });
 
   if (cache && !nocache) {

@@ -23,7 +23,7 @@ export interface NexusSearchResult {
   attempts: SonicAttempt[];
 }
 
-function getTrackDedupKey(title: string, artist: string): string {
+async function computeSongSha(title: string, artist: string): Promise<string> {
   const cleanTitle = (title || '')
     .toLowerCase()
     .replace(/[\s\-_—·.,!?'"()[\]{}<>《》「」【】]/g, '')
@@ -32,7 +32,24 @@ function getTrackDedupKey(title: string, artist: string): string {
     .toLowerCase()
     .replace(/[\s\-_—·.,!?'"()[\]{}<>《》「」【】]/g, '')
     .split('/')[0] || '';
-  return `${cleanTitle}:::${cleanArtist}`;
+  const raw = `${cleanTitle}:::${cleanArtist}`;
+  try {
+    const data = new TextEncoder().encode(raw);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 16);
+  } catch {
+    let h1 = 0xdeadbeef, h2 = 0x41c64e6d;
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    return (((h1 ^ (h1 >>> 16)) >>> 0).toString(16).padStart(8, '0') +
+            ((h2 ^ (h2 >>> 16)) >>> 0).toString(16).padStart(8, '0')).slice(0, 16);
+  }
 }
 
 export async function searchNexus(
@@ -104,39 +121,47 @@ export async function searchNexus(
     }
   }
 
-  // Normalization, Deduplication & Multi-Platform ID Merging
+  // Normalization, SHA Deduplication & Audio Quality Classification
   const trackMap = new Map<string, SonicSearchTrack>();
   const mergedOrder: SonicSearchTrack[] = [];
 
   for (const track of allTracks) {
     if (!track.title) continue;
-    const key = getTrackDedupKey(track.title, track.artist);
+    const sha = await computeSongSha(track.title, track.artist);
 
-    if (trackMap.has(key)) {
-      const existing = trackMap.get(key)!;
+    if (trackMap.has(sha)) {
+      const existing = trackMap.get(sha)!;
 
-      // Merge sources array
-      const existingSources = existing.sources || [];
-      const newSource: SonicSearchSource = {
-        platform: track.platform,
-        platformId: track.platformId,
-        duration: track.duration,
-      };
+      // Merge and record quality capabilities without exposing third-party provider names
+      const existingQualities = existing.qualities || [];
+      const hasLossless = existingQualities.some(q => q.level === 'lossless');
+      const hasExhigh = existingQualities.some(q => q.level === 'exhigh');
 
-      const hasSource = existingSources.some(
-        (s) => s.platform === newSource.platform && s.platformId === newSource.platformId,
-      );
-      if (!hasSource) {
-        existingSources.push(newSource);
+      // Promote quality if higher tier discovered
+      if ((track.platform === 'kugou' || track.platform === 'netease' || track.platform === 'qq') && !hasLossless) {
+        existingQualities.unshift({
+          level: 'lossless',
+          label: 'SQ 无损',
+          bitrate: 'FLAC 24bit',
+          streamUrl: `/api/music/stream?id=${encodeURIComponent(track.platformId || track.id)}&br=lossless`,
+        });
+        existing.qualityBadge = 'SQ';
+      } else if (!hasExhigh) {
+        existingQualities.push({
+          level: 'exhigh',
+          label: 'HQ 极高',
+          bitrate: '320kbps',
+          streamUrl: `/api/music/stream?id=${encodeURIComponent(track.platformId || track.id)}&br=320`,
+        });
+        if (existing.qualityBadge !== 'SQ') existing.qualityBadge = 'HQ';
       }
 
-      // If incoming track is from netease and existing is not, promote netease as primary for audio playability
+      // If incoming track is from netease and existing is not, use netease ID internally for highest stream compatibility
       if (track.platform === 'netease' && existing.platform !== 'netease') {
-        existing.platform = 'netease';
         existing.platformId = track.platformId;
         existing.id = track.platformId;
         existing.urlId = track.platformId;
-        existing.source = 'netease';
+        existing.streamUrl = `/api/music/stream?id=${encodeURIComponent(track.platformId)}`;
         if (track.picId) existing.picId = track.picId;
       }
 
@@ -150,18 +175,44 @@ export async function searchNexus(
         existing.duration = track.duration;
       }
     } else {
-      const initialSources: SonicSearchSource[] = track.sources && track.sources.length > 0
-        ? [...track.sources]
-        : [
-            {
-              platform: track.platform,
-              platformId: track.platformId,
-              duration: track.duration,
-            },
-          ];
+      const canonicalId = track.platformId || track.id;
+      // Default classified quality tiers for Sonic native delivery
+      const isHighTier = track.platform === 'netease' || track.platform === 'kugou' || track.platform === 'qq';
+      const qualities: any[] = [
+        ...(isHighTier
+          ? [
+              {
+                level: 'lossless' as const,
+                label: 'SQ 无损',
+                bitrate: 'FLAC',
+                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=lossless`,
+              },
+              {
+                level: 'exhigh' as const,
+                label: 'HQ 极高',
+                bitrate: '320kbps',
+                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=320`,
+              },
+            ]
+          : [
+              {
+                level: 'exhigh' as const,
+                label: 'HQ 极高',
+                bitrate: '320kbps',
+                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=320`,
+              },
+            ]),
+        {
+          level: 'standard' as const,
+          label: '标准',
+          bitrate: '128kbps',
+          streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=128`,
+        },
+      ];
 
       const mergedTrack: SonicSearchTrack = {
-        id: track.platformId || track.id,
+        id: canonicalId,
+        sha,
         title: track.title,
         name: track.title,
         artist: track.artist,
@@ -169,26 +220,28 @@ export async function searchNexus(
         duration: track.duration || 0,
         cover: track.cover || '',
         coverUrl: track.cover || '',
-        platform: track.platform,
-        platformId: track.platformId,
-        sources: initialSources,
+        platform: 'sonic', // Desensitized brand
+        platformId: canonicalId,
+        qualities,
+        qualityBadge: isHighTier ? 'SQ' : 'HQ',
+        streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}`,
+        sources: [
+          {
+            platform: 'sonic',
+            platformId: canonicalId,
+            duration: track.duration,
+          },
+        ],
         picId: track.picId,
-        lyricId: track.lyricId || track.platformId,
-        urlId: track.urlId || track.platformId,
-        source: track.source || track.platform,
+        lyricId: track.lyricId || canonicalId,
+        urlId: track.urlId || canonicalId,
+        source: 'sonic',
       };
 
-      trackMap.set(key, mergedTrack);
+      trackMap.set(sha, mergedTrack);
       mergedOrder.push(mergedTrack);
     }
   }
-
-  // Sort tracks: prioritize tracks that have a netease source for instant audio playback reliability
-  mergedOrder.sort((a, b) => {
-    const aHasNetease = a.platform === 'netease' || (a.sources && a.sources.some((s) => s.platform === 'netease')) ? 1 : 0;
-    const bHasNetease = b.platform === 'netease' || (b.sources && b.sources.some((s) => s.platform === 'netease')) ? 1 : 0;
-    return bHasNetease - aHasNetease;
-  });
 
   return {
     data: {

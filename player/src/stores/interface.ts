@@ -43,6 +43,12 @@ export interface Song {
   url?: string
   /** 是否为本地音乐 */
   isLocal?: boolean
+  /** 歌曲唯一 SHA 聚合指纹 */
+  sha?: string
+  /** 最高音质等级标识（如 SQ、HQ、标准） */
+  qualityBadge?: string
+  /** 支持的音质等级列表 */
+  qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string }>
 }
 
 /** 音频播放器 Store 状态 */

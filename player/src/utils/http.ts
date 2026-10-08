@@ -11,8 +11,8 @@ import NProgress from '@/config/nprogress'
 
 /** 创建 axios 实例 */
 const instance: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_APP_BASE_API,
-    timeout: 1000000,
+    baseURL: import.meta.env.VITE_APP_BASE_API || '/api',
+    timeout: 30000,
     withCredentials: true,
 })
 

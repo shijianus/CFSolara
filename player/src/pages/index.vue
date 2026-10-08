@@ -43,7 +43,7 @@ const { banners, recommendPlaylists, hotSongs, artists, mvs, isLoading } = toRef
 const loadData = async () => {
   state.isLoading = true
   try {
-    const [b, p, s, a, m] = await Promise.all([
+    const [bRes, pRes, sRes, aRes, mRes] = await Promise.allSettled([
       banner({ type: 0 }),
       topPlaylist({ order: 'hot', limit: 20 }),
       topSong({ type: 0 }),
@@ -51,15 +51,25 @@ const loadData = async () => {
       personalizedMv(),
     ])
 
-    state.banners = transformBanners(b as Record<string, unknown>, 6)
-    state.recommendPlaylists = transformPlaylists(
-      p as Record<string, unknown>,
-      20,
-      t('home.playlistFallback')
-    )
-    state.hotSongs = transformTopSongs(s as Record<string, unknown>, 12)
-    state.artists = transformArtists(a as Record<string, unknown>, 16)
-    state.mvs = transformMVs(m as Record<string, unknown>, 6)
+    if (bRes.status === 'fulfilled' && bRes.value) {
+      state.banners = transformBanners(bRes.value as Record<string, unknown>, 6)
+    }
+    if (pRes.status === 'fulfilled' && pRes.value) {
+      state.recommendPlaylists = transformPlaylists(
+        pRes.value as Record<string, unknown>,
+        20,
+        t('home.playlistFallback')
+      )
+    }
+    if (sRes.status === 'fulfilled' && sRes.value) {
+      state.hotSongs = transformTopSongs(sRes.value as Record<string, unknown>, 12)
+    }
+    if (aRes.status === 'fulfilled' && aRes.value) {
+      state.artists = transformArtists(aRes.value as Record<string, unknown>, 16)
+    }
+    if (mRes.status === 'fulfilled' && mRes.value) {
+      state.mvs = transformMVs(mRes.value as Record<string, unknown>, 6)
+    }
   } finally {
     state.isLoading = false
   }

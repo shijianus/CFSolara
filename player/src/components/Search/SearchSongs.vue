@@ -38,6 +38,38 @@ const fetchSongs = async () => {
     return
   }
   state.isLoading = true
+
+  // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
+  try {
+    const page = Math.floor((props.offset ?? 0) / (props.limit ?? 40)) + 1
+    const count = props.limit ?? 40
+    const sonicRes = await fetch(`/api/sonic/search/nexus?q=${encodeURIComponent(term)}&page=${page}&count=${count}`).then(r => r.json())
+    const tracks = sonicRes?.data?.tracks || []
+    if (tracks.length > 0) {
+      state.results = tracks.map((t: any) => ({
+        id: t.platformId || t.id,
+        name: t.title || t.name,
+        artist: t.artist,
+        artistId: 0,
+        artists: [{ id: 0, name: t.artist }],
+        album: t.album || '',
+        albumId: 0,
+        cover: t.cover || t.coverUrl || '',
+        duration: (t.duration || 200) * 1000,
+        dt: (t.duration || 200) * 1000,
+        url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}`,
+        sha: t.sha || '',
+        qualityBadge: t.qualityBadge || 'SQ',
+        qualities: t.qualities || [],
+        liked: false,
+      }))
+      emit('loaded', state.results.length)
+      emit('total', sonicRes?.data?.total || state.results.length)
+      return
+    }
+  } catch {}
+
+  // 2. 备用兜底检索通道
   try {
     const res = await cloudSearch({
       keywords: term,
@@ -52,22 +84,6 @@ const fetchSongs = async () => {
       emit('total', total)
       return
     }
-  } catch {}
-
-  // Sonic 多源聚合网关智能兜底
-  try {
-    const sonicRes = await fetch(`/api/sonic/search/nexus?q=${encodeURIComponent(term)}&count=${props.limit ?? 30}`).then(r => r.json())
-    const tracks = sonicRes?.data?.tracks || []
-    state.results = tracks.map((t: any) => ({
-      id: t.platformId || t.id,
-      name: t.title || t.name,
-      ar: [{ id: 0, name: t.artist }],
-      al: { id: 0, name: t.album, picUrl: t.cover || t.coverUrl },
-      dt: (t.duration || 200) * 1000,
-      url: '',
-    }))
-    emit('loaded', state.results.length)
-    emit('total', state.results.length)
   } catch {}
   finally {
     state.isLoading = false

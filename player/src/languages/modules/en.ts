@@ -281,7 +281,7 @@ export default {
       all: 'All',
       official: 'Official',
       live: 'Live',
-      netease: 'NetEase Original',
+      netease: 'Sonic Originals',
     },
     actions: {
       loadMore: 'Load More',

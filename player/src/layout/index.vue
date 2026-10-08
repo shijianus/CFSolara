@@ -81,10 +81,10 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
       <div class="absolute top-[30%] left-[35%] size-[38vmax] rounded-full blur-[100px] animate-drift-c opacity-20 dark:opacity-25" style="background: #3b82f6;"></div>
     </div>
 
-    <!-- 主容器 -->
-    <div class="z-50 flex h-full w-full flex-col px-2 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-2 sm:py-4 md:py-6 max-w-[1800px] mx-auto">
+    <!-- 主容器：直接全屏呈现，不居中内缩 -->
+    <div class="z-50 flex h-full w-full flex-col">
       <div
-        class="glass-container flex flex-1 flex-col overflow-hidden backdrop-blur-xl backdrop-filter"
+        class="glass-container flex flex-1 flex-col overflow-hidden backdrop-blur-md backdrop-filter rounded-none border-0 shadow-none"
       >
         <!-- 头部区域 -->
         <Header />

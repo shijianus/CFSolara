@@ -142,8 +142,16 @@ export interface SonicSearchSource {
   bitrate?: string | number;
 }
 
+export interface SonicQualityOption {
+  level: 'lossless' | 'exhigh' | 'standard';
+  label: string;
+  bitrate: string;
+  streamUrl?: string;
+}
+
 export interface SonicSearchTrack {
   id: string; // for Sonic player backward compatibility
+  sha?: string; // SHA hash identifying the canonical song
   title: string;
   name: string; // alias for player compatibility
   artist: string;
@@ -154,6 +162,9 @@ export interface SonicSearchTrack {
   platform: string;
   platformId: string;
   sources: SonicSearchSource[];
+  qualities?: SonicQualityOption[];
+  qualityBadge?: 'SQ' | 'HQ' | '标准' | string;
+  streamUrl?: string;
   // Additional player compatibility fields:
   picId?: string;
   lyricId?: string;
