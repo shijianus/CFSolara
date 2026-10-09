@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Header from './header.vue'
 import Aside from './aside.vue'
 import Footer from './footer.vue'
 
@@ -81,18 +80,15 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
       <div class="absolute top-[30%] left-[35%] size-[38vmax] rounded-full blur-[100px] animate-drift-c opacity-20 dark:opacity-25" style="background: #3b82f6;"></div>
     </div>
 
-    <!-- 主容器：直接全屏呈现，不居中内缩 -->
-    <div class="z-50 flex h-full w-full flex-col">
-      <div
-        class="glass-container flex flex-1 flex-col overflow-hidden backdrop-blur-md backdrop-filter rounded-none border-0 shadow-none"
-      >
-        <!-- 头部区域 -->
-        <Header />
+    <!-- 主工作区：全高分离式 Studio 架构 (Aside 单独占用左侧全部空间，右侧容纳主内容与底部控制 Dock) -->
+    <div class="z-50 flex h-full w-full overflow-hidden">
+      <!-- 左侧边栏：单独占用左边所有空间 -->
+      <Aside />
+
+      <!-- 右侧主区域：上部滚动内容 + 底部浮动控制 Dock -->
+      <div class="relative flex flex-1 flex-col h-full min-w-0 overflow-hidden">
         <!-- 主内容区域 -->
-        <main class="flex h-full overflow-x-hidden">
-          <!-- 左侧边栏 -->
-          <Aside />
-          <!-- 右侧主内容 -->
+        <main class="relative flex flex-1 min-h-0 flex-col overflow-hidden">
           <router-view v-slot="{ Component }">
             <transition appear name="fade-transform" mode="out-in">
               <keep-alive>
@@ -100,10 +96,13 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
               </keep-alive>
             </transition>
           </router-view>
-          <!-- 播放器抽屉 -->
-          <PlayerDrawer v-model="isDrawerOpen" />
         </main>
+
+        <!-- 底部播放栏：位于 Aside 右侧，占用右侧主区域底部 -->
         <Footer @show="openPlayerDrawer" />
+
+        <!-- 播放器全屏抽屉 -->
+        <PlayerDrawer v-model="isDrawerOpen" />
       </div>
     </div>
   </div>
