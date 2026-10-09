@@ -234,7 +234,7 @@ onUnmounted(() => {
 const emit = defineEmits(['show'])
 </script>
 <template>
-  <footer class="glass-nav relative m-3 sm:m-4 md:ml-1.5 mt-1 sm:mt-1.5 overflow-hidden rounded-[26px] p-3 sm:p-4 border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]">
+  <footer class="glass-nav relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4 border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]">
     <!-- 音频可视化器背景 -->
     <div
       v-if="isAnalyserInitialized && audioVisualizer.enabledInFooter"

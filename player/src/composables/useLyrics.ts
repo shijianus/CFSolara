@@ -235,6 +235,7 @@ const activeTimeline = computed<number[]>(() => mergedLines.value.map(m => m.tim
 const timeForIndex = (index: number) => mergedLines.value[index]?.time ?? 0
 
 const fetchLyrics = async (idOrSong?: string | number | any, force = false, songOverride?: any) => {
+  const thisSeq = ++currentFetchSeq
   try {
     let targetSong: any = null
     if (typeof idOrSong === 'object' && idOrSong !== null) {
@@ -290,7 +291,6 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
       return
     }
 
-    const thisSeq = ++currentFetchSeq
     loading.value = true
 
     let ori: RawLyricLine[] = []

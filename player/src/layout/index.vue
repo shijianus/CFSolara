@@ -80,15 +80,15 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
       <div class="absolute top-[30%] left-[35%] size-[38vmax] rounded-full blur-[100px] animate-drift-c opacity-20 dark:opacity-25" style="background: #3b82f6;"></div>
     </div>
 
-    <!-- 主工作区：全高分离式 Studio 架构 (Aside 单独占用左侧全部空间，右侧容纳主内容与底部控制 Dock) -->
-    <div class="z-50 flex h-full w-full overflow-hidden">
-      <!-- 左侧边栏：单独占用左边所有空间 -->
+    <!-- 主工作区：严格几何对齐的 Studio 架构 (全组件限制在统一上下区间 [Y_top, Y_bottom] 内) -->
+    <div class="z-50 flex h-full w-full p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+      <!-- 左侧边栏：单独占用左边所有空间，严格限制在上下区间内 -->
       <Aside />
 
-      <!-- 右侧主区域：上部滚动内容 + 底部浮动控制 Dock -->
-      <div class="relative flex flex-1 flex-col h-full min-w-0 overflow-hidden">
-        <!-- 主内容区域 -->
-        <main class="relative flex flex-1 min-h-0 flex-col overflow-hidden">
+      <!-- 右侧主区域：上部内容画板 + 底部控制 Dock，与左侧边栏上下区间严格同步对齐 -->
+      <div class="relative flex flex-1 flex-col h-full min-h-0 min-w-0 gap-3 sm:gap-4 overflow-hidden">
+        <!-- 主内容画板区域：继承毛玻璃卡片规格与圆角裁剪，严格对齐左侧边栏顶部边界 -->
+        <main class="glass-card relative flex flex-1 min-h-0 flex-col rounded-[28px] border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.4)] overflow-hidden">
           <router-view v-slot="{ Component }">
             <transition appear name="fade-transform" mode="out-in">
               <keep-alive>
@@ -98,7 +98,7 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
           </router-view>
         </main>
 
-        <!-- 底部播放栏：位于 Aside 右侧，占用右侧主区域底部 -->
+        <!-- 底部播放栏：位于 Aside 右侧，占用右侧主区域底部，与左侧边栏底缘绝对齐平 -->
         <Footer @show="openPlayerDrawer" />
 
         <!-- 播放器全屏抽屉 -->

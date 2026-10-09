@@ -124,8 +124,8 @@ const isActive = (path: string) => {
 }
 </script>
 <template>
-  <aside class="hidden md:block w-64 xl:w-72 shrink-0 p-3 sm:p-4 pr-1.5 sm:pr-2 h-full">
-    <div class="glass-card relative flex h-full flex-col justify-between rounded-[28px] p-4 border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.4)] overflow-hidden">
+  <aside class="hidden md:flex w-64 xl:w-72 shrink-0 h-full flex-col">
+    <div class="glass-card relative flex h-full w-full flex-col justify-between rounded-[28px] p-4 border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.4)] overflow-hidden">
       <div class="flex flex-col min-h-0 flex-1">
         <!-- 顶部：Sonic 品牌 Logo + 前进后退导航按钮 -->
         <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
