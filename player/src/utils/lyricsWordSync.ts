@@ -327,24 +327,30 @@ export function syncWordElements(
   lyricsData: Array<{ time?: number; words?: LyricWord[] }>,
   currentTime: number,
   currentIndex?: number,
-  lastLineIndexRef?: { value: number }
+  lastLineIndexRef?: { value: number },
+  latencyCompensation = 0.08
 ) {
   if (!container || !Array.isArray(lyricsData) || lyricsData.length === 0) return
 
   const lineEls = container.querySelectorAll('.lyric-line')
   if (!lineEls.length) return
 
-  // 1. 根据当前播放时间精确定位活动行（完全还原 js/index.js 算法）
+  // 声学与蓝牙硬件延迟补偿：人耳感知滞后约 80ms，视听前置校准使发音与高亮严格重合
+  const effectiveTime = Math.max(0, currentTime - latencyCompensation)
+
+  // 1. 根据当前播放时间精确定位活动行
   let targetIndex = -1
   for (let i = 0; i < lyricsData.length; i++) {
-    if (currentTime >= (lyricsData[i].time || 0)) {
+    const lineTime = lyricsData[i].time || 0
+    if (effectiveTime >= lineTime - 0.35) {
       targetIndex = i
     } else {
       break
     }
   }
 
-  const activeIndex = targetIndex !== -1 ? targetIndex : (typeof currentIndex === 'number' ? currentIndex : -1)
+  // 若处于前奏空白期（尚未唱到第一行前 350ms），则不激活任何行为当前行
+  const activeIndex = targetIndex
   const lastIndex = lastLineIndexRef ? lastLineIndexRef.value : -2
   const lineChanged = lastIndex !== activeIndex
 
@@ -400,15 +406,15 @@ export function syncWordElements(
         const start = Number.isFinite(w.startSec) ? w.startSec : (w.startMs || 0) / 1000
         const end = Number.isFinite(w.endSec) ? w.endSec : (w.endMs || (start * 1000 + 300)) / 1000
 
-        if (currentTime < start) {
+        if (effectiveTime < start) {
           // 状态 ①：还没唱到
           charSpan.style.setProperty('--fill', '0%')
           charSpan.style.backgroundImage = ''
           charSpan.classList.remove('word-sung', 'word-singing')
-        } else if (currentTime < end) {
+        } else if (effectiveTime < end) {
           // 状态 ②：正在唱到这里（显式平滑渐变填充）
           const dur = Math.max(0.04, end - start)
-          const pct = Math.min(100, Math.max(0, ((currentTime - start) / dur) * 100))
+          const pct = Math.min(100, Math.max(0, ((effectiveTime - start) / dur) * 100))
           const pctStr = `${pct.toFixed(1)}%`
           charSpan.style.setProperty('--fill', pctStr)
           charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%)`

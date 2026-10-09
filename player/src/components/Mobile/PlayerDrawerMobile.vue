@@ -261,11 +261,14 @@ const runWordSync = () => {
     activeSingleLyrics.value,
     curTime,
     currentLyricIndex.value,
-    lastWordSyncLine
+    lastWordSyncLine,
+    isPlaying.value ? 0.08 : 0
   )
-  if (lastWordSyncLine.value >= 0 && lastWordSyncLine.value !== currentLyricIndex.value && !state.isDraggingLyrics) {
+  if (lastWordSyncLine.value !== currentLyricIndex.value && !state.isDraggingLyrics) {
     currentLyricIndex.value = lastWordSyncLine.value
-    scrollToCurrentLyric()
+    if (lastWordSyncLine.value >= 0) {
+      scrollToCurrentLyric()
+    }
   }
 }
 
@@ -349,8 +352,10 @@ watch(
 )
 
 watch(currentTime, () => {
-  updateCurrentLyric()
-  runWordSync()
+  if (!isPlaying.value) {
+    updateCurrentLyric()
+    runWordSync()
+  }
 })
 
 watch(
@@ -593,15 +598,16 @@ const playModeIcon = computed(() => {
           >
             <p class="leading-relaxed pointer-events-auto">
               <template v-if="line.words && line.words.length > 0">
-                <span
-                  v-for="(w, wIdx) in line.words"
-                  :key="wIdx"
-                  class="word-char"
-                  :data-windex="wIdx"
-                  :data-start="w.startSec"
-                  :data-end="w.endSec"
-                  @click.stop="handleWordClick(w.startSec)"
-                >{{ w.text }}</span>
+                <template v-for="(w, wIdx) in line.words" :key="wIdx">
+                  <span
+                    class="word-char"
+                    :data-windex="wIdx"
+                    :data-start="w.startSec"
+                    :data-end="w.endSec"
+                    @click.stop="handleWordClick(w.startSec)"
+                  >{{ w.text.trimEnd() }}</span>
+                  <span v-if="w.text.endsWith(' ')" class="inline">&nbsp;</span>
+                </template>
               </template>
               <template v-else>{{ line.ori }}</template>
             </p>

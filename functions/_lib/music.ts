@@ -632,11 +632,13 @@ export function parseHighPrecisionLyrics(
 
       if (words.length > 0) {
         hasWordTimestamps = true;
+        const lineTime = words[0].start;
+        const lineDur = (words[words.length - 1].end - lineTime) || lineDurMs;
         parsedLines.push({
-          time: Math.max(0, lineStartMs),
-          timeSec: parseFloat((Math.max(0, lineStartMs) / 1000).toFixed(3)),
-          duration: lineDurMs,
-          durationSec: parseFloat((Math.max(0, lineDurMs) / 1000).toFixed(3)),
+          time: Math.max(0, lineTime),
+          timeSec: parseFloat((Math.max(0, lineTime) / 1000).toFixed(3)),
+          duration: lineDur,
+          durationSec: parseFloat((Math.max(0, lineDur) / 1000).toFixed(3)),
           text: cleanText,
           words,
         });

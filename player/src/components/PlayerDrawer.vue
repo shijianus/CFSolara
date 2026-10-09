@@ -322,11 +322,12 @@ const runWordSync = () => {
     activeSingleLyrics.value,
     curTime,
     currentLyricIndex.value,
-    lastWordSyncLine
+    lastWordSyncLine,
+    isPlaying.value ? 0.08 : 0
   )
-  if (lastWordSyncLine.value >= 0 && lastWordSyncLine.value !== currentLyricIndex.value && !lyricsDragging.value) {
+  if (lastWordSyncLine.value !== currentLyricIndex.value && !lyricsDragging.value) {
     currentLyricIndex.value = lastWordSyncLine.value
-    if (autoScroll.value) {
+    if (autoScroll.value && lastWordSyncLine.value >= 0) {
       scrollToCurrentLyric()
     }
   }
@@ -418,8 +419,10 @@ watch(
 )
 
 watch(currentTime, () => {
-  updateCurrentLyric()
-  runWordSync()
+  if (!isPlaying.value) {
+    updateCurrentLyric()
+    runWordSync()
+  }
 })
 
 /** 切歌时：加载歌词、重置滚动、更新背景、翻转封面 */
@@ -854,15 +857,16 @@ onUnmounted(() => {
           >
             <p class="lyric-text pointer-events-auto">
               <template v-if="line.words && line.words.length > 0">
-                <span
-                  v-for="(w, wIdx) in line.words"
-                  :key="wIdx"
-                  class="word-char"
-                  :data-windex="wIdx"
-                  :data-start="w.startSec"
-                  :data-end="w.endSec"
-                  @click.stop="handleWordClick(w.startSec)"
-                >{{ w.text }}</span>
+                <template v-for="(w, wIdx) in line.words" :key="wIdx">
+                  <span
+                    class="word-char"
+                    :data-windex="wIdx"
+                    :data-start="w.startSec"
+                    :data-end="w.endSec"
+                    @click.stop="handleWordClick(w.startSec)"
+                  >{{ w.text.trimEnd() }}</span>
+                  <span v-if="w.text.endsWith(' ')" class="inline">&nbsp;</span>
+                </template>
               </template>
               <template v-else>{{ line.ori }}</template>
             </p>

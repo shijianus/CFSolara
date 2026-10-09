@@ -41,26 +41,28 @@ export function useLyricsScroll(options: LyricsScrollOptions) {
    * 更新当前歌词索引
    * @param instant 是否立即定位（无动画）
    */
-  const updateCurrentLyric = (instant = false) => {
-    const adjustedTime = currentTime.value + (offset?.value ?? 0)
+  const updateCurrentLyric = (instant = false, customTime?: number) => {
+    const rawT = typeof customTime === 'number' ? customTime : currentTime.value
+    // 与逐字高亮引擎严格同步：包含 80ms 声学硬件延迟前置补偿
+    const adjustedTime = rawT + (offset?.value ?? 0) - 0.08
     const times = timeline.value
     if (!times.length) return
 
     let idx = times.findIndex((t, i) => {
       const nextT = times[i + 1]
-      return adjustedTime >= t && (nextT === undefined || adjustedTime < nextT)
+      return adjustedTime >= t - 0.35 && (nextT === undefined || adjustedTime < nextT - 0.35)
     })
 
     if (idx === -1) {
-      if (adjustedTime < times[0]) idx = 0
-      else if (adjustedTime >= times[times.length - 1]) idx = times.length - 1
+      if (adjustedTime < times[0] - 0.35) idx = -1
+      else if (adjustedTime >= times[times.length - 1] - 0.35) idx = times.length - 1
       else idx = times.findIndex(t => t > adjustedTime)
     }
 
-    if (idx !== -1 && idx !== state.currentIndex) {
+    if (idx !== state.currentIndex) {
       state.currentIndex = idx
-      if (state.autoScroll) scrollToCurrentLyric(instant)
-    } else if (!state.positioned) {
+      if (state.autoScroll && idx >= 0) scrollToCurrentLyric(instant)
+    } else if (!state.positioned && idx >= 0) {
       if (state.autoScroll) scrollToCurrentLyric(instant)
     }
   }

@@ -31,6 +31,7 @@ const state = reactive({
 })
 const lastCacheKey = ref<string | null>(null)
 const loading = ref(false)
+let currentFetchSeq = 0
 
 const lyricCache = new Map<string, { ori: RawLyricLine[]; tran: RawLyricLine[]; roma: RawLyricLine[] }>()
 
@@ -151,6 +152,11 @@ export const parseAnyLrc = (raw: string): RawLyricLine[] => {
   const timeTag = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g
   const metaFilter = /^\[(ti|ar|al|by|offset|kana|re|ve|hash|sign|qq|total|language|id):/i
 
+  // 提取全局 offset 偏移量（毫秒）
+  const offsetMatch = trimmed.match(/^\[offset:\s*(-?\d+)\s*\]/im)
+  const lrcOffsetMs = offsetMatch ? parseInt(offsetMatch[1], 10) : 0
+  const lrcOffsetSec = lrcOffsetMs / 1000
+
   for (const rawLine of lines) {
     const line = rawLine.trim()
     if (!line || metaFilter.test(line)) continue
@@ -167,8 +173,8 @@ export const parseAnyLrc = (raw: string): RawLyricLine[] => {
       const s = Number(match[2])
       const msStr = match[3] || '0'
       const ms = Number(msStr.padEnd(3, '0').slice(0, 3))
-      const time = m * 60 + s + ms / 1000
-      const startMs = m * 60000 + s * 1000 + ms
+      const time = Math.max(0, m * 60 + s + ms / 1000 + lrcOffsetSec)
+      const startMs = Math.max(0, m * 60000 + s * 1000 + ms + lrcOffsetMs)
       result.push({
         time: parseFloat(time.toFixed(3)),
         startMs,
@@ -284,7 +290,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
       return
     }
 
-    if (loading.value) return
+    const thisSeq = ++currentFetchSeq
     loading.value = true
 
     let ori: RawLyricLine[] = []
@@ -390,6 +396,8 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
       } catch {}
     }
 
+    if (thisSeq !== currentFetchSeq) return
+
     state.lyricsOriginal = ori.length > 0 ? ori : [{ time: 0, text: '暂无歌词' }]
     state.lyricsTrans = tran
     state.lyricsRoma = roma
@@ -401,11 +409,14 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
       roma: state.lyricsRoma,
     })
   } catch {
+    if (thisSeq !== currentFetchSeq) return
     state.lyricsOriginal = [{ time: 0, text: '歌词获取失败' }]
     state.lyricsTrans = []
     state.lyricsRoma = []
   } finally {
-    loading.value = false
+    if (thisSeq === currentFetchSeq) {
+      loading.value = false
+    }
   }
 }
 
