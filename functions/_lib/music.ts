@@ -87,17 +87,96 @@ export async function searchTracks(env: AppEnv, query: string, source = 'netease
     .map((item) => normalizeTrack(item, source));
 }
 
-export async function getTrackStreamUrl(env: AppEnv, id: string, source = 'netease', quality = '320'): Promise<string> {
-  const data = await fetchMusicProvider(env, {
-    types: 'url',
-    id,
-    source,
-    br: quality,
-  });
-
-  if (typeof data === 'object' && data !== null && typeof data.url === 'string') {
-    return data.url;
+export async function getTrackStreamUrl(
+  env: AppEnv,
+  id: string,
+  source = 'netease',
+  quality = '320',
+  title?: string,
+  artist?: string
+): Promise<string> {
+  let cleanId = id;
+  let cleanSource = source;
+  if (cleanId.includes(':')) {
+    const parts = cleanId.split(':');
+    cleanSource = parts[0] || cleanSource;
+    cleanId = parts.slice(1).join(':');
   }
+
+  // 1. Direct Kuwo stream if source is kuwo or id is numeric rid
+  if (cleanSource === 'kuwo') {
+    try {
+      const kuwoUrl = `https://antiserver.kuwo.cn/anti.s?type=convert_url&rid=${encodeURIComponent(cleanId)}&format=mp3&response=url`;
+      const res = await fetch(kuwoUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          Referer: 'https://www.kuwo.cn/',
+        },
+      });
+      if (res.ok) {
+        const directUrl = (await res.text()).trim();
+        if (directUrl && directUrl.startsWith('http')) return directUrl;
+      }
+    } catch {}
+  }
+
+  // 2. Primary GDStudio / Meting Bridge (netease, joox, bilibili)
+  try {
+    const data = await fetchMusicProvider(env, {
+      types: 'url',
+      id: cleanId,
+      source: cleanSource === 'qq' ? 'tencent' : cleanSource,
+      br: quality,
+    });
+    if (typeof data === 'object' && data !== null && typeof data.url === 'string' && data.url.startsWith('http')) {
+      return data.url;
+    }
+  } catch {}
+
+  // 3. High-availability Kuwo search fallback when track is restricted or unresolvable
+  const searchKeywords = [title, artist].filter(Boolean).join(' ').trim();
+  if (searchKeywords) {
+    try {
+      const kwSearchUrl = `http://search.kuwo.cn/r.s?client=kt&all=${encodeURIComponent(searchKeywords)}&pn=0&rn=3&vipver=1&ft=music&encoding=utf8&rformat=json&mobi=1`;
+      const kwRes = await fetch(kwSearchUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Sonic/2.1.0' },
+      });
+      if (kwRes.ok) {
+        const kwJson: any = await kwRes.json();
+        const rid = kwJson?.abslist?.[0]?.MUSICRID?.replace('MUSIC_', '');
+        if (rid) {
+          const kwPlayUrl = `https://antiserver.kuwo.cn/anti.s?type=convert_url&rid=${encodeURIComponent(rid)}&format=mp3&response=url`;
+          const playRes = await fetch(kwPlayUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              Referer: 'https://www.kuwo.cn/',
+            },
+          });
+          if (playRes.ok) {
+            const finalAudioUrl = (await playRes.text()).trim();
+            if (finalAudioUrl && finalAudioUrl.startsWith('http')) return finalAudioUrl;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // 4. NetEase Direct Outer MP3 fallback
+  if (cleanSource === 'netease' && /^\d+$/.test(cleanId)) {
+    try {
+      const outerUrl = `https://music.163.com/song/media/outer/url?id=${cleanId}.mp3`;
+      const testRes = await fetch(outerUrl, {
+        method: 'HEAD',
+        redirect: 'manual',
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+      });
+      const loc = testRes.headers.get('location') || '';
+      if (loc && !loc.includes('404')) {
+        return outerUrl;
+      }
+    } catch {}
+  }
+
   return '';
 }
 
@@ -525,17 +604,16 @@ export function parseHighPrecisionLyrics(
       let wMatch;
       let lineText = '';
 
+      // 预先检测整行是相对偏移模式还是绝对时间戳模式（严防句中相对偏移累加大于 lineStartMs 时发生时间戳倒流）
+      const firstTag = content.match(/[<(](\d+),/);
+      const isRelativeOffset = firstTag ? parseInt(firstTag[1], 10) < lineStartMs : true;
+
       while ((wMatch = wordRegex.exec(content)) !== null) {
-        let wStart = parseInt(wMatch[1], 10);
+        const rawOffset = parseInt(wMatch[1], 10);
         const wDur = parseInt(wMatch[2], 10);
         const wText = wMatch[3];
 
-        if (wStart < lineStartMs) {
-          wStart = lineStartMs + wStart;
-        } else {
-          wStart = wStart + offsetMs;
-        }
-
+        const wStart = isRelativeOffset ? (lineStartMs + rawOffset) : (rawOffset + offsetMs);
         const wEnd = wStart + wDur;
         words.push({
           text: wText,

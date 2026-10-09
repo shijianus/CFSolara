@@ -11,3 +11,5 @@ player/node_modules/
 player/dist
 player/dist/
 *.zip
+temp_*
+/tmp_sonic_ui/

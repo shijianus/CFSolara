@@ -39,10 +39,24 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
     } catch {}
   }
 
+  let cleanId = id;
+  let effectiveSource = source;
+  if (cleanId?.startsWith('qq:')) {
+    cleanId = cleanId.slice(3);
+    effectiveSource = 'tencent';
+  } else if (cleanId?.startsWith('kugou:')) {
+    cleanId = cleanId.slice(6);
+    effectiveSource = 'kugou';
+  } else if (cleanId && /^00[a-zA-Z0-9]{12}$/.test(cleanId) && effectiveSource === 'netease') {
+    effectiveSource = 'tencent';
+  } else if (cleanId && /^[a-fA-F0-9]{32}$/.test(cleanId) && effectiveSource === 'netease') {
+    effectiveSource = 'kugou';
+  }
+
   try {
     const lyricPayload = await getUniversalLyrics(env, {
-      id,
-      source,
+      id: cleanId,
+      source: effectiveSource,
       title,
       artist,
       q,
@@ -72,10 +86,43 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
         },
       });
     } else {
+      let standardLrc = '';
+      if (lyricPayload.lines && lyricPayload.lines.length > 0) {
+        standardLrc = lyricPayload.lines
+          .map((line) => {
+            const totalSec = Math.max(0, (line.time || (line.timeSec ? line.timeSec * 1000 : 0)) / 1000);
+            const mins = Math.floor(totalSec / 60);
+            const secs = (totalSec % 60).toFixed(2);
+            const timeStr = `${String(mins).padStart(2, '0')}:${secs.padStart(5, '0')}`;
+            return `[${timeStr}]${line.text}`;
+          })
+          .join('\n');
+      } else if (lyricPayload.rawLyric && !lyricPayload.rawLyric.startsWith('{')) {
+        standardLrc = lyricPayload.rawLyric;
+      }
+
       response = jsonResponse(
         {
+          code: 200,
           ...lyricPayload,
           album: album || undefined,
+          // Standard NetEase Cloud client compatibility
+          lrc: {
+            version: 1,
+            lyric: standardLrc,
+          },
+          klyric: {
+            version: 1,
+            lyric: '',
+          },
+          tlyric: {
+            version: 1,
+            lyric: '',
+          },
+          romalrc: {
+            version: 1,
+            lyric: '',
+          },
           // 向前兼容历史字段与开放生态
           lyric: lyricPayload.rawLyric,
           parsed: lyricPayload.lines,

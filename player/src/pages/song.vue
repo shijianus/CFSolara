@@ -80,6 +80,15 @@ const loadInfo = async () => {
     const resSimPls = await search({ keywords: song?.name || '', type: 1000 })
     const { playlists } = transformSearchPlaylists(resSimPls as Record<string, unknown>, 6)
     state.similarPlaylists = playlists
+
+    if (song) {
+      fetchLyrics(songId.value, false, {
+        name: song.name,
+        artist: artistNameVal,
+        album: albumName.value,
+        duration: duration.value,
+      })
+    }
   } catch {}
 }
 

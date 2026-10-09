@@ -14,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 import { useAudioAnalyser } from '@/composables/useAudioAnalyser'
 import { useLyricsDrag } from '@/composables/useLyricsDrag'
 import { useDrawerTransition } from '@/composables/useDrawerTransition'
+import { syncWordElements } from '@/utils/lyricsWordSync'
 import VinylDisc from '@/components/Player/VinylDisc.vue'
 
 const { t } = useI18n()
@@ -305,6 +306,69 @@ const handleAlbumCoverClick = () => {
   }
 }
 
+// ═══ 逐字对齐与 60fps 追随渲染引擎 ═══
+let wordSyncRafId: number | null = null
+const lastWordSyncLine = { value: -1 }
+
+const runWordSync = () => {
+  const container = lyricsContainerRef.value || lyricsRef.value
+  if (!container) return
+  const audioElement = audioStore.audio.audio
+  const curTime = (audioElement && Number.isFinite(audioElement.currentTime) && audioElement.currentTime > 0)
+    ? audioElement.currentTime
+    : currentTime.value
+  syncWordElements(
+    container,
+    activeSingleLyrics.value,
+    curTime,
+    currentLyricIndex.value,
+    lastWordSyncLine
+  )
+  if (lastWordSyncLine.value >= 0 && lastWordSyncLine.value !== currentLyricIndex.value && !lyricsDragging.value) {
+    currentLyricIndex.value = lastWordSyncLine.value
+    if (autoScroll.value) {
+      scrollToCurrentLyric()
+    }
+  }
+}
+
+const startWordSyncLoop = () => {
+  if (wordSyncRafId !== null) {
+    cancelAnimationFrame(wordSyncRafId)
+    wordSyncRafId = null
+  }
+  const loop = () => {
+    if (isOpen.value && isPlaying.value) {
+      runWordSync()
+      wordSyncRafId = requestAnimationFrame(loop)
+    } else {
+      wordSyncRafId = null
+    }
+  }
+  wordSyncRafId = requestAnimationFrame(loop)
+}
+
+const stopWordSyncLoop = () => {
+  if (wordSyncRafId !== null) {
+    cancelAnimationFrame(wordSyncRafId)
+    wordSyncRafId = null
+  }
+}
+
+const handleWordClick = (startSec?: number) => {
+  if (typeof startSec === 'number' && !Number.isNaN(startSec)) {
+    setCurrentTime(startSec)
+    runWordSync()
+  }
+}
+
+const handleLineClick = (time?: number) => {
+  if (typeof time === 'number' && !Number.isNaN(time)) {
+    setCurrentTime(time)
+    runWordSync()
+  }
+}
+
 // ═══ Watchers ═══
 
 /** 抽屉开关：打开时初始化动画和背景，关闭时清理 */
@@ -318,7 +382,13 @@ watch(
       lyricsPositioned.value = false
       updateCurrentLyric(true)
       setBackgroundGradient(currentSong.value?.cover)
+      if (isPlaying.value) {
+        startWordSyncLoop()
+      } else {
+        runWordSync()
+      }
     } else {
+      stopWordSyncLoop()
       closeDrawer()
       stopBackgroundBreathing()
     }
@@ -334,9 +404,14 @@ watch(
         startAnalyser()
         resumeAnalyser()
       }
+      if (isOpen.value) {
+        startWordSyncLoop()
+      }
     } else {
+      stopWordSyncLoop()
       stopBackgroundBreathing()
       stopAnalyser()
+      runWordSync()
     }
   },
   { immediate: true }
@@ -344,16 +419,19 @@ watch(
 
 watch(currentTime, () => {
   updateCurrentLyric()
+  runWordSync()
 })
 
 /** 切歌时：加载歌词、重置滚动、更新背景、翻转封面 */
 watch(
   currentSong,
   async (s, oldSong) => {
-    await fetchLyrics(s?.id)
+    lastWordSyncLine.value = -1
+    await fetchLyrics(s)
     resetLyrics()
     await nextTick()
     updateCurrentLyric(true)
+    runWordSync()
     setBackgroundGradient(s?.cover, 0)
 
     // 触发圆形可视化器封面翻转动画
@@ -393,6 +471,7 @@ watch(
 )
 
 onUnmounted(() => {
+  stopWordSyncLoop()
   stopBackgroundBreathing()
 })
 </script>
@@ -764,13 +843,29 @@ onUnmounted(() => {
           <div
             v-for="(line, index) in activeSingleLyrics"
             :key="index"
-            class="lyric-line text-center transition-all duration-500"
+            :data-time="line.time"
+            :data-index="index"
+            class="lyric-line text-center"
             :class="{
               current: index === (lyricsDragging ? dragPreviewIndex : currentLyricIndex),
               'text-primary/40': index !== (lyricsDragging ? dragPreviewIndex : currentLyricIndex),
             }"
+            @click="handleLineClick(line.time)"
           >
-            <p class="lyric-text pointer-events-none">{{ line.ori }}</p>
+            <p class="lyric-text pointer-events-auto">
+              <template v-if="line.words && line.words.length > 0">
+                <span
+                  v-for="(w, wIdx) in line.words"
+                  :key="wIdx"
+                  class="word-char"
+                  :data-windex="wIdx"
+                  :data-start="w.startSec"
+                  :data-end="w.endSec"
+                  @click.stop="handleWordClick(w.startSec)"
+                >{{ w.text }}</span>
+              </template>
+              <template v-else>{{ line.ori }}</template>
+            </p>
             <p v-if="showTrans && line.tran" class="lyric-sub pointer-events-none">
               {{ line.tran }}
             </p>
@@ -882,7 +977,15 @@ onUnmounted(() => {
   will-change: transform;
 }
 
+@property --fill {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
 .lyrics-container {
+  --lyric-word-active: #ffffff;
+  --lyric-word-inactive: rgba(255, 255, 255, 0.38);
   mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -893,28 +996,83 @@ onUnmounted(() => {
   );
 }
 
+/* 逐字卡拉OK平滑渐变填充核心技术 (60fps Progressive Syllable Wipe) */
+.word-char {
+  display: inline-block;
+  white-space: pre-wrap;
+  --fill: 0%;
+  background-image: linear-gradient(
+    to right,
+    var(--lyric-word-active, #ffffff) 0%,
+    var(--lyric-word-active, #ffffff) var(--fill, 0%),
+    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) var(--fill, 0%),
+    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform, --fill;
+  cursor: pointer;
+}
+
+.lyric-line.current .word-char.word-sung {
+  --fill: 100%;
+  -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
+  color: var(--lyric-word-active, #ffffff);
+  background-image: none;
+  transform: scale(1);
+  opacity: 0.98;
+}
+
+.lyric-line:not(.current) .word-char.word-sung {
+  --fill: 100%;
+  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  background-image: none;
+  transform: scale(1);
+}
+
+.lyric-line.current .word-char.word-singing {
+  transform: scale(1.08);
+  font-weight: 800;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
+}
+
+.lyric-line:not(.current) .word-char {
+  --fill: 0%;
+  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  background-image: none;
+}
+
 .lyrics-scroll {
   transform: translateY(0);
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .lyric-line {
   line-height: 1.8;
   padding: 0.5rem 1.5rem;
   margin-bottom: 0.25rem;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
   white-space: pre-line;
+  transform-origin: center center;
 }
 
 .lyric-line.current {
-  @apply text-primary font-bold;
   text-shadow: 0 0 24px rgba(139, 92, 246, 0.65), 0 0 40px rgba(236, 72, 153, 0.4);
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.08));
   border-radius: 14px;
-  transform: scale(1.06);
+  transform: scale(1.08);
+}
+.lyric-line .lyric-text {
+  @apply text-xl font-bold lg:text-2xl;
 }
 .lyric-line.current .lyric-text {
-  @apply text-xl font-extrabold lg:text-2xl text-white;
+  @apply font-extrabold;
+  color: #ffffff;
 }
 .lyric-line.current .lyric-sub {
   @apply text-primary/80 mt-1 text-sm lg:text-base;

@@ -138,12 +138,14 @@ export async function searchNexus(
       const hasExhigh = existingQualities.some(q => q.level === 'exhigh');
 
       // Promote quality if higher tier discovered
+      const origPlat = track.platform || track.source || 'netease';
+      const qParams = `id=${encodeURIComponent(track.platformId || track.id)}&source=${encodeURIComponent(origPlat)}&title=${encodeURIComponent(track.title || '')}&artist=${encodeURIComponent(track.artist || '')}`;
       if ((track.platform === 'kugou' || track.platform === 'netease' || track.platform === 'qq') && !hasLossless) {
         existingQualities.unshift({
           level: 'lossless',
           label: 'SQ 无损',
           bitrate: 'FLAC 24bit',
-          streamUrl: `/api/music/stream?id=${encodeURIComponent(track.platformId || track.id)}&br=lossless`,
+          streamUrl: `/api/music/stream?${qParams}&br=lossless`,
         });
         existing.qualityBadge = 'SQ';
       } else if (!hasExhigh) {
@@ -151,7 +153,7 @@ export async function searchNexus(
           level: 'exhigh',
           label: 'HQ 极高',
           bitrate: '320kbps',
-          streamUrl: `/api/music/stream?id=${encodeURIComponent(track.platformId || track.id)}&br=320`,
+          streamUrl: `/api/music/stream?${qParams}&br=320`,
         });
         if (existing.qualityBadge !== 'SQ') existing.qualityBadge = 'HQ';
       }
@@ -161,7 +163,7 @@ export async function searchNexus(
         existing.platformId = track.platformId;
         existing.id = track.platformId;
         existing.urlId = track.platformId;
-        existing.streamUrl = `/api/music/stream?id=${encodeURIComponent(track.platformId)}`;
+        existing.streamUrl = `/api/music/stream?${qParams}`;
         if (track.picId) existing.picId = track.picId;
       }
 
@@ -176,6 +178,8 @@ export async function searchNexus(
       }
     } else {
       const canonicalId = track.platformId || track.id;
+      const origPlatform = track.platform || track.source || 'netease';
+      const qParams = `id=${encodeURIComponent(canonicalId)}&source=${encodeURIComponent(origPlatform)}&title=${encodeURIComponent(track.title || '')}&artist=${encodeURIComponent(track.artist || '')}`;
       // Default classified quality tiers for Sonic native delivery
       const isHighTier = track.platform === 'netease' || track.platform === 'kugou' || track.platform === 'qq';
       const qualities: any[] = [
@@ -185,13 +189,13 @@ export async function searchNexus(
                 level: 'lossless' as const,
                 label: 'SQ 无损',
                 bitrate: 'FLAC',
-                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=lossless`,
+                streamUrl: `/api/music/stream?${qParams}&br=lossless`,
               },
               {
                 level: 'exhigh' as const,
                 label: 'HQ 极高',
                 bitrate: '320kbps',
-                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=320`,
+                streamUrl: `/api/music/stream?${qParams}&br=320`,
               },
             ]
           : [
@@ -199,14 +203,14 @@ export async function searchNexus(
                 level: 'exhigh' as const,
                 label: 'HQ 极高',
                 bitrate: '320kbps',
-                streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=320`,
+                streamUrl: `/api/music/stream?${qParams}&br=320`,
               },
             ]),
         {
           level: 'standard' as const,
           label: '标准',
           bitrate: '128kbps',
-          streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}&br=128`,
+          streamUrl: `/api/music/stream?${qParams}&br=128`,
         },
       ];
 
@@ -224,7 +228,7 @@ export async function searchNexus(
         platformId: canonicalId,
         qualities,
         qualityBadge: isHighTier ? 'SQ' : 'HQ',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(canonicalId)}`,
+        streamUrl: `/api/music/stream?${qParams}`,
         sources: [
           {
             platform: 'sonic',

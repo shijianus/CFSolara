@@ -18,20 +18,8 @@ const state = reactive({
 
 const { play, togglePlay } = useAudio()
 
-const parseLrc = (raw: string) => {
-  const lines = raw.split(/\r?\n/)
-  const result: Array<{ time: number; text: string }> = []
-  for (const line of lines) {
-    const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/)
-    if (!m) continue
-    const min = parseInt(m[1])
-    const sec = parseInt(m[2])
-    const ms = parseInt(m[3].slice(0, 2))
-    const time = min * 60 + sec + ms / 100
-    result.push({ time, text: m[4].trim() })
-  }
-  return result
-}
+import { parseAnyLrc } from '@/composables/useLyrics'
+
 
 const load = async (id: string) => {
   try {
@@ -51,8 +39,8 @@ const load = async (id: string) => {
       state.duration = song?.dt ?? song?.duration ?? 0
       state.cover = song?.al?.picUrl || song?.album?.picUrl || ''
     }
-    const raw = (lrcRes as any)?.lrc?.lyric || (lrcRes as any)?.lyric || ''
-    state.lrc = raw ? parseLrc(raw) : []
+    const raw = (lrcRes as any)?.lrc?.lyric || (lrcRes as any)?.lyric || (lrcRes as any)?.rawLyric || ''
+    state.lrc = raw ? parseAnyLrc(raw) : []
   } finally {
     state.loading = false
   }

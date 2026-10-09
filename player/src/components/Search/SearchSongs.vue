@@ -39,53 +39,64 @@ const fetchSongs = async () => {
   }
   state.isLoading = true
 
-  // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
   try {
-    const page = Math.floor((props.offset ?? 0) / (props.limit ?? 40)) + 1
-    const count = props.limit ?? 40
-    const sonicRes = await fetch(`/api/sonic/search/nexus?q=${encodeURIComponent(term)}&page=${page}&count=${count}`).then(r => r.json())
-    const tracks = sonicRes?.data?.tracks || []
-    if (tracks.length > 0) {
-      state.results = tracks.map((t: any) => ({
-        id: t.platformId || t.id,
-        name: t.title || t.name,
-        artist: t.artist,
-        artistId: 0,
-        artists: [{ id: 0, name: t.artist }],
-        album: t.album || '',
-        albumId: 0,
-        cover: t.cover || t.coverUrl || '',
-        duration: (t.duration || 200) * 1000,
-        dt: (t.duration || 200) * 1000,
-        url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}`,
-        sha: t.sha || '',
-        qualityBadge: t.qualityBadge || 'SQ',
-        qualities: t.qualities || [],
-        liked: false,
-      }))
-      emit('loaded', state.results.length)
-      emit('total', sonicRes?.data?.total || state.results.length)
-      return
+    // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
+    try {
+      const page = Math.floor((props.offset ?? 0) / (props.limit ?? 40)) + 1
+      const count = props.limit ?? 40
+      const sonicRes = await fetch(
+        `/api/sonic/search/nexus?q=${encodeURIComponent(term)}&page=${page}&count=${count}`
+      ).then(r => r.json())
+      const tracks = sonicRes?.data?.tracks || []
+      if (tracks.length > 0) {
+        state.results = tracks.map((t: any) => ({
+          id: t.platformId || t.id,
+          name: t.title || t.name,
+          artist: t.artist,
+          artistId: 0,
+          artists: [{ id: 0, name: t.artist }],
+          album: t.album || '',
+          albumId: 0,
+          cover: t.cover || t.coverUrl || '',
+          duration: (t.duration || 200) * 1000,
+          dt: (t.duration || 200) * 1000,
+          url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
+          sha: t.sha || '',
+          qualityBadge: t.qualityBadge || 'SQ',
+          qualities: t.qualities || [],
+          liked: false,
+        }))
+        emit('loaded', state.results.length)
+        emit('total', sonicRes?.data?.total || state.results.length)
+        return
+      }
+    } catch (err) {
+      console.warn('[Sonic Search] Nexus gateway warning:', err)
     }
-  } catch {}
 
-  // 2. 备用兜底检索通道
-  try {
-    const res = await cloudSearch({
-      keywords: term,
-      type: 1,
-      limit: props.limit ?? 40,
-      offset: props.offset ?? 0,
-    })
-    const { songs, total } = transformSearchSongs(res as Record<string, unknown>)
-    if (songs && songs.length > 0) {
-      state.results = songs
-      emit('loaded', state.results.length)
-      emit('total', total)
-      return
+    // 2. 备用兜底检索通道
+    try {
+      const res = await cloudSearch({
+        keywords: term,
+        type: 1,
+        limit: props.limit ?? 40,
+        offset: props.offset ?? 0,
+      })
+      const { songs, total } = transformSearchSongs(res as Record<string, unknown>)
+      if (songs && songs.length > 0) {
+        state.results = songs
+        emit('loaded', state.results.length)
+        emit('total', total)
+        return
+      }
+    } catch (err) {
+      console.warn('[Sonic Search] CloudSearch fallback warning:', err)
     }
-  } catch {}
-  finally {
+
+    state.results = []
+    emit('loaded', 0)
+    emit('total', 0)
+  } finally {
     state.isLoading = false
   }
 }

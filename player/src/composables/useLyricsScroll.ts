@@ -85,8 +85,9 @@ export function useLyricsScroll(options: LyricsScrollOptions) {
         } else {
           gsap.to(lyricsContainer, {
             y: -targetScrollTop,
-            duration: 0.8,
+            duration: 0.5,
             ease: 'power2.out',
+            overwrite: 'auto',
           })
         }
       }

@@ -23,6 +23,23 @@ const getAudioSingleton = (): HTMLAudioElement => {
     globalAudio = new Audio()
     // 允许跨域，以便 AudioContext 进行音频可视化分析
     globalAudio.crossOrigin = 'anonymous'
+    globalAudio.id = 'audioPlayer'
+    if (typeof document !== 'undefined') {
+      const attachAudio = () => {
+        if (!document.getElementById('audioPlayer') && document.body) {
+          document.body.appendChild(globalAudio)
+        }
+      }
+      if (document.body) {
+        attachAudio()
+      } else {
+        document.addEventListener('DOMContentLoaded', attachAudio, { once: true })
+      }
+    }
+    if (typeof window !== 'undefined') {
+      ;(window as any).__audioPlayer = globalAudio
+      ;(window as any).__sonicAudio = globalAudio
+    }
   }
   return globalAudio
 }
@@ -525,9 +542,14 @@ export const useAudioStore = defineStore('audio', {
 
     // 设置播放进度
     setCurrentTime(time: number) {
-      if (this.audio.audio && this.audio.duration > 0) {
-        this.audio.audio.currentTime = Math.max(0, Math.min(this.audio.duration, time))
+      const validTime = Math.max(0, time)
+      if (this.audio.audio) {
+        try {
+          const maxTime = this.audio.duration > 0 ? this.audio.duration : validTime
+          this.audio.audio.currentTime = Math.min(maxTime, validTime)
+        } catch {}
       }
+      this.audio.currentTime = validTime
     },
 
     // 设置播放进度（百分比）

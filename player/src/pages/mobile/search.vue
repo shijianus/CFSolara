@@ -111,16 +111,59 @@ const fetchSuggest = async () => {
 }
 
 const fetchSongs = async () => {
-  if (!state.q.trim()) return
-  const res = await cloudSearch({
-    keywords: state.q,
-    type: 1,
-    limit: state.songPageSize,
-    offset: (state.songPage - 1) * state.songPageSize,
-  })
-  const { songs, total } = transformSearchSongs(res as Record<string, unknown>)
-  state.songs = songs
-  state.songTotal = total
+  const term = state.q.trim()
+  if (!term) {
+    state.songs = []
+    state.songTotal = 0
+    return
+  }
+
+  // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
+  try {
+    const sonicRes = await fetch(
+      `/api/sonic/search/nexus?q=${encodeURIComponent(term)}&page=${state.songPage}&count=${state.songPageSize}`
+    ).then((r) => r.json())
+    const tracks = sonicRes?.data?.tracks || []
+    if (tracks.length > 0) {
+      state.songs = tracks.map((t: any) => ({
+        id: t.platformId || t.id,
+        name: t.title || t.name,
+        artist: t.artist,
+        artistId: 0,
+        artists: [{ id: 0, name: t.artist }],
+        album: t.album || '',
+        albumId: 0,
+        cover: t.cover || t.coverUrl || '',
+        duration: (t.duration || 200) * 1000,
+        dt: (t.duration || 200) * 1000,
+        url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
+        sha: t.sha || '',
+        qualityBadge: t.qualityBadge || 'SQ',
+        qualities: t.qualities || [],
+        liked: false,
+      }))
+      state.songTotal = sonicRes?.data?.total || tracks.length
+      return
+    }
+  } catch (err) {
+    console.warn('[Sonic Mobile Search] Nexus gateway warning:', err)
+  }
+
+  // 2. 备用兜底检索通道
+  try {
+    const res = await cloudSearch({
+      keywords: term,
+      type: 1,
+      limit: state.songPageSize,
+      offset: (state.songPage - 1) * state.songPageSize,
+    })
+    const { songs, total } = transformSearchSongs(res as Record<string, unknown>)
+    state.songs = songs
+    state.songTotal = total
+  } catch {
+    state.songs = []
+    state.songTotal = 0
+  }
 }
 
 const fetchPlaylists = async () => {

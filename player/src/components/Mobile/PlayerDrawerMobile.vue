@@ -13,15 +13,19 @@ import PlaylistDrawerMobile from '@/components/Mobile/PlaylistDrawerMobile.vue'
 import PlaylistCommentsPopup from '@/components/Mobile/PlaylistCommentsPopup.vue'
 import Button from '@/components/Ui/Button.vue'
 import VinylDisc from '@/components/Player/VinylDisc.vue'
+import { syncWordElements } from '@/utils/lyricsWordSync'
+import { useAudioStore } from '@/stores/modules/audio'
 
 // 国际化文本函数
 const { t } = useI18n()
+const audioStore = useAudioStore()
 // 抽屉开关（父组件通过 v-model 控制）
 const isOpen = defineModel<boolean>()
 
 // 模板引用
 const drawerRef = useTemplateRef('drawerRef')
 const lyricsRef = useTemplateRef('lyricsRef')
+const lyricsContainerRef = useTemplateRef('lyricsContainerRef')
 const bgARef = useTemplateRef('bgARef')
 const bgBRef = useTemplateRef('bgBRef')
 
@@ -241,6 +245,67 @@ const closeDrawer = () => {
   }
 }
 
+// ═══ 逐字对齐与 60fps 追随渲染引擎 ═══
+let wordSyncRafId: number | null = null
+const lastWordSyncLine = { value: -1 }
+
+const runWordSync = () => {
+  const container = lyricsContainerRef.value || lyricsRef.value
+  if (!container) return
+  const audioElement = audioStore.audio.audio
+  const curTime = (audioElement && Number.isFinite(audioElement.currentTime) && audioElement.currentTime > 0)
+    ? audioElement.currentTime
+    : currentTime.value
+  syncWordElements(
+    container,
+    activeSingleLyrics.value,
+    curTime,
+    currentLyricIndex.value,
+    lastWordSyncLine
+  )
+  if (lastWordSyncLine.value >= 0 && lastWordSyncLine.value !== currentLyricIndex.value && !state.isDraggingLyrics) {
+    currentLyricIndex.value = lastWordSyncLine.value
+    scrollToCurrentLyric()
+  }
+}
+
+const startWordSyncLoop = () => {
+  if (wordSyncRafId !== null) {
+    cancelAnimationFrame(wordSyncRafId)
+    wordSyncRafId = null
+  }
+  const loop = () => {
+    if (isOpen.value && isPlaying.value) {
+      runWordSync()
+      wordSyncRafId = requestAnimationFrame(loop)
+    } else {
+      wordSyncRafId = null
+    }
+  }
+  wordSyncRafId = requestAnimationFrame(loop)
+}
+
+const stopWordSyncLoop = () => {
+  if (wordSyncRafId !== null) {
+    cancelAnimationFrame(wordSyncRafId)
+    wordSyncRafId = null
+  }
+}
+
+const handleWordClick = (startSec?: number) => {
+  if (typeof startSec === 'number' && !Number.isNaN(startSec)) {
+    setCurrentTime(startSec)
+    runWordSync()
+  }
+}
+
+const handleLineClick = (time?: number) => {
+  if (typeof time === 'number' && !Number.isNaN(time)) {
+    setCurrentTime(time)
+    runWordSync()
+  }
+}
+
 // Watchers
 watch(
   () => isOpen.value,
@@ -254,8 +319,12 @@ watch(
       setBackgroundGradient(currentSong.value?.cover)
       if (isPlaying.value) {
         startBackgroundBreathing()
+        startWordSyncLoop()
+      } else {
+        runWordSync()
       }
     } else {
+      stopWordSyncLoop()
       closeDrawer()
       stopBackgroundBreathing()
     }
@@ -267,8 +336,13 @@ watch(
   playing => {
     if (playing) {
       startBackgroundBreathing()
+      if (isOpen.value) {
+        startWordSyncLoop()
+      }
     } else {
+      stopWordSyncLoop()
       stopBackgroundBreathing()
+      runWordSync()
     }
   },
   { immediate: true }
@@ -276,15 +350,18 @@ watch(
 
 watch(currentTime, () => {
   updateCurrentLyric()
+  runWordSync()
 })
 
 watch(
   currentSong,
   async s => {
-    await fetchLyrics(s?.id)
+    lastWordSyncLine.value = -1
+    await fetchLyrics(s)
     resetLyrics()
     await nextTick()
     updateCurrentLyric(true)
+    runWordSync()
     setBackgroundGradient(s?.cover)
   },
   { immediate: true }
@@ -294,6 +371,11 @@ onMounted(() => {
   if (drawerRef.value) {
     gsap.set(drawerRef.value as any, { display: 'none' })
   }
+})
+
+onUnmounted(() => {
+  stopWordSyncLoop()
+  stopBackgroundBreathing()
 })
 
 // 播放模式图标
@@ -499,13 +581,30 @@ const playModeIcon = computed(() => {
           <div
             v-for="(line, index) in activeSingleLyrics"
             :key="index"
-            class="lyric-line mb-6 px-4 text-center transition-all duration-500"
+            :data-time="line.time"
+            :data-index="index"
+            class="lyric-line mb-6 px-4 text-center"
             :class="{
+              current: index === currentLyricIndex,
               'text-primary scale-105 transform font-semibold': index === currentLyricIndex,
               'text-primary/40': index !== currentLyricIndex,
             }"
+            @click.stop="handleLineClick(line.time)"
           >
-            <p class="leading-relaxed">{{ line.ori }}</p>
+            <p class="leading-relaxed pointer-events-auto">
+              <template v-if="line.words && line.words.length > 0">
+                <span
+                  v-for="(w, wIdx) in line.words"
+                  :key="wIdx"
+                  class="word-char"
+                  :data-windex="wIdx"
+                  :data-start="w.startSec"
+                  :data-end="w.endSec"
+                  @click.stop="handleWordClick(w.startSec)"
+                >{{ w.text }}</span>
+              </template>
+              <template v-else>{{ line.ori }}</template>
+            </p>
             <p v-if="showTrans && line.tran" class="mt-1 text-sm opacity-80">{{ line.tran }}</p>
             <p v-if="showRoma && line.roma" class="mt-1 text-xs opacity-60">{{ line.roma }}</p>
           </div>
@@ -714,7 +813,15 @@ const playModeIcon = computed(() => {
   background: linear-gradient(180deg, #d0d0d0, #909090);
 }
 
+@property --fill {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
 .lyrics-container {
+  --lyric-word-active: #ffffff;
+  --lyric-word-inactive: rgba(255, 255, 255, 0.38);
   mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -725,13 +832,64 @@ const playModeIcon = computed(() => {
   );
 }
 
+.word-char {
+  display: inline-block;
+  white-space: pre-wrap;
+  --fill: 0%;
+  background-image: linear-gradient(
+    to right,
+    var(--lyric-word-active, #ffffff) 0%,
+    var(--lyric-word-active, #ffffff) var(--fill, 0%),
+    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) var(--fill, 0%),
+    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform, --fill;
+  cursor: pointer;
+}
+
+.lyric-line.current .word-char.word-sung {
+  --fill: 100%;
+  -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
+  color: var(--lyric-word-active, #ffffff);
+  background-image: none;
+  transform: scale(1);
+  opacity: 0.98;
+}
+
+.lyric-line:not(.current) .word-char.word-sung {
+  --fill: 100%;
+  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  background-image: none;
+  transform: scale(1);
+}
+
+.lyric-line.current .word-char.word-singing {
+  transform: scale(1.08);
+  font-weight: 800;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
+}
+
+.lyric-line:not(.current) .word-char {
+  --fill: 0%;
+  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  background-image: none;
+}
+
 .lyrics-scroll {
   transform: translateY(0);
 }
 
 .lyric-line {
   line-height: 1.6;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
+  transform-origin: center center;
 }
 
 .progress-track:active .progress-thumb {

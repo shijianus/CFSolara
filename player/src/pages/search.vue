@@ -278,26 +278,26 @@ const maxScore = computed(() => {
           <!-- 搜索输入框 -->
           <div
             class="search-box mx-auto w-full max-w-xl transition-all duration-500"
-            :class="inputFocused ? 'scale-[1.02]' : ''"
+            :class="inputFocused ? 'scale-[1.01]' : ''"
           >
             <div
-              class="flex items-center gap-3 rounded-2xl border px-5 py-3.5 backdrop-blur-xl transition-all duration-300"
+              class="flex items-center gap-3 rounded-full border px-5 py-3.5 backdrop-blur-2xl transition-all duration-300"
               :class="[
                 inputFocused
-                  ? 'border-pink-500/30 bg-white/[0.07] shadow-[0_0_30px_rgba(236,72,153,0.08),0_8px_32px_rgba(0,0,0,0.12)]'
-                  : 'border-white/[0.06] bg-white/[0.035] shadow-[0_2px_12px_rgba(0,0,0,0.08)]'
+                  ? 'border-pink-500/40 bg-white/[0.08] ring-4 ring-[#8b5cf6]/20 shadow-[0_0_35px_rgba(236,72,153,0.15),0_8px_32px_rgba(0,0,0,0.25)]'
+                  : 'border-white/[0.12] bg-white/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:border-white/20'
               ]"
             >
               <span
                 class="icon-[mdi--magnify] h-5 w-5 shrink-0 transition-all duration-300"
-                :class="inputFocused ? 'text-pink-400' : 'text-primary/30'"
+                :class="inputFocused ? 'text-pink-400' : 'text-primary/40'"
               />
               <input
                 ref="inputRef"
                 v-model="searchInput"
                 type="text"
                 :placeholder="placeholder || $t('common.search.placeholder')"
-                class="min-w-0 flex-1 bg-transparent text-sm text-primary outline-none placeholder:text-primary/30"
+                class="min-w-0 flex-1 bg-transparent text-sm md:text-base text-primary outline-none placeholder:text-primary/40 font-medium"
                 @focus="inputFocused = true"
                 @blur="inputFocused = false"
                 @keyup.enter="handleSubmit"
@@ -306,7 +306,7 @@ const maxScore = computed(() => {
               <Transition name="fade-scale">
                 <button
                   v-if="searchInput"
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary/30 transition-colors hover:bg-white/10 hover:text-primary/60"
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary/40 transition-colors hover:bg-white/10 hover:text-white"
                   @click="searchInput = ''"
                 >
                   <span class="icon-[mdi--close] h-3.5 w-3.5" />
@@ -314,7 +314,7 @@ const maxScore = computed(() => {
               </Transition>
               <!-- 搜索按钮 -->
               <button
-                class="search-btn flex h-8 shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs font-medium text-white transition-all duration-300 active:scale-95"
+                class="search-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full px-5 text-xs font-semibold text-white transition-all duration-300 active:scale-95"
                 @click="handleSubmit"
               >
                 <span class="icon-[mdi--magnify] h-3.5 w-3.5" />
@@ -328,11 +328,11 @@ const maxScore = computed(() => {
         <div v-if="searchHistory.length > 0" class="relative z-10 mb-6 shrink-0">
           <div class="mb-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="icon-[mdi--history] h-4 w-4 text-primary/25" />
-              <span class="text-primary/40 text-xs font-medium">{{ $t('search.recentSearches') }}</span>
+              <span class="icon-[mdi--history] h-4 w-4 text-primary/40" />
+              <span class="text-primary/60 text-xs font-bold uppercase tracking-wider">{{ $t('search.recentSearches') }}</span>
             </div>
             <button
-              class="text-primary/25 hover:text-primary/50 text-xs transition-colors"
+              class="text-primary/40 hover:text-primary/70 text-xs font-medium transition-colors"
               @click="clearHistory"
             >
               {{ $t('common.clear') }}
@@ -342,13 +342,14 @@ const maxScore = computed(() => {
             <button
               v-for="(keyword, ki) in searchHistory"
               :key="keyword"
-              class="history-chip group flex items-center gap-1.5 rounded-full border border-white/[0.05] bg-white/[0.025] px-3 py-1.5 text-[13px] transition-all duration-200 hover:border-pink-500/15 hover:bg-white/[0.055]"
+              class="history-chip group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:border-pink-500/30 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95"
               :style="{ animationDelay: `${ki * 35}ms` }"
               @click="doSearch(keyword)"
             >
-              <span class="text-primary/55 group-hover:text-primary/85 transition-colors">{{ keyword }}</span>
+              <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
+              <span class="text-primary/80 group-hover:text-white transition-colors">{{ keyword }}</span>
               <span
-                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/30 hover:text-pink-400!"
+                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/40 hover:text-pink-400!"
                 @click.stop="globalStore.removeSearchHistory(keyword)"
               />
             </button>

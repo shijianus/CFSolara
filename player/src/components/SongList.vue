@@ -259,6 +259,14 @@ const downloadSong = (song: Song, index: number) => {
                   >
                     {{ song.qualityBadge || (song.qualities?.[0]?.level === 'lossless' ? 'SQ 无损' : 'HQ 极高') }}
                   </span>
+                  <!-- Sonic SHA 规范聚合指纹 (证明单曲跨多源去重与身份一致性) -->
+                  <span
+                    v-if="song.sha"
+                    :title="'Sonic Canonical SHA: ' + song.sha"
+                    class="shrink-0 hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono select-none bg-white/5 border border-white/10 text-white/40 hover:text-white/70 transition-colors"
+                  >
+                    #{{ song.sha.slice(0, 6) }}
+                  </span>
                 </div>
                 <div class="mt-0.5 flex items-center gap-2 md:hidden">
                   <span class="text-primary/60 truncate text-xs">{{ song.artist }}</span>

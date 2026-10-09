@@ -166,8 +166,8 @@ const flipCover = (newCover: string) => {
 watch(currentTime, updateLyricIndex)
 watch(
   () => [footerLyrics.value.enabled, currentSong.value?.id],
-  ([enabled, id]) => {
-    if (enabled) fetchLyrics(id as any)
+  ([enabled]) => {
+    if (enabled) fetchLyrics(currentSong.value)
   },
   { immediate: true }
 )

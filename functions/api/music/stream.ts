@@ -33,13 +33,15 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     const id = url.searchParams.get('id');
     const source = url.searchParams.get('source') || 'netease';
     const quality = url.searchParams.get('quality') || url.searchParams.get('br') || '320';
+    const title = url.searchParams.get('title') || '';
+    const artist = url.searchParams.get('artist') || '';
 
-    if (!id) {
-      return errorResponse('缺少歌曲 ID (Parameter id is required)', 400);
+    if (!id && !title) {
+      return errorResponse('缺少歌曲标识 (Parameter id or title is required)', 400);
     }
 
     try {
-      const streamUrl = await getTrackStreamUrl(env, id, source, quality);
+      const streamUrl = await getTrackStreamUrl(env, id || '', source, quality, title, artist);
       if (!streamUrl) {
         return errorResponse('无法解析可播放音频流 (No stream found)', 404);
       }
@@ -51,6 +53,10 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       console.error('[Sonic Music Stream Error]', err);
       return errorResponse(err?.message || '解析音频流失败', 502);
     }
+  }
+
+  if (!targetUrl) {
+    return errorResponse('无法解析音频目标地址', 500);
   }
 
   // Proxy the audio stream

@@ -47,6 +47,8 @@ export function useLyricsDrag(options: LyricsDragOptions) {
 
   /** 拖动相关内部状态 */
   const state = reactive({
+    /** 是否处于按压状态 */
+    isPointerDown: false,
     /** 是否正在拖动 */
     dragging: false,
     /** 拖动起点 Y 坐标 */
@@ -59,10 +61,8 @@ export function useLyricsDrag(options: LyricsDragOptions) {
 
   /** 拖动开始（鼠标/触摸） */
   const onDragStart = (e: MouseEvent | TouchEvent) => {
-    e.preventDefault()
-
-    state.dragging = true
-    autoScroll.value = false
+    state.isPointerDown = true
+    state.dragging = false
 
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
     state.startY = clientY
@@ -77,22 +77,31 @@ export function useLyricsDrag(options: LyricsDragOptions) {
         state.startScrollY = 0
       }
     }
-
-    // 拖动期间禁止文本选中
-    document.body.style.userSelect = 'none'
-    document.body.style.webkitUserSelect = 'none'
-    document.body.style.cursor = 'grabbing'
   }
 
   /** 拖动移动：实时跟随手指/鼠标，并计算最近歌词行 */
   const onDragMove = (e: MouseEvent | TouchEvent) => {
-    if (!state.dragging || !lyricsRef.value || !lyricsContainerRef.value) return
-    e.preventDefault()
+    if (!state.isPointerDown || !lyricsRef.value || !lyricsContainerRef.value) return
 
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
     const deltaY = clientY - state.startY
-    const newScrollY = state.startScrollY + deltaY
 
+    // 超出轻微位移阈值后正式进入拖动状态
+    if (!state.dragging) {
+      if (Math.abs(deltaY) > 6) {
+        state.dragging = true
+        autoScroll.value = false
+        document.body.style.userSelect = 'none'
+        document.body.style.webkitUserSelect = 'none'
+        document.body.style.cursor = 'grabbing'
+      } else {
+        return
+      }
+    }
+
+    if (e.cancelable) e.preventDefault()
+
+    const newScrollY = state.startScrollY + deltaY
     gsap.set(lyricsRef.value, { y: newScrollY })
 
     // 找到可视区中心最近的歌词行
@@ -121,8 +130,10 @@ export function useLyricsDrag(options: LyricsDragOptions) {
 
   /** 拖动结束：跳转到预览位置，延迟恢复自动滚动 */
   const onDragEnd = () => {
-    if (!state.dragging) return
+    if (!state.isPointerDown) return
 
+    const wasDragging = state.dragging
+    state.isPointerDown = false
     state.dragging = false
 
     // 恢复选中与光标样式
@@ -130,20 +141,20 @@ export function useLyricsDrag(options: LyricsDragOptions) {
     document.body.style.webkitUserSelect = ''
     document.body.style.cursor = ''
 
-    // 跳转到拖动预览对应的时间点
-    if (state.previewIndex >= 0 && state.previewIndex < activeSingleLyrics.value.length) {
+    // 仅在真实发生拖动时跳转到预览位置
+    if (wasDragging && state.previewIndex >= 0 && state.previewIndex < activeSingleLyrics.value.length) {
       const targetTime = timeForIndex(state.previewIndex) ?? 0
       setCurrentTime(targetTime)
       currentLyricIndex.value = state.previewIndex
       scrollToCurrentLyric()
+
+      // 延迟 1.5s 后恢复自动滚动
+      setTimeout(() => {
+        toggleAutoScroll()
+      }, 1500)
     }
 
     state.previewIndex = -1
-
-    // 延迟 1.5s 后恢复自动滚动
-    setTimeout(() => {
-      toggleAutoScroll()
-    }, 1500)
   }
 
   /** 拖动预览信息（时间 + 歌词文本） */
