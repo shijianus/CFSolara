@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cd player && pnpm build && cd .. && rm -rf dist && cp -r player/dist dist && cp -n favicon.png favicon.svg dist/ 2>/dev/null || true",
-    "deploy": "npm run build && /home/shijian/projects/shijianus-blog/node_modules/.bin/wrangler pages deploy dist --project-name=cfsolara --branch=main",
+    "deploy": "npm run build && /home/shijian/projects/shijianus-blog/node_modules/.bin/wrangler pages deploy dist --project-name=cfsolara --branch=main --commit-dirty=true",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
     "test:auth": "jiti scripts/test-auth-compatibility.mjs",
     "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs"
