@@ -98,12 +98,30 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
           </router-view>
         </main>
 
-        <!-- 底部磨砂玻璃柔和糊化与衰减过渡层 (Frosted Blur-Out Gradient Transition) -->
-        <!-- 该层使向下流动的网格卡片在接近 Footer 处柔和糊化、向下渐变消失（若隐若现），不遮挡其色彩向 Footer 渗透 -->
-        <div
-          class="pointer-events-none absolute bottom-0 left-0 right-0 h-32 sm:h-36 z-10 overflow-hidden backdrop-blur-md"
-          style="mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 35%, black 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 35%, black 100%);"
-        ></div>
+        <!-- 底部渐进式毛玻璃柔和融化与颜色预示层 (Progressive Frosted Dispersion Transition) -->
+        <!-- 多层平滑景深阶梯模糊，消除生硬截断，使向下流动的卡片在接近 Footer 处柔和融化、若隐若现 -->
+        <div class="pointer-events-none absolute bottom-0 left-0 right-0 h-44 sm:h-48 z-10 overflow-hidden">
+          <!-- 阶梯 1: 远端微弱景深柔化 (0 - 8px) -->
+          <div
+            class="absolute bottom-28 left-0 right-0 h-16 backdrop-blur-[6px]"
+            style="-webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);"
+          ></div>
+          <!-- 阶梯 2: 中端景深散射 (8 - 20px) -->
+          <div
+            class="absolute bottom-16 left-0 right-0 h-20 backdrop-blur-[18px]"
+            style="-webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);"
+          ></div>
+          <!-- 阶梯 3: 近端深度糊化 (20 - 40px) -->
+          <div
+            class="absolute bottom-6 left-0 right-0 h-24 backdrop-blur-[36px]"
+            style="-webkit-backdrop-filter: blur(36px); backdrop-filter: blur(36px);"
+          ></div>
+          <!-- 阶梯 4: 底基超强色散漫反射层 (全面覆盖 Dock 核心区，仅透射纯净色彩) -->
+          <div
+            class="glass-blur-base absolute bottom-0 left-0 right-0 h-32 backdrop-blur-[64px] backdrop-saturate-[240%]"
+            style="-webkit-backdrop-filter: blur(64px) saturate(240%); backdrop-filter: blur(64px) saturate(240%);"
+          ></div>
+        </div>
 
         <!-- 底部播放栏：悬浮停靠在右侧底部，与左侧边栏底缘绝对齐平 -->
         <div class="pointer-events-none absolute bottom-0 left-0 right-0 z-20">

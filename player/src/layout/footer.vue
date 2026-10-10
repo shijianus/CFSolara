@@ -234,7 +234,10 @@ onUnmounted(() => {
 const emit = defineEmits(['show'])
 </script>
 <template>
-  <footer class="glass-nav relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4 border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]">
+  <footer
+    class="glass-dock backdrop-blur-[64px] backdrop-saturate-[240%] backdrop-contrast-[105%] relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4 isolate"
+    style="-webkit-backdrop-filter: blur(64px) saturate(240%) contrast(105%); backdrop-filter: blur(64px) saturate(240%) contrast(105%);"
+  >
     <!-- 音频可视化器背景 -->
     <div
       v-if="isAnalyserInitialized && audioVisualizer.enabledInFooter"
