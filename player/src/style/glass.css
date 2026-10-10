@@ -163,29 +163,6 @@
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 24px 60px -12px rgba(0, 0, 0, 0.65);
   }
 
-  .glass-blur-wash {
-    -webkit-backdrop-filter: blur(64px) saturate(240%);
-    backdrop-filter: blur(64px) saturate(240%);
-    background: linear-gradient(
-      to top,
-      light-dark(rgba(245, 245, 252, 0.92), rgba(10, 8, 20, 0.88)) 0%,
-      light-dark(rgba(245, 245, 252, 0.70), rgba(10, 8, 20, 0.65)) 42%,
-      light-dark(rgba(245, 245, 252, 0.25), rgba(10, 8, 20, 0.20)) 75%,
-      transparent 100%
-    );
-  }
-
-  .glass-blur-base {
-    -webkit-backdrop-filter: blur(64px) saturate(240%);
-    backdrop-filter: blur(64px) saturate(240%);
-    background: linear-gradient(
-      to top,
-      light-dark(rgba(245, 245, 252, 0.75), rgba(10, 8, 20, 0.70)) 0%,
-      light-dark(rgba(245, 245, 252, 0.45), rgba(10, 8, 20, 0.40)) 45%,
-      light-dark(rgba(245, 245, 252, 0.12), rgba(10, 8, 20, 0.10)) 80%,
-      transparent 100%
-    );
-  }
 
   .mobile-tabbar {
     background: var(--glass-bg-subtle);
