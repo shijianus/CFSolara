@@ -53,7 +53,7 @@ const tabs = computed(() => [
 </script>
 
 <template>
-  <div class="flex h-full flex-1 flex-col overflow-hidden p-4">
+  <div class="flex h-full flex-1 flex-col overflow-hidden p-4 pb-28 sm:pb-32">
     <!-- 顶部操作栏 -->
     <div class="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-4">
       <!-- Tab 导航 -->

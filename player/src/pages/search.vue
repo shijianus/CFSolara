@@ -156,7 +156,7 @@ const maxScore = computed(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-1 flex-col overflow-hidden px-4">
+  <div class="flex h-full flex-1 flex-col overflow-hidden px-4 pb-28 sm:pb-32">
     <!-- 有搜索结果时的布局 -->
     <template v-if="q">
       <!-- 顶部操作栏 -->
@@ -265,7 +265,7 @@ const maxScore = computed(() => {
     <!-- 空状态：没有搜索关键词时                         -->
     <!-- ═══════════════════════════════════════════════ -->
     <template v-else>
-      <div class="custom-scrollbar relative flex h-full flex-col overflow-y-auto">
+      <div class="custom-scrollbar relative flex h-full flex-col overflow-y-auto pb-28 sm:pb-32">
 
         <!-- 背景氛围光 -->
         <div class="pointer-events-none absolute inset-0 overflow-hidden">

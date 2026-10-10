@@ -112,7 +112,7 @@ const tabs = computed(() => [
 
 <template>
   <div class="text-primary flex-1 overflow-hidden px-4">
-    <div class="h-full overflow-auto">
+    <div class="h-full overflow-auto pb-28 sm:pb-32">
       <PageSkeleton v-if="state.loading" :sections="['hero', 'list']" :list-count="12" />
       <template v-else>
         <section class="relative mb-8 flex shrink-0">

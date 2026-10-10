@@ -6,7 +6,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="h-full w-full overflow-auto p-4">
+  <div class="h-full w-full overflow-auto p-4 pb-28 sm:pb-32">
     <!-- 头部卡片 -->
     <div class="relative mb-6 overflow-hidden">
       <!-- 背景装饰 -->

@@ -129,7 +129,7 @@ onMounted(() => {
       </header>
 
       <!-- MV 网格 -->
-      <div class="min-h-0 flex-1 overflow-auto">
+      <div class="min-h-0 flex-1 overflow-auto pb-28 sm:pb-32">
         <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <router-link
             v-for="mv in mvList"

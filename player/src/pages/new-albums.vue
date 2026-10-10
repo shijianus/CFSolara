@@ -70,7 +70,7 @@ onMounted(() => loadAlbums(true))
 
 <template>
   <div class="flex h-full flex-1 flex-col overflow-hidden">
-    <div class="glass-card mx-4 mb-0 shrink-0 p-4">
+    <div class="glass-card mx-1 sm:mx-2 mt-1 mb-3 shrink-0 p-4">
       <div class="flex items-center gap-4">
         <h2 class="text-primary text-lg font-bold">{{ t('newAlbums.title') }}</h2>
         <div class="flex gap-1">
@@ -87,7 +87,7 @@ onMounted(() => loadAlbums(true))
       </div>
     </div>
 
-    <div class="flex-1 overflow-auto p-4">
+    <div class="flex-1 overflow-auto px-1 sm:px-2 pb-28 sm:pb-32">
       <PageSkeleton v-if="state.isLoading && !state.albums.length" :sections="['grid']" />
       <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         <router-link

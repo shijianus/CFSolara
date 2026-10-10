@@ -80,15 +80,15 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
       <div class="absolute top-[30%] left-[35%] size-[38vmax] rounded-full blur-[100px] animate-drift-c opacity-20 dark:opacity-25" style="background: #3b82f6;"></div>
     </div>
 
-    <!-- 主工作区：严格几何对齐的 Studio 架构 (全组件限制在统一上下区间 [Y_top, Y_bottom] 内) -->
+    <!-- 主工作区：几何对齐的 Studio 架构 (全组件限制在统一上下区间 [Y_top, Y_bottom] 内) -->
     <div class="z-50 flex h-full w-full p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
       <!-- 左侧边栏：单独占用左边所有空间，严格限制在上下区间内 -->
       <Aside />
 
-      <!-- 右侧主区域：上部内容画板 + 底部控制 Dock，与左侧边栏上下区间严格同步对齐 -->
-      <div class="relative flex flex-1 flex-col h-full min-h-0 min-w-0 gap-3 sm:gap-4 overflow-hidden">
-        <!-- 主内容画板区域：继承毛玻璃卡片规格与圆角裁剪，严格对齐左侧边栏顶部边界 -->
-        <main class="glass-card relative flex flex-1 min-h-0 flex-col rounded-[28px] border border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.4)] overflow-hidden">
+      <!-- 右侧主区域：内容画板贯通至底缘 + 底部悬浮控制 Dock，与左侧边栏上下区间严格同步 -->
+      <div class="relative flex flex-1 h-full min-h-0 min-w-0 overflow-hidden">
+        <!-- 主内容区域：隐式限制框（限制框依然存在，但移除显式深色边框与阴影，保持尺寸与上下区间约束） -->
+        <main class="relative flex-1 h-full min-h-0 w-full overflow-hidden">
           <router-view v-slot="{ Component }">
             <transition appear name="fade-transform" mode="out-in">
               <keep-alive>
@@ -98,8 +98,17 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
           </router-view>
         </main>
 
-        <!-- 底部播放栏：位于 Aside 右侧，占用右侧主区域底部，与左侧边栏底缘绝对齐平 -->
-        <Footer @show="openPlayerDrawer" />
+        <!-- 底部磨砂玻璃柔和糊化与衰减过渡层 (Frosted Blur-Out Gradient Transition) -->
+        <!-- 该层使向下流动的网格卡片在接近 Footer 处柔和糊化、向下渐变消失（若隐若现），不遮挡其色彩向 Footer 渗透 -->
+        <div
+          class="pointer-events-none absolute bottom-0 left-0 right-0 h-32 sm:h-36 z-10 overflow-hidden backdrop-blur-md"
+          style="mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 35%, black 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 35%, black 100%);"
+        ></div>
+
+        <!-- 底部播放栏：悬浮停靠在右侧底部，与左侧边栏底缘绝对齐平 -->
+        <div class="pointer-events-none absolute bottom-0 left-0 right-0 z-20">
+          <Footer @show="openPlayerDrawer" class="pointer-events-auto" />
+        </div>
 
         <!-- 播放器全屏抽屉 -->
         <PlayerDrawer v-model="isDrawerOpen" />

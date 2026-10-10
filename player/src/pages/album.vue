@@ -56,7 +56,7 @@ onMounted(() => load())
 
 <template>
   <div class="text-primary flex-1 overflow-hidden">
-    <div class="h-full overflow-auto">
+    <div class="h-full overflow-auto pb-28 sm:pb-32">
       <div class="relative mb-6 h-56 w-full">
         <div class="absolute inset-0 overflow-hidden rounded-b-3xl">
           <img

@@ -84,7 +84,7 @@ onMounted(() => loadArtists(true))
 
 <template>
   <div class="flex h-full flex-1 flex-col overflow-hidden">
-    <div class="glass-card mx-4 mb-0 shrink-0 p-4">
+    <div class="glass-card mx-1 sm:mx-2 mt-1 mb-3 shrink-0 p-4">
       <div class="flex flex-wrap items-center gap-6">
         <div class="flex items-center gap-2">
           <span class="text-primary/60 text-sm">{{ t('artists.type') }}:</span>
@@ -131,7 +131,7 @@ onMounted(() => loadArtists(true))
       </div>
     </div>
 
-    <div class="flex-1 overflow-auto p-4">
+    <div class="flex-1 overflow-auto px-1 sm:px-2 pb-28 sm:pb-32">
       <PageSkeleton v-if="state.isLoading && !state.artists.length" :sections="['grid']" />
       <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         <router-link

@@ -90,7 +90,7 @@ onMounted(() => {
   <div class="flex-1 overflow-hidden">
     <div class="custom-scrollbar h-full overflow-y-auto">
       <HomeSkeleton v-if="isLoading" />
-      <div v-else class="space-y-10 p-5 pb-8">
+      <div v-else class="space-y-10 p-5 pb-28 sm:pb-32">
         <!-- ═══════ Banner 轮播 ═══════ -->
         <section v-if="banners.length" v-scroll-in="{ direction: 'up', duration: 0.8 }" class="relative">
           <Swiper

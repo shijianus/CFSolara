@@ -66,7 +66,7 @@ const filtered = computed(() =>
       <div class="glow top-1/2 right-10 bg-blue-500/25"></div>
     </div>
 
-    <div class="h-full overflow-auto p-6">
+    <div class="h-full overflow-auto p-6 pb-28 sm:pb-32">
       <PageSkeleton v-if="state.isPageLoading" :sections="['list']" :list-count="12" />
       <template v-else>
       <div class="mb-8">

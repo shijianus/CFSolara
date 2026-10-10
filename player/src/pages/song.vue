@@ -98,7 +98,7 @@ watch(songId, () => loadInfo())
 
 <template>
   <div class="text-primary flex-1 overflow-hidden">
-    <div class="h-full overflow-auto">
+    <div class="h-full overflow-auto pb-28 sm:pb-32">
       <div class="p-6">
         <div v-if="state.info" class="mb-8 flex gap-8">
           <div class="group relative h-72 w-72 shrink-0 overflow-hidden rounded-2xl shadow-2xl">

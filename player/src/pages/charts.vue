@@ -109,7 +109,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-1 gap-6 overflow-hidden p-4 lg:p-6">
+  <div class="flex h-full flex-1 gap-6 overflow-hidden p-4 lg:p-6 pb-28 sm:pb-32">
     <!-- 侧边栏 -->
     <aside class="glass-card flex w-64 shrink-0 flex-col overflow-hidden rounded-3xl">
       <!-- Tab 切换 -->

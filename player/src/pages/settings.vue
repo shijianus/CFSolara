@@ -78,7 +78,7 @@ const romaChecked = computed({
 </script>
 
 <template>
-  <div class="h-full w-full overflow-auto p-6">
+  <div class="h-full w-full overflow-auto p-6 pb-28 sm:pb-32">
     <PageSkeleton v-if="state.isPageLoading" :sections="['list']" :list-count="6" />
     <div v-else>
       <div class="mb-8">
