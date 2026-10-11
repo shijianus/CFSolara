@@ -235,13 +235,13 @@ const emit = defineEmits(['show'])
 </script>
 <template>
   <footer
-    class="glass-dock backdrop-blur-[64px] backdrop-saturate-[240%] backdrop-contrast-[105%] relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4 isolate"
-    style="-webkit-backdrop-filter: blur(64px) saturate(240%) contrast(105%); backdrop-filter: blur(64px) saturate(240%) contrast(105%);"
+    class="glass-dock relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
+    style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
     <!-- 音频可视化器背景 -->
     <div
       v-if="isAnalyserInitialized && audioVisualizer.enabledInFooter"
-      class="absolute bottom-0 w-full left-0 -z-10 opacity-30"
+      class="pointer-events-none absolute bottom-0 w-full left-0 z-0 opacity-30"
     >
       <AudioVisualizer
         :frequency-data="frequencyData"
