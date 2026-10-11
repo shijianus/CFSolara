@@ -159,11 +159,6 @@ const previewVolumeText = computed(() => {
           :style="{ width: `${displayVolume}%` }"
         ></div>
       </div>
-      <div
-        class="progress-thumb absolute top-1/2"
-        :class="state.isDragging ? 'active' : ''"
-        :style="{ left: `${displayVolume}%` }"
-      ></div>
     </div>
   </div>
 </template>
@@ -183,32 +178,6 @@ const previewVolumeText = computed(() => {
   background: linear-gradient(90deg, #ec4899, #8b5cf6);
   box-shadow: 0 0 10px rgba(236, 72, 153, 0.25);
   transition: width 0.05s linear;
-}
-
-.progress-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition:
-    opacity 0.2s var(--glass-ease, ease),
-    transform 0.2s var(--glass-ease, ease),
-    box-shadow 0.25s var(--glass-ease, ease);
-}
-
-.progress-wrapper:hover .progress-thumb,
-.progress-thumb.active {
-  opacity: 1;
-}
-
-.progress-thumb.active {
-  transform: translate(-50%, -50%) scale(1.15);
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.25),
-    0 0 14px rgba(236, 72, 153, 0.35);
 }
 
 .volume-preview {

@@ -119,14 +119,6 @@ const handleMouseUp = () => {
             class="bg-primary absolute bottom-2 w-1.5 rounded-full"
             :style="{ height: `calc((100% - 16px) * ${volume})` }"
           ></div>
-
-          <!-- Thumb (Circle) -->
-          <div
-            class="absolute flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-lg"
-            :style="{ bottom: `calc(8px + (100% - 16px) * ${volume} - 8px)` }"
-          >
-            <div class="bg-primary/50 h-1.5 w-1.5 rounded-full"></div>
-          </div>
         </div>
 
         <!-- Arrow (Triangle) -->

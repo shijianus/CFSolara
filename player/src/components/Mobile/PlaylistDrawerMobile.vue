@@ -271,19 +271,9 @@ const handleClear = () => {
 <style scoped>
 /* Custom Scrollbar for the list */
 ::-webkit-scrollbar {
-  width: 4px;
+  display: none !important;
 }
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+* {
+  scrollbar-width: none !important;
 }
 </style>

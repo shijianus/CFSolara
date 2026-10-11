@@ -898,9 +898,6 @@ const playModeIcon = computed(() => {
   transform-origin: center center;
 }
 
-.progress-track:active .progress-thumb {
-  transform: translateY(-50%) scale(1.3);
-}
 
 .control-btn {
   transition: all 0.2s ease;

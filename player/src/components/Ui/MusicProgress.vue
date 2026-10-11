@@ -19,17 +19,6 @@ const gradientStyle = computed(() => {
   return `linear-gradient(90deg, ${props.color.join(', ')})`
 })
 
-// 生成圆点纯色样式 - 使用渐变的中间色或主色
-const thumbStyle = computed(() => {
-  if (props.color.length === 0) {
-    // 使用默认主色
-    return '#ec4899'
-  }
-  // 使用颜色数组的中间位置的颜色
-  const midIndex = Math.floor(props.color.length / 2)
-  return props.color[midIndex]
-})
-
 const { currentSong, duration, progress, setProgress } = useAudio()
 
 const progressBarRef = useTemplateRef('progressBarRef')
@@ -191,11 +180,6 @@ const previewPositionPercent = computed(() => {
         :style="{ width: `${displayProgress}%`, background: gradientStyle }"
       ></div>
     </div>
-    <div
-      class="progress-thumb absolute top-1/2"
-      :class="state.isDragging ? 'active' : ''"
-      :style="{ left: `${displayProgress}%`, background: thumbStyle }"
-    ></div>
   </div>
 </template>
 
@@ -211,33 +195,8 @@ const previewPositionPercent = computed(() => {
 }
 
 .progress-fill {
-  box-shadow: 0 0 10px rgba(236, 72, 153, 0.25);
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.35);
   transition: width 0.05s linear;
-}
-
-.progress-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition:
-    opacity 0.2s var(--glass-ease, ease),
-    transform 0.2s var(--glass-ease, ease),
-    box-shadow 0.25s var(--glass-ease, ease);
-}
-
-.progress-wrapper:hover .progress-thumb,
-.progress-thumb.active {
-  opacity: 1;
-}
-
-.progress-thumb.active {
-  transform: translate(-50%, -50%) scale(1.15);
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.25),
-    0 0 16px rgba(236, 72, 153, 0.4);
 }
 
 .time-preview {

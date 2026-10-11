@@ -367,18 +367,12 @@ const formatTime = (t: number | string) => {
 }
 
 /* ═══ Scrollbar ═══ */
+.custom-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--glass-interactive-hover-muted);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--glass-interactive-hover);
+  display: none !important;
 }
 
 /* ═══ Transition ═══ */
