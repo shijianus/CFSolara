@@ -131,7 +131,7 @@ onMounted(() => loadArtists(true))
       </div>
     </div>
 
-    <div class="flex-1 overflow-auto px-1 sm:px-2 pb-28 sm:pb-32">
+    <div class="flex-1 overflow-auto px-1 sm:px-2 pb-6">
       <PageSkeleton v-if="state.isLoading && !state.artists.length" :sections="['grid']" />
       <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         <router-link

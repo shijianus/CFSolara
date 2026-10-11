@@ -85,10 +85,10 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
       <!-- 左侧边栏：单独占用左边所有空间，严格限制在上下区间内 -->
       <Aside />
 
-      <!-- 右侧主区域：内容画板贯通至底缘 + 底部悬浮控制 Dock，与左侧边栏上下区间严格同步 -->
-      <div class="relative flex flex-1 h-full min-h-0 min-w-0 overflow-hidden">
-        <!-- 主内容区域：隐式限制框（限制框依然存在，但移除显式深色边框与阴影，保持尺寸与上下区间约束） -->
-        <main class="relative flex-1 h-full min-h-0 w-full overflow-hidden">
+      <!-- 右侧主区域：上部内容画板 + 底部控制 Dock，与左侧边栏上下区间严格同步 -->
+      <div class="relative flex flex-1 flex-col h-full min-h-0 min-w-0 gap-3 sm:gap-4 overflow-hidden">
+        <!-- 上页内容画板：显式用 glass-card 框出终止线，在底部控制栏前终止，保留真实可见的分割线 -->
+        <main class="glass-card relative flex flex-1 min-h-0 flex-col overflow-hidden p-2 rounded-[26px]">
           <router-view v-slot="{ Component }">
             <transition appear name="fade-transform" mode="out-in">
               <keep-alive>
@@ -98,11 +98,8 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
           </router-view>
         </main>
 
-
-        <!-- 底部播放栏：悬浮停靠在右侧底部，与左侧边栏底缘绝对齐平 -->
-        <div class="pointer-events-none absolute bottom-0 left-0 right-0 z-20">
-          <Footer @show="openPlayerDrawer" class="pointer-events-auto" />
-        </div>
+        <!-- 底部播放栏：在 main 下方（前终止），保留已有的磨砂玻璃材质，与左侧边栏底缘绝对齐平 -->
+        <Footer @show="openPlayerDrawer" />
 
         <!-- 播放器全屏抽屉 -->
         <PlayerDrawer v-model="isDrawerOpen" />
