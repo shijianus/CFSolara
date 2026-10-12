@@ -119,27 +119,46 @@ const formatSongTitle = (title: string, maxLen = MAX_TITLE_LEN) => {
   return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
 }
 
+const isPredominantlyLossless = computed(() => {
+  if (!props.songs || props.songs.length === 0) return false
+  const sqCount = props.songs.filter(
+    s => s.qualityBadge === 'SQ' || s.qualities?.[0]?.level === 'lossless'
+  ).length
+  return sqCount / props.songs.length >= 0.8
+})
+
 const getQualityBadgeInfo = (song: Song) => {
   const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
   const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
+  const hasMultiple = Boolean(song.qualities && song.qualities.length > 1)
+
+  // 当绝大多数（80%以上）曲目均为 SQ 无损时，不逐行重复贴大徽章；仅标明例外或留作底栏切换
+  if (isPredominantlyLossless.value && isLossless) {
+    return null
+  }
+
   if (isLossless) {
     return {
-      label: 'SQ 无损',
-      title: 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
-      badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.2)]',
+      label: 'SQ',
+      title: hasMultiple
+        ? `SQ: 超清无损母带 (含 ${song.qualities?.length} 档音质可在底栏切换)`
+        : 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
+      badgeClass: 'bg-pink-500/10 text-pink-300/90 border border-pink-500/25',
     }
   }
   if (isExhigh) {
     return {
-      label: 'HQ 极高',
-      title: 'HQ: 极高音质 (320Kbps MP3)',
-      badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+      label: 'HQ',
+      title: hasMultiple
+        ? `HQ: 极高音质 (含 ${song.qualities?.length} 档音质可在底栏切换)`
+        : 'HQ: 极高音质 (320Kbps MP3)',
+      badgeClass: 'bg-cyan-500/15 text-cyan-300/90 border border-cyan-500/25',
     }
   }
   return {
     label: '标准',
-    title: '标准: 标清音质 (128Kbps MP3)',
-    badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    title: '标准: 标清流畅音质 (128Kbps MP3)',
+    badgeClass: 'bg-emerald-500/15 text-emerald-300/90 border border-emerald-500/25',
   }
 }
 </script>
@@ -290,22 +309,14 @@ const getQualityBadgeInfo = (song: Song) => {
                   >
                     {{ formatSongTitle(song.name) }}
                   </h3>
-                  <!-- Sonic 规范音质标签 (无损/极高/标准) -->
+                  <!-- 精炼降噪音质徽章 (全列表以SQ为主时不重复显眼刷屏，只标出例外；多音质收归进交互提示) -->
                   <span
-                    v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
-                    :title="getQualityBadgeInfo(song).title"
-                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider leading-none select-none transition-all cursor-help"
-                    :class="getQualityBadgeInfo(song).badgeClass"
+                    v-if="getQualityBadgeInfo(song)"
+                    :title="getQualityBadgeInfo(song)!.title"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium leading-none select-none transition-all cursor-help"
+                    :class="getQualityBadgeInfo(song)!.badgeClass"
                   >
-                    {{ getQualityBadgeInfo(song).label }}
-                  </span>
-                  <!-- 多音质版本集中切换标识 -->
-                  <span
-                    v-if="song.qualities && song.qualities.length > 1"
-                    :title="`包含 ${song.qualities.length} 个音质版本，播放后可在底栏切换`"
-                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium leading-none select-none bg-amber-500/15 text-amber-300 border border-amber-500/30 cursor-help"
-                  >
-                    多音质
+                    {{ getQualityBadgeInfo(song)!.label }}
                   </span>
                 </div>
                 <div class="mt-0.5 flex items-center gap-2 md:hidden">
