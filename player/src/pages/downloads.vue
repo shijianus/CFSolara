@@ -255,8 +255,8 @@ const formatSongTitle = (title: string, maxLen = 28) => {
                   本地 IndexedDB 高保真无损存储 · 断网免流无缝收听 · 原声独立文件导出
                 </p>
 
-                <!-- 统计徽章 -->
-                <div class="mt-3.5 flex flex-wrap items-center gap-4 text-xs text-primary/65">
+                <!-- 统计徽章 (仅在库中有歌曲时展示) -->
+                <div v-if="downloads.length > 0" class="mt-3.5 flex flex-wrap items-center gap-4 text-xs text-primary/65">
                   <div class="flex items-center gap-1.5">
                     <span class="icon-[mdi--music-note] h-4 w-4 text-pink-400"></span>
                     <span>共 {{ downloadStore.totalCount }} 首音乐</span>
@@ -275,27 +275,38 @@ const formatSongTitle = (title: string, maxLen = 28) => {
 
             <!-- 操作按钮组 -->
             <div class="flex flex-wrap items-center gap-2.5">
+              <template v-if="downloads.length > 0">
+                <Button
+                  variant="gradient"
+                  size="md"
+                  rounded="full"
+                  class="px-5 py-2.5 text-xs font-bold shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40"
+                  @click="playAll"
+                >
+                  <span class="icon-[mdi--play] mr-1.5 h-4 w-4"></span>
+                  播放全部
+                </Button>
+                <Button
+                  variant="soft"
+                  size="md"
+                  rounded="full"
+                  class="px-4 py-2.5 text-xs font-semibold text-primary/80"
+                  @click="shufflePlay"
+                >
+                  <span class="icon-[mdi--shuffle] mr-1.5 h-4 w-4"></span>
+                  随机播放
+                </Button>
+              </template>
               <Button
+                v-else
                 variant="gradient"
                 size="md"
                 rounded="full"
-                class="px-5 py-2.5 text-xs font-bold shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40"
-                :disabled="!downloads.length"
-                @click="playAll"
+                class="px-5 py-2.5 text-xs font-bold shadow-lg shadow-pink-500/25"
+                @click="router.push('/search')"
               >
-                <span class="icon-[mdi--play] mr-1.5 h-4 w-4"></span>
-                播放全部
-              </Button>
-              <Button
-                variant="soft"
-                size="md"
-                rounded="full"
-                class="px-4 py-2.5 text-xs font-semibold text-primary/80"
-                :disabled="!downloads.length"
-                @click="shufflePlay"
-              >
-                <span class="icon-[mdi--shuffle] mr-1.5 h-4 w-4"></span>
-                随机播放
+                <span class="icon-[mdi--compass-outline] mr-1.5 h-4 w-4"></span>
+                去发现优质音乐
               </Button>
               <Button
                 v-if="downloads.length > 0"

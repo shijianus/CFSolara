@@ -118,8 +118,11 @@ const formatSongTitle = (title: string, maxLen = 18) => {
             <h1 class="text-lg font-bold text-primary">
               下载列表
             </h1>
-            <p class="text-xs text-primary/60 mt-0.5">
+            <p v-if="downloads.length > 0" class="text-xs text-primary/60 mt-0.5">
               共 {{ downloadStore.totalCount }} 首 · 占用 {{ downloadStore.totalSizeFormatted }}
+            </p>
+            <p v-else class="text-xs text-primary/50 mt-0.5">
+              暂无离线音乐 · 支持随时免流播放
             </p>
           </div>
         </div>
