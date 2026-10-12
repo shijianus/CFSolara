@@ -273,6 +273,8 @@ const getQualityBadgeInfo = (song: Song) => {
                   :src="formatCoverUrl(song.cover, { size: 90, artist: song.artist })"
                   :fallback-src="formatCoverUrl('', { artist: song.artist })"
                   :alt="t('components.songList.coverAlt')"
+                  :title="song.name"
+                  :seed="song.album || song.artist || song.name"
                   imgClass="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   wrapperClass="h-full w-full"
                 />
