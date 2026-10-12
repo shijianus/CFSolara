@@ -328,14 +328,22 @@ const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
   showQualityMenu.value = false
 }
 
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && showQualityMenu.value) {
+    showQualityMenu.value = false
+  }
+}
+
 onMounted(() => {
   document.addEventListener('pointerdown', handleDocumentClick)
+  document.addEventListener('keydown', handleKeydown)
   window.addEventListener('resize', updateQualityMenuPosition)
   window.addEventListener('scroll', updateQualityMenuPosition, true)
 })
 
 onUnmounted(() => {
   document.removeEventListener('pointerdown', handleDocumentClick)
+  document.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('resize', updateQualityMenuPosition)
   window.removeEventListener('scroll', updateQualityMenuPosition, true)
 })
@@ -495,73 +503,43 @@ const emit = defineEmits(['show'])
                 position: 'fixed',
                 bottom: `${menuCoords.bottom}px`,
                 right: `${menuCoords.right}px`,
-                zIndex: 99999,
+                zIndex: 45,
               }"
-              class="quality-panel-popover w-64 overflow-hidden rounded-2xl select-none"
+              class="quality-panel-popover w-52 overflow-hidden rounded-2xl select-none"
             >
               <!-- 顶部标题 -->
               <div
-                class="px-3.5 py-2.5 flex items-center justify-between border-b border-white/10"
-                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.14), rgba(139, 92, 246, 0.14));"
+                class="px-3 py-2 flex items-center justify-between border-b border-white/10"
+                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.10));"
               >
                 <div class="flex items-center gap-1.5">
-                  <span class="icon-[mdi--waveform] h-4 w-4 text-pink-400"></span>
-                  <span class="text-xs font-bold text-primary tracking-wide">音频规格切换</span>
+                  <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-pink-400"></span>
+                  <span class="text-[11px] font-semibold text-primary/80 tracking-wider">音频规格</span>
                 </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border border-pink-500/30">
-                  Hi-Fi 原声
+                <span class="text-[11px] font-mono font-medium text-pink-300">
+                  {{ activeQualityBadge }}
                 </span>
               </div>
 
               <!-- 音质选项列表 -->
-              <div class="p-2 space-y-1.5">
+              <div class="p-1.5 space-y-1">
                 <button
                   v-for="q in availableQualities"
                   :key="q.level"
                   @click.stop="selectQuality(q.level)"
-                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-200 group cursor-pointer"
+                  class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left transition-all duration-150 group cursor-pointer"
                   :class="[
                     currentQualityLevel === q.level
-                      ? 'border border-pink-500/50 text-pink-200 font-semibold shadow-[0_0_16px_rgba(236,72,153,0.2)]'
+                      ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm'
                       : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary'
                   ]"
-                  :style="currentQualityLevel === q.level ? 'background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(139, 92, 246, 0.22));' : ''"
                 >
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                      <span
-                        class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold leading-none select-none"
-                        :class="[
-                          q.level === 'lossless'
-                            ? 'bg-gradient-to-r from-violet-600/40 to-pink-600/40 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.3)]'
-                            : q.level === 'exhigh'
-                              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/35'
-                              : 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/35'
-                        ]"
-                      >
-                        {{ q.label }}
-                      </span>
-                      <span class="text-[11px] font-mono opacity-85 text-primary">{{ q.bitrate }}</span>
-                    </div>
-                    <p class="text-[10px] text-primary/50 mt-1 truncate leading-tight">{{ q.desc }}</p>
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="text-xs font-semibold">{{ q.label }}</span>
+                    <span class="text-[11px] font-mono text-primary/60 group-hover:text-primary/80">{{ q.bitrate }}</span>
                   </div>
-                  <div
-                    class="ml-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
-                    :class="[
-                      currentQualityLevel === q.level
-                        ? 'border-pink-400 bg-pink-500 text-white shadow-sm'
-                        : 'border-white/20 bg-transparent opacity-40'
-                    ]"
-                  >
-                    <span v-if="currentQualityLevel === q.level" class="icon-[mdi--check] h-3.5 w-3.5"></span>
-                  </div>
+                  <span v-if="currentQualityLevel === q.level" class="icon-[mdi--check] h-3.5 w-3.5 text-pink-400 shrink-0"></span>
                 </button>
-              </div>
-
-              <!-- 底部切换提示 -->
-              <div class="px-3.5 py-1.5 border-t border-white/10 text-[10px] text-primary/50 flex items-center gap-1.5 bg-black/15">
-                <span class="icon-[mdi--sync] h-3.5 w-3.5 text-pink-400 shrink-0"></span>
-                <span>即时无缝切换 · 自动保留当前播放位置</span>
               </div>
             </div>
           </Transition>
