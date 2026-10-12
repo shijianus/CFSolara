@@ -76,7 +76,32 @@
     );
     --glass-skeleton: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
 
-    /* ── 过渡曲线 ── */
+    /* ── 强调色与流光 ── */
+    --glass-accent-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    --glass-accent-subtle: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.12) 100%);
+    --glass-accent-border: rgba(236, 72, 153, 0.50);
+    --glass-accent-glow: 0 0 20px rgba(236, 72, 153, 0.22);
+    --glass-focus-ring: 0 0 0 2px rgba(236, 72, 153, 0.45), 0 0 12px rgba(139, 92, 246, 0.25);
+
+    /* ── 圆角阶梯 ── */
+    --glass-r-sm: 8px;
+    --glass-r-md: 12px;
+    --glass-r-lg: 16px;
+    --glass-r-xl: 24px;
+
+    /* ── 字号阶梯 (严格最小 11px，禁止 8-10px) ── */
+    --glass-font-2xs: 11px;
+    --glass-font-xs: 12px;
+    --glass-font-sm: 13px;
+    --glass-font-base: 14px;
+    --glass-font-md: 16px;
+    --glass-font-lg: 20px;
+    --glass-font-xl: 28px;
+
+    /* ── 过渡时长与统一缓动 ── */
+    --glass-duration-fast: 120ms;
+    --glass-duration-normal: 200ms;
+    --glass-duration-slow: 320ms;
     --glass-ease: cubic-bezier(0.4, 0, 0.2, 1);
     --glass-ease-out: cubic-bezier(0, 0, 0.2, 1);
     --glass-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -481,4 +506,14 @@
   .animate-drift-a { animation: drift-a 26s ease-in-out infinite; }
   .animate-drift-b { animation: drift-b 32s ease-in-out infinite; }
   .animate-drift-c { animation: drift-c 38s ease-in-out infinite; }
+
+  /* 尊重系统减少动效偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
