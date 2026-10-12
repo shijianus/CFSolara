@@ -16,7 +16,6 @@ import { adaptColorsForTheme } from '@/utils/colorThemeAdapter'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { gsap } from 'gsap'
 import { useDownloadStore } from '@/stores/modules/download'
-import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue'
 
 const { t } = useI18n()
 const audioStore = useAudioStore()
@@ -547,9 +546,6 @@ const emit = defineEmits(['show'])
         <span>{{ qualityToastMsg }}</span>
       </div>
     </Transition>
-
-    <!-- 下载弹窗组件 -->
-    <DownloadQualityDialog />
   </footer>
 </template>
 

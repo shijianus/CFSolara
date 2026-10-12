@@ -9,7 +9,6 @@ import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useDownloadStore } from '@/stores/modules/download'
-import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue'
 
 interface Props {
   songs: Song[]
@@ -409,7 +408,5 @@ const getQualityBadgeInfo = (song: Song) => {
         </p>
       </div>
     </div>
-    <!-- 下载音质选择弹窗 -->
-    <DownloadQualityDialog />
   </div>
 </template>
