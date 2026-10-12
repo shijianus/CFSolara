@@ -214,7 +214,7 @@ const isActive = (path: string) => {
                   v-for="item in sec.items"
                   :key="item.to"
                   :to="item.to"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
                     'hover:bg-white/5': !isActive(item.to),
@@ -270,9 +270,12 @@ const isActive = (path: string) => {
 </template>
 
 <style scoped>
-/* 导航指示器过渡 */
+/* 导航指示器过渡与毛玻璃微光 */
 .nav-indicator {
   transition: opacity 0.2s ease;
+  background-color: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.08));
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.12));
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.12);
 }
 
 /* 导航链接悬停效果 */
