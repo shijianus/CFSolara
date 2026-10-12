@@ -235,27 +235,32 @@ const getQualityBadgeInfo = (song: Song) => {
           @dblclick="(e) => playSongWithAnimation(song, index, e)"
         >
           <!-- 序号/播放状态 -->
-          <div class="flex w-14 shrink-0 items-center justify-center text-center">
+          <div class="relative flex w-14 shrink-0 items-center justify-center text-center select-none">
+            <!-- 未悬停且非当前播放：显示纯数字序号 -->
             <span
               v-if="!isCurrent(song)"
-              class="text-primary/60 text-sm font-medium group-hover:hidden"
+              class="font-mono text-xs text-primary/60 transition-opacity duration-150 group-hover:opacity-0"
             >
               {{ index + 1 }}
             </span>
-            <div v-if="isCurrent(song)" class="playing-icon">
+
+            <!-- 当前播放状态：动效均衡器柱 -->
+            <div v-else class="playing-icon flex items-center justify-center gap-0.5">
               <span class="bar" :class="{ animate: isPlaying }"></span>
               <span class="bar" :class="{ animate: isPlaying }"></span>
               <span class="bar" :class="{ animate: isPlaying }"></span>
             </div>
-            <Button
+
+            <!-- 悬停时：平滑浮现播放三角按钮 -->
+            <button
               v-if="!isCurrent(song)"
-              variant="text"
-              size="none"
-              class="hidden! transition-colors group-hover:block! hover:text-pink-400"
+              type="button"
+              class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-primary hover:text-pink-400 active:scale-90 cursor-pointer"
+              :title="t('actions.play') || '播放'"
               @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
             >
-              <span class="icon-[mdi--play] h-6 w-6"></span>
-            </Button>
+              <span class="icon-[mdi--play] h-5 w-5"></span>
+            </button>
           </div>
 
           <div class="grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
