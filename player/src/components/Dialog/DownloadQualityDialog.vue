@@ -70,6 +70,20 @@ const displayTitle = computed(() => {
   const MAX_LEN = 28
   return title.length > MAX_LEN ? title.slice(0, MAX_LEN) + '...' : title
 })
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && downloadStore.dialogVisible) {
+    downloadStore.closeDownloadDialog()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
@@ -77,11 +91,14 @@ const displayTitle = computed(() => {
     <div
       v-if="downloadStore.dialogVisible"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="download-dialog-title"
     >
-      <!-- 背景毛玻璃遮罩 -->
+      <!-- 背景毛玻璃遮罩 (克制通透度) -->
       <Transition name="mask" appear>
         <div
-          class="absolute inset-0 bg-black/65 backdrop-blur-md"
+          class="absolute inset-0 bg-black/35 backdrop-blur-sm"
           @click="downloadStore.closeDownloadDialog"
         />
       </Transition>
@@ -110,7 +127,7 @@ const displayTitle = computed(() => {
                 <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 class="text-base font-bold text-primary tracking-wide">
+                <h3 id="download-dialog-title" class="text-base font-bold text-primary tracking-wide">
                   下载音质选择
                 </h3>
                 <p class="mt-0.5 text-xs text-primary/60">
