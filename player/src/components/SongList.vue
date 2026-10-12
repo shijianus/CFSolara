@@ -359,39 +359,39 @@ const getQualityBadgeInfo = (song: Song) => {
                 formatDuration(song.duration)
               }}</span>
             </div>
-            <!-- 操控按钮 -->
+            <!-- 操控按钮 (悬停或键盘聚焦时渐现，触屏设备常驻) -->
             <div
-              class="col-span-2 flex items-center justify-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              class="col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
             >
               <Button
                 v-if="song.mvId"
                 variant="ghost"
-                size="icon-md"
+                size="icon-sm"
                 rounded="full"
-                class="h-9 w-9"
+                class="h-8 w-8 text-primary/70 hover:text-pink-400"
                 icon="icon-[mdi--movie-open-play]"
-                iconClass="h-5 w-5"
+                iconClass="h-4 w-4"
                 :title="t('common.playMV')"
                 @click.stop="openMV(song, index)"
               />
               <Button
                 v-if="song.id"
                 variant="ghost"
-                size="icon-md"
+                size="icon-sm"
                 rounded="full"
-                class="h-9 w-9"
+                class="h-8 w-8 text-primary/70 hover:text-primary"
                 icon="icon-[mdi--information-outline]"
-                iconClass="h-5 w-5"
+                iconClass="h-4 w-4"
                 :title="t('common.detail')"
                 @click.stop="router.push(`/song/${song.id}`)"
               />
               <Button
                 variant="ghost"
-                size="icon-md"
+                size="icon-sm"
                 rounded="full"
-                class="h-9 w-9"
+                class="h-8 w-8 text-primary/70 hover:text-pink-400"
                 icon="icon-[mdi--tray-arrow-down]"
-                iconClass="h-5 w-5"
+                iconClass="h-4 w-4"
                 :title="t('common.download')"
                 @click.stop="downloadSong(song, index)"
               />
