@@ -244,7 +244,7 @@ const formatSongTitle = (title: string, maxLen = 28) => {
               <div>
                 <div class="flex items-center gap-3">
                   <h1 class="text-2xl font-bold text-primary md:text-3xl">
-                    本地下载 · 离线音乐库
+                    下载列表 · 离线音乐库
                   </h1>
                   <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>

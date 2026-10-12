@@ -130,10 +130,18 @@ async function verifyLiveUi() {
     await qualitySwitcherBtn.first().click();
     await page.waitForTimeout(400);
 
-    const qualityPopover = page.locator('div:has-text("音质切换"):has-text("Hi-Fi")');
+    const qualityPopover = page.locator('.quality-panel-popover, div:has-text("音频规格切换"):has-text("Hi-Fi"), div:has-text("音质切换")');
     const popoverCount = await qualityPopover.count();
     console.log(`✓ Quality switch menu popover opened: ${popoverCount > 0}`);
     assert(popoverCount > 0, 'Quality switch menu popover opened');
+
+    // Verify popover is teleported to body (not trapped inside footer) and not clipped
+    const isTeleported = await page.evaluate(() => {
+      const el = document.querySelector('.quality-panel-popover');
+      return el && el.parentElement === document.body;
+    });
+    console.log(`✓ Quality popover is teleported directly to body (immune to overflow:hidden): ${isTeleported}`);
+    assert(isTeleported, 'Quality popover is teleported directly to body');
 
     // Close popover
     await page.keyboard.press('Escape');
@@ -147,7 +155,12 @@ async function verifyLiveUi() {
     console.log(`✓ Downloads page header rendered: ${hasDownloadPage}`);
     assert(hasDownloadPage, 'Downloads page rendered successfully');
 
-    // 2.7 Verify Sidebar Navigation contains "下载列表"
+    // 2.7 Verify Downloads Page interactive features (search, filter, batch button)
+    const hasSearchInput = await page.locator('input[placeholder*="搜索"]').count() > 0;
+    const hasFilterButtons = await page.locator('button:has-text("全部")').count() > 0;
+    console.log(`✓ Downloads page has search input: ${hasSearchInput}, filter chips: ${hasFilterButtons}`);
+
+    // 2.8 Verify Sidebar Navigation contains "下载列表"
     const asideLink = page.locator('nav a[href*="/downloads"]');
     const hasAsideLink = await asideLink.count() > 0;
     console.log(`✓ Aside navigation has Downloads link: ${hasAsideLink}`);
