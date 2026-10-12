@@ -503,7 +503,7 @@ const emit = defineEmits(['show'])
                 position: 'fixed',
                 bottom: `${menuCoords.bottom}px`,
                 right: `${menuCoords.right}px`,
-                zIndex: 45,
+                zIndex: 60,
               }"
               class="quality-panel-popover w-52 overflow-hidden rounded-2xl select-none"
             >
