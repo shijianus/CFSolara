@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useDownloadStore, DEFAULT_QUALITY_CHOICES, type QualityChoice } from '@/stores/modules/download'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import Button from '@/components/Ui/Button.vue'
 
 const downloadStore = useDownloadStore()
 const selectedLevel = ref<string>('lossless')
@@ -49,12 +50,15 @@ watch(
   { immediate: true }
 )
 
+const currentChoice = computed(() => {
+  return availableChoices.value.find((c) => c.level === selectedLevel.value) || availableChoices.value[0]
+})
+
 const handleConfirm = async () => {
   const song = downloadStore.currentDownloadSong
   if (!song) return
-  const choice = availableChoices.value.find((c) => c.level === selectedLevel.value) || availableChoices.value[0]
   try {
-    await downloadStore.startDownload(song, choice)
+    await downloadStore.startDownload(song, currentChoice.value)
   } catch (e) {
     // 错误信息已保存在 downloadStore.errorMsg
   }
@@ -63,163 +67,236 @@ const handleConfirm = async () => {
 // 歌名最大字符上限保护
 const displayTitle = computed(() => {
   const title = downloadStore.currentDownloadSong?.name || ''
-  const MAX_LEN = 26
+  const MAX_LEN = 28
   return title.length > MAX_LEN ? title.slice(0, MAX_LEN) + '...' : title
 })
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="fade">
-      <div
-        v-if="downloadStore.dialogVisible"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-        @click.self="downloadStore.closeDownloadDialog"
-      >
+    <div
+      v-if="downloadStore.dialogVisible"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    >
+      <!-- 背景毛玻璃遮罩 -->
+      <Transition name="mask" appear>
         <div
-          class="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/15 bg-neutral-900/90 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300"
-          style="box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(236, 72, 153, 0.15);"
-        >
-          <!-- 顶部标题与关闭按钮 -->
-          <div class="flex items-center justify-between pb-4 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-pink-400"></span>
-              <h3 class="text-base font-bold text-white tracking-wide">下载音质选择</h3>
-            </div>
+          class="absolute inset-0 bg-black/65 backdrop-blur-md"
+          @click="downloadStore.closeDownloadDialog"
+        />
+      </Transition>
+
+      <!-- 弹窗容器 -->
+      <Transition name="dialog" appear>
+        <div class="relative z-10 w-full max-w-lg">
+          <div
+            class="glass-container-strong relative overflow-hidden rounded-[28px] border border-white/20 p-6 shadow-2xl backdrop-blur-2xl"
+            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.75), 0 0 45px rgba(236, 72, 153, 0.2);"
+          >
+            <!-- 右上角关闭按钮 -->
             <button
               @click="downloadStore.closeDownloadDialog"
-              class="rounded-full p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+              class="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-primary/60 transition-all hover:bg-white/15 hover:text-primary active:scale-95 cursor-pointer"
+              title="关闭"
             >
               <span class="icon-[mdi--close] h-4 w-4"></span>
             </button>
-          </div>
 
-          <!-- 当前歌曲信息 -->
-          <div
-            v-if="downloadStore.currentDownloadSong"
-            class="my-4 flex items-center gap-3.5 rounded-2xl bg-white/5 p-3 border border-white/5"
-          >
-            <img
-              :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 120, artist: downloadStore.currentDownloadSong.artist })"
-              alt="cover"
-              class="h-12 w-12 rounded-xl object-cover shadow-md"
-            />
-            <div class="min-w-0 flex-1">
-              <h4
-                :title="downloadStore.currentDownloadSong.name"
-                class="truncate text-sm font-semibold text-white"
+            <!-- 顶部标题与规格 -->
+            <div class="mb-5 flex items-center gap-3.5 pr-8">
+              <div
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg shadow-pink-500/25"
               >
-                {{ displayTitle }}
-              </h4>
-              <p class="truncate text-xs text-white/60 mt-0.5">
-                {{ downloadStore.currentDownloadSong.artist }}
-                <span v-if="downloadStore.currentDownloadSong.album"> · 《{{ downloadStore.currentDownloadSong.album }}》</span>
-              </p>
+                <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-primary tracking-wide">
+                  下载音质选择
+                </h3>
+                <p class="mt-0.5 text-xs text-primary/60">
+                  支持无损母带编码，自动持久化至本地离线音乐库
+                </p>
+              </div>
+            </div>
+
+            <!-- 当前歌曲信息卡片 -->
+            <div
+              v-if="downloadStore.currentDownloadSong"
+              class="relative mb-5 flex items-center gap-3.5 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm"
+            >
+              <!-- 封面艺术图 (黑胶外环效果) -->
+              <div class="relative h-13 w-13 shrink-0 overflow-hidden rounded-xl shadow-md border border-white/10">
+                <img
+                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 120, artist: downloadStore.currentDownloadSong.artist })"
+                  alt="cover"
+                  class="h-full w-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/15 pointer-events-none"></div>
+              </div>
+
+              <!-- 歌曲与歌手信息 -->
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <h4
+                    :title="downloadStore.currentDownloadSong.name"
+                    class="truncate text-sm font-bold text-primary"
+                  >
+                    {{ displayTitle }}
+                  </h4>
+                  <span class="shrink-0 rounded bg-pink-500/15 px-1.5 py-0.5 text-[9px] font-bold text-pink-300 border border-pink-500/30">
+                    多源高保真
+                  </span>
+                </div>
+                <p class="mt-0.5 truncate text-xs text-primary/60">
+                  {{ downloadStore.currentDownloadSong.artist }}
+                  <span v-if="downloadStore.currentDownloadSong.album"> · 《{{ downloadStore.currentDownloadSong.album }}》</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- 音质档位选择卡片 -->
+            <div class="mb-4 space-y-2.5">
+              <label
+                v-for="choice in availableChoices"
+                :key="choice.level"
+                class="group relative flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 transition-all duration-200 select-none"
+                :class="[
+                  selectedLevel === choice.level
+                    ? 'border-pink-500/60 shadow-[0_0_24px_rgba(236,72,153,0.2)]'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                ]"
+                :style="selectedLevel === choice.level ? 'background: linear-gradient(135deg, rgba(236, 72, 153, 0.16) 0%, rgba(139, 92, 246, 0.14) 100%);' : ''"
+              >
+                <input
+                  type="radio"
+                  name="audioQuality"
+                  :value="choice.level"
+                  v-model="selectedLevel"
+                  class="sr-only"
+                />
+
+                <!-- 左侧：单选按钮 + 规格信息 -->
+                <div class="flex items-center gap-3.5 min-w-0 flex-1 pr-2">
+                  <div
+                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
+                    :class="[
+                      selectedLevel === choice.level
+                        ? 'border-pink-400 bg-pink-500 text-white shadow-sm ring-2 ring-pink-500/30'
+                        : 'border-white/30 bg-transparent group-hover:border-white/50'
+                    ]"
+                  >
+                    <span
+                      v-if="selectedLevel === choice.level"
+                      class="icon-[mdi--check] h-3.5 w-3.5"
+                    ></span>
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-bold text-primary">{{ choice.label }}</span>
+                      <!-- 专属规格 Tag -->
+                      <span
+                        class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold leading-none"
+                        :class="[
+                          choice.level === 'lossless'
+                            ? 'bg-gradient-to-r from-violet-600/35 to-pink-600/35 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.25)]'
+                            : choice.level === 'exhigh'
+                              ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-500/30'
+                              : 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/30'
+                        ]"
+                      >
+                        {{ choice.bitrate }}
+                      </span>
+                      <span class="hidden sm:inline-block rounded bg-white/5 px-1 py-0.5 font-mono text-[9px] text-primary/50 uppercase">
+                        {{ choice.format }}
+                      </span>
+                    </div>
+                    <p class="mt-1 text-xs text-primary/50 leading-snug truncate">
+                      {{ choice.desc }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 右侧：预估体积 -->
+                <div class="shrink-0 text-right">
+                  <span class="font-mono text-xs font-semibold text-primary/70">
+                    {{ choice.estimatedSize }}
+                  </span>
+                  <p class="text-[10px] text-primary/40 mt-0.5">本地存储</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- 离线存储提示 -->
+            <div class="mb-5 flex items-start gap-2 rounded-xl bg-white/5 p-2.5 border border-white/5 text-[11px] text-primary/60 leading-relaxed">
+              <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400 mt-0.5"></span>
+              <span>
+                下载后文件将<strong>自动永久持久化于本地离线库</strong>，可在「下载列表」随时免流重放，同时触发浏览器文件保存。
+              </span>
+            </div>
+
+            <!-- 错误提示（若有） -->
+            <div
+              v-if="downloadStore.errorMsg"
+              class="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/15 p-2.5 text-xs text-red-300"
+            >
+              <span class="icon-[mdi--alert-circle] h-4 w-4 shrink-0"></span>
+              <span>{{ downloadStore.errorMsg }}</span>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <Button
+                variant="ghost"
+                size="md"
+                rounded="xl"
+                class="px-4 text-xs font-semibold text-primary/70 hover:text-primary"
+                :disabled="downloadStore.isDownloading"
+                @click="downloadStore.closeDownloadDialog"
+              >
+                取消
+              </Button>
+
+              <Button
+                variant="gradient"
+                size="md"
+                rounded="xl"
+                class="px-6 text-xs font-bold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all"
+                :disabled="downloadStore.isDownloading"
+                @click="handleConfirm"
+              >
+                <span
+                  v-if="downloadStore.isDownloading"
+                  class="icon-[mdi--loading] mr-1.5 h-4 w-4 animate-spin"
+                ></span>
+                <span v-else class="icon-[mdi--download] mr-1.5 h-4 w-4"></span>
+                <span>{{ downloadStore.isDownloading ? '正在下载中...' : `确认下载 (${currentChoice.label})` }}</span>
+              </Button>
             </div>
           </div>
-
-          <!-- 音质选项卡片列表 -->
-          <div class="space-y-2.5 my-4">
-            <label
-              v-for="choice in availableChoices"
-              :key="choice.level"
-              class="relative flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 transition-all duration-200 select-none"
-              :class="[
-                selectedLevel === choice.level
-                  ? 'border-pink-500/60 bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[0_0_20px_rgba(236,72,153,0.15)] ring-1 ring-pink-500/40'
-                  : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/20'
-              ]"
-            >
-              <input
-                type="radio"
-                name="audioQuality"
-                :value="choice.level"
-                v-model="selectedLevel"
-                class="sr-only"
-              />
-              <div class="flex items-center gap-3 min-w-0">
-                <div
-                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
-                  :class="[
-                    selectedLevel === choice.level
-                      ? 'border-pink-500 bg-pink-500 text-white shadow-sm'
-                      : 'border-white/30 bg-transparent'
-                  ]"
-                >
-                  <span
-                    v-if="selectedLevel === choice.level"
-                    class="icon-[mdi--check] h-3.5 w-3.5"
-                  ></span>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-white">{{ choice.label }}</span>
-                    <span
-                      class="rounded px-1.5 py-0.5 text-[10px] font-mono font-bold leading-none"
-                      :class="[
-                        choice.level === 'lossless'
-                          ? 'bg-pink-500/25 text-pink-300 border border-pink-500/30'
-                          : choice.level === 'exhigh'
-                            ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/30'
-                            : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/30'
-                      ]"
-                    >
-                      {{ choice.bitrate }}
-                    </span>
-                  </div>
-                  <p class="text-xs text-white/50 mt-0.5 leading-snug">{{ choice.desc }}</p>
-                </div>
-              </div>
-              <span class="shrink-0 text-xs text-white/40 font-mono">{{ choice.estimatedSize }}</span>
-            </label>
-          </div>
-
-          <!-- 提示与错误展示 -->
-          <div v-if="downloadStore.errorMsg" class="mb-3 rounded-xl bg-red-500/15 border border-red-500/30 p-2.5 text-xs text-red-300 flex items-center gap-2">
-            <span class="icon-[mdi--alert-circle] h-4 w-4 shrink-0"></span>
-            <span>{{ downloadStore.errorMsg }}</span>
-          </div>
-
-          <p class="text-[11px] text-white/40 mb-4 leading-relaxed">
-            ✨ 下载后音乐将自动永久保存在本地离线库（下载列表），同时自动保存至本地文件夹。
-          </p>
-
-          <!-- 底部操作按钮 -->
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-            <button
-              @click="downloadStore.closeDownloadDialog"
-              :disabled="downloadStore.isDownloading"
-              class="rounded-xl px-4 py-2 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              取消
-            </button>
-            <button
-              @click="handleConfirm"
-              :disabled="downloadStore.isDownloading"
-              class="relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-pink-500/25 hover:opacity-95 active:scale-95 transition-all disabled:opacity-50"
-            >
-              <span
-                v-if="downloadStore.isDownloading"
-                class="icon-[mdi--loading] h-4 w-4 animate-spin"
-              ></span>
-              <span v-else class="icon-[mdi--download] h-4 w-4"></span>
-              <span>{{ downloadStore.isDownloading ? '正在下载...' : '确认下载' }}</span>
-            </button>
-          </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </div>
   </Teleport>
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+.mask-enter-active,
+.mask-leave-active {
   transition: opacity 0.25s ease;
 }
-
-.fade-enter-from,
-.fade-leave-to {
+.mask-enter-from,
+.mask-leave-to {
   opacity: 0;
+}
+
+.dialog-enter-active,
+.dialog-leave-active {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dialog-enter-from,
+.dialog-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(12px);
 }
 </style>

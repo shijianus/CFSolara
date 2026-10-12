@@ -190,13 +190,26 @@ export const useDownloadStore = defineStore('download', {
       }
     },
 
-    /** 从本地下载列表删除 */
+    /** 从本地下载列表删除单个 */
     async deleteDownload(id: string | number) {
       try {
         await downloadedMusicDB.delete(id)
         this.downloadedList = this.downloadedList.filter((item) => String(item.id) !== String(id))
       } catch (err) {
         console.error('[DownloadStore] Failed to delete download:', err)
+      }
+    },
+
+    /** 批量删除多个已下载项目 */
+    async deleteMultiple(ids: (string | number)[]) {
+      const idSet = new Set(ids.map((id) => String(id)))
+      try {
+        for (const id of ids) {
+          await downloadedMusicDB.delete(id)
+        }
+        this.downloadedList = this.downloadedList.filter((item) => !idSet.has(String(item.id)))
+      } catch (err) {
+        console.error('[DownloadStore] Failed to batch delete downloads:', err)
       }
     },
 

@@ -275,7 +275,22 @@ const activeQualityBadge = computed(() => {
 
 const isLosslessActive = computed(() => currentQualityLevel.value === 'lossless')
 
+const qualityBtnRef = ref<HTMLButtonElement | null>(null)
+const menuCoords = ref({ bottom: 0, right: 0 })
+
+const updateQualityMenuPosition = () => {
+  if (!qualityBtnRef.value) return
+  const rect = qualityBtnRef.value.getBoundingClientRect()
+  menuCoords.value = {
+    bottom: Math.max(16, window.innerHeight - rect.top + 10),
+    right: Math.max(16, window.innerWidth - rect.right),
+  }
+}
+
 const toggleQualityMenu = () => {
+  if (!showQualityMenu.value) {
+    updateQualityMenuPosition()
+  }
   showQualityMenu.value = !showQualityMenu.value
 }
 
@@ -306,14 +321,23 @@ const formatSongTitle = (title?: string, maxLen = 22) => {
   return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
 }
 
-const handleDocumentClick = (e: MouseEvent) => {
-  if (qualityMenuRef.value && !qualityMenuRef.value.contains(e.target as Node)) {
-    showQualityMenu.value = false
-  }
+const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
+  const target = e.target as Node
+  if (qualityBtnRef.value && qualityBtnRef.value.contains(target)) return
+  if (qualityMenuRef.value && qualityMenuRef.value.contains(target)) return
+  showQualityMenu.value = false
 }
 
 onMounted(() => {
-  document.addEventListener('click', handleDocumentClick)
+  document.addEventListener('pointerdown', handleDocumentClick)
+  window.addEventListener('resize', updateQualityMenuPosition)
+  window.addEventListener('scroll', updateQualityMenuPosition, true)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', handleDocumentClick)
+  window.removeEventListener('resize', updateQualityMenuPosition)
+  window.removeEventListener('scroll', updateQualityMenuPosition, true)
 })
 
 const emit = defineEmits(['show'])
@@ -441,9 +465,10 @@ const emit = defineEmits(['show'])
 
       <!-- 右侧：音质切换、下载、音量和其他控制 -->
       <div class="relative flex flex-1 items-center justify-end space-x-2.5 sm:space-x-3.5">
-        <!-- 音质切换按钮与浮动菜单 -->
-        <div v-if="currentSong" class="relative" ref="qualityMenuRef">
+        <!-- 音质切换按钮 -->
+        <div v-if="currentSong" class="relative">
           <button
+            ref="qualityBtnRef"
             @click.stop="toggleQualityMenu"
             class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer"
             :title="'当前音质: ' + activeQualityBadge + ' (点击切换音质)'"
@@ -458,46 +483,89 @@ const emit = defineEmits(['show'])
               :class="{ 'rotate-180': showQualityMenu }"
             ></span>
           </button>
+        </div>
 
-          <!-- 向上浮动音质选择面板 -->
+        <!-- 向上浮动音质选择面板 (Teleport 至 body 避免被 footer overflow-hidden 截断) -->
+        <Teleport to="body">
           <Transition name="quality-pop">
             <div
               v-if="showQualityMenu"
-              class="absolute bottom-full right-0 mb-3 w-56 overflow-hidden rounded-2xl border border-white/15 bg-neutral-900/90 p-2 shadow-2xl backdrop-blur-2xl z-50"
-              style="box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(236, 72, 153, 0.15);"
+              ref="qualityMenuRef"
+              :style="{
+                position: 'fixed',
+                bottom: `${menuCoords.bottom}px`,
+                right: `${menuCoords.right}px`,
+                zIndex: 99999,
+              }"
+              class="quality-panel-popover w-64 overflow-hidden rounded-2xl select-none"
             >
-              <div class="px-2.5 py-1.5 border-b border-white/10 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-white/70 tracking-wider">音质切换</span>
-                <span class="text-[10px] text-pink-400 font-mono">Hi-Fi</span>
+              <!-- 顶部标题 -->
+              <div
+                class="px-3.5 py-2.5 flex items-center justify-between border-b border-white/10"
+                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.14), rgba(139, 92, 246, 0.14));"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="icon-[mdi--waveform] h-4 w-4 text-pink-400"></span>
+                  <span class="text-xs font-bold text-primary tracking-wide">音频规格切换</span>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border border-pink-500/30">
+                  Hi-Fi 原声
+                </span>
               </div>
-              <div class="space-y-1 mt-1">
+
+              <!-- 音质选项列表 -->
+              <div class="p-2 space-y-1.5">
                 <button
                   v-for="q in availableQualities"
                   :key="q.level"
                   @click.stop="selectQuality(q.level)"
-                  class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left transition-all duration-150 group cursor-pointer"
+                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-200 group cursor-pointer"
                   :class="[
                     currentQualityLevel === q.level
-                      ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 font-semibold'
-                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      ? 'border border-pink-500/50 text-pink-200 font-semibold shadow-[0_0_16px_rgba(236,72,153,0.2)]'
+                      : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary'
                   ]"
+                  :style="currentQualityLevel === q.level ? 'background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(139, 92, 246, 0.22));' : ''"
                 >
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-xs">{{ q.label }}</span>
-                      <span class="text-[10px] opacity-60 font-mono">{{ q.bitrate }}</span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold leading-none select-none"
+                        :class="[
+                          q.level === 'lossless'
+                            ? 'bg-gradient-to-r from-violet-600/40 to-pink-600/40 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.3)]'
+                            : q.level === 'exhigh'
+                              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/35'
+                              : 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/35'
+                        ]"
+                      >
+                        {{ q.label }}
+                      </span>
+                      <span class="text-[11px] font-mono opacity-85 text-primary">{{ q.bitrate }}</span>
                     </div>
-                    <p class="text-[10px] text-white/40 mt-0.5">{{ q.desc }}</p>
+                    <p class="text-[10px] text-primary/50 mt-1 truncate leading-tight">{{ q.desc }}</p>
                   </div>
-                  <span
-                    v-if="currentQualityLevel === q.level"
-                    class="icon-[mdi--check] h-4 w-4 text-pink-400 shrink-0"
-                  ></span>
+                  <div
+                    class="ml-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
+                    :class="[
+                      currentQualityLevel === q.level
+                        ? 'border-pink-400 bg-pink-500 text-white shadow-sm'
+                        : 'border-white/20 bg-transparent opacity-40'
+                    ]"
+                  >
+                    <span v-if="currentQualityLevel === q.level" class="icon-[mdi--check] h-3.5 w-3.5"></span>
+                  </div>
                 </button>
+              </div>
+
+              <!-- 底部切换提示 -->
+              <div class="px-3.5 py-1.5 border-t border-white/10 text-[10px] text-primary/50 flex items-center gap-1.5 bg-black/15">
+                <span class="icon-[mdi--sync] h-3.5 w-3.5 text-pink-400 shrink-0"></span>
+                <span>即时无缝切换 · 自动保留当前播放位置</span>
               </div>
             </div>
           </Transition>
-        </div>
+        </Teleport>
 
         <!-- 当前歌曲下载按钮 -->
         <Button
@@ -612,6 +680,16 @@ const emit = defineEmits(['show'])
 .quality-pop-leave-to {
   opacity: 0;
   transform: translateY(8px) scale(0.96);
+}
+
+/* 音质规格上浮菜单毛玻璃容器 */
+.quality-panel-popover {
+  background-color: light-dark(rgba(255, 255, 255, 0.90), rgba(20, 16, 36, 0.92));
+  border: 1px solid light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.65),
+    0 0 35px -8px rgba(139, 92, 246, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .fade-enter-active,
