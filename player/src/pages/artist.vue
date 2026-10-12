@@ -11,6 +11,7 @@ import {
   type SongData,
   type AlbumData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const route = useRoute()
 const router = useRouter()
@@ -119,8 +120,9 @@ const tabs = computed(() => [
           <div class="absolute inset-0 overflow-hidden">
             <img
               v-if="state.info.picUrl"
-              :src="state.info.picUrl + '?param=800y800'"
+              :src="formatCoverUrl(state.info.picUrl, { size: 800, artist: state.info.name })"
               class="h-full w-full scale-110 object-cover opacity-20 blur-2xl"
+              referrerpolicy="no-referrer"
             />
             <div
               v-else
@@ -145,9 +147,10 @@ const tabs = computed(() => [
                   >
                     <img
                       v-if="state.info.picUrl"
-                      :src="state.info.picUrl + '?param=400y400'"
+                      :src="formatCoverUrl(state.info.picUrl, { size: 400, artist: state.info.name })"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       :alt="$t('layout.aside.menu.artists')"
+                      referrerpolicy="no-referrer"
                     />
                     <div
                       v-else
@@ -303,8 +306,9 @@ const tabs = computed(() => [
               >
                 <div class="relative mb-3 aspect-square w-full overflow-hidden rounded-xl">
                   <img
-                    :src="al.picUrl + '?param=400y400'"
+                    :src="formatCoverUrl(al.picUrl, { size: 400 })"
                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    referrerpolicy="no-referrer"
                   />
                   <div
                     class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"

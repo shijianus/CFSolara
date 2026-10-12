@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { formatDuration } from '@/utils/time'
 import { useAudio } from '@/composables/useAudio'
+import { formatCoverUrl } from '@/utils/imageUrl'
 import type { Song as StoreSong } from '@/stores/interface'
 
 interface Props {
@@ -73,7 +74,7 @@ const handleClick = async (_event: MouseEvent) => {
       left: ${rect.left}px;
       top: ${rect.top}px;
       border-radius: 12px;
-      background-image: url(${props.song.cover}?param=100y100);
+      background-image: url(${formatCoverUrl(props.song.cover, { size: 100, artist: props.song.artist })});
       background-size: cover;
       background-position: center;
       pointer-events: none;
@@ -205,7 +206,8 @@ const handleMouseLeave = () => {
     <!-- 封面 -->
     <div ref="coverRef" class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-md ring-1 ring-white/10">
       <LazyImage
-        :src="song.cover + '?param=100y100'"
+        :src="formatCoverUrl(song.cover, { size: 100, artist: song.artist })"
+        :fallback-src="formatCoverUrl('', { artist: song.artist })"
         alt="cover"
         img-class="h-full w-full object-cover"
       />

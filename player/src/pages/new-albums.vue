@@ -2,6 +2,7 @@
 import { albumNew } from '@/api'
 import { useI18n } from 'vue-i18n'
 import { transformAlbums, type AlbumData } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 
@@ -98,7 +99,7 @@ onMounted(() => loadAlbums(true))
         >
           <div class="relative mb-3 aspect-square overflow-hidden rounded-lg">
             <LazyImage
-              :src="album.cover + '?param=300y300'"
+              :src="formatCoverUrl(album.cover, { size: 300, artist: album.artist })"
               :alt="album.name"
               class="h-full w-full object-cover transition-transform group-hover:scale-105"
             />

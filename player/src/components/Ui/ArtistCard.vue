@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 interface Props {
   id: number | string
@@ -37,7 +38,7 @@ const handleClick = async () => {
     left: ${rect.left}px;
     top: ${rect.top}px;
     border-radius: 50%;
-    background-image: url(${props.picUrl}?param=400y400);
+    background-image: url(${formatCoverUrl(props.picUrl, { size: 400, artist: props.name })});
     background-size: cover;
     background-position: center;
     pointer-events: none;
@@ -168,7 +169,8 @@ const handleMouseLeave = () => {
       class="border-glass relative mb-2.5 aspect-square w-full overflow-hidden rounded-full border-2 shadow-lg transition-all duration-300 group-hover:border-[#8b5cf6] group-hover:shadow-[0_0_20px_rgba(139,92,246,0.5)]"
     >
       <LazyImage
-        :src="picUrl + '?param=150y150'"
+        :src="formatCoverUrl(picUrl, { size: 150, artist: name })"
+        :fallback-src="formatCoverUrl('', { artist: name })"
         :alt="name"
         img-class="h-full w-full object-cover"
       />

@@ -159,6 +159,14 @@ const router = createRouter({
           ),
         },
         {
+          path: '/downloads',
+          name: 'downloads',
+          component: responsive(
+            () => import('@/pages/downloads.vue'),
+            () => import('@/pages/mobile/downloads.vue')
+          ),
+        },
+        {
           path: '/local-music',
           name: 'local-music',
           component: responsive(

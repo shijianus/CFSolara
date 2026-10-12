@@ -4,6 +4,7 @@ import { mvAll } from '@/api'
 import { formatCount } from '@/utils/time'
 import TabGroup from '@/components/Ui/TabGroup.vue'
 import Button from '@/components/Ui/Button.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 const { t } = useI18n()
 
 const state = reactive({
@@ -139,7 +140,7 @@ onMounted(() => {
           >
             <div class="relative aspect-video overflow-hidden">
               <LazyImage
-                :src="mv.cover + '?param=480y270'"
+                :src="formatCoverUrl(mv.cover, { size: 480 })"
                 :alt="t('mvList.alt.cover')"
                 imgClass="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 wrapperClass="h-full w-full"

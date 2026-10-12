@@ -13,10 +13,14 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { getColorPalette } from '@/utils/colorExtractor'
 import { adaptColorsForTheme } from '@/utils/colorThemeAdapter'
+import { formatCoverUrl } from '@/utils/imageUrl'
 import { gsap } from 'gsap'
+import { useDownloadStore } from '@/stores/modules/download'
+import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue'
 
 const { t } = useI18n()
 const audioStore = useAudioStore()
+const downloadStore = useDownloadStore()
 
 // 使用音频播放器组合式API
 const {
@@ -95,7 +99,7 @@ const visualizerGradient = computed(() => {
 const extractCoverColors = async (coverUrl?: string) => {
   if (!coverUrl) return
   try {
-    const palette = await getColorPalette(coverUrl + '?param=128x128')
+    const palette = await getColorPalette(formatCoverUrl(coverUrl, { size: 128 }))
     state.footerGradient = palette.gradient
   } catch (error) {
     console.error('Failed to extract footer colors:', error)
@@ -176,13 +180,15 @@ watch(
 watch(
   () => currentSong.value,
   (song, oldSong) => {
-    if (song?.cover) {
-      extractCoverColors(song.cover)
-      // 只有当歌曲真正变化时才触发翻转
-      if (oldSong && oldSong.id !== song.id) {
-        flipCover(song.cover)
-      } else if (!state.displayCover) {
-        state.displayCover = song.cover
+    if (song) {
+      const resolved = formatCoverUrl(song.cover, { size: 128, artist: song.artist })
+      if (resolved) {
+        extractCoverColors(resolved)
+        if (oldSong && oldSong.id !== song.id) {
+          flipCover(resolved)
+        } else if (!state.displayCover) {
+          state.displayCover = resolved
+        }
       }
     }
   },
@@ -229,13 +235,93 @@ watch(
 
 onUnmounted(() => {
   stopAnalyser()
+  document.removeEventListener('click', handleDocumentClick)
+  if (qualityToastTimer) clearTimeout(qualityToastTimer)
+})
+
+// ═══════ 音质切换与下载控制 ═══════
+const showQualityMenu = ref(false)
+const qualityMenuRef = ref<HTMLElement | null>(null)
+const qualityToastMsg = ref('')
+let qualityToastTimer: any = null
+
+const availableQualities = computed(() => {
+  if (currentSong.value?.qualities && currentSong.value.qualities.length > 0) {
+    return currentSong.value.qualities.map((q) => ({
+      level: q.level,
+      label: q.label,
+      bitrate: q.bitrate,
+      desc: q.desc || (q.level === 'lossless' ? '超清无损母带音质' : q.level === 'exhigh' ? '极高品质MP3' : '标准流畅音质'),
+    }))
+  }
+  return [
+    { level: 'lossless', label: 'SQ 无损', bitrate: 'FLAC 24bit', desc: '超清无损母带音质 (FLAC / 24-bit)' },
+    { level: 'exhigh', label: 'HQ 极高', bitrate: '320kbps', desc: '极高品质MP3 (320kbps 饱满声场)' },
+    { level: 'standard', label: '标准', bitrate: '128kbps', desc: '标准流畅音质 (128kbps 快速省流)' },
+  ]
+})
+
+const currentQualityLevel = computed(() => {
+  const badge = currentSong.value?.qualityBadge
+  if (badge === 'SQ' || currentSong.value?.qualities?.[0]?.level === 'lossless') return 'lossless'
+  if (badge === 'HQ' || currentSong.value?.qualities?.[0]?.level === 'exhigh') return 'exhigh'
+  return 'standard'
+})
+
+const activeQualityBadge = computed(() => {
+  if (currentQualityLevel.value === 'lossless') return 'SQ 无损'
+  if (currentQualityLevel.value === 'exhigh') return 'HQ 极高'
+  return '标准'
+})
+
+const isLosslessActive = computed(() => currentQualityLevel.value === 'lossless')
+
+const toggleQualityMenu = () => {
+  showQualityMenu.value = !showQualityMenu.value
+}
+
+const selectQuality = async (level: string) => {
+  showQualityMenu.value = false
+  if (level === currentQualityLevel.value) return
+  await audioStore.switchQuality(level)
+  const labelMap: Record<string, string> = {
+    lossless: 'SQ 无损音质',
+    exhigh: 'HQ 极高音质',
+    standard: '标准音质',
+  }
+  qualityToastMsg.value = `已切换至 ${labelMap[level] || '目标音质'}`
+  if (qualityToastTimer) clearTimeout(qualityToastTimer)
+  qualityToastTimer = setTimeout(() => {
+    qualityToastMsg.value = ''
+  }, 2200)
+}
+
+const downloadCurrentSong = () => {
+  if (currentSong.value) {
+    downloadStore.openDownloadDialog(currentSong.value)
+  }
+}
+
+const formatSongTitle = (title?: string, maxLen = 22) => {
+  if (!title) return ''
+  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
+}
+
+const handleDocumentClick = (e: MouseEvent) => {
+  if (qualityMenuRef.value && !qualityMenuRef.value.contains(e.target as Node)) {
+    showQualityMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
 })
 
 const emit = defineEmits(['show'])
 </script>
 <template>
   <footer
-    class="glass-dock relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
+    class="glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
     style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
     <!-- 音频可视化器背景 -->
@@ -268,7 +354,7 @@ const emit = defineEmits(['show'])
             :class="{ 'animate-pulse-subtle': isPlaying }"
             :style="{
               backgroundImage: state.displayCover
-                ? `url(${state.displayCover + '?param=128x128'})`
+                ? `url(${formatCoverUrl(state.displayCover, { size: 128 })})`
                 : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #3b82f6 100%)',
             }"
           >
@@ -286,8 +372,8 @@ const emit = defineEmits(['show'])
           </div>
         </div>
         <div id="footer-song-info" class="flex min-w-0 flex-col justify-around">
-          <p class="text-primary truncate text-sm font-medium">
-            {{ currentSong?.name || t('player.unknownSong') }}
+          <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
+            {{ formatSongTitle(currentSong?.name) || t('player.unknownSong') }}
           </p>
           <p class="text-primary/80 truncate text-xs">
             {{ currentSong?.artist || t('player.unknownArtist') }}
@@ -324,6 +410,7 @@ const emit = defineEmits(['show'])
           variant="gradient"
           size="icon-lg"
           rounded="full"
+          class="play-btn-glow"
           @click="togglePlay"
           :title="isPlaying ? t('player.pause') : t('player.play')"
           :loading="isLoading"
@@ -353,8 +440,78 @@ const emit = defineEmits(['show'])
         />
       </div>
 
-      <!-- 右侧：音量和其他控制 -->
-      <div class="relative flex flex-1 items-center justify-end space-x-4">
+      <!-- 右侧：音质切换、下载、音量和其他控制 -->
+      <div class="relative flex flex-1 items-center justify-end space-x-2.5 sm:space-x-3.5">
+        <!-- 音质切换按钮与浮动菜单 -->
+        <div v-if="currentSong" class="relative" ref="qualityMenuRef">
+          <button
+            @click.stop="toggleQualityMenu"
+            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer"
+            :title="'当前音质: ' + activeQualityBadge + ' (点击切换音质)'"
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full"
+              :class="isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
+            ></span>
+            <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
+            <span
+              class="icon-[mdi--chevron-up] text-xs transition-transform duration-200"
+              :class="{ 'rotate-180': showQualityMenu }"
+            ></span>
+          </button>
+
+          <!-- 向上浮动音质选择面板 -->
+          <Transition name="quality-pop">
+            <div
+              v-if="showQualityMenu"
+              class="absolute bottom-full right-0 mb-3 w-56 overflow-hidden rounded-2xl border border-white/15 bg-neutral-900/90 p-2 shadow-2xl backdrop-blur-2xl z-50"
+              style="box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(236, 72, 153, 0.15);"
+            >
+              <div class="px-2.5 py-1.5 border-b border-white/10 flex items-center justify-between">
+                <span class="text-[11px] font-bold text-white/70 tracking-wider">音质切换</span>
+                <span class="text-[10px] text-pink-400 font-mono">Hi-Fi</span>
+              </div>
+              <div class="space-y-1 mt-1">
+                <button
+                  v-for="q in availableQualities"
+                  :key="q.level"
+                  @click.stop="selectQuality(q.level)"
+                  class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left transition-all duration-150 group cursor-pointer"
+                  :class="[
+                    currentQualityLevel === q.level
+                      ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 font-semibold'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ]"
+                >
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs">{{ q.label }}</span>
+                      <span class="text-[10px] opacity-60 font-mono">{{ q.bitrate }}</span>
+                    </div>
+                    <p class="text-[10px] text-white/40 mt-0.5">{{ q.desc }}</p>
+                  </div>
+                  <span
+                    v-if="currentQualityLevel === q.level"
+                    class="icon-[mdi--check] h-4 w-4 text-pink-400 shrink-0"
+                  ></span>
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+
+        <!-- 当前歌曲下载按钮 -->
+        <Button
+          v-if="currentSong"
+          variant="text"
+          size="none"
+          icon="icon-[mdi--tray-arrow-down]"
+          icon-class="size-5"
+          class="text-primary/70 hover:text-pink-400 flex items-center transition-colors cursor-pointer"
+          :title="t('common.download') + '当前歌曲'"
+          @click.stop="downloadCurrentSong"
+        />
+
         <VolumeControl />
         <PlaylistBubble v-model:show="showQueue" placement="top-right" :offset-y="20">
           <template #trigger>
@@ -379,6 +536,20 @@ const emit = defineEmits(['show'])
       <MusicProgress class="flex-1" />
       <span class="text-primary/60 text-xs">{{ formattedDuration }}</span>
     </div>
+
+    <!-- 音质切换即时反馈 Toast -->
+    <Transition name="fade">
+      <div
+        v-if="qualityToastMsg"
+        class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-pink-500/30 bg-neutral-900/90 px-4 py-1.5 text-xs font-semibold text-pink-300 shadow-xl backdrop-blur-xl"
+      >
+        <span class="icon-[mdi--check-circle] h-4 w-4 text-pink-400"></span>
+        <span>{{ qualityToastMsg }}</span>
+      </div>
+    </Transition>
+
+    <!-- 下载弹窗组件 -->
+    <DownloadQualityDialog />
   </footer>
 </template>
 
@@ -434,5 +605,25 @@ const emit = defineEmits(['show'])
 
 .animate-equalizer-3 {
   animation: equalizer-3 0.5s ease-in-out infinite 0.2s;
+}
+
+/* 音质菜单与反馈弹窗过渡 */
+.quality-pop-enter-active,
+.quality-pop-leave-active {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quality-pop-enter-from,
+.quality-pop-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

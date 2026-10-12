@@ -514,6 +514,60 @@ export const useAudioStore = defineStore('audio', {
       }
     },
 
+    /** 切换当前播放歌曲的音质等级并平滑无缝恢复播放进度 */
+    async switchQuality(targetLevel: string) {
+      if (!this.audio.currentSong || !this.audio.audio) return
+      if (this.audio.currentSong.isLocal) return
+
+      const currentTime = this.audio.audio.currentTime || 0
+      const wasPlaying = this.audio.isPlaying
+
+      // 查找对应音质配置
+      const qualityOpt = this.audio.currentSong.qualities?.find(q => q.level === targetLevel)
+      let newUrl = qualityOpt?.streamUrl || ''
+
+      const brMap: Record<string, string> = {
+        lossless: 'lossless',
+        exhigh: '320',
+        standard: '128',
+      }
+      const br = brMap[targetLevel] || '320'
+
+      if (!newUrl) {
+        newUrl = `/api/music/stream?id=${encodeURIComponent(String(this.audio.currentSong.id))}&source=netease&br=${br}&title=${encodeURIComponent(this.audio.currentSong.name || '')}&artist=${encodeURIComponent(this.audio.currentSong.artist || '')}`
+      }
+
+      this.audio.currentSong.url = newUrl
+      const badgeMap: Record<string, string> = {
+        lossless: 'SQ',
+        exhigh: 'HQ',
+        standard: '标准',
+      }
+      if (badgeMap[targetLevel]) {
+        this.audio.currentSong.qualityBadge = badgeMap[targetLevel]
+      }
+
+      // 同步到播放列表
+      const idx = this.audio.currentIndex
+      if (idx >= 0 && idx < this.audio.playlist.length) {
+        this.audio.playlist[idx].url = newUrl
+        this.audio.playlist[idx].qualityBadge = this.audio.currentSong.qualityBadge
+      }
+
+      this.audio.isLoading = true
+      try {
+        this._loadAudioSrc(newUrl)
+        this.audio.audio.currentTime = currentTime
+        if (wasPlaying) {
+          await this.audio.audio.play()
+        }
+      } catch (err) {
+        console.error('Switch quality failed:', err)
+      } finally {
+        this.audio.isLoading = false
+      }
+    },
+
     // 设置音量
     setVolume(volume: number) {
       if (this.audio.audio) {

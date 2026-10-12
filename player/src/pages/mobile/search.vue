@@ -18,6 +18,7 @@ import {
   type PlaylistData,
   type MVData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const creativeEffect = {
   prev: {
@@ -133,7 +134,7 @@ const fetchSongs = async () => {
         artists: [{ id: 0, name: t.artist }],
         album: t.album || '',
         albumId: 0,
-        cover: t.cover || t.coverUrl || '',
+        cover: formatCoverUrl(t.cover || t.coverUrl || t.artistPic || '', { size: 300, artist: t.artist }),
         duration: (t.duration || 200) * 1000,
         dt: (t.duration || 200) * 1000,
         url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
@@ -480,7 +481,7 @@ watch(
               >
                 <div class="playlist-cover relative mb-3 aspect-square overflow-hidden rounded-2xl">
                   <LazyImage
-                    :src="p.coverImgUrl + '?param=300y300'"
+                    :src="formatCoverUrl(p.coverImgUrl, { size: 300 })"
                     :alt="p.name"
                     imgClass="h-full w-full object-cover transition-all duration-500 group-active:scale-110"
                   />
@@ -537,7 +538,7 @@ watch(
               >
                 <div class="mv-cover relative aspect-video overflow-hidden rounded-2xl">
                   <LazyImage
-                    :src="m.cover + '?param=480y270'"
+                    :src="formatCoverUrl(m.cover, { size: 480 })"
                     :alt="m.name"
                     imgClass="h-full w-full object-cover transition-all duration-500 group-active:scale-105"
                   />

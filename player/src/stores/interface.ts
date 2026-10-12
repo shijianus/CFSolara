@@ -48,7 +48,7 @@ export interface Song {
   /** 最高音质等级标识（如 SQ、HQ、标准） */
   qualityBadge?: string
   /** 支持的音质等级列表 */
-  qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string }>
+  qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string; format?: string; desc?: string }>
 }
 
 /** 音频播放器 Store 状态 */

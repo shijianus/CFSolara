@@ -200,6 +200,7 @@ export default {
         search: '検索',
         recent: '最近の再生',
         likes: 'お気に入り',
+        downloads: 'ダウンロード一覧',
         settings: '設定',
         localMusic: 'ローカル音楽',
       },

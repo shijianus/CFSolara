@@ -2,6 +2,7 @@
 import { artistList } from '@/api'
 import { useI18n } from 'vue-i18n'
 import { transformArtists, type ArtistData } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 
@@ -142,7 +143,7 @@ onMounted(() => loadArtists(true))
         >
           <div class="relative mb-3 aspect-square overflow-hidden rounded-full">
             <LazyImage
-              :src="artist.picUrl + '?param=300y300'"
+              :src="formatCoverUrl(artist.picUrl, { size: 300, artist: artist.name })"
               :alt="artist.name"
               class="h-full w-full object-cover transition-transform group-hover:scale-105"
             />

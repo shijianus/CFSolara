@@ -20,6 +20,7 @@ import {
   type MVData,
   type ArtistData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 
@@ -132,7 +133,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             >
               <div class="playlist-cover relative mb-2 aspect-square overflow-hidden rounded-xl">
                 <LazyImage
-                  :src="pl.coverImgUrl + '?param=200y200'"
+                  :src="formatCoverUrl(pl.coverImgUrl, { size: 200 })"
                   :alt="pl.name"
                   imgClass="h-full w-full object-cover transition-transform duration-300 group-active:scale-105"
                 />
@@ -178,7 +179,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             >
               <div class="artist-avatar relative mb-1.5 h-16 w-16 overflow-hidden rounded-full">
                 <LazyImage
-                  :src="artist.picUrl + '?param=100y100'"
+                  :src="formatCoverUrl(artist.picUrl, { size: 100, artist: artist.name })"
                   :alt="artist.name"
                   imgClass="h-full w-full object-cover"
                 />
@@ -223,7 +224,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             <router-link v-for="mv in mvs" :key="mv.id" :to="`/mv-player/${mv.id}`" class="group">
               <div class="mv-cover relative aspect-video overflow-hidden rounded-xl">
                 <LazyImage
-                  :src="mv.cover + '?param=320y180'"
+                  :src="formatCoverUrl(mv.cover, { size: 320 })"
                   :alt="mv.name"
                   imgClass="h-full w-full object-cover transition-transform duration-300 group-active:scale-105"
                 />

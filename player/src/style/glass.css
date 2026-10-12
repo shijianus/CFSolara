@@ -30,11 +30,11 @@
 
     /* ── 背景 ── */
     --glass-bg-solid: light-dark(#ffffff, #07070d);
-    --glass-bg-base: light-dark(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-    --glass-bg-subtle: light-dark(rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.045));
-    --glass-bg-elevated: light-dark(rgba(255, 255, 255, 0.36), rgba(16, 14, 28, 0.58));
-    --glass-bg-card: light-dark(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.055));
-    --glass-bg-overlay: light-dark(rgba(255, 255, 255, 0.88), rgba(10, 10, 18, 0.90));
+    --glass-bg-base: light-dark(rgba(255, 255, 255, 0.12), rgba(18, 14, 32, 0.48));
+    --glass-bg-subtle: light-dark(rgba(255, 255, 255, 0.09), rgba(18, 14, 32, 0.50));
+    --glass-bg-elevated: light-dark(rgba(255, 255, 255, 0.36), rgba(20, 16, 36, 0.52));
+    --glass-bg-card: light-dark(rgba(255, 255, 255, 0.16), rgba(22, 18, 38, 0.46));
+    --glass-bg-overlay: light-dark(rgba(255, 255, 255, 0.88), rgba(12, 10, 22, 0.90));
     --glass-bg-mask: light-dark(rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.35));
 
     /* ── 文字 ── */
@@ -154,15 +154,66 @@
     box-shadow: var(--glass-shadow-sm), var(--glass-shadow-inset);
   }
 
-  .glass-dock {
+  .glass-dock,
+  .player-panel {
     -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
     backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-    background: light-dark(rgba(255, 255, 255, 0.32), rgba(16, 14, 28, 0.40));
-    border: 1px solid light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.15));
+    background-color: light-dark(rgba(255, 255, 255, 0.35), rgba(20, 16, 36, 0.52));
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.18));
     border-radius: 26px;
     box-shadow:
-      inset 0 1px 1px 0 light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.18)),
-      0 20px 48px -10px rgba(0, 0, 0, 0.55);
+      inset 0 1px 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22)),
+      0 24px 60px -12px rgba(0, 0, 0, 0.65),
+      0 0 35px -8px rgba(139, 92, 246, 0.22);
+  }
+
+  .sidebar {
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+    background-color: light-dark(rgba(255, 255, 255, 0.28), rgba(18, 14, 32, 0.50));
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.15));
+    border-radius: 28px;
+    box-shadow:
+      inset 0 1px 0 0 light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.16)),
+      0 16px 40px -8px rgba(0, 0, 0, 0.45);
+  }
+
+  .section-container {
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    background-color: light-dark(rgba(255, 255, 255, 0.22), rgba(22, 18, 38, 0.46));
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid light-dark(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.12));
+    border-radius: 22px;
+    box-shadow:
+      inset 0 1px 0 0 light-dark(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.12)),
+      0 8px 24px -4px rgba(0, 0, 0, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .section-container:hover {
+    border-color: light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.22));
+    box-shadow:
+      inset 0 1px 0 0 light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.18)),
+      0 14px 32px -4px rgba(0, 0, 0, 0.45);
+  }
+
+  .play-btn-glow {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 10px 24px -4px rgba(236, 72, 153, 0.55),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease !important;
+  }
+
+  .play-btn-glow:hover {
+    transform: scale(1.06) !important;
+    box-shadow:
+      0 12px 28px -2px rgba(236, 72, 153, 0.7),
+      inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
   }
 
 

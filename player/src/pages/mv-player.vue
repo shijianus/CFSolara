@@ -5,6 +5,7 @@ import { mvDetail, mvUrl, simiMv, commentNew } from '@/api'
 import { MVInfo, RelatedMV, MVComment } from '@/typings'
 import { formatCount } from '@/utils/time'
 import Button from '@/components/Ui/Button.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
@@ -226,8 +227,9 @@ watch(
                   >
                     <img
                       v-if="c.avatarUrl"
-                      :src="c.avatarUrl + '?param=80y80'"
+                      :src="formatCoverUrl(c.avatarUrl, { size: 80 })"
                       class="h-10 w-10 shrink-0 rounded-full object-cover"
+                      referrerpolicy="no-referrer"
                     />
                     <div
                       v-else
@@ -288,7 +290,7 @@ watch(
                   >
                     <div class="relative shrink-0 overflow-hidden rounded-xl">
                       <LazyImage
-                        :src="mv.cover + '?param=160y90'"
+                        :src="formatCoverUrl(mv.cover, { size: 160 })"
                         :alt="mv.title"
                         imgClass="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         wrapperClass="h-18 w-32"

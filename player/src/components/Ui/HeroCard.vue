@@ -2,6 +2,7 @@
 import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { formatCount } from '@/utils/time'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 interface Props {
   id: number | string
@@ -78,6 +79,7 @@ const handleClick = async (_event: MouseEvent) => {
   isAnimating.value = true
   const card = cardRef.value
   const rect = card.getBoundingClientRect()
+  const cleanCover = formatCoverUrl(props.coverUrl, { size: 400 })
 
   // 创建克隆元素用于动画
   const clone = document.createElement('div')
@@ -86,7 +88,7 @@ const handleClick = async (_event: MouseEvent) => {
     <div class="hero-clone-bg" style="
       position: absolute;
       inset: 0;
-      background-image: url(${props.coverUrl}?param=400y400);
+      background-image: url(${cleanCover});
       background-size: cover;
       background-position: center;
       filter: blur(40px) saturate(1.5);
@@ -104,7 +106,7 @@ const handleClick = async (_event: MouseEvent) => {
       padding: 24px;
       opacity: 0;
     ">
-      <img src="${props.coverUrl}?param=400y400" style="
+      <img src="${cleanCover}" referrerpolicy="no-referrer" style="
         width: 200px;
         height: 200px;
         border-radius: 16px;
@@ -291,7 +293,7 @@ const handleMouseLeave = () => {
       :class="aspectRatio === 'video' ? 'aspect-video' : 'aspect-square'"
     >
       <LazyImage
-        :src="coverUrl + '?param=300y300'"
+        :src="formatCoverUrl(coverUrl, { size: 300 })"
         :alt="title"
         img-class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         wrapper-class="h-full w-full"

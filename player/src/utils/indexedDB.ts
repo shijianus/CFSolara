@@ -15,85 +15,121 @@ export interface LocalMusic {
   createTime: number
 }
 
+/** 已下载歌曲数据结构 */
+export interface DownloadedSong {
+  id: string | number
+  name: string
+  artist: string
+  album?: string
+  duration: number
+  cover?: string
+  qualityLevel: string // 'lossless' | 'exhigh' | 'standard'
+  qualityBadge: string // 'SQ' | 'HQ' | '标准'
+  bitrate?: string
+  format: string // 'flac' | 'mp3'
+  fileSize: number // 文件大小(字节)
+  file: Blob // 本地持久化 Blob 文件
+  downloadTime: number
+  streamUrl?: string
+}
+
 /** 数据库名称 */
 const DB_NAME = 'SonicMusicPlayerDB'
 /** 对象存储名称 */
-const STORE_NAME = 'local_music'
+const STORE_LOCAL = 'local_music'
+const STORE_DOWNLOAD = 'downloaded_music'
 /** 数据库版本 */
-const DB_VERSION = 1
+const DB_VERSION = 2
+
+let globalDbPromise: Promise<IDBDatabase> | null = null
+
+function openDatabase(): Promise<IDBDatabase> {
+  if (globalDbPromise) return globalDbPromise
+
+  globalDbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onerror = () => {
+      globalDbPromise = null
+      reject(request.error)
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result)
+    }
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result
+      if (!db.objectStoreNames.contains(STORE_LOCAL)) {
+        db.createObjectStore(STORE_LOCAL, { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains(STORE_DOWNLOAD)) {
+        db.createObjectStore(STORE_DOWNLOAD, { keyPath: 'id' })
+      }
+    }
+  })
+
+  return globalDbPromise
+}
+
+async function executeInStore<T>(
+  storeName: string,
+  mode: IDBTransactionMode,
+  operation: (store: IDBObjectStore) => IDBRequest
+): Promise<T> {
+  const db = await openDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([storeName], mode)
+    const store = transaction.objectStore(storeName)
+    const request = operation(store)
+
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result)
+  })
+}
 
 /**
  * 本地音乐数据库操作类
- * 封装 IndexedDB 的 CRUD 操作，统一使用 Promise 风格
  */
 export class LocalMusicDB {
-  private db: IDBDatabase | null = null
-
-  /** 打开数据库连接（单例模式，已连接则复用） */
-  async open(): Promise<IDBDatabase> {
-    if (this.db) return this.db
-
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION)
-
-      request.onerror = () => reject(request.error)
-      request.onsuccess = () => {
-        this.db = request.result
-        resolve(this.db)
-      }
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        }
-      }
-    })
-  }
-
-  /**
-   * 执行单次事务操作的通用辅助方法
-   * 将重复的 open → transaction → store → request → promise 模式统一封装
-   *
-   * @param mode - 事务模式：'readonly' 或 'readwrite'
-   * @param operation - 对 objectStore 执行的具体操作，返回 IDBRequest
-   * @returns Promise 包装的操作结果
-   */
-  private async execute<T>(
-    mode: IDBTransactionMode,
-    operation: (store: IDBObjectStore) => IDBRequest
-  ): Promise<T> {
-    const db = await this.open()
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORE_NAME], mode)
-      const store = transaction.objectStore(STORE_NAME)
-      const request = operation(store)
-
-      request.onerror = () => reject(request.error)
-      request.onsuccess = () => resolve(request.result)
-    })
-  }
-
-  /** 添加或更新一首本地音乐（put 语义：存在则覆盖） */
   async add(music: LocalMusic): Promise<void> {
-    await this.execute<void>('readwrite', store => store.put(music))
+    await executeInStore<void>(STORE_LOCAL, 'readwrite', store => store.put(music))
   }
 
-  /** 获取所有本地音乐列表 */
   async getAll(): Promise<LocalMusic[]> {
-    return this.execute<LocalMusic[]>('readonly', store => store.getAll())
+    return executeInStore<LocalMusic[]>(STORE_LOCAL, 'readonly', store => store.getAll())
   }
 
-  /** 根据 ID 删除一首本地音乐 */
   async delete(id: string): Promise<void> {
-    await this.execute<void>('readwrite', store => store.delete(id))
+    await executeInStore<void>(STORE_LOCAL, 'readwrite', store => store.delete(id))
   }
 
-  /** 清空所有本地音乐 */
   async clear(): Promise<void> {
-    await this.execute<void>('readwrite', store => store.clear())
+    await executeInStore<void>(STORE_LOCAL, 'readwrite', store => store.clear())
+  }
+}
+
+/**
+ * 已下载音乐数据库操作类
+ */
+export class DownloadedMusicDB {
+  async add(song: DownloadedSong): Promise<void> {
+    await executeInStore<void>(STORE_DOWNLOAD, 'readwrite', store => store.put(song))
+  }
+
+  async getAll(): Promise<DownloadedSong[]> {
+    return executeInStore<DownloadedSong[]>(STORE_DOWNLOAD, 'readonly', store => store.getAll())
+  }
+
+  async delete(id: string | number): Promise<void> {
+    await executeInStore<void>(STORE_DOWNLOAD, 'readwrite', store => store.delete(id))
+  }
+
+  async clear(): Promise<void> {
+    await executeInStore<void>(STORE_DOWNLOAD, 'readwrite', store => store.clear())
   }
 }
 
 /** 全局单例，供各模块直接导入使用 */
 export const localMusicDB = new LocalMusicDB()
+export const downloadedMusicDB = new DownloadedMusicDB()

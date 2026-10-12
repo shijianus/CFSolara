@@ -11,6 +11,7 @@ import {
   type SongData,
   type AlbumData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -114,7 +115,7 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
         <div class="header-bg absolute inset-0 overflow-hidden">
           <LazyImage
             v-if="state.info.picUrl"
-            :src="state.info.picUrl + '?param=400y400'"
+            :src="formatCoverUrl(state.info.picUrl, { size: 400, artist: state.info.name })"
             :alt="$t('components.songList.coverAlt')"
             imgClass="h-full w-full object-cover scale-110"
           />
@@ -126,7 +127,7 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
             <div class="avatar-wrapper relative mb-4">
               <LazyImage
                 v-if="state.info.picUrl"
-                :src="state.info.picUrl + '?param=300y300'"
+                :src="formatCoverUrl(state.info.picUrl, { size: 300, artist: state.info.name })"
                 :alt="$t('layout.aside.menu.artists')"
                 imgClass="artist-avatar h-28 w-28 rounded-full object-cover"
               />
@@ -233,7 +234,7 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
             >
               <div class="relative aspect-square">
                 <LazyImage
-                  :src="album.picUrl + '?param=200y200'"
+                  :src="formatCoverUrl(album.picUrl, { size: 200, artist: state.info.name })"
                   :alt="album.name"
                   imgClass="h-full w-full object-cover"
                 />

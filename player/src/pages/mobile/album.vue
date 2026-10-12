@@ -11,6 +11,7 @@ import {
   extractArray,
   type SongData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -115,7 +116,7 @@ const goToArtist = () => {
         <div class="header-bg absolute inset-0 overflow-hidden">
           <LazyImage
             v-if="state.info.coverImgUrl"
-            :src="state.info.coverImgUrl + '?param=400y400'"
+            :src="formatCoverUrl(state.info.coverImgUrl, { size: 400, artist: state.info.artist })"
             :alt="$t('components.songList.coverAlt')"
             imgClass="h-full w-full object-cover scale-110"
           />
@@ -127,7 +128,7 @@ const goToArtist = () => {
             <div class="cover-wrapper relative shrink-0">
               <LazyImage
                 v-if="state.info.coverImgUrl"
-                :src="state.info.coverImgUrl + '?param=300y300'"
+                :src="formatCoverUrl(state.info.coverImgUrl, { size: 300, artist: state.info.artist })"
                 :alt="$t('components.songList.coverAlt')"
                 imgClass="cover-image h-32 w-32 rounded-2xl object-cover"
               />

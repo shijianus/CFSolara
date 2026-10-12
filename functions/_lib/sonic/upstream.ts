@@ -14,23 +14,24 @@ const UPSTREAM_HEADERS = {
 };
 
 // Popular curated artists with high-res avatars
+// Popular curated artists with high-res avatars
 const TOP_ARTISTS_CATALOG = [
-  { id: 6452, name: '周杰伦', picUrl: 'https://p2.music.126.net/c1z1a9i5Z89_E7q_9iA8qA==/109951165588539704.jpg', musicSize: 420, albumSize: 38 },
-  { id: 2116, name: '陈奕迅', picUrl: 'https://p2.music.126.net/n9-hU4s-xT3e4Y6rZ_Kz2Q==/109951165588554271.jpg', musicSize: 380, albumSize: 42 },
-  { id: 7763, name: 'G.E.M.邓紫棋', picUrl: 'https://p2.music.126.net/7_M4XFkP0s1c5aQ9cE8wQw==/109951165588557999.jpg', musicSize: 260, albumSize: 24 },
-  { id: 5771, name: '薛之谦', picUrl: 'https://p2.music.126.net/1n8J9W4f2-9z-1c2-9z-1w==/109951165588561234.jpg', musicSize: 210, albumSize: 18 },
-  { id: 3684, name: '林俊杰', picUrl: 'https://p2.music.126.net/9z-1c2-9z-1w1n8J9W4f2Q==/109951165588565432.jpg', musicSize: 390, albumSize: 35 },
-  { id: 10559, name: '毛不易', picUrl: 'https://p2.music.126.net/4f2-9z-1c2-9z-1w1n8J9Q==/109951165588569876.jpg', musicSize: 120, albumSize: 12 },
-  { id: 4292, name: '李荣浩', picUrl: 'https://p2.music.126.net/2-9z-1c2-9z-1w1n8J9W4f==/109951165588574321.jpg', musicSize: 180, albumSize: 15 },
-  { id: 5768, name: '许嵩', picUrl: 'https://p2.music.126.net/1w1n8J9W4f2-9z-1c2-9z-Q==/109951165588578901.jpg', musicSize: 195, albumSize: 16 },
-  { id: 6456, name: '张学友', picUrl: 'https://p2.music.126.net/8J9W4f2-9z-1c2-9z-1w1n==/109951165588583456.jpg', musicSize: 520, albumSize: 55 },
-  { id: 9621, name: '王菲', picUrl: 'https://p2.music.126.net/9W4f2-9z-1c2-9z-1w1n8J==/109951165588588012.jpg', musicSize: 310, albumSize: 32 },
-  { id: 7061, name: '孙燕姿', picUrl: 'https://p2.music.126.net/4f2-9z-1c2-9z-1w1n8J9W==/109951165588592567.jpg', musicSize: 240, albumSize: 22 },
-  { id: 8325, name: '梁静茹', picUrl: 'https://p2.music.126.net/z-1c2-9z-1w1n8J9W4f2-9==/109951165588597123.jpg', musicSize: 280, albumSize: 26 },
-  { id: 3681, name: '莫文蔚', picUrl: 'https://p2.music.126.net/1c2-9z-1w1n8J9W4f2-9z-==/109951165588601678.jpg', musicSize: 260, albumSize: 25 },
-  { id: 1045123, name: '周深', picUrl: 'https://p2.music.126.net/2-9z-1w1n8J9W4f2-9z-1c==/109951165588606234.jpg', musicSize: 340, albumSize: 20 },
-  { id: 1030001, name: '华晨宇', picUrl: 'https://p2.music.126.net/9z-1w1n8J9W4f2-9z-1c2-==/109951165588610789.jpg', musicSize: 130, albumSize: 10 },
-  { id: 12085562, name: '告五人', picUrl: 'https://p2.music.126.net/w1n8J9W4f2-9z-1c2-9z-1==/109951165588615345.jpg', musicSize: 90, albumSize: 8 },
+  { id: 6452, name: '周杰伦', picUrl: 'https://p2.music.126.net/NWv6PtSBkyWZzqbJVzBr7g==/109951169164936450.jpg', musicSize: 420, albumSize: 38 },
+  { id: 3684, name: '林俊杰', picUrl: 'https://p2.music.126.net/78q0jUUJ0h08GxAs2G-tCA==/109951168529051968.jpg', musicSize: 390, albumSize: 35 },
+  { id: 2116, name: '陈奕迅', picUrl: 'https://p2.music.126.net/5KJI2mq0G0OQHQaAfAJfwg==/109951173289563385.jpg', musicSize: 380, albumSize: 42 },
+  { id: 5781, name: '薛之谦', picUrl: 'https://p2.music.126.net/Z2x6knGRr7eRrZeOlgCngA==/109951172414270313.jpg', musicSize: 210, albumSize: 18 },
+  { id: 7763, name: 'G.E.M.邓紫棋', picUrl: 'https://y.gtimg.cn/music/photo_new/T001R300x300M000001fNHEf1SFEFN.jpg', musicSize: 260, albumSize: 24 },
+  { id: 4292, name: '李荣浩', picUrl: 'https://p2.music.126.net/FlL7wkN6VBoGTj3Df7s2_w==/109951170316908673.jpg', musicSize: 180, albumSize: 15 },
+  { id: 5771, name: '许嵩', picUrl: 'https://p2.music.126.net/FLHG9Ou-sIq9F6dPe7SuNw==/109951169440811453.jpg', musicSize: 195, albumSize: 16 },
+  { id: 29051613, name: '郑润泽', picUrl: 'https://p2.music.126.net/BtXjoRNLCZjoSV-3Ag3M0Q==/109951164458656122.jpg', musicSize: 130, albumSize: 10 },
+  { id: 5538, name: '汪苏泷', picUrl: 'https://p2.music.126.net/YrjCHWk_OQhjlc5ycLpY3A==/109951172494696852.jpg', musicSize: 250, albumSize: 20 },
+  { id: 2738, name: '方大同', picUrl: 'https://p2.music.126.net/EO_mrK1Hft9DpC5fr9ROIw==/109951169897875877.jpg', musicSize: 180, albumSize: 15 },
+  { id: 5196, name: '陶喆', picUrl: 'https://p2.music.126.net/7FWLQ9Vm_po0VS7ptLTFiQ==/109951170606711717.jpg', musicSize: 190, albumSize: 16 },
+  { id: 6731, name: '赵雷', picUrl: 'https://p2.music.126.net/j6KWzSdlRKzZUwJnQx3vBA==/3300733912483912.jpg', musicSize: 120, albumSize: 8 },
+  { id: 6472, name: '张杰', picUrl: 'https://p2.music.126.net/PxsdyHtM0yMi1cIIDk_MFw==/109951169294511651.jpg', musicSize: 280, albumSize: 25 },
+  { id: 1143033, name: '队长', picUrl: 'https://p2.music.126.net/bFUIuxjaooW5dH98_NaAoA==/109951170827419881.jpg', musicSize: 110, albumSize: 9 },
+  { id: 31376161, name: '颜人中', picUrl: 'https://p2.music.126.net/M9GvSuKJQyfPKprZaLKt7A==/109951165122696427.jpg', musicSize: 100, albumSize: 8 },
+  { id: 9621, name: '王菲', picUrl: 'https://p1.music.126.net/5XK6juNImi6Au60YCCcCtA==/109951170501527382.jpg', musicSize: 310, albumSize: 32 },
 ];
 
 // Trending hot searches
@@ -153,6 +154,30 @@ export async function handleUpstreamEndpoint(
   // 4. Artists (Top / List)
   if (normEndpoint === 'top/artists' || normEndpoint === 'artist/list') {
     const limit = parseInt(url.searchParams.get('limit') || '16', 10);
+    try {
+      const resp = await fetch(`https://music.163.com/api/artist/list?categoryCode=1001&limit=${limit}`, {
+        headers: UPSTREAM_HEADERS,
+        signal: AbortSignal.timeout(5000),
+      });
+      if (resp.ok) {
+        const data: any = await resp.json();
+        if (Array.isArray(data?.artists) && data.artists.length > 0) {
+          const artists = data.artists.map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            picUrl: (a.picUrl || a.img1v1Url || '').replace('http://', 'https://'),
+            img1v1Url: (a.img1v1Url || a.picUrl || '').replace('http://', 'https://'),
+            musicSize: a.musicSize || 0,
+            albumSize: a.albumSize || 0,
+          }));
+          return jsonResponse(
+            { code: 200, brand: 'Sonic', artists: desensitizeData(artists), more: data.hasMore ?? false },
+            { headers: { 'Cache-Control': 'public, max-age=86400' } },
+          );
+        }
+      }
+    } catch {}
+
     const artists = TOP_ARTISTS_CATALOG.slice(0, limit);
     return jsonResponse(
       { code: 200, brand: 'Sonic', artists: desensitizeData(artists), more: false },

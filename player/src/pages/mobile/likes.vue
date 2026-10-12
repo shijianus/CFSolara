@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAudio } from '@/composables/useAudio'
 import LazyImage from '@/components/Ui/LazyImage.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { playlist } = useAudio()
 
@@ -19,7 +20,7 @@ const playSong = (s: any) => {
     <div v-else class="space-y-3">
       <div v-for="s in likedSongs" :key="s.id" class="glass-card flex items-center gap-3 p-3" @click="playSong(s)">
         <div class="h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-          <LazyImage v-if="s.cover" :src="s.cover+'?param=200y200'" alt="cover" imgClass="h-full w-full object-cover" />
+          <LazyImage v-if="s.cover" :src="formatCoverUrl(s.cover, { size: 200, artist: s.artist })" alt="cover" imgClass="h-full w-full object-cover" />
           <div v-else class="flex h-full w-full items-center justify-center rounded-lg glass-button">🎵</div>
         </div>
         <div class="min-w-0 flex-1">

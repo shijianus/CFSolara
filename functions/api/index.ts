@@ -24,6 +24,7 @@ export async function onRequest({ request }: { request: Request; env: AppEnv }):
       { path: '/api/music/search', method: 'GET', desc: '搜索歌曲 (params: q, source, count, page)' },
       { path: '/api/music/stream', method: 'GET', desc: '获取/代理音频流 (params: id, source, quality)' },
       { path: '/api/music/lyric', method: 'GET', desc: '获取歌词与逐行时间戳 (params: id, source)' },
+      { path: '/api/music/cover', method: 'GET', desc: '多渠道封面与歌手图解析/代理网关 (params: id, source, artist, url)' },
       { path: '/api/music/random', method: 'GET', desc: '随机曲目推荐 (params: count, genre)' },
       { path: '/api/music/palette', method: 'GET', desc: '封面取色与沉浸式背景渐变计算' },
       { path: '/proxy', method: 'GET', desc: '经典兼容代理接口 (Backward compatible)' },

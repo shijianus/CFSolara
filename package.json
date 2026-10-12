@@ -9,6 +9,7 @@
     "deploy": "npm run build && /home/shijian/projects/shijianus-blog/node_modules/.bin/wrangler pages deploy dist --project-name=cfsolara --branch=main --commit-dirty=true",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
     "test:auth": "jiti scripts/test-auth-compatibility.mjs",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs"
+    "test:cover": "jiti scripts/test-cover-gateway.mjs",
+    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs"
   }
 }

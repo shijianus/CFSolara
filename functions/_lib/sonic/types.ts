@@ -147,6 +147,8 @@ export interface SonicQualityOption {
   label: string;
   bitrate: string;
   streamUrl?: string;
+  format?: string;
+  desc?: string;
 }
 
 export interface SonicSearchTrack {
@@ -159,6 +161,7 @@ export interface SonicSearchTrack {
   duration: number; // in seconds
   cover: string;
   coverUrl: string; // alias for player
+  artistPic?: string; // artist photo fallback
   platform: string;
   platformId: string;
   sources: SonicSearchSource[];

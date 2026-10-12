@@ -202,6 +202,7 @@ export default {
         search: 'Search',
         recent: 'Recent',
         likes: 'Favorites',
+        downloads: 'Downloads',
         settings: 'Settings',
         localMusic: 'Local Music',
       },

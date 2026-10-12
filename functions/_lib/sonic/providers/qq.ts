@@ -137,7 +137,12 @@ export const qqProvider: SonicProviderAdapter = {
             const artist = Array.isArray(item.singer) ? item.singer.map((s: any) => s.name).join(' / ') : '';
             const albumName = item.albumname || item.album?.name || '';
             const albumMid = item.albummid || item.album?.mid || '';
-            const cover = albumMid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albumMid}.jpg` : '';
+            const singerMid = item.singer?.[0]?.mid || item.singermid || '';
+            const artistPic = singerMid ? `https://y.gtimg.cn/music/photo_new/T001R300x300M000${singerMid}.jpg` : '';
+            const hasValidAlbumMid = Boolean(albumMid && albumMid !== '00000000000000');
+            const cover = hasValidAlbumMid
+              ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albumMid}.jpg`
+              : (artistPic || (platformId ? `/api/music/cover?id=${encodeURIComponent(platformId)}&source=qq&artist=${encodeURIComponent(artist)}` : ''));
 
             return {
               id: `qq:${platformId}`,
@@ -148,6 +153,7 @@ export const qqProvider: SonicProviderAdapter = {
               duration: durationSec,
               cover,
               coverUrl: cover,
+              artistPic,
               platform: 'qq',
               platformId,
               sources: [
@@ -204,7 +210,12 @@ export const qqProvider: SonicProviderAdapter = {
             const artist = Array.isArray(item.singer) ? item.singer.map((s: any) => s.name).join(' / ') : '';
             const albumName = item.album?.name || '';
             const albumMid = item.album?.mid || '';
-            const cover = albumMid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albumMid}.jpg` : '';
+            const singerMid = item.singer?.[0]?.mid || item.singermid || '';
+            const artistPic = singerMid ? `https://y.gtimg.cn/music/photo_new/T001R300x300M000${singerMid}.jpg` : '';
+            const hasValidAlbumMid = Boolean(albumMid && albumMid !== '00000000000000');
+            const cover = hasValidAlbumMid
+              ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albumMid}.jpg`
+              : (artistPic || (platformId ? `/api/music/cover?id=${encodeURIComponent(platformId)}&source=qq&artist=${encodeURIComponent(artist)}` : ''));
 
             return {
               id: `qq:${platformId}`,
@@ -215,6 +226,7 @@ export const qqProvider: SonicProviderAdapter = {
               duration: durationSec,
               cover,
               coverUrl: cover,
+              artistPic,
               platform: 'qq',
               platformId,
               sources: [
@@ -252,7 +264,13 @@ export const qqProvider: SonicProviderAdapter = {
         const durationSec = typeof item.interval === 'number' ? item.interval : 0;
         const artist = Array.isArray(item.singer) ? item.singer.map((s: any) => s.name).join(' / ') : '';
         const album = item.albumname || '';
-        const cover = item.albummid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${item.albummid}.jpg` : '';
+        const albumMid = item.albummid || '';
+        const singerMid = item.singer?.[0]?.mid || item.singermid || '';
+        const artistPic = singerMid ? `https://y.gtimg.cn/music/photo_new/T001R300x300M000${singerMid}.jpg` : '';
+        const hasValidAlbumMid = Boolean(albumMid && albumMid !== '00000000000000');
+        const cover = hasValidAlbumMid
+          ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albumMid}.jpg`
+          : (artistPic || (platformId ? `/api/music/cover?id=${encodeURIComponent(platformId)}&source=qq&artist=${encodeURIComponent(artist)}` : ''));
 
         return {
           id: `qq:${platformId}`,
@@ -263,6 +281,7 @@ export const qqProvider: SonicProviderAdapter = {
           duration: durationSec,
           cover,
           coverUrl: cover,
+          artistPic,
           platform: 'qq',
           platformId,
           sources: [

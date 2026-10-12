@@ -7,6 +7,7 @@ import LazyImage from '@/components/Ui/LazyImage.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
 import Button from '@/components/Ui/Button.vue'
 import { transformTopSongs, transformSongs, type SongData } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 const { playAll: playAllAction } = usePlayActions()
@@ -152,7 +153,7 @@ onMounted(() => {
         >
           <div class="relative shrink-0">
             <LazyImage
-              :src="item.cover + '?param=100y100'"
+              :src="formatCoverUrl(item.cover, { size: 100 })"
               :alt="item.name"
               imgClass="h-12 w-12 rounded-lg object-cover shadow-md transition-transform duration-300 group-hover:scale-105"
               wrapperClass="h-12 w-12"

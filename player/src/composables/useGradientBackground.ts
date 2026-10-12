@@ -6,6 +6,7 @@
 import { gsap } from 'gsap'
 import type { Ref } from 'vue'
 import { getColorPalette } from '@/utils/colorExtractor'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 export interface GradientBackgroundOptions {
   /** 背景A层元素引用 */
@@ -125,7 +126,7 @@ export function useGradientBackground(options: GradientBackgroundOptions) {
     }
 
     try {
-      const palette = await getColorPalette(coverUrl + '?param=320x320')
+      const palette = await getColorPalette(formatCoverUrl(coverUrl, { size: 320 }))
 
       // 首次初始化
       if (state.bgAGradient.length === 0 && state.bgBGradient.length === 0) {

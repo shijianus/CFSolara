@@ -161,7 +161,13 @@ export const neteaseProvider: SonicProviderAdapter = {
         const durationSec = typeof item.duration === 'number' ? Math.round(item.duration / 1000) : 0;
         const artist = Array.isArray(item.artists) ? item.artists.map((a: any) => a.name).join(' / ') : '';
         const album = item.album?.name || '';
-        const cover = item.album?.picUrl || '';
+        const rawCover = item.album?.picUrl ? String(item.album.picUrl).replace('http://', 'https://') : '';
+        const rawArtistPic = item.artists?.[0]?.img1v1Url || item.artists?.[0]?.picUrl || '';
+        const artistPic = rawArtistPic ? String(rawArtistPic).replace('http://', 'https://') : '';
+        const cover = rawCover || (item.album?.picId
+          ? `/api/music/cover?id=${encodeURIComponent(item.album.picId)}&source=netease&artist=${encodeURIComponent(artist)}`
+          : (artistPic || `/api/music/cover?id=${encodeURIComponent(platformId)}&source=netease&artist=${encodeURIComponent(artist)}`));
+
         return {
           id: `netease:${platformId}`,
           title: item.name || '未知歌曲',
@@ -171,6 +177,7 @@ export const neteaseProvider: SonicProviderAdapter = {
           duration: durationSec,
           cover,
           coverUrl: cover,
+          artistPic,
           platform: 'netease',
           platformId,
           sources: [

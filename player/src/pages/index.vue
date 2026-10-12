@@ -297,8 +297,8 @@ onMounted(() => {
 
 /* ── 歌曲列表容器 ── */
 .songs-container {
-  background: var(--glass-bg-card);
-  border: 1px solid var(--glass-border-subtle);
+  background: transparent;
+  border: none;
 }
 
 /* ── 歌曲分隔线 ── */

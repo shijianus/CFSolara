@@ -113,6 +113,27 @@ export const kugouProvider: SonicProviderAdapter = {
         const songName = item.songname || item.SongName || '未知歌曲';
         const singerName = item.singername || item.SingerName || '未知歌手';
 
+        const rawCover =
+          item.trans_param?.union_cover ||
+          item.album_sizable_cover ||
+          item.img ||
+          item.album_img ||
+          '';
+        let cover = '';
+        if (rawCover) {
+          cover = String(rawCover)
+            .replace('{size}', '400')
+            .replace('http://', 'https://');
+        } else if (platformId) {
+          cover = `/api/music/cover?id=${encodeURIComponent(platformId)}&source=kugou&artist=${encodeURIComponent(singerName)}`;
+        } else if (singerName && singerName !== '未知歌手') {
+          cover = `/api/music/cover?artist=${encodeURIComponent(singerName)}&source=kugou`;
+        }
+
+        const artistPic = singerName && singerName !== '未知歌手'
+          ? `/api/music/cover?artist=${encodeURIComponent(singerName)}&source=kugou`
+          : '';
+
         return {
           id: `kugou:${platformId}`,
           title: songName,
@@ -120,8 +141,9 @@ export const kugouProvider: SonicProviderAdapter = {
           artist: singerName,
           album: item.album_name || '',
           duration: durationSec,
-          cover: '',
-          coverUrl: '',
+          cover,
+          coverUrl: cover,
+          artistPic,
           platform: 'kugou',
           platformId,
           sources: [

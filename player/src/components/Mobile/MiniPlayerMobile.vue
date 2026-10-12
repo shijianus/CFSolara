@@ -5,6 +5,7 @@ import { useSettingsStore } from '@/stores/modules/settings'
 import { storeToRefs } from 'pinia'
 import MusicProgress from '@/components/Ui/MusicProgress.vue'
 import Button from '@/components/Ui/Button.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const settingsStore = useSettingsStore()
 
@@ -75,12 +76,19 @@ onUnmounted(() => {
     class="mask-glass fixed right-0 bottom-15 left-0 z-50 backdrop-blur-md"
   >
     <div class="glass-card flex items-center gap-3 rounded-t-2xl rounded-tl-2xl rounded-b-none p-3">
-      <div class="w-12 overflow-hidden rounded-lg" @click="$emit('open')">
+      <div class="w-12 h-12 overflow-hidden rounded-lg shrink-0 relative" @click="$emit('open')">
         <img
           v-if="currentSong.cover"
-          :src="currentSong.cover + '?param=200y200'"
+          :src="formatCoverUrl(currentSong.cover, { size: 200, artist: currentSong.artist })"
           alt="cover"
           class="h-full w-full object-cover"
+          referrerpolicy="no-referrer"
+          @error="(e: Event) => {
+            const el = e.target as HTMLImageElement;
+            if (el && !el.src.includes('data:image')) {
+              el.src = formatCoverUrl('', { artist: currentSong.artist });
+            }
+          }"
         />
         <div v-else class="glass-button flex h-full w-full items-center justify-center rounded-lg">
           🎵

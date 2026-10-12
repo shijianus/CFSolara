@@ -2,6 +2,7 @@
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { useAudio } from '@/composables/useAudio'
 import type { Song } from '@/stores/interface'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 type ListVariant = 'compact' | 'card'
 
@@ -47,6 +48,35 @@ const handleClick = (s: Song, i: number) => {
     playByIndex(idx >= 0 ? idx : Math.max(0, playlist.value.length - 1))
   }
 }
+
+const formatSongTitle = (title: string, maxLen = 18) => {
+  if (!title) return ''
+  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
+}
+
+const getQualityBadgeInfo = (song: Song) => {
+  const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
+  const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
+  if (isLossless) {
+    return {
+      label: 'SQ 无损',
+      title: 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
+      badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40',
+    }
+  }
+  if (isExhigh) {
+    return {
+      label: 'HQ 极高',
+      title: 'HQ: 极高音质 (320Kbps MP3)',
+      badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+    }
+  }
+  return {
+    label: '标准',
+    title: '标准: 标清音质 (128Kbps MP3)',
+    badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+  }
+}
 </script>
 
 <template>
@@ -60,17 +90,11 @@ const handleClick = (s: Song, i: number) => {
     >
       <div class="song-cover relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
         <LazyImage
-          v-if="song.cover"
-          :src="song.cover + '?param=200y200'"
+          :src="formatCoverUrl(song.cover, { size: 200, artist: song.artist })"
+          :fallback-src="formatCoverUrl('', { artist: song.artist })"
           alt="cover"
           imgClass="h-full w-full object-cover"
         />
-        <div
-          v-else
-          class="flex h-full w-full items-center justify-center bg-linear-to-br from-pink-500/30 to-purple-600/30"
-        >
-          <span class="icon-[mdi--music-note] h-6 w-6 opacity-60" />
-        </div>
         <div
           v-if="isCurrent(song)"
           class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -82,12 +106,23 @@ const handleClick = (s: Song, i: number) => {
         </div>
       </div>
       <div class="min-w-0 flex-1">
-        <p
-          class="song-name truncate text-sm font-medium"
-          :class="isCurrent(song) ? 'text-pink-400' : ''"
-        >
-          {{ song.name }}
-        </p>
+        <div class="flex items-center gap-1.5">
+          <p
+            :title="song.name"
+            class="song-name truncate text-sm font-medium"
+            :class="isCurrent(song) ? 'text-pink-400' : ''"
+          >
+            {{ formatSongTitle(song.name, 18) }}
+          </p>
+          <span
+            v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
+            :title="getQualityBadgeInfo(song).title"
+            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold leading-none select-none"
+            :class="getQualityBadgeInfo(song).badgeClass"
+          >
+            {{ getQualityBadgeInfo(song).label }}
+          </span>
+        </div>
         <p class="song-artist mt-0.5 truncate text-xs">
           {{ song.artist }}<template v-if="song.album"> - 《{{ song.album }}》</template>
         </p>
@@ -126,25 +161,30 @@ const handleClick = (s: Song, i: number) => {
       </div>
       <div class="song-cover-small relative h-11 w-11 shrink-0 overflow-hidden rounded-lg">
         <LazyImage
-          v-if="song.cover"
-          :src="song.cover + '?param=100y100'"
+          :src="formatCoverUrl(song.cover, { size: 100, artist: song.artist })"
+          :fallback-src="formatCoverUrl('', { artist: song.artist })"
           alt="cover"
           imgClass="h-full w-full object-cover"
         />
-        <div
-          v-else
-          class="flex h-full w-full items-center justify-center bg-linear-to-br from-pink-500/30 to-purple-600/30"
-        >
-          <span class="icon-[mdi--music-note] h-5 w-5 opacity-50" />
-        </div>
       </div>
       <div class="min-w-0 flex-1">
-        <p
-          class="song-name truncate text-sm font-medium"
-          :class="isCurrent(song) ? 'text-pink-400' : ''"
-        >
-          {{ song.name }}
-        </p>
+        <div class="flex items-center gap-1.5">
+          <p
+            :title="song.name"
+            class="song-name truncate text-sm font-medium"
+            :class="isCurrent(song) ? 'text-pink-400' : ''"
+          >
+            {{ formatSongTitle(song.name, 18) }}
+          </p>
+          <span
+            v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
+            :title="getQualityBadgeInfo(song).title"
+            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold leading-none select-none"
+            :class="getQualityBadgeInfo(song).badgeClass"
+          >
+            {{ getQualityBadgeInfo(song).label }}
+          </span>
+        </div>
         <p class="song-artist mt-0.5 truncate text-xs">
           {{ song.artist }}<template v-if="song.album"> - 《{{ song.album }}》</template>
         </p>

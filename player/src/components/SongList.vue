@@ -7,6 +7,9 @@ import { RouterLink, useRouter } from 'vue-router'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
+import { formatCoverUrl } from '@/utils/imageUrl'
+import { useDownloadStore } from '@/stores/modules/download'
+import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue'
 
 interface Props {
   songs: Song[]
@@ -62,7 +65,7 @@ const playSongWithAnimation = async (song: Song, index: number, event?: MouseEve
       setPlaylist(props.songs, index)
 
       // 执行抛物线飞行动画
-      await flyTo(sourceCover, targetCover, song.cover + '?param=128x128', {
+      await flyTo(sourceCover, targetCover, formatCoverUrl(song.cover, { size: 128, artist: song.artist }), {
         duration: 0.55,
         ease: 'power2.out',
         borderRadius: { from: '8px', to: '8px' },
@@ -104,8 +107,41 @@ const openMV = (song: Song, index: number) => {
   }
 }
 
+const downloadStore = useDownloadStore()
+
 const downloadSong = (song: Song, index: number) => {
   emit('download', song, index)
+  downloadStore.openDownloadDialog(song)
+}
+
+const MAX_TITLE_LEN = 28
+const formatSongTitle = (title: string, maxLen = MAX_TITLE_LEN) => {
+  if (!title) return ''
+  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
+}
+
+const getQualityBadgeInfo = (song: Song) => {
+  const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
+  const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
+  if (isLossless) {
+    return {
+      label: 'SQ 无损',
+      title: 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
+      badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.2)]',
+    }
+  }
+  if (isExhigh) {
+    return {
+      label: 'HQ 极高',
+      title: 'HQ: 极高音质 (320Kbps MP3)',
+      badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+    }
+  }
+  return {
+    label: '标准',
+    title: '标准: 标清音质 (128Kbps MP3)',
+    badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+  }
 }
 </script>
 
@@ -230,7 +266,8 @@ const downloadSong = (song: Song, index: number) => {
                 class="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg shadow-md transition-shadow group-hover:shadow-lg"
               >
                 <LazyImage
-                  :src="(song.cover || '') + '?param=90y90'"
+                  :src="formatCoverUrl(song.cover, { size: 90, artist: song.artist })"
+                  :fallback-src="formatCoverUrl('', { artist: song.artist })"
                   :alt="t('components.songList.coverAlt')"
                   imgClass="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   wrapperClass="h-full w-full"
@@ -245,27 +282,24 @@ const downloadSong = (song: Song, index: number) => {
                     :title="song.name"
                     class="text-primary truncate text-base font-medium transition-colors group-hover:text-pink-300"
                   >
-                    {{ song.name }}
+                    {{ formatSongTitle(song.name) }}
                   </h3>
-                  <!-- Sonic 统一音质分类标识 (替代第三方来源标记) -->
+                  <!-- Sonic 规范音质标签 (无损/极高/标准) -->
                   <span
                     v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
-                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider leading-none select-none transition-all"
-                    :class="[
-                      (song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless')
-                        ? 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.2)]'
-                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                    ]"
+                    :title="getQualityBadgeInfo(song).title"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider leading-none select-none transition-all cursor-help"
+                    :class="getQualityBadgeInfo(song).badgeClass"
                   >
-                    {{ song.qualityBadge || (song.qualities?.[0]?.level === 'lossless' ? 'SQ 无损' : 'HQ 极高') }}
+                    {{ getQualityBadgeInfo(song).label }}
                   </span>
-                  <!-- Sonic SHA 规范聚合指纹 (证明单曲跨多源去重与身份一致性) -->
+                  <!-- 多音质版本集中切换标识 -->
                   <span
-                    v-if="song.sha"
-                    :title="'Sonic Canonical SHA: ' + song.sha"
-                    class="shrink-0 hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono select-none bg-white/5 border border-white/10 text-white/40 hover:text-white/70 transition-colors"
+                    v-if="song.qualities && song.qualities.length > 1"
+                    :title="`包含 ${song.qualities.length} 个音质版本，播放后可在底栏切换`"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium leading-none select-none bg-amber-500/15 text-amber-300 border border-amber-500/30 cursor-help"
                   >
-                    #{{ song.sha.slice(0, 6) }}
+                    多音质
                   </span>
                 </div>
                 <div class="mt-0.5 flex items-center gap-2 md:hidden">
@@ -375,5 +409,7 @@ const downloadSong = (song: Song, index: number) => {
         </p>
       </div>
     </div>
+    <!-- 下载音质选择弹窗 -->
+    <DownloadQualityDialog />
   </div>
 </template>

@@ -192,6 +192,7 @@ export default {
         search: '搜索',
         recent: '最近播放',
         likes: '我喜欢的',
+        downloads: '下载列表',
         settings: '设置',
         localMusic: '本地音乐',
       },

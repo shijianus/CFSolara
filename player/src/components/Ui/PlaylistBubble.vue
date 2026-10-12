@@ -2,6 +2,7 @@
 import { useAudio } from '@/composables/useAudio'
 import { formatDuration } from '@/utils/time'
 import Button from '@/components/Ui/Button.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const props = withDefaults(
   defineProps<{
@@ -293,9 +294,10 @@ const totalDuration = computed(() => {
                   <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
                     <img
                       v-if="s.cover"
-                      :src="s.cover + '?param=100y100'"
+                      :src="formatCoverUrl(s.cover, { size: 100, artist: s.artist })"
                       alt=""
                       class="h-full w-full object-cover"
+                      referrerpolicy="no-referrer"
                     />
                     <div v-else class="cover-fallback flex h-full w-full items-center justify-center">
                       <span class="icon-[mdi--music-note] h-6 w-6 text-white/70"></span>

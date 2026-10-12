@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { songDetail, lyric } from '@/api'
 import { useAudio } from '@/composables/useAudio'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const route = useRoute()
 
@@ -82,9 +83,10 @@ const toggleLike = () => {
           <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
             <img
               v-if="state.cover"
-              :src="state.cover + '?param=300y300'"
+              :src="formatCoverUrl(state.cover, { size: 300, artist: state.artist })"
               alt="cover"
               class="h-full w-full object-cover"
+              referrerpolicy="no-referrer"
             />
             <div
               v-else

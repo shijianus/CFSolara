@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { cloudSearch } from '@/api'
 import { formatCount } from '@/utils/time'
+import { formatCoverUrl } from '@/utils/imageUrl'
 interface Props {
   keywords: string
   limit?: number
@@ -66,7 +67,7 @@ watch(
       <router-link v-for="pl in results" :key="pl.id" :to="`/playlist/${pl.id}`" class="group">
         <div class="relative aspect-square overflow-hidden rounded-2xl shadow-lg">
           <LazyImage
-            :src="pl.coverImgUrl + '?param=300y300'"
+            :src="formatCoverUrl(pl.coverImgUrl, { size: 300 })"
             alt="cover"
             img-class="h-full w-full object-cover transition-all duration-500 group-hover:scale-110"
           />

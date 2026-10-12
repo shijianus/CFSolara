@@ -14,6 +14,7 @@ import {
   type SongData,
   type PlaylistData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const route = useRoute()
 const playlistId = route.params.id
@@ -223,8 +224,9 @@ const tabsWithCount = computed(() =>
           <!-- 背景模糊图片 -->
           <div class="absolute inset-0 overflow-hidden rounded-3xl">
             <img
-              :src="playlistInfo.coverImgUrl + '?param=100y100'"
+              :src="formatCoverUrl(playlistInfo.coverImgUrl, { size: 100 })"
               class="h-full w-full scale-150 object-cover opacity-30 blur-3xl"
+              referrerpolicy="no-referrer"
             />
             <div
               class="to-overlay absolute inset-0 bg-linear-to-b from-transparent via-transparent"
@@ -241,7 +243,7 @@ const tabsWithCount = computed(() =>
                     class="aspect-square overflow-hidden rounded-3xl shadow-2xl ring-1 ring-glass"
                   >
                     <LazyImage
-                      :src="playlistInfo.coverImgUrl + '?param=400y400'"
+                      :src="formatCoverUrl(playlistInfo.coverImgUrl, { size: 400 })"
                       :alt="$t('components.songList.coverAlt')"
                       imgClass="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       wrapperClass="h-full w-full"
@@ -274,8 +276,9 @@ const tabsWithCount = computed(() =>
                   <div class="mb-5 flex items-center justify-center gap-3 lg:justify-start">
                     <img
                       v-if="playlistInfo.creatorAvatar"
-                      :src="playlistInfo.creatorAvatar + '?param=80y80'"
+                      :src="formatCoverUrl(playlistInfo.creatorAvatar, { size: 80 })"
                       class="h-8 w-8 rounded-full ring-2 ring-glass"
+                      referrerpolicy="no-referrer"
                     />
                     <span class="text-primary font-medium">{{ playlistInfo.creator }}</span>
                     <span class="text-primary/40">•</span>
@@ -438,8 +441,9 @@ const tabsWithCount = computed(() =>
                 <div class="flex gap-4">
                   <img
                     v-if="comment.avatarUrl"
-                    :src="comment.avatarUrl + '?param=100y100'"
+                    :src="formatCoverUrl(comment.avatarUrl, { size: 100 })"
                     class="h-11 w-11 shrink-0 rounded-full ring-2 ring-glass"
+                    referrerpolicy="no-referrer"
                   />
                   <div
                     v-else
@@ -488,8 +492,9 @@ const tabsWithCount = computed(() =>
                       <div v-for="(reply, ri) in comment.replies" :key="ri" class="flex gap-3">
                         <img
                           v-if="reply.avatarUrl"
-                          :src="reply.avatarUrl + '?param=80y80'"
+                          :src="formatCoverUrl(reply.avatarUrl, { size: 80 })"
                           class="h-8 w-8 shrink-0 rounded-full ring-1 ring-glass"
+                          referrerpolicy="no-referrer"
                         />
                         <div class="min-w-0 flex-1">
                           <span class="text-primary text-xs font-semibold">{{
@@ -545,7 +550,7 @@ const tabsWithCount = computed(() =>
               >
                 <div class="relative aspect-square overflow-hidden">
                   <LazyImage
-                    :src="pl.coverImgUrl + '?param=300y300'"
+                    :src="formatCoverUrl(pl.coverImgUrl, { size: 300 })"
                     :alt="pl.name"
                     imgClass="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     wrapperClass="h-full w-full"

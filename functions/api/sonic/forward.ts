@@ -33,6 +33,12 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
 
       const forwardHeaders = new Headers();
       forwardHeaders.set('User-Agent', SONIC_UA);
+      const h = parsedTarget.hostname.toLowerCase();
+      if (h.includes('gtimg.cn') || h.includes('qq.com')) forwardHeaders.set('Referer', 'https://y.qq.com/');
+      else if (h.includes('126.net') || h.includes('163.com')) forwardHeaders.set('Referer', 'https://music.163.com/');
+      else if (h.includes('kugou.com')) forwardHeaders.set('Referer', 'https://www.kugou.com/');
+      else if (h.includes('kuwo.cn')) forwardHeaders.set('Referer', 'https://www.kuwo.cn/');
+
       const range = request.headers.get('Range');
       if (range) forwardHeaders.set('Range', range);
 

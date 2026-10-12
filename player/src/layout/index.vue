@@ -87,12 +87,12 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
 
       <!-- 右侧主区域：上部内容画板 + 底部控制 Dock，与左侧边栏上下区间严格同步 -->
       <div class="relative flex flex-1 flex-col h-full min-h-0 min-w-0 gap-3 sm:gap-4 overflow-hidden">
-        <!-- 上页内容画板：显式用 glass-card 框出终止线，在底部控制栏前终止，保留真实可见的分割线 -->
-        <main class="glass-card relative flex flex-1 min-h-0 flex-col overflow-hidden p-2 rounded-[26px]">
-          <router-view v-slot="{ Component }">
+        <!-- 上页内容画板：作为主内容区统一的大磨砂画板，内部绝无嵌套框 -->
+        <main class="section-container relative flex flex-1 min-h-0 flex-col overflow-hidden p-2 rounded-[28px]">
+          <router-view v-slot="{ Component, route }">
             <transition appear name="fade-transform" mode="out-in">
               <keep-alive>
-                <component :is="Component" />
+                <component :is="Component" :key="route.path" />
               </keep-alive>
             </transition>
           </router-view>

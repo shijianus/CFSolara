@@ -11,6 +11,7 @@ import {
   type SongData,
   type AlbumData,
 } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const route = useRoute()
 const albumId = computed(() => Number(route.params.id))
@@ -61,8 +62,9 @@ onMounted(() => load())
         <div class="absolute inset-0 overflow-hidden rounded-b-3xl">
           <img
             v-if="state.info?.picUrl"
-            :src="state.info.picUrl + '?param=800y800'"
+            :src="formatCoverUrl(state.info.picUrl, { size: 800, artist: state.info.artist })"
             class="h-full w-full object-cover opacity-30"
+            referrerpolicy="no-referrer"
           />
           <div v-else class="h-full w-full bg-linear-to-br from-pink-500/40 to-purple-600/40"></div>
         </div>
@@ -71,9 +73,10 @@ onMounted(() => load())
             <div class="h-24 w-24 overflow-hidden rounded-xl ring-2 ring-white/20">
               <img
                 v-if="state.info?.picUrl"
-                :src="state.info.picUrl + '?param=300y300'"
+                :src="formatCoverUrl(state.info.picUrl, { size: 300, artist: state.info.artist })"
                 class="h-full w-full object-cover"
                 :alt="$t('albumPage.alt.cover')"
+                referrerpolicy="no-referrer"
               />
               <div
                 v-else

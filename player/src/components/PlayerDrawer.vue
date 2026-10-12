@@ -16,6 +16,7 @@ import { useLyricsDrag } from '@/composables/useLyricsDrag'
 import { useDrawerTransition } from '@/composables/useDrawerTransition'
 import { syncWordElements } from '@/utils/lyricsWordSync'
 import VinylDisc from '@/components/Player/VinylDisc.vue'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 const globalStore = useGlobalStore()
@@ -435,13 +436,14 @@ watch(
     await nextTick()
     updateCurrentLyric(true)
     runWordSync()
-    setBackgroundGradient(s?.cover, 0)
+    const resolvedCover = formatCoverUrl(s?.cover, { size: 320, artist: s?.artist })
+    setBackgroundGradient(resolvedCover, 0)
 
     // 触发圆形可视化器封面翻转动画
-    if (s?.cover && oldSong && oldSong.id !== s.id) {
-      flipCircularCover(s.cover)
-    } else if (s?.cover && !state.circularCover) {
-      state.circularCover = s.cover
+    if (resolvedCover && oldSong && oldSong.id !== s.id) {
+      flipCircularCover(resolvedCover)
+    } else if (resolvedCover && !state.circularCover) {
+      state.circularCover = resolvedCover
     }
   },
   { immediate: true }
@@ -694,10 +696,17 @@ onUnmounted(() => {
           >
             <img
               v-if="state.circularCover"
-              :src="state.circularCover + '?param=320x320'"
+              :src="formatCoverUrl(state.circularCover, { size: 320, artist: currentSong?.artist })"
               :alt="currentSong?.name"
               class="h-full w-full object-cover"
               style="backface-visibility: hidden"
+              referrerpolicy="no-referrer"
+              @error="(e: Event) => {
+                const el = e.target as HTMLImageElement;
+                if (el && !el.src.includes('data:image')) {
+                  el.src = formatCoverUrl('', { artist: currentSong?.artist });
+                }
+              }"
             />
             <div v-else class="h-full w-full bg-linear-to-br from-blue-500 to-purple-600"></div>
           </div>

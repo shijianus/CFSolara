@@ -41,7 +41,15 @@ export function normalizeTrack(raw: Record<string, any>, fallbackSource = 'netea
     picId,
     lyricId,
     urlId: raw.url_id ? String(raw.url_id) : undefined,
-    coverUrl: picId && !picId.startsWith('http') ? `/api/music/cover?id=${encodeURIComponent(picId)}&source=${source}` : picId || undefined,
+    coverUrl: picId
+      ? picId.startsWith('http:')
+        ? picId.replace('http:', 'https:')
+        : picId.startsWith('https:')
+          ? picId
+          : `/api/music/cover?id=${encodeURIComponent(picId)}&source=${source}&artist=${encodeURIComponent(artist)}`
+      : artist && artist !== '未知歌手'
+        ? `/api/music/cover?artist=${encodeURIComponent(artist)}&source=${source}`
+        : undefined,
   };
 }
 

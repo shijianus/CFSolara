@@ -2,6 +2,7 @@
 import { cloudSearch } from '@/api'
 import { useAudio } from '@/composables/useAudio'
 import { transformSearchSongs, type SongData } from '@/utils/transformers'
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 interface Props {
   keywords: string
@@ -57,7 +58,7 @@ const fetchSongs = async () => {
           artists: [{ id: 0, name: t.artist }],
           album: t.album || '',
           albumId: 0,
-          cover: t.cover || t.coverUrl || '',
+          cover: formatCoverUrl(t.cover || t.coverUrl || t.artistPic || '', { size: 300, artist: t.artist }),
           duration: (t.duration || 200) * 1000,
           dt: (t.duration || 200) * 1000,
           url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,

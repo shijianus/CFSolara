@@ -2,6 +2,7 @@
  * API 响应数据转换器
  * 统一处理各种 API 响应格式的数据转换
  */
+import { formatCoverUrl } from '@/utils/imageUrl'
 
 // ============ 类型定义 ============
 
@@ -217,24 +218,65 @@ export function transformSong(item: Record<string, unknown>): SongData {
       }))
     : undefined
 
-  // 提取单个歌手 ID（用于只有一个歌手的情况）
-  const artistId = artists?.[0]?.id || 0
+  const artistId = (artists?.[0]?.id as number | string) || 0
+  const artistName = extractArtistName(item)
+  const rawCover =
+    (albumData?.picUrl as string) ||
+    (albumData?.pic as string) ||
+    (item?.picUrl as string) ||
+    (item?.pic as string) ||
+    (item?.cover as string) ||
+    (item?.coverUrl as string) ||
+    (song?.cover as string) ||
+    (song?.coverUrl as string) ||
+    ((item?.artistPic || item?.artists?.[0]?.img1v1Url || albumData?.artist?.img1v1Url) as string) ||
+    ''
+
+  const cover = formatCoverUrl(rawCover, {
+    size: 300,
+    artist: artistName,
+  })
 
   return {
     id: (item?.id as number | string) || (song?.id as number | string) || 0,
     name: (item?.name as string) || (song?.name as string) || '',
-    artist: extractArtistName(item),
+    artist: artistName,
     artistId,
     artists,
     album: (albumData?.name as string) || '',
     albumId: (albumData?.id as number | string) || 0,
-    cover: (albumData?.picUrl as string) || (item?.picUrl as string) || '',
+    cover,
     duration: (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0,
     liked: false,
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
     sha: (item?.sha as string) || (song?.sha as string) || '',
     qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || 'SQ',
-    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [],
+    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [
+      {
+        level: 'lossless',
+        label: 'SQ 无损',
+        bitrate: 'FLAC',
+        format: 'flac',
+        desc: '超清无损母带音质 (FLAC / 24-bit)',
+        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=lossless`,
+      },
+      {
+        level: 'exhigh',
+        label: 'HQ 极高',
+        bitrate: '320kbps',
+        format: 'mp3',
+        desc: '极高品质MP3 (320kbps 饱满声场)',
+        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=320`,
+      },
+      {
+        level: 'standard',
+        label: '标准',
+        bitrate: '128kbps',
+        format: 'mp3',
+        desc: '标准流畅音质 (128kbps 快速省流)',
+        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=128`,
+      },
+    ],
     url: (item?.streamUrl as string) || (item?.url as string) || (song?.url as string) || '',
   }
 }
@@ -262,15 +304,19 @@ export function transformSongs(
  * 转换歌手数据
  */
 export function transformArtist(item: Record<string, unknown>): ArtistData {
+  const name = (item?.name as string) || ''
+  const rawPic =
+    (item?.picUrl as string) ||
+    (item?.img1v1Url as string) ||
+    (item?.cover as string) ||
+    (item?.avatar as string) ||
+    ''
+  const picUrl = formatCoverUrl(rawPic, { size: 400, artist: name })
+
   return {
     id: (item?.id as number | string) || 0,
-    name: (item?.name as string) || '',
-    picUrl:
-      (item?.picUrl as string) ||
-      (item?.img1v1Url as string) ||
-      (item?.cover as string) ||
-      (item?.avatar as string) ||
-      '',
+    name,
+    picUrl,
     alias: (item?.alias as string[]) || [],
     albumSize: (item?.albumSize as number) || 0,
     musicSize: (item?.musicSize as number) || 0,
