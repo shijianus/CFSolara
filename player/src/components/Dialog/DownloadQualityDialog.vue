@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useDownloadStore, DEFAULT_QUALITY_CHOICES, type QualityChoice } from '@/stores/modules/download'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import Button from '@/components/Ui/Button.vue'
@@ -7,7 +7,7 @@ import Button from '@/components/Ui/Button.vue'
 const downloadStore = useDownloadStore()
 const selectedLevel = ref<string>('lossless')
 
-// 根据当前歌曲的 qualities 列表动态展示音质选项
+// 根据当前歌曲的 qualities 列表展示音质选项，不展示未经验证的采样率/位深，保留真实码率与体积区间
 const availableChoices = computed<QualityChoice[]>(() => {
   const song = downloadStore.currentDownloadSong
   if (!song) return DEFAULT_QUALITY_CHOICES
@@ -71,11 +71,79 @@ const displayTitle = computed(() => {
   return title.length > MAX_LEN ? title.slice(0, MAX_LEN) + '...' : title
 })
 
+// ════════════ 可访问性、键盘导航与焦点管理 ════════════
+const dialogCardRef = ref<HTMLElement | null>(null)
+const radioItemRefs = ref<HTMLElement[]>([])
+const returnTriggerElement = ref<HTMLElement | null>(null)
+
+// 上下/左右方向键在 radiogroup 中切换并聚焦
+const selectNext = (delta: number) => {
+  const list = availableChoices.value
+  if (!list.length) return
+  const currentIndex = list.findIndex((c) => c.level === selectedLevel.value)
+  const nextIndex = (currentIndex + delta + list.length) % list.length
+  selectedLevel.value = list[nextIndex].level
+  nextTick(() => {
+    const targetEl = radioItemRefs.value[nextIndex]
+    targetEl?.focus()
+  })
+}
+
+// 焦点陷阱与按键监听
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && downloadStore.dialogVisible) {
+  if (!downloadStore.dialogVisible) return
+
+  // 1. Esc 键安全退出
+  if (e.key === 'Escape') {
+    e.preventDefault()
     downloadStore.closeDownloadDialog()
+    return
+  }
+
+  // 2. Tab 键焦点循环陷阱 (Focus Trap)
+  if (e.key === 'Tab' && dialogCardRef.value) {
+    const focusableElements = dialogCardRef.value.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [role="radio"][tabindex="0"], [tabindex="0"]:not([disabled])'
+    )
+    if (!focusableElements.length) return
+
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement.focus()
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus()
+      }
+    }
   }
 }
+
+// 打开弹窗时捕获触发按钮，聚焦当前选中项；关闭时焦点恢复至触发源
+watch(
+  () => downloadStore.dialogVisible,
+  (visible) => {
+    if (visible) {
+      returnTriggerElement.value = document.activeElement as HTMLElement | null
+      nextTick(() => {
+        // 初始聚焦落在当前选中的单选卡片上
+        const currentIndex = availableChoices.value.findIndex((c) => c.level === selectedLevel.value)
+        const targetCard = radioItemRefs.value[currentIndex >= 0 ? currentIndex : 0]
+        targetCard?.focus()
+      })
+    } else {
+      nextTick(() => {
+        returnTriggerElement.value?.focus?.()
+        returnTriggerElement.value = null
+      })
+    }
+  }
+)
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
@@ -95,7 +163,7 @@ onUnmounted(() => {
       aria-modal="true"
       aria-labelledby="download-dialog-title"
     >
-      <!-- 背景毛玻璃遮罩 (克制通透度) -->
+      <!-- 背景毛玻璃遮罩 (克制通透度，遵循 b710cde 提交) -->
       <Transition name="mask" appear>
         <div
           class="absolute inset-0 bg-black/35 backdrop-blur-sm"
@@ -107,31 +175,33 @@ onUnmounted(() => {
       <Transition name="dialog" appear>
         <div class="relative z-10 w-full max-w-lg">
           <div
-            class="glass-container-strong relative overflow-hidden rounded-[28px] border border-white/20 p-6 shadow-2xl backdrop-blur-2xl"
-            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.75), 0 0 45px rgba(236, 72, 153, 0.2);"
+            ref="dialogCardRef"
+            class="glass-container-strong relative overflow-hidden rounded-[var(--glass-r-xl,24px)] border border-white/15 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
+            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.75), var(--glass-accent-glow);"
           >
             <!-- 右上角关闭按钮 -->
             <button
               @click="downloadStore.closeDownloadDialog"
-              class="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-primary/60 transition-all hover:bg-white/15 hover:text-primary active:scale-95 cursor-pointer"
+              class="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-primary/60 transition-all hover:bg-white/15 hover:text-primary active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
               title="关闭"
+              aria-label="关闭弹窗"
             >
               <span class="icon-[mdi--close] h-4 w-4"></span>
             </button>
 
-            <!-- 顶部标题与规格 -->
-            <div class="mb-5 flex items-center gap-3.5 pr-8">
+            <!-- 顶部标题与规格说明 -->
+            <div class="mb-4 flex items-center gap-3 pr-8">
               <div
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg shadow-pink-500/25"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--glass-r-md,12px)] bg-gradient-to-br from-pink-500 to-purple-600 shadow-md shadow-pink-500/25"
               >
-                <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-white" />
+                <span class="icon-[mdi--tray-arrow-down] h-5 w-5 text-white" />
               </div>
               <div>
                 <h3 id="download-dialog-title" class="text-base font-bold text-primary tracking-wide">
-                  下载音质选择
+                  下载音质规格选择
                 </h3>
                 <p class="mt-0.5 text-xs text-primary/60">
-                  支持无损母带编码，自动持久化至本地离线音乐库
+                  选择音频规格以启动下载并导入离线音乐库
                 </p>
               </div>
             </div>
@@ -139,16 +209,15 @@ onUnmounted(() => {
             <!-- 当前歌曲信息卡片 -->
             <div
               v-if="downloadStore.currentDownloadSong"
-              class="relative mb-5 flex items-center gap-3.5 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm"
+              class="relative mb-4 flex items-center gap-3 overflow-hidden rounded-[var(--glass-r-md,12px)] border border-white/10 bg-white/5 p-3 backdrop-blur-sm"
             >
-              <!-- 封面艺术图 (黑胶外环效果) -->
-              <div class="relative h-13 w-13 shrink-0 overflow-hidden rounded-xl shadow-md border border-white/10">
+              <!-- 封面图：严格 8px 圆角规范 -->
+              <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[var(--glass-r-sm,8px)] shadow-md border border-white/10">
                 <img
-                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 120, artist: downloadStore.currentDownloadSong.artist })"
+                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 100, artist: downloadStore.currentDownloadSong.artist })"
                   alt="cover"
                   class="h-full w-full object-cover"
                 />
-                <div class="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/15 pointer-events-none"></div>
               </div>
 
               <!-- 歌曲与歌手信息 -->
@@ -160,8 +229,8 @@ onUnmounted(() => {
                   >
                     {{ displayTitle }}
                   </h4>
-                  <span class="shrink-0 rounded bg-pink-500/15 px-1.5 py-0.5 text-[9px] font-bold text-pink-300 border border-pink-500/30">
-                    多源高保真
+                  <span class="shrink-0 rounded-[var(--glass-r-sm,8px)] bg-pink-500/15 px-1.5 py-0.5 text-[11px] font-mono font-medium text-pink-300 border border-pink-500/30">
+                    {{ currentChoice.label }}
                   </span>
                 </div>
                 <p class="mt-0.5 truncate text-xs text-primary/60">
@@ -171,91 +240,96 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- 音质档位选择卡片 -->
-            <div class="mb-4 space-y-2.5">
-              <label
-                v-for="choice in availableChoices"
+            <!-- 音质档位选择卡片 (语义化 radiogroup，去掉大单选圆圈，选中态采用高光边框加勾选) -->
+            <div
+              class="mb-4 space-y-2 select-none"
+              role="radiogroup"
+              aria-labelledby="download-dialog-title"
+            >
+              <div
+                v-for="(choice, index) in availableChoices"
                 :key="choice.level"
-                class="group relative flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 transition-all duration-200 select-none"
+                :ref="el => { if (el) radioItemRefs[index] = el as HTMLElement }"
+                role="radio"
+                :aria-checked="selectedLevel === choice.level"
+                :tabindex="selectedLevel === choice.level ? 0 : -1"
+                @click="selectedLevel = choice.level"
+                @keydown.arrow-down.prevent="selectNext(1)"
+                @keydown.arrow-right.prevent="selectNext(1)"
+                @keydown.arrow-up.prevent="selectNext(-1)"
+                @keydown.arrow-left.prevent="selectNext(-1)"
+                @keydown.space.prevent="selectedLevel = choice.level"
+                @keydown.enter.prevent="handleConfirm"
+                class="group relative flex cursor-pointer items-center justify-between rounded-[var(--glass-r-lg,16px)] border p-3 transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :class="[
                   selectedLevel === choice.level
-                    ? 'border-pink-500/60 shadow-[0_0_24px_rgba(236,72,153,0.2)]'
+                    ? 'border-[var(--glass-accent-border,rgba(236,72,153,0.5))] bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[var(--glass-accent-glow)]'
                     : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
                 ]"
-                :style="selectedLevel === choice.level ? 'background: linear-gradient(135deg, rgba(236, 72, 153, 0.16) 0%, rgba(139, 92, 246, 0.14) 100%);' : ''"
               >
-                <input
-                  type="radio"
-                  name="audioQuality"
-                  :value="choice.level"
-                  v-model="selectedLevel"
-                  class="sr-only"
-                />
-
-                <!-- 左侧：单选按钮 + 规格信息 -->
-                <div class="flex items-center gap-3.5 min-w-0 flex-1 pr-2">
-                  <div
-                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
-                    :class="[
-                      selectedLevel === choice.level
-                        ? 'border-pink-400 bg-pink-500 text-white shadow-sm ring-2 ring-pink-500/30'
-                        : 'border-white/30 bg-transparent group-hover:border-white/50'
-                    ]"
-                  >
-                    <span
-                      v-if="selectedLevel === choice.level"
-                      class="icon-[mdi--check] h-3.5 w-3.5"
-                    ></span>
-                  </div>
-
+                <!-- 左侧：规格名 + 码率/格式 + 描述 (不编造位深/采样率) -->
+                <div class="flex items-center gap-3 min-w-0 flex-1 pr-2">
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-sm font-bold text-primary">{{ choice.label }}</span>
-                      <!-- 专属规格 Tag -->
                       <span
-                        class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold leading-none"
+                        class="text-sm font-bold transition-colors"
+                        :class="selectedLevel === choice.level ? 'text-primary font-bold' : 'text-primary/85'"
+                      >
+                        {{ choice.label }}
+                      </span>
+                      <!-- 格式与码率标签 -->
+                      <span
+                        class="shrink-0 rounded-[var(--glass-r-sm,8px)] px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none"
                         :class="[
                           choice.level === 'lossless'
-                            ? 'bg-gradient-to-r from-violet-600/35 to-pink-600/35 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.25)]'
+                            ? 'bg-pink-500/20 text-pink-300 border border-pink-500/35'
                             : choice.level === 'exhigh'
-                              ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-500/30'
-                              : 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/30'
+                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                              : 'bg-white/10 text-primary/70 border border-white/15'
                         ]"
                       >
                         {{ choice.bitrate }}
                       </span>
-                      <span class="hidden sm:inline-block rounded bg-white/5 px-1 py-0.5 font-mono text-[9px] text-primary/50 uppercase">
+                      <span class="rounded bg-white/5 px-1 py-0.5 font-mono text-[11px] text-primary/50 uppercase">
                         {{ choice.format }}
                       </span>
                     </div>
-                    <p class="mt-1 text-xs text-primary/50 leading-snug truncate">
+                    <p class="mt-1 text-xs text-primary/55 leading-tight truncate">
                       {{ choice.desc }}
                     </p>
                   </div>
                 </div>
 
-                <!-- 右侧：预估体积 -->
-                <div class="shrink-0 text-right">
-                  <span class="font-mono text-xs font-semibold text-primary/70">
-                    {{ choice.estimatedSize }}
-                  </span>
-                  <p class="text-[10px] text-primary/40 mt-0.5">本地存储</p>
+                <!-- 右侧：预估体积区间 + 选中勾标 (无表单单选圆圈) -->
+                <div class="flex items-center gap-3 shrink-0">
+                  <div class="text-right">
+                    <span class="font-mono text-xs font-semibold text-primary/75">
+                      {{ choice.estimatedSize }}
+                    </span>
+                  </div>
+                  <!-- 勾选指示器 (仅在选中态优雅浮现) -->
+                  <div class="w-5 flex items-center justify-center">
+                    <span
+                      v-if="selectedLevel === choice.level"
+                      class="icon-[mdi--check] h-4.5 w-4.5 text-pink-400 shrink-0 drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]"
+                    ></span>
+                  </div>
                 </div>
-              </label>
+              </div>
             </div>
 
-            <!-- 离线存储提示 -->
-            <div class="mb-5 flex items-start gap-2 rounded-xl bg-white/5 p-2.5 border border-white/5 text-[11px] text-primary/60 leading-relaxed">
-              <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400 mt-0.5"></span>
+            <!-- 底部存储与导出提示文案 (基于 IndexedDB 离线库 + 浏览器文件保存双路径确证) -->
+            <div class="mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] bg-white/5 px-3 py-2 border border-white/5 text-[11px] text-primary/65 leading-relaxed">
+              <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400"></span>
               <span>
-                下载后文件将<strong>自动永久持久化于本地离线库</strong>，可在「下载列表」随时免流重放，同时触发浏览器文件保存。
+                音频将<strong>存入应用内离线库</strong>（可在下载列表随时免流播放），并<strong>同步唤起本地文件保存</strong>。
               </span>
             </div>
 
             <!-- 错误提示（若有） -->
             <div
               v-if="downloadStore.errorMsg"
-              class="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/15 p-2.5 text-xs text-red-300"
+              class="mb-3 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] border border-red-500/30 bg-red-500/15 p-2.5 text-xs text-red-300"
             >
               <span class="icon-[mdi--alert-circle] h-4 w-4 shrink-0"></span>
               <span>{{ downloadStore.errorMsg }}</span>
@@ -267,7 +341,7 @@ onUnmounted(() => {
                 variant="ghost"
                 size="md"
                 rounded="xl"
-                class="px-4 text-xs font-semibold text-primary/70 hover:text-primary"
+                class="px-4 text-xs font-semibold text-primary/70 hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
@@ -278,7 +352,7 @@ onUnmounted(() => {
                 variant="gradient"
                 size="md"
                 rounded="xl"
-                class="px-6 text-xs font-bold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all"
+                class="px-6 text-xs font-bold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="handleConfirm"
               >
@@ -286,7 +360,7 @@ onUnmounted(() => {
                   v-if="downloadStore.isDownloading"
                   class="icon-[mdi--loading] mr-1.5 h-4 w-4 animate-spin"
                 ></span>
-                <span v-else class="icon-[mdi--download] mr-1.5 h-4 w-4"></span>
+                <span v-else class="icon-[mdi--tray-arrow-down] mr-1.5 h-4 w-4"></span>
                 <span>{{ downloadStore.isDownloading ? '正在下载中...' : `确认下载 (${currentChoice.label})` }}</span>
               </Button>
             </div>
@@ -300,7 +374,7 @@ onUnmounted(() => {
 <style scoped>
 .mask-enter-active,
 .mask-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity var(--glass-duration-normal, 200ms) var(--glass-ease, ease);
 }
 .mask-enter-from,
 .mask-leave-to {
@@ -309,11 +383,11 @@ onUnmounted(() => {
 
 .dialog-enter-active,
 .dialog-leave-active {
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--glass-duration-normal, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dialog-enter-from,
 .dialog-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(12px);
+  transform: scale(0.96) translateY(8px);
 }
 </style>
