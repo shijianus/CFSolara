@@ -241,30 +241,45 @@ onUnmounted(() => {
 // ═══════ 音质切换与下载控制 ═══════
 const showQualityMenu = ref(false)
 const qualityMenuRef = ref<HTMLElement | null>(null)
+const qualityBtnRef = ref<HTMLButtonElement | null>(null)
+const qualityItemRefs = ref<HTMLButtonElement[]>([])
+const focusedQualityIndex = ref(0)
 const qualityToastMsg = ref('')
 let qualityToastTimer: any = null
 
 const availableQualities = computed(() => {
   if (currentSong.value?.qualities && currentSong.value.qualities.length > 0) {
-    return currentSong.value.qualities.map((q) => ({
-      level: q.level,
-      label: q.label,
-      bitrate: q.bitrate,
-      desc: q.desc || (q.level === 'lossless' ? '超清无损母带音质' : q.level === 'exhigh' ? '极高品质MP3' : '标准流畅音质'),
-    }))
+    return currentSong.value.qualities.map((q) => {
+      let displayBitrate = '128k'
+      if (q.level === 'lossless') displayBitrate = 'FLAC'
+      else if (q.level === 'exhigh') displayBitrate = '320k'
+      else if (q.level === 'standard') displayBitrate = '128k'
+      else if (q.bitrate) displayBitrate = q.bitrate
+
+      return {
+        level: q.level,
+        label: q.label,
+        bitrate: displayBitrate,
+        desc: q.desc || (q.level === 'lossless' ? '超清无损' : q.level === 'exhigh' ? '极高品质' : '标准流畅'),
+      }
+    })
   }
   return [
-    { level: 'lossless', label: 'SQ 无损', bitrate: 'FLAC 24bit', desc: '超清无损母带音质 (FLAC / 24-bit)' },
-    { level: 'exhigh', label: 'HQ 极高', bitrate: '320kbps', desc: '极高品质MP3 (320kbps 饱满声场)' },
-    { level: 'standard', label: '标准', bitrate: '128kbps', desc: '标准流畅音质 (128kbps 快速省流)' },
+    { level: 'lossless', label: 'SQ 无损', bitrate: 'FLAC', desc: '超清无损' },
+    { level: 'exhigh', label: 'HQ 极高', bitrate: '320k', desc: '极高品质' },
+    { level: 'standard', label: '标准', bitrate: '128k', desc: '标准流畅' },
   ]
 })
 
 const currentQualityLevel = computed(() => {
   const badge = currentSong.value?.qualityBadge
-  if (badge === 'SQ' || currentSong.value?.qualities?.[0]?.level === 'lossless') return 'lossless'
-  if (badge === 'HQ' || currentSong.value?.qualities?.[0]?.level === 'exhigh') return 'exhigh'
-  return 'standard'
+  if (badge === 'SQ') return 'lossless'
+  if (badge === 'HQ') return 'exhigh'
+  if (badge === '标准' || badge === 'STANDARD') return 'standard'
+  // 若未标注则回退至首个音质规格
+  const firstLevel = currentSong.value?.qualities?.[0]?.level
+  if (firstLevel) return firstLevel
+  return 'lossless'
 })
 
 const activeQualityBadge = computed(() => {
@@ -275,7 +290,6 @@ const activeQualityBadge = computed(() => {
 
 const isLosslessActive = computed(() => currentQualityLevel.value === 'lossless')
 
-const qualityBtnRef = ref<HTMLButtonElement | null>(null)
 const menuCoords = ref({ bottom: 0, right: 0 })
 
 const updateQualityMenuPosition = () => {
@@ -287,15 +301,60 @@ const updateQualityMenuPosition = () => {
   }
 }
 
+const openAndFocusQualityMenu = () => {
+  updateQualityMenuPosition()
+  showQualityMenu.value = true
+  const activeIdx = availableQualities.value.findIndex(q => q.level === currentQualityLevel.value)
+  focusedQualityIndex.value = activeIdx >= 0 ? activeIdx : 0
+  nextTick(() => {
+    qualityItemRefs.value[focusedQualityIndex.value]?.focus()
+  })
+}
+
+const closeQualityMenuAndRestoreFocus = () => {
+  showQualityMenu.value = false
+  nextTick(() => {
+    qualityBtnRef.value?.focus()
+  })
+}
+
 const toggleQualityMenu = () => {
   if (!showQualityMenu.value) {
-    updateQualityMenuPosition()
+    openAndFocusQualityMenu()
+  } else {
+    closeQualityMenuAndRestoreFocus()
   }
-  showQualityMenu.value = !showQualityMenu.value
+}
+
+const moveQualityFocus = (delta: number) => {
+  if (availableQualities.value.length === 0) return
+  focusedQualityIndex.value =
+    (focusedQualityIndex.value + delta + availableQualities.value.length) % availableQualities.value.length
+  nextTick(() => {
+    qualityItemRefs.value[focusedQualityIndex.value]?.focus()
+  })
+}
+
+const handleQualityMenuKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    e.stopPropagation()
+    moveQualityFocus(1)
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    e.stopPropagation()
+    moveQualityFocus(-1)
+  } else if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closeQualityMenuAndRestoreFocus()
+  } else if (e.key === 'Tab') {
+    closeQualityMenuAndRestoreFocus()
+  }
 }
 
 const selectQuality = async (level: string) => {
-  showQualityMenu.value = false
+  closeQualityMenuAndRestoreFocus()
   if (level === currentQualityLevel.value) return
   await audioStore.switchQuality(level)
   const labelMap: Record<string, string> = {
@@ -330,7 +389,7 @@ const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && showQualityMenu.value) {
-    showQualityMenu.value = false
+    closeQualityMenuAndRestoreFocus()
   }
 }
 
@@ -478,7 +537,12 @@ const emit = defineEmits(['show'])
           <button
             ref="qualityBtnRef"
             @click.stop="toggleQualityMenu"
-            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer"
+            @keydown.down.prevent="openAndFocusQualityMenu"
+            @keydown.up.prevent="openAndFocusQualityMenu"
+            aria-haspopup="true"
+            :aria-expanded="showQualityMenu"
+            aria-controls="quality-menu-panel"
+            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500/80"
             :title="'当前音质: ' + activeQualityBadge + ' (点击切换音质)'"
           >
             <span
@@ -498,7 +562,10 @@ const emit = defineEmits(['show'])
           <Transition name="quality-pop">
             <div
               v-if="showQualityMenu"
+              id="quality-menu-panel"
               ref="qualityMenuRef"
+              role="radiogroup"
+              aria-labelledby="quality-menu-title"
               :style="{
                 position: 'fixed',
                 bottom: `${menuCoords.bottom}px`,
@@ -506,6 +573,7 @@ const emit = defineEmits(['show'])
                 zIndex: 60,
               }"
               class="quality-panel-popover w-52 overflow-hidden rounded-2xl select-none"
+              @keydown="handleQualityMenuKeydown"
             >
               <!-- 顶部标题 -->
               <div
@@ -514,20 +582,26 @@ const emit = defineEmits(['show'])
               >
                 <div class="flex items-center gap-1.5">
                   <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-pink-400"></span>
-                  <span class="text-[11px] font-semibold text-primary/80 tracking-wider">音频规格</span>
+                  <span id="quality-menu-title" class="text-[11px] font-semibold text-primary/85 tracking-wider">音频规格</span>
                 </div>
                 <span class="text-[11px] font-mono font-medium text-pink-300">
                   {{ activeQualityBadge }}
                 </span>
               </div>
 
-              <!-- 音质选项列表 -->
+              <!-- 音质选项列表 (每行约 36px 高度，左侧指示条，右侧等宽格式/码率，无单选圆圈) -->
               <div class="p-1.5 space-y-1">
                 <button
-                  v-for="q in availableQualities"
+                  v-for="(q, index) in availableQualities"
                   :key="q.level"
+                  :ref="(el) => { if (el) qualityItemRefs[index] = el as HTMLButtonElement }"
+                  role="radio"
+                  :aria-checked="currentQualityLevel === q.level"
+                  :tabindex="focusedQualityIndex === index ? 0 : -1"
                   @click.stop="selectQuality(q.level)"
-                  class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left transition-all duration-150 group cursor-pointer"
+                  @keydown.enter.prevent.stop="selectQuality(q.level)"
+                  @keydown.space.prevent.stop="selectQuality(q.level)"
+                  class="w-full h-9 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group cursor-pointer outline-none focus-visible:ring-1.5 focus-visible:ring-pink-500/80 focus-visible:bg-white/10"
                   :class="[
                     currentQualityLevel === q.level
                       ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm'
@@ -535,10 +609,25 @@ const emit = defineEmits(['show'])
                   ]"
                 >
                   <div class="flex items-center gap-2 min-w-0">
-                    <span class="text-xs font-semibold">{{ q.label }}</span>
-                    <span class="text-[11px] font-mono text-primary/60 group-hover:text-primary/80">{{ q.bitrate }}</span>
+                    <!-- 左侧选中指示条 -->
+                    <span
+                      class="w-1 h-3.5 rounded-full transition-all duration-150 shrink-0"
+                      :class="currentQualityLevel === q.level ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
+                    ></span>
+                    <span
+                      class="text-xs transition-colors"
+                      :class="currentQualityLevel === q.level ? 'text-pink-200 font-bold' : 'text-primary/85 font-medium'"
+                    >
+                      {{ q.label }}
+                    </span>
                   </div>
-                  <span v-if="currentQualityLevel === q.level" class="icon-[mdi--check] h-3.5 w-3.5 text-pink-400 shrink-0"></span>
+                  <!-- 右侧等宽字体码率/格式标注 -->
+                  <span
+                    class="text-[11px] font-mono shrink-0 transition-colors"
+                    :class="currentQualityLevel === q.level ? 'text-pink-300 font-semibold' : 'text-primary/60 group-hover:text-primary/80'"
+                  >
+                    {{ q.bitrate }}
+                  </span>
                 </button>
               </div>
             </div>
@@ -649,25 +738,49 @@ const emit = defineEmits(['show'])
   animation: equalizer-3 0.5s ease-in-out infinite 0.2s;
 }
 
-/* 音质菜单与反馈弹窗过渡 */
+/* 音质菜单与反馈弹窗过渡 (引用设计令牌并遵守 prefers-reduced-motion) */
 .quality-pop-enter-active,
 .quality-pop-leave-active {
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity var(--glass-duration-normal, 200ms) var(--glass-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--glass-duration-normal, 200ms) var(--glass-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 .quality-pop-enter-from,
 .quality-pop-leave-to {
   opacity: 0;
-  transform: translateY(8px) scale(0.96);
+  transform: translateY(6px) scale(0.97);
 }
 
-/* 音质规格上浮菜单毛玻璃容器 */
+@media (prefers-reduced-motion: reduce) {
+  .quality-pop-enter-active,
+  .quality-pop-leave-active {
+    transition: opacity 0.05s ease !important;
+    transform: none !important;
+  }
+  .quality-pop-enter-from,
+  .quality-pop-leave-to {
+    opacity: 0;
+    transform: none !important;
+  }
+}
+
+/* 音质规格上浮菜单毛玻璃容器 (带纯色回退机制，模糊半径限制在 24px 内) */
 .quality-panel-popover {
-  background-color: light-dark(rgba(255, 255, 255, 0.90), rgba(20, 16, 36, 0.92));
-  border: 1px solid light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+  /* 纯色回退背景 (当不支持 backdrop-filter 时) */
+  background-color: light-dark(#f8f9fa, #120e1e);
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.16));
   box-shadow:
-    0 24px 60px -12px rgba(0, 0, 0, 0.65),
-    0 0 35px -8px rgba(139, 92, 246, 0.35),
+    0 16px 36px -8px rgba(0, 0, 0, 0.55),
+    0 0 24px -4px rgba(236, 72, 153, 0.20),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .quality-panel-popover {
+    background-color: light-dark(rgba(255, 255, 255, 0.90), rgba(20, 16, 36, 0.90));
+    backdrop-filter: blur(var(--glass-blur, 24px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
+  }
 }
 
 .fade-enter-active,
