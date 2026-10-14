@@ -162,7 +162,7 @@ const handleError = () => {
     <!-- 优雅生成式艺术回退占位符 (歌名首字 + 专辑派生底色) -->
     <div
       v-else
-      class="flex h-full w-full items-center justify-center bg-gradient-to-br backdrop-blur-sm select-none border border-white/10"
+      class="flex h-full w-full items-center justify-center bg-gradient-to-br select-none border border-white/10"
       :class="gradientPalette"
     >
       <span v-if="initialChar" class="text-sm font-bold text-white/90 drop-shadow-sm font-sans select-none">
@@ -173,7 +173,7 @@ const handleError = () => {
     <!-- 加载中骨架指示器 -->
     <div
       v-if="isLoading && !activeSrc.startsWith('data:')"
-      class="absolute inset-0 flex items-center justify-center bg-white/5 backdrop-blur-[2px] animate-pulse"
+      class="absolute inset-0 flex items-center justify-center bg-white/10 animate-pulse"
     >
       <div class="h-3 w-3 rounded-full border border-pink-400/60 border-t-transparent animate-spin"></div>
     </div>
