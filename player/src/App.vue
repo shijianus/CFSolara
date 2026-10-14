@@ -4,8 +4,8 @@ import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue
 
 onMounted(() => {
   try {
-    const raw = localStorage.getItem('settings')
-    if (raw && JSON.parse(raw).performanceMode) {
+    const isPerf = localStorage.getItem('sonic-perf-mode') === 'true'
+    if (isPerf) {
       document.documentElement.classList.add('perf-mode')
     }
   } catch (_) {}

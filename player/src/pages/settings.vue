@@ -81,11 +81,7 @@ const isPerformanceMode = ref(false)
 
 const loadPerformanceMode = () => {
   try {
-    const raw = localStorage.getItem('settings')
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      isPerformanceMode.value = !!parsed.performanceMode
-    }
+    isPerformanceMode.value = localStorage.getItem('sonic-perf-mode') === 'true'
   } catch (_) {}
 }
 
@@ -93,10 +89,7 @@ const togglePerformanceMode = () => {
   const nextVal = !isPerformanceMode.value
   isPerformanceMode.value = nextVal
   try {
-    const raw = localStorage.getItem('settings') || '{}'
-    const parsed = JSON.parse(raw)
-    parsed.performanceMode = nextVal
-    localStorage.setItem('settings', JSON.stringify(parsed))
+    localStorage.setItem('sonic-perf-mode', String(nextVal))
   } catch (_) {}
   document.documentElement.classList.toggle('perf-mode', nextVal)
 }
