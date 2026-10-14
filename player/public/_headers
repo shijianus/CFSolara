@@ -1,3 +1,9 @@
 /*
   Referrer-Policy: no-referrer
   Access-Control-Allow-Origin: *
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
