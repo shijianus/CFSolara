@@ -674,6 +674,6 @@ const formatSongTitle = (title: string, maxLen = 28) => {
 <style scoped>
 .download-song-item {
   content-visibility: auto;
-  contain-intrinsic-size: 0 60px;
+  contain-intrinsic-size: auto 56px;
 }
 </style>

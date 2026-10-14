@@ -28,6 +28,7 @@
               class="option-item cursor-pointer rounded-md px-3 py-2 text-sm transition"
               :class="{ selected: opt.value === modelValue }"
               @click="select(opt.value)"
+              @mouseenter="emit('hover-option', opt.value)"
             >
               {{ opt.label }}
             </li>
@@ -44,7 +45,10 @@ interface OptionItem {
   value: any
 }
 const props = defineProps<{ modelValue: any; options: OptionItem[] }>()
-const emit = defineEmits<{ (e: 'update:modelValue', v: any): void }>()
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: any): void
+  (e: 'hover-option', v: any): void
+}>()
 const state = reactive({
   open: false,
 })

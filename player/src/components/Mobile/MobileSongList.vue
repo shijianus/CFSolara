@@ -198,7 +198,7 @@ const getQualityBadgeInfo = (song: Song) => {
 .song-item,
 .song-item-compact {
   content-visibility: auto;
-  contain-intrinsic-size: 0 64px;
+  contain-intrinsic-size: auto 64px;
 }
 
 .song-item {

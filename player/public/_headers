@@ -2,8 +2,11 @@
   Referrer-Policy: no-referrer
   Access-Control-Allow-Origin: *
 
+/
+  Cache-Control: no-cache, must-revalidate
+
 /index.html
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /static/*
   Cache-Control: public, max-age=31536000, immutable

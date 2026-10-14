@@ -94,6 +94,18 @@ const togglePerformanceMode = () => {
   document.documentElement.classList.toggle('perf-mode', nextVal)
 }
 
+const prefetchBackground = (bgKey: string) => {
+  if (bgKey === 'colorbends') {
+    import('@/components/Background/ColorBends.vue')
+  } else if (bgKey === 'aurora') {
+    import('@/components/Background/Aurora.vue')
+  } else if (bgKey === 'shadowBling') {
+    import('@/components/Background/ShadowBling.vue')
+  } else if (bgKey === 'ultimate') {
+    import('@/components/Background/Ultimate.vue')
+  }
+}
+
 onMounted(() => {
   loadPerformanceMode()
 })
@@ -159,7 +171,11 @@ onMounted(() => {
               </p>
             </div>
           </div>
-          <GlassSelect v-model="backgroundType" :options="bgOptions" />
+          <GlassSelect
+            v-model="backgroundType"
+            :options="bgOptions"
+            @hover-option="prefetchBackground"
+          />
         </div>
 
         <div class="glass-card space-y-5 rounded-2xl p-5">

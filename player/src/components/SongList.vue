@@ -168,7 +168,7 @@ const getQualityBadgeInfo = (song: Song) => {
 .song-item {
   transition: all 0.2s ease;
   content-visibility: auto;
-  contain-intrinsic-size: 0 56px;
+  contain-intrinsic-size: auto 53px;
 }
 
 /* 响应式调整 */

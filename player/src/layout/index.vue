@@ -66,12 +66,15 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
 
 <template>
   <div class="relative flex h-full w-full overflow-hidden">
-    <div class="custom-theme absolute inset-0 h-full w-full">
-      <component
-        :is="currentBackgroundComponent"
-        v-bind="currentBackgroundProps"
-        class="h-full w-full"
-      />
+    <div class="custom-theme absolute inset-0 h-full w-full bg-[#07070d]">
+      <transition appear name="fade-bg" mode="out-in">
+        <component
+          :is="currentBackgroundComponent"
+          :key="currentBackgroundType"
+          v-bind="currentBackgroundProps"
+          class="h-full w-full"
+        />
+      </transition>
     </div>
 
     <!-- Sonic 风格氛围光晕流光层 (Ambient Glowing Drift Blobs) -->
@@ -122,5 +125,15 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
 .fade-transform-leave-to {
   opacity: 0;
   transform: translateX(20px);
+}
+
+.fade-bg-enter-active,
+.fade-bg-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-bg-enter-from,
+.fade-bg-leave-to {
+  opacity: 0;
 }
 </style>
