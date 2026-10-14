@@ -2,14 +2,15 @@
 import Aside from './aside.vue'
 import Footer from './footer.vue'
 
-import Aurora from '@/components/Background/Aurora.vue'
-import ColorBends from '@/components/Background/ColorBends.vue'
-import Ultimate from '@/components/Background/Ultimate.vue'
-import ShadowBling from '@/components/Background/ShadowBling.vue'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import type { Component } from 'vue'
 import { useSettingsStore } from '@/stores/modules/settings'
+
+const Aurora = defineAsyncComponent(() => import('@/components/Background/Aurora.vue'))
+const ColorBends = defineAsyncComponent(() => import('@/components/Background/ColorBends.vue'))
+const Ultimate = defineAsyncComponent(() => import('@/components/Background/Ultimate.vue'))
+const ShadowBling = defineAsyncComponent(() => import('@/components/Background/ShadowBling.vue'))
 
 const settings = useSettingsStore()
 const { aurora, colorBends, ultimate, shadowBling, backgroundType } = storeToRefs(settings)
