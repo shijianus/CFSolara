@@ -18,6 +18,23 @@ const updateTabbarHeight = () => {
   const h = tabbarRef.value?.offsetHeight ?? 0
   document.documentElement.style.setProperty('--mobile-tabbar-h', `${h}px`)
 }
+const mobileRouteChunkLoaders: Record<string, () => Promise<any>> = {
+  '/': () => import('@/pages/mobile/index.vue'),
+  '/search': () => import('@/pages/mobile/search.vue'),
+  '/recent': () => import('@/pages/mobile/recent.vue'),
+  '/settings': () => import('@/pages/mobile/settings.vue'),
+}
+
+const prefetchedMobileRoutes = new Set<string>()
+const prefetchMobileRoute = (to: string) => {
+  if (!to || prefetchedMobileRoutes.has(to)) return
+  const loader = mobileRouteChunkLoaders[to]
+  if (loader) {
+    prefetchedMobileRoutes.add(to)
+    loader().catch(() => {})
+  }
+}
+
 onMounted(() => {
   updateTabbarHeight()
   if (tabbarRef.value) {
@@ -25,6 +42,11 @@ onMounted(() => {
     ro.observe(tabbarRef.value)
   }
   window.addEventListener('resize', updateTabbarHeight)
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      prefetchMobileRoute('/search')
+    })
+  }
 })
 onUnmounted(() => {
   ro?.disconnect()
@@ -42,6 +64,8 @@ onUnmounted(() => {
         v-for="it in items"
         :key="it.to"
         :to="it.to"
+        @touchstart.passive="prefetchMobileRoute(it.to)"
+        @mouseenter="prefetchMobileRoute(it.to)"
         class="relative flex flex-1 flex-col items-center justify-center py-2 text-[11px] font-semibold transition-all duration-200"
         :class="$route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/') ? 'text-primary' : 'text-primary/50 hover:text-primary/80'"
       >

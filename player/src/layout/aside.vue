@@ -102,6 +102,30 @@ const updateIndicator = () => {
   })
 }
 
+// 路由代码块按需预取（悬停或空闲预取脚本，不预取任何后端数据）
+const routeChunkLoaders: Record<string, () => Promise<any>> = {
+  '/': () => import('@/pages/index.vue'),
+  '/mv-list': () => import('@/pages/mv-list.vue'),
+  '/charts': () => import('@/pages/charts.vue'),
+  '/artists': () => import('@/pages/artists.vue'),
+  '/new-albums': () => import('@/pages/new-albums.vue'),
+  '/search': () => import('@/pages/search.vue'),
+  '/my-music': () => import('@/pages/my-music.vue'),
+  '/downloads': () => import('@/pages/downloads.vue'),
+  '/local-music': () => import('@/pages/local-music.vue'),
+  '/settings': () => import('@/pages/settings.vue'),
+}
+
+const prefetchedRoutes = new Set<string>()
+const prefetchRoute = (to: string) => {
+  if (!to || prefetchedRoutes.has(to)) return
+  const loader = routeChunkLoaders[to]
+  if (loader) {
+    prefetchedRoutes.add(to)
+    loader().catch(() => {})
+  }
+}
+
 // 监听路由变化
 watch(
   () => route.path,
@@ -113,11 +137,18 @@ watch(
   { immediate: true }
 )
 
-// 组件挂载后初始化
+// 组件挂载后初始化与空闲预取
 onMounted(() => {
   nextTick(() => {
     updateIndicator()
   })
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      prefetchRoute('/search')
+      prefetchRoute('/downloads')
+      prefetchRoute('/settings')
+    })
+  }
 })
 
 // 检查是否是当前路由
@@ -214,6 +245,8 @@ const isActive = (path: string) => {
                   v-for="item in sec.items"
                   :key="item.to"
                   :to="item.to"
+                  @mouseenter="prefetchRoute(item.to)"
+                  @focus="prefetchRoute(item.to)"
                   class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
