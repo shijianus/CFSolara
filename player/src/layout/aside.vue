@@ -142,13 +142,16 @@ onMounted(() => {
   nextTick(() => {
     updateIndicator()
   })
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
-      prefetchRoute('/search')
-      prefetchRoute('/downloads')
-      prefetchRoute('/settings')
-    })
-  }
+  const scheduleIdle =
+    typeof window !== 'undefined' && 'requestIdleCallback' in window
+      ? (cb: () => void) => (window as any).requestIdleCallback(cb, { timeout: 2000 })
+      : (cb: () => void) => setTimeout(cb, 1200)
+
+  scheduleIdle(() => {
+    prefetchRoute('/search')
+    prefetchRoute('/downloads')
+    prefetchRoute('/settings')
+  })
 })
 
 // 检查是否是当前路由

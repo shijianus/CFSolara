@@ -42,11 +42,14 @@ onMounted(() => {
     ro.observe(tabbarRef.value)
   }
   window.addEventListener('resize', updateTabbarHeight)
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
-      prefetchMobileRoute('/search')
-    })
-  }
+  const scheduleIdle =
+    typeof window !== 'undefined' && 'requestIdleCallback' in window
+      ? (cb: () => void) => (window as any).requestIdleCallback(cb, { timeout: 2000 })
+      : (cb: () => void) => setTimeout(cb, 1200)
+
+  scheduleIdle(() => {
+    prefetchMobileRoute('/search')
+  })
 })
 onUnmounted(() => {
   ro?.disconnect()
