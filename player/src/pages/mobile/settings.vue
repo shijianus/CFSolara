@@ -58,6 +58,35 @@ const romaChecked = computed({
   get: () => footerLyrics.value.modes.includes('roma'),
   set: v => toggleMode('roma', v as boolean),
 })
+
+// 性能优先模式
+const isPerformanceMode = ref(false)
+
+const loadPerformanceMode = () => {
+  try {
+    const raw = localStorage.getItem('settings')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      isPerformanceMode.value = !!parsed.performanceMode
+    }
+  } catch (_) {}
+}
+
+const togglePerformanceMode = () => {
+  const nextVal = !isPerformanceMode.value
+  isPerformanceMode.value = nextVal
+  try {
+    const raw = localStorage.getItem('settings') || '{}'
+    const parsed = JSON.parse(raw)
+    parsed.performanceMode = nextVal
+    localStorage.setItem('settings', JSON.stringify(parsed))
+  } catch (_) {}
+  document.documentElement.classList.toggle('perf-mode', nextVal)
+}
+
+onMounted(() => {
+  loadPerformanceMode()
+})
 </script>
 
 <template>
@@ -187,6 +216,30 @@ const romaChecked = computed({
           @click="audioQuality = opt.value"
         >
           <span class="option-label text-xs font-medium">{{ opt.label }}</span>
+        </Button>
+      </div>
+    </section>
+
+    <!-- 性能优先模式 -->
+    <section class="settings-card mb-4">
+      <div class="card-header">
+        <div class="icon-wrapper bg-linear-to-br from-cyan-500 to-blue-600">
+          <span class="icon-[mdi--speedometer] h-4 w-4 text-primary"></span>
+        </div>
+        <div class="flex-1">
+          <h2 class="card-title">性能优先模式</h2>
+          <p class="card-desc">
+            关闭毛玻璃高斯模糊与背景流光特效，降低低配设备 CPU/GPU 负载
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="none"
+          class="toggle-switch"
+          :class="{ active: isPerformanceMode }"
+          @click="togglePerformanceMode"
+        >
+          <span class="toggle-dot"></span>
         </Button>
       </div>
     </section>

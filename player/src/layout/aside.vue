@@ -167,7 +167,7 @@ const isActive = (path: string) => {
         <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
           <router-link to="/" class="group flex items-center gap-2.5">
             <span class="relative flex h-8.5 w-8.5 items-center justify-center rounded-2xl bg-linear-to-br from-[#8b5cf6] via-[#ec4899] to-[#3b82f6] p-0.5 shadow-[0_0_16px_rgba(139,92,246,0.6)] transition-transform duration-300 group-hover:scale-105">
-              <span class="flex h-full w-full items-center justify-center rounded-[13px] bg-black/25 backdrop-blur-xs">
+              <span class="flex h-full w-full items-center justify-center rounded-[13px] bg-black/40">
                 <span class="h-2 w-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-pulse"></span>
               </span>
             </span>

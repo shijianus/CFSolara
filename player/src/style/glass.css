@@ -516,4 +516,26 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* ── 性能模式 (零模糊与背景特效关闭，纯色回退，释放 GPU 合成开销) ── */
+  html.perf-mode *,
+  html.perf-mode *::before,
+  html.perf-mode *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  html.perf-mode .animate-drift-a,
+  html.perf-mode .animate-drift-b,
+  html.perf-mode .animate-drift-c {
+    display: none !important;
+    animation: none !important;
+  }
+
+  html.perf-mode .glass-dock,
+  html.perf-mode .glass-card,
+  html.perf-mode .glass-container,
+  html.perf-mode .sidebar {
+    background-color: rgba(18, 18, 22, 0.96) !important;
+  }
 }
