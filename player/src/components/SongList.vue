@@ -167,6 +167,8 @@ const getQualityBadgeInfo = (song: Song) => {
 /* 歌曲项悬停效果 - 移除位移，改用更平滑的背景过渡 */
 .song-item {
   transition: all 0.2s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 56px;
 }
 
 /* 响应式调整 */

@@ -195,6 +195,12 @@ const getQualityBadgeInfo = (song: Song) => {
 </template>
 
 <style scoped>
+.song-item,
+.song-item-compact {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 64px;
+}
+
 .song-item {
   background: var(--glass-interactive-hover-muted);
 }

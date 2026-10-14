@@ -479,7 +479,7 @@ const formatSongTitle = (title: string, maxLen = 28) => {
           v-for="(item, index) in filteredDownloads"
           :key="item.id"
           @dblclick="playSingle(item, index)"
-          class="group relative flex items-center justify-between rounded-2xl border p-2.5 md:p-3 transition-all duration-200"
+          class="download-song-item group relative flex items-center justify-between rounded-2xl border p-2.5 md:p-3 transition-all duration-200"
           :class="[
             isCurrentPlaying(item)
               ? 'border-pink-500/40 bg-pink-500/10 shadow-[0_0_18px_rgba(236,72,153,0.15)]'
@@ -670,3 +670,10 @@ const formatSongTitle = (title: string, maxLen = 28) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.download-song-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 60px;
+}
+</style>

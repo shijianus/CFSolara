@@ -153,6 +153,7 @@ const handleError = () => {
       :src="activeSrc"
       :alt="alt"
       :class="imgClass"
+      loading="lazy"
       decoding="async"
       referrerpolicy="no-referrer"
       @load="handleLoad"
