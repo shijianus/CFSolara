@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDownloadStore } from '@/stores/modules/download'
-import { useAudioStore } from '@/stores/modules/audio'
+import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import Button from '@/components/Ui/Button.vue'
 import GlassSelect from '@/components/Ui/GlassSelect.vue'
@@ -12,7 +12,7 @@ import type { DownloadedSong } from '@/utils/indexedDB'
 
 const router = useRouter()
 const downloadStore = useDownloadStore()
-const audioStore = useAudioStore()
+const { currentSong, isPlaying, setPlaylist, play } = useAudio()
 
 // ══════ 状态：检索、筛选与排序 ══════
 const searchQuery = ref('')
@@ -159,7 +159,7 @@ const toSongList = (items: typeof downloads.value): Song[] => {
     album: d.album,
     duration: (d.duration || 0) * 1000,
     cover: d.cover,
-    url: URL.createObjectURL(d.file),
+    url: d.file ? URL.createObjectURL(d.file) : '',
     isLocal: true,
     qualityBadge: d.qualityBadge,
     qualities: [
@@ -177,8 +177,8 @@ const toSongList = (items: typeof downloads.value): Song[] => {
 const playAll = () => {
   if (!filteredDownloads.value.length) return
   const songList = toSongList(filteredDownloads.value)
-  audioStore.setPlaylist(songList, 0)
-  audioStore.playSong(songList[0], 0)
+  setPlaylist(songList, 0)
+  play(songList[0], 0)
 }
 
 // 随机播放
@@ -186,26 +186,25 @@ const shufflePlay = () => {
   if (!filteredDownloads.value.length) return
   const songList = toSongList(filteredDownloads.value)
   const shuffled = [...songList].sort(() => Math.random() - 0.5)
-  audioStore.setPlaylist(shuffled, 0)
-  audioStore.playSong(shuffled[0], 0)
+  setPlaylist(shuffled, 0)
+  play(shuffled[0], 0)
 }
 
 // 播放单曲
 const playSingle = (item: DownloadedSong, index: number) => {
   const songList = toSongList(filteredDownloads.value)
-  audioStore.setPlaylist(songList, index)
-  audioStore.playSong(songList[index], index)
+  setPlaylist(songList, index)
+  play(songList[index], index)
 }
 
 // 当前歌曲是否正在播放
 const isCurrentSong = (item: DownloadedSong) => {
-  return String(audioStore.currentSong?.id || '') === String(item.id || '')
+  return String(currentSong.value?.id || '') === String(item.id || '')
 }
-
-const isAudioPlaying = computed(() => audioStore.isPlaying)
 
 // 导出文件到本地磁盘
 const handleExport = (item: DownloadedSong) => {
+  if (!item.file) return
   const blobUrl = URL.createObjectURL(item.file)
   const a = document.createElement('a')
   a.href = blobUrl
@@ -258,19 +257,19 @@ const getQualityBadgeInfo = (item: DownloadedSong) => {
   if (item.qualityBadge === 'SQ' || item.qualityLevel === 'lossless') {
     return {
       label: 'SQ 无损',
-      class: 'bg-pink-500/15 text-pink-300 border border-pink-500/30',
+      class: 'bg-pink-500/20 text-pink-300 border border-pink-500/35',
     }
   }
   if (item.qualityBadge === 'HQ' || item.qualityLevel === 'exhigh') {
     return {
       label: 'HQ 极高',
-      class: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30',
+      class: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/35',
     }
   }
   if (item.qualityBadge === '标准' || item.qualityLevel === 'standard') {
     return {
       label: '标准',
-      class: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
+      class: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35',
     }
   }
   return null
@@ -285,12 +284,12 @@ const formatSize = (bytes?: number) => {
 
 <template>
   <div class="flex flex-1 flex-col overflow-hidden p-4 sm:p-6">
-    <div class="glass-card flex flex-1 flex-col overflow-hidden p-4 sm:p-5">
+    <div class="flex flex-1 flex-col overflow-hidden">
       <!-- 扁平 Header (B2) -->
       <header class="flex items-center justify-between pb-3.5 border-b border-white/5 select-none shrink-0">
         <div class="flex items-baseline gap-3">
           <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-primary">下载列表</h1>
-          <p v-if="downloads.length > 0" class="text-xs text-primary/60 font-medium">
+          <p v-if="downloads.length > 0" class="text-xs text-primary/70 font-medium">
             {{ downloads.length }} 首 · {{ totalSizeFormatted }} · 离线可用
           </p>
         </div>
@@ -300,7 +299,7 @@ const formatSize = (bytes?: number) => {
             variant="ghost"
             size="sm"
             rounded="full"
-            class="text-xs text-primary/60 hover:text-red-400 px-3 py-1.5 transition-colors"
+            class="text-xs text-primary/70 hover:text-red-400 px-3 py-1.5 transition-colors"
             @click="openClearAllConfirm"
             title="清空离线音乐库"
             aria-label="清空离线音乐库"
@@ -332,7 +331,7 @@ const formatSize = (bytes?: number) => {
             播放全部
           </Button>
           <Button
-            variant="glass"
+            variant="soft"
             size="sm"
             rounded="full"
             class="px-3.5 py-2 text-xs font-medium text-primary/80 hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
@@ -360,11 +359,11 @@ const formatSize = (bytes?: number) => {
             role="radio"
             :aria-checked="selectedQualityFilter === opt.value"
             :tabindex="selectedQualityFilter === opt.value ? 0 : -1"
-            class="relative rounded-lg px-2.5 py-1 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/60"
+            class="relative rounded-lg px-2.5 py-1 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/60 cursor-pointer"
             :class="[
               selectedQualityFilter === opt.value
                 ? 'bg-pink-500 text-white font-semibold shadow-sm'
-                : 'text-primary/60 hover:text-primary hover:bg-white/[0.04]'
+                : 'text-primary/70 hover:text-primary hover:bg-white/[0.04]'
             ]"
             @click="selectedQualityFilter = (opt.value as any)"
           >
@@ -382,14 +381,14 @@ const formatSize = (bytes?: number) => {
               type="text"
               placeholder="搜索歌名、歌手、专辑..."
               aria-label="搜索歌名、歌手、专辑"
-              class="w-full rounded-xl border border-white/10 bg-white/[0.04] py-1.5 pr-7 pl-8 text-xs text-primary placeholder-primary/40 focus:border-pink-500/50 focus:bg-white/[0.08] focus:outline-none transition-all"
+              class="w-full rounded-xl border border-white/10 bg-white/[0.04] py-1.5 pr-7 pl-8 text-xs text-primary placeholder-primary/50 focus:border-pink-500/50 focus:bg-white/[0.08] focus:outline-none transition-all"
             />
-            <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-3.5 w-3.5 text-primary/40 pointer-events-none"></span>
+            <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-3.5 w-3.5 text-primary/50 pointer-events-none"></span>
             <button
               v-if="searchQuery"
               type="button"
               @click="searchQuery = ''"
-              class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-primary/40 hover:text-primary focus:outline-none"
+              class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-primary/50 hover:text-primary focus:outline-none"
               aria-label="清空搜索内容"
             >
               <span class="icon-[mdi--close-circle] h-3.5 w-3.5"></span>
@@ -407,163 +406,171 @@ const formatSize = (bytes?: number) => {
 
       <!-- 歌曲列表区 (B4, B5, B9) -->
       <div class="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar">
-        <!-- 列表有内容 -->
-        <div v-if="filteredDownloads.length > 0" class="space-y-1 pb-4">
+        <!-- 列表有内容 (WAI-ARIA 表格体系) -->
+        <div
+          v-if="filteredDownloads.length > 0"
+          role="table"
+          aria-label="离线下载音乐列表"
+          class="space-y-1 pb-4"
+        >
           <!-- 表头 (桌面端) -->
           <div
             role="row"
-            class="text-primary/50 mb-1 hidden items-center border-b border-white/5 py-2.5 px-3 text-xs font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
+            class="text-primary/60 mb-1 hidden items-center border-b border-white/5 py-2 px-3 text-xs font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
           >
-            <div class="col-span-1 text-center font-mono">#</div>
-            <div class="col-span-5">歌曲</div>
-            <div class="col-span-2">专辑</div>
-            <div class="col-span-1 text-center">音质规格</div>
-            <div class="col-span-1 text-right font-mono">大小</div>
-            <div class="col-span-2 text-center">操作</div>
+            <div role="columnheader" class="col-span-1 text-center font-mono">#</div>
+            <div role="columnheader" class="col-span-5">歌曲</div>
+            <div role="columnheader" class="col-span-2">专辑</div>
+            <div role="columnheader" class="col-span-1 text-center">音质规格</div>
+            <div role="columnheader" class="col-span-1 text-right font-mono">大小</div>
+            <div role="columnheader" class="col-span-2 text-center">操作</div>
           </div>
 
-          <!-- 歌曲行 -->
-          <div
-            v-for="(item, index) in filteredDownloads"
-            :key="item.id"
-            tabindex="0"
-            role="row"
-            :id="`download-row-${item.id}`"
-            :aria-label="`${item.name} - ${item.artist}`"
-            @dblclick="playSingle(item, index)"
-            @keydown.enter.self="playSingle(item, index)"
-            class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500/50 cursor-pointer"
-            :class="[
-              isCurrentSong(item)
-                ? 'bg-pink-500/10 border border-pink-500/30 shadow-[0_0_16px_rgba(236,72,153,0.12)]'
-                : 'border border-transparent hover:bg-white/[0.06] hover:border-white/10'
-            ]"
-          >
-            <!-- 序号 / 播放动效 / 悬停播放键 (Col 1) -->
-            <div class="col-span-1 relative flex items-center justify-center text-center select-none">
-              <!-- 未播放：显示数字序号 -->
-              <span
-                v-if="!isCurrentSong(item)"
-                class="font-mono text-xs text-primary/60 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0"
-              >
-                {{ String(index + 1).padStart(2, '0') }}
-              </span>
+          <!-- 歌曲行容器 (role="rowgroup") -->
+          <div role="rowgroup" class="space-y-1">
+            <div
+              v-for="(item, index) in filteredDownloads"
+              :key="item.id"
+              tabindex="0"
+              role="row"
+              :id="`download-row-${item.id}`"
+              :aria-label="`${item.name} - ${item.artist}`"
+              @dblclick="playSingle(item, index)"
+              @keydown.enter.self="playSingle(item, index)"
+              class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500/50 cursor-pointer"
+              :class="[
+                isCurrentSong(item)
+                  ? 'bg-pink-500/10 border border-pink-500/30 shadow-[0_0_16px_rgba(236,72,153,0.12)]'
+                  : 'border border-transparent hover:bg-white/[0.06] hover:border-white/10'
+              ]"
+            >
+              <!-- 序号 / 播放动效 / 悬停播放键 (Col 1) -->
+              <div role="cell" class="col-span-1 relative flex items-center justify-center text-center select-none">
+                <!-- 未播放：显示数字序号 -->
+                <span
+                  v-if="!isCurrentSong(item)"
+                  class="font-mono text-xs text-primary/70 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0"
+                >
+                  {{ String(index + 1).padStart(2, '0') }}
+                </span>
 
-              <!-- 正在播放：CSS 均衡器柱动画 (B4 页面隐藏或 reduced-motion 时停止) -->
-              <div
-                v-else
-                class="playing-icon flex items-center justify-center gap-0.5"
-                aria-label="正在播放"
-              >
-                <span class="bar" :class="{ animate: isAudioPlaying && isPageVisible }"></span>
-                <span class="bar" :class="{ animate: isAudioPlaying && isPageVisible }"></span>
-                <span class="bar" :class="{ animate: isAudioPlaying && isPageVisible }"></span>
+                <!-- 正在播放：CSS 均衡器柱动画 (B4 页面隐藏或 reduced-motion 时停止) -->
+                <div
+                  v-else
+                  class="playing-icon flex items-center justify-center gap-0.5"
+                  aria-label="正在播放"
+                >
+                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
+                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
+                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
+                </div>
+
+                <!-- 悬停或键盘聚焦：平滑浮现播放按钮 -->
+                <button
+                  v-if="!isCurrentSong(item)"
+                  type="button"
+                  class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 text-primary hover:text-pink-400 active:scale-95 cursor-pointer focus:outline-none focus:opacity-100"
+                  aria-label="播放"
+                  title="播放"
+                  @click.stop="playSingle(item, index)"
+                >
+                  <span class="icon-[mdi--play] h-4 w-4"></span>
+                </button>
               </div>
 
-              <!-- 悬停或键盘聚焦：平滑浮现播放按钮 -->
-              <button
-                v-if="!isCurrentSong(item)"
-                type="button"
-                class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 text-primary hover:text-pink-400 active:scale-95 cursor-pointer focus:outline-none focus:opacity-100"
-                aria-label="播放"
-                title="播放"
-                @click.stop="playSingle(item, index)"
-              >
-                <span class="icon-[mdi--play] h-4 w-4"></span>
-              </button>
-            </div>
+              <!-- 封面与歌曲标题 + 歌手 (Col 2: 5 cols) -->
+              <div role="cell" class="col-span-5 flex min-w-0 items-center gap-3">
+                <div class="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg shadow-sm border border-white/10 bg-white/5">
+                  <LazyImage
+                    :src="formatCoverUrl(item.cover, { size: 80, artist: item.artist })"
+                    :fallback-src="formatCoverUrl('', { artist: item.artist })"
+                    :alt="item.name"
+                    :title="item.name"
+                    :seed="item.album || item.artist || item.name"
+                    imgClass="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    wrapperClass="h-full w-full"
+                  />
+                </div>
 
-            <!-- 封面与歌曲标题 + 歌手 (Col 2: 5 cols) -->
-            <div class="col-span-5 flex min-w-0 items-center gap-3">
-              <div class="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg shadow-sm border border-white/10 bg-white/5">
-                <LazyImage
-                  :src="formatCoverUrl(item.cover, { size: 80, artist: item.artist })"
-                  :fallback-src="formatCoverUrl('', { artist: item.artist })"
-                  :alt="item.name"
-                  :title="item.name"
-                  :seed="item.album || item.artist || item.name"
-                  imgClass="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  wrapperClass="h-full w-full"
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <h3
+                      :title="item.name"
+                      class="truncate text-sm font-medium transition-colors"
+                      :class="isCurrentSong(item) ? 'text-pink-300 font-semibold' : 'text-primary group-hover:text-pink-300'"
+                    >
+                      {{ item.name }}
+                    </h3>
+                  </div>
+                  <p :title="item.artist" class="mt-0.5 truncate text-xs text-primary/70">
+                    {{ item.artist || '未知歌手' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- 专辑 (Col 3: 2 cols) -->
+              <div role="cell" class="col-span-2 min-w-0 hidden md:block">
+                <span :title="item.album" class="truncate text-xs text-primary/70 block">
+                  {{ item.album || '-' }}
+                </span>
+              </div>
+
+              <!-- 音质规格徽章 (Col 4: 1 col) -->
+              <div role="cell" class="col-span-1 text-center hidden md:flex items-center justify-center">
+                <span
+                  v-if="getQualityBadgeInfo(item)"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium font-mono select-none"
+                  :class="getQualityBadgeInfo(item)!.class"
+                >
+                  {{ getQualityBadgeInfo(item)!.label }}
+                </span>
+                <span v-else class="text-xs text-primary/50 font-mono">-</span>
+              </div>
+
+              <!-- 大小 (Col 5: 1 col) -->
+              <div role="cell" class="col-span-1 text-right font-mono text-xs text-primary/70 hidden md:block">
+                {{ formatSize(item.fileSize || item.file?.size) }}
+              </div>
+
+              <!-- 操作按钮 (Col 6: 2 cols) (B5 悬停或键盘聚焦显示) -->
+              <div
+                role="cell"
+                class="col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  rounded="full"
+                  class="h-8 w-8 text-primary/80 hover:text-pink-400 focus:opacity-100 focus:text-pink-400"
+                  icon="icon-[mdi--play]"
+                  icon-class="h-4 w-4"
+                  aria-label="播放歌曲"
+                  title="播放"
+                  @click.stop="playSingle(item, index)"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  rounded="full"
+                  class="h-8 w-8 text-primary/80 hover:text-primary focus:opacity-100 focus:text-primary"
+                  icon="icon-[mdi--tray-arrow-down]"
+                  icon-class="h-4 w-4"
+                  aria-label="导出音频文件"
+                  title="导出音频文件"
+                  @click.stop="handleExport(item)"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  rounded="full"
+                  class="h-8 w-8 text-primary/70 hover:text-red-400 focus:opacity-100 focus:text-red-400"
+                  icon="icon-[mdi--trash-can-outline]"
+                  icon-class="h-4 w-4"
+                  aria-label="从离线库删除"
+                  title="从离线库删除"
+                  @click.stop="openDeleteConfirm(item)"
                 />
               </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <h3
-                    :title="item.name"
-                    class="truncate text-sm font-medium transition-colors"
-                    :class="isCurrentSong(item) ? 'text-pink-300 font-semibold' : 'text-primary group-hover:text-pink-300'"
-                  >
-                    {{ item.name }}
-                  </h3>
-                </div>
-                <p :title="item.artist" class="mt-0.5 truncate text-xs text-primary/65">
-                  {{ item.artist || '未知歌手' }}
-                </p>
-              </div>
-            </div>
-
-            <!-- 专辑 (Col 3: 2 cols) -->
-            <div class="col-span-2 min-w-0 hidden md:block">
-              <span :title="item.album" class="truncate text-xs text-primary/60 block">
-                {{ item.album || '-' }}
-              </span>
-            </div>
-
-            <!-- 音质规格徽章 (Col 4: 1 col) -->
-            <div class="col-span-1 text-center hidden md:flex items-center justify-center">
-              <span
-                v-if="getQualityBadgeInfo(item)"
-                class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium font-mono select-none"
-                :class="getQualityBadgeInfo(item)!.class"
-              >
-                {{ getQualityBadgeInfo(item)!.label }}
-              </span>
-              <span v-else class="text-xs text-primary/40 font-mono">-</span>
-            </div>
-
-            <!-- 大小 (Col 5: 1 col) -->
-            <div class="col-span-1 text-right font-mono text-xs text-primary/65 hidden md:block">
-              {{ formatSize(item.fileSize || item.file?.size) }}
-            </div>
-
-            <!-- 操作按钮 (Col 6: 2 cols) (B5 悬停或键盘聚焦显示) -->
-            <div
-              class="col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
-            >
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/70 hover:text-pink-400 focus:opacity-100 focus:text-pink-400"
-                icon="icon-[mdi--play]"
-                icon-class="h-4 w-4"
-                aria-label="播放歌曲"
-                title="播放"
-                @click.stop="playSingle(item, index)"
-              />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/70 hover:text-primary focus:opacity-100 focus:text-primary"
-                icon="icon-[mdi--tray-arrow-down]"
-                icon-class="h-4 w-4"
-                aria-label="导出音频文件"
-                title="导出音频文件"
-                @click.stop="handleExport(item)"
-              />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/60 hover:text-red-400 focus:opacity-100 focus:text-red-400"
-                icon="icon-[mdi--trash-can-outline]"
-                icon-class="h-4 w-4"
-                aria-label="从离线库删除"
-                title="从离线库删除"
-                @click.stop="openDeleteConfirm(item)"
-              />
             </div>
           </div>
         </div>
@@ -574,12 +581,12 @@ const formatSize = (bytes?: number) => {
           class="flex h-full min-h-[260px] flex-col items-center justify-center py-14 text-center select-none"
         >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10">
-            <span class="icon-[mdi--text-search] h-7 w-7 text-primary/40"></span>
+            <span class="icon-[mdi--text-search] h-7 w-7 text-primary/50"></span>
           </div>
-          <h3 class="text-sm font-semibold text-primary">未找到匹配的音乐</h3>
-          <p class="mt-1 text-xs text-primary/50">请尝试更换检索关键词或音质筛选条件</p>
+          <h2 class="text-sm font-semibold text-primary">未找到匹配的音乐</h2>
+          <p class="mt-1 text-xs text-primary/60">请尝试更换检索关键词或音质筛选条件</p>
           <Button
-            variant="glass"
+            variant="soft"
             size="sm"
             rounded="full"
             class="mt-4 px-4 py-1.5 text-xs text-primary/80 hover:text-primary"
@@ -596,10 +603,10 @@ const formatSize = (bytes?: number) => {
           class="flex h-full min-h-[320px] flex-col items-center justify-center py-16 text-center select-none"
         >
           <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner">
-            <span class="icon-[mdi--tray-arrow-down] h-8 w-8 text-primary/40"></span>
+            <span class="icon-[mdi--tray-arrow-down] h-8 w-8 text-primary/50"></span>
           </div>
-          <h3 class="text-base font-semibold text-primary">暂无离线下载音乐</h3>
-          <p class="mt-1.5 max-w-xs text-xs text-primary/60 leading-relaxed">
+          <h2 class="text-base font-semibold text-primary">暂无离线下载音乐</h2>
+          <p class="mt-1.5 max-w-xs text-xs text-primary/70 leading-relaxed">
             在歌曲列表或播放控制栏点击「下载」，歌曲将持久化保存在本地，离线断网亦可随时收听。
           </p>
           <Button
@@ -630,7 +637,7 @@ const formatSize = (bytes?: number) => {
         >
           <div
             id="delete-confirm-dialog"
-            class="glass-card w-full max-w-sm rounded-2xl border border-white/15 bg-neutral-900/95 p-6 shadow-2xl"
+            class="w-full max-w-sm rounded-2xl border border-white/15 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-md"
             @click.stop
           >
             <div class="flex items-center gap-3">
@@ -641,7 +648,7 @@ const formatSize = (bytes?: number) => {
                 <h3 id="confirm-dialog-title" class="text-base font-semibold text-primary">
                   {{ isClearAllConfirm ? '清空所有下载？' : '确认删除歌曲？' }}
                 </h3>
-                <p class="text-xs text-primary/60 mt-0.5">
+                <p class="text-xs text-primary/70 mt-0.5">
                   {{ isClearAllConfirm ? '此操作将释放所有离线存储空间，无法撤销。' : `将从离线库移除「${itemToDelete?.name || ''}」` }}
                 </p>
               </div>
@@ -649,10 +656,10 @@ const formatSize = (bytes?: number) => {
 
             <div class="mt-6 flex items-center justify-end gap-3">
               <Button
-                variant="glass"
+                variant="soft"
                 size="sm"
                 rounded="xl"
-                class="px-4 py-2 text-xs font-medium text-primary/70 hover:text-primary"
+                class="px-4 py-2 text-xs font-medium text-primary/80 hover:text-primary"
                 @click="closeDeleteModal"
                 aria-label="取消"
               >
