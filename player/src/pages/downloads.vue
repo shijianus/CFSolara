@@ -12,7 +12,7 @@ import type { DownloadedSong } from '@/utils/indexedDB'
 
 const router = useRouter()
 const downloadStore = useDownloadStore()
-const { currentSong, isPlaying, setPlaylist, play } = useAudio()
+const { currentSong, setPlaylist, play } = useAudio()
 
 // ══════ 状态：检索、筛选与排序 ══════
 const searchQuery = ref('')
@@ -449,7 +449,7 @@ const formatSize = (bytes?: number) => {
                 <!-- 未播放：显示数字序号 -->
                 <span
                   v-if="!isCurrentSong(item)"
-                  class="font-mono text-xs text-primary/70 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0"
+                  class="row-hover-hide font-mono text-xs text-primary/70 transition-opacity duration-150"
                 >
                   {{ String(index + 1).padStart(2, '0') }}
                 </span>
@@ -460,16 +460,16 @@ const formatSize = (bytes?: number) => {
                   class="playing-icon flex items-center justify-center gap-0.5"
                   aria-label="正在播放"
                 >
-                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
-                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
-                  <span class="bar" :class="{ animate: isPlaying && isPageVisible }"></span>
+                  <span class="bar" :class="{ animate: isPageVisible }"></span>
+                  <span class="bar" :class="{ animate: isPageVisible }"></span>
+                  <span class="bar" :class="{ animate: isPageVisible }"></span>
                 </div>
 
                 <!-- 悬停或键盘聚焦：平滑浮现播放按钮 -->
                 <button
                   v-if="!isCurrentSong(item)"
                   type="button"
-                  class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 text-primary hover:text-pink-400 active:scale-95 cursor-pointer focus:outline-none focus:opacity-100"
+                  class="row-hover-show absolute inset-0 flex items-center justify-center text-primary hover:text-pink-400 active:scale-95 cursor-pointer focus:outline-none"
                   aria-label="播放"
                   title="播放"
                   @click.stop="playSingle(item, index)"
@@ -535,7 +535,7 @@ const formatSize = (bytes?: number) => {
               <!-- 操作按钮 (Col 6: 2 cols) (B5 悬停或键盘聚焦显示) -->
               <div
                 role="cell"
-                class="col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
+                class="row-hover-show col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150"
               >
                 <Button
                   variant="ghost"
@@ -637,18 +637,18 @@ const formatSize = (bytes?: number) => {
         >
           <div
             id="delete-confirm-dialog"
-            class="w-full max-w-sm rounded-2xl border border-white/15 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-md"
+            class="w-full max-w-sm rounded-2xl border border-white/20 bg-neutral-900 text-white p-6 shadow-2xl backdrop-blur-md"
             @click.stop
           >
             <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/15 text-red-400 border border-red-500/25">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/20 text-red-400 border border-red-500/30">
                 <span class="icon-[mdi--alert-circle-outline] h-5 w-5"></span>
               </div>
               <div>
-                <h3 id="confirm-dialog-title" class="text-base font-semibold text-primary">
+                <h3 id="confirm-dialog-title" class="text-base font-semibold text-white">
                   {{ isClearAllConfirm ? '清空所有下载？' : '确认删除歌曲？' }}
                 </h3>
-                <p class="text-xs text-primary/70 mt-0.5">
+                <p class="text-xs text-zinc-300 mt-1">
                   {{ isClearAllConfirm ? '此操作将释放所有离线存储空间，无法撤销。' : `将从离线库移除「${itemToDelete?.name || ''}」` }}
                 </p>
               </div>
@@ -659,7 +659,7 @@ const formatSize = (bytes?: number) => {
                 variant="soft"
                 size="sm"
                 rounded="xl"
-                class="px-4 py-2 text-xs font-medium text-primary/80 hover:text-primary"
+                class="px-4 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/10"
                 @click="closeDeleteModal"
                 aria-label="取消"
               >
@@ -670,7 +670,7 @@ const formatSize = (bytes?: number) => {
                 variant="soft"
                 size="sm"
                 rounded="xl"
-                class="bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 px-4 py-2 text-xs font-semibold"
+                class="bg-red-500/30 text-red-200 hover:bg-red-500/40 border border-red-500/40 px-4 py-2 text-xs font-semibold"
                 @click="confirmDeleteAction"
                 aria-label="确认删除"
               >
@@ -689,6 +689,29 @@ const formatSize = (bytes?: number) => {
 .download-song-item {
   content-visibility: auto;
   contain-intrinsic-size: auto 56px;
+}
+
+/* 序号悬停平滑切换为播放按钮，行操作悬停/聚焦显示 (B4, B5) */
+.download-song-item .row-hover-show {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.download-song-item:hover .row-hover-show,
+.download-song-item:focus-within .row-hover-show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.download-song-item .row-hover-hide {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+.download-song-item:hover .row-hover-hide,
+.download-song-item:focus-within .row-hover-hide {
+  opacity: 0;
 }
 
 /* 动效遵守 prefers-reduced-motion (B4, B9) */
