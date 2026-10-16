@@ -413,7 +413,7 @@ const formatSize = (bytes?: number) => {
           <!-- 表头 (桌面端) -->
           <div
             role="row"
-            class="text-white/70 mb-1 hidden items-center border-b border-white/10 py-2.5 px-3 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
+            class="text-white/70 mb-1 hidden items-center border-b border-white/10 py-2.5 px-2.5 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
           >
             <div role="columnheader" class="col-span-1 text-center font-mono text-[13px] font-medium text-white/70">#</div>
             <div role="columnheader" class="col-span-5 text-[13px] font-medium text-white/70">歌曲</div>
