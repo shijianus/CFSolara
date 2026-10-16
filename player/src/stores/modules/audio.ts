@@ -280,12 +280,64 @@ export const useAudioStore = defineStore('audio', {
 
       // 同一首歌、audio.src 未变、currentTime > 0 且未播完时，从暂停恢复播放，不重载、不重设 src、不归零
       if (!isSwitchingSong && isSrcUnchanged && audio.currentTime > 0 && !isAtEnd) {
-        try {
-          this.audio.error = null
-          await audio.play()
-          return
-        } catch (error) {
-          console.error('Resume error:', error)
+        const resumeTime = audio.currentTime || this.audio.currentTime || 0
+        let shouldFallbackReload = false
+
+        // 检查媒体状态是否异常（抛错、error、readyState 为 0、或 networkState 为 NETWORK_NO_SOURCE 即 3）
+        if (audio.error || audio.readyState === 0 || audio.networkState === 3) {
+          shouldFallbackReload = true
+        } else {
+          try {
+            this.audio.error = null
+            await audio.play()
+            if (audio.error || audio.readyState === 0 || audio.networkState === 3) {
+              shouldFallbackReload = true
+            } else {
+              return
+            }
+          } catch (error) {
+            console.warn('Resume play failed, triggering fallback reload:', error)
+            shouldFallbackReload = true
+          }
+        }
+
+        // 失败兜底：强制重载音频源并在 loadedmetadata 后尝试恢复暂停进度，确保播放不卡死
+        if (shouldFallbackReload) {
+          try {
+            this.audio.isLoading = true
+            if (resumeTime > 0) {
+              const restoreProgress = () => {
+                try {
+                  if (audio.duration && audio.duration > 0) {
+                    audio.currentTime = Math.min(resumeTime, audio.duration)
+                  } else {
+                    audio.currentTime = resumeTime
+                  }
+                } catch (_) {}
+              }
+              audio.addEventListener('loadedmetadata', restoreProgress, { once: true })
+            }
+            this._loadAudioSrc(this.audio.currentSong.url || '', true)
+            await audio.play()
+            this.audio.error = null
+            return
+          } catch (reloadErr) {
+            console.error('Fallback reload and resume error, attempting restart from 0:', reloadErr)
+            try {
+              audio.currentTime = 0
+              this.audio.currentTime = 0
+              await audio.play()
+              this.audio.error = null
+              return
+            } catch (finalErr) {
+              console.error('Final play attempt error:', finalErr)
+              const id = this.audio.currentSong?.id ?? null
+              if (id) this.refreshAndReplay()
+              return
+            }
+          } finally {
+            this.audio.isLoading = false
+          }
         }
       }
 
@@ -364,14 +416,14 @@ export const useAudioStore = defineStore('audio', {
     },
 
     /**
-     * 内部方法：当 URL 变化时重新加载音频源
+     * 内部方法：当 URL 变化（或 force=true 强制）时重新加载音频源
      */
-    _loadAudioSrc(url: string) {
+    _loadAudioSrc(url: string, force = false) {
       if (!this.audio.audio) return
       const currentSrc = this.audio.audio.src
       const resolved =
         url && typeof window !== 'undefined' ? new URL(url, window.location.href).href : url
-      if (currentSrc !== resolved && this.audio.audio.getAttribute('src') !== url) {
+      if (force || (currentSrc !== resolved && this.audio.audio.getAttribute('src') !== url)) {
         this.audio.audio.src = url
         this.audio.audio.load()
       }
