@@ -197,10 +197,10 @@ onUnmounted(() => {
                 <span class="icon-[mdi--tray-arrow-down] h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 id="download-dialog-title" class="text-base font-bold text-primary tracking-wide">
+                <h3 id="download-dialog-title" class="text-[18px] font-semibold text-white/95 tracking-wide leading-snug">
                   下载音质规格选择
                 </h3>
-                <p class="mt-0.5 text-xs text-primary/60">
+                <p class="mt-0.5 text-[13px] text-white/75 font-normal">
                   选择音频规格以启动下载并导入离线音乐库
                 </p>
               </div>
@@ -225,7 +225,7 @@ onUnmounted(() => {
                 <div class="flex items-center gap-2">
                   <h4
                     :title="downloadStore.currentDownloadSong.name"
-                    class="truncate text-sm font-bold text-primary"
+                    class="truncate text-[15px] font-semibold text-white/95"
                   >
                     {{ displayTitle }}
                   </h4>
@@ -233,7 +233,7 @@ onUnmounted(() => {
                     {{ currentChoice.label }}
                   </span>
                 </div>
-                <p class="mt-0.5 truncate text-xs text-primary/60">
+                <p class="mt-0.5 truncate text-[13px] text-white/75 font-normal">
                   {{ downloadStore.currentDownloadSong.artist }}
                   <span v-if="downloadStore.currentDownloadSong.album"> · 《{{ downloadStore.currentDownloadSong.album }}》</span>
                 </p>
@@ -272,8 +272,8 @@ onUnmounted(() => {
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2 flex-wrap">
                       <span
-                        class="text-sm font-bold transition-colors"
-                        :class="selectedLevel === choice.level ? 'text-primary font-bold' : 'text-primary/85'"
+                        class="text-[15px] font-semibold transition-colors"
+                        :class="selectedLevel === choice.level ? 'text-white font-semibold' : 'text-white/85'"
                       >
                         {{ choice.label }}
                       </span>
@@ -285,16 +285,16 @@ onUnmounted(() => {
                             ? 'bg-pink-500/20 text-pink-300 border border-pink-500/35'
                             : choice.level === 'exhigh'
                               ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                              : 'bg-white/10 text-primary/70 border border-white/15'
+                              : 'bg-white/10 text-white/80 border border-white/15'
                         ]"
                       >
                         {{ choice.bitrate }}
                       </span>
-                      <span class="rounded bg-white/5 px-1 py-0.5 font-mono text-[11px] text-primary/50 uppercase">
+                      <span class="rounded bg-white/5 px-1 py-0.5 font-mono text-[11px] text-white/60 uppercase">
                         {{ choice.format }}
                       </span>
                     </div>
-                    <p class="mt-1 text-xs text-primary/55 leading-tight truncate">
+                    <p class="mt-1 text-[13px] text-white/75 leading-normal truncate font-normal">
                       {{ choice.desc }}
                     </p>
                   </div>
@@ -303,7 +303,7 @@ onUnmounted(() => {
                 <!-- 右侧：预估体积区间 + 选中勾标 (无表单单选圆圈) -->
                 <div class="flex items-center gap-3 shrink-0">
                   <div class="text-right">
-                    <span class="font-mono text-xs font-semibold text-primary/75">
+                    <span class="font-mono text-[13px] font-medium text-white/80 tabular-nums">
                       {{ choice.estimatedSize }}
                     </span>
                   </div>
@@ -319,7 +319,7 @@ onUnmounted(() => {
             </div>
 
             <!-- 底部存储与导出提示文案 -->
-            <div class="dialog-inner-card mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] px-3 py-2 text-[11px] text-primary/65 leading-relaxed">
+            <div class="dialog-inner-card mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] px-3 py-2 text-[13px] text-white/75 font-normal leading-relaxed">
               <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400"></span>
               <span>
                 音频将<strong>存入应用内离线库</strong>（可在下载列表随时免流播放），并<strong>同步唤起本地文件保存</strong>。
@@ -329,7 +329,7 @@ onUnmounted(() => {
             <!-- 错误提示（若有） -->
             <div
               v-if="downloadStore.errorMsg"
-              class="mb-3 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] border border-red-500/30 bg-red-500/15 p-2.5 text-xs text-red-300"
+              class="mb-3 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] border border-red-500/30 bg-red-500/15 p-2.5 text-[13px] text-red-300"
             >
               <span class="icon-[mdi--alert-circle] h-4 w-4 shrink-0"></span>
               <span>{{ downloadStore.errorMsg }}</span>
@@ -341,7 +341,7 @@ onUnmounted(() => {
                 variant="ghost"
                 size="md"
                 rounded="xl"
-                class="px-4 text-xs font-semibold text-primary/70 hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="px-4 text-[14px] font-semibold text-white/75 hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
@@ -352,7 +352,7 @@ onUnmounted(() => {
                 variant="gradient"
                 size="md"
                 rounded="xl"
-                class="px-6 text-xs font-bold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="px-6 text-[14px] font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="handleConfirm"
               >
