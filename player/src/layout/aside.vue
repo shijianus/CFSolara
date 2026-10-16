@@ -299,6 +299,7 @@ const isActive = (path: string) => {
         <span class="icon-[mdi--chevron-right] h-5 w-5"></span>
         <span class="icon-[mdi--account-music] h-5 w-5"></span>
         <span class="icon-[mdi--album] h-5 w-5"></span>
+        <span class="icon-[mdi--download-circle-outline] h-5 w-5"></span>
         <span class="icon-[mdi--folder-music-outline] h-5 w-5"></span>
       </div>
     </div>
