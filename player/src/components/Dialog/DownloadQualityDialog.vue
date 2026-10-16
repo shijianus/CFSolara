@@ -7,32 +7,52 @@ import Button from '@/components/Ui/Button.vue'
 const downloadStore = useDownloadStore()
 const selectedLevel = ref<string>('lossless')
 
-// 根据当前歌曲的 qualities 列表展示音质选项，不展示未经验证的采样率/位深，保留真实码率与体积区间
-const availableChoices = computed<QualityChoice[]>(() => {
+// 严格对齐 U-04 规范：单一格式标签、无位深/采样率编造、每句描述不超过 14 个汉字
+const QUALITY_CONFIG: Record<string, { label: string; formatTag: string; estimatedSize: string; desc: string }> = {
+  lossless: {
+    label: 'SQ 无损',
+    formatTag: 'FLAC',
+    estimatedSize: '约 25–50 MB',
+    desc: '超清无损音质母带级声场',
+  },
+  exhigh: {
+    label: 'HQ 极高',
+    formatTag: 'MP3 320k',
+    estimatedSize: '约 8–12 MB',
+    desc: '极高品质细节饱满通透',
+  },
+  standard: {
+    label: '标准',
+    formatTag: 'MP3 128k',
+    estimatedSize: '约 3–5 MB',
+    desc: '标准品质流畅快速省流',
+  },
+}
+
+const availableChoices = computed<Array<QualityChoice & { formatTag: string }>>(() => {
   const song = downloadStore.currentDownloadSong
-  if (!song) return DEFAULT_QUALITY_CHOICES
+  const levels = ['lossless', 'exhigh', 'standard'] as const
 
-  if (song.qualities && song.qualities.length > 0) {
-    return song.qualities.map((q) => {
-      const def = DEFAULT_QUALITY_CHOICES.find((d) => d.level === q.level)
-      return {
-        level: q.level,
-        label: q.label || (def?.label ?? '高品质'),
-        bitrate: q.bitrate || (def?.bitrate ?? '320kbps'),
-        format: q.format || (def?.format ?? 'mp3'),
-        desc: q.desc || (def?.desc ?? '超清高品质音频'),
-        estimatedSize:
-          q.level === 'lossless'
-            ? '约 25MB - 50MB'
-            : q.level === 'exhigh'
-              ? '约 8MB - 12MB'
-              : '约 3MB - 5MB',
-        streamUrl: q.streamUrl,
-      }
-    })
-  }
+  const availableLevels = (song?.qualities && song.qualities.length > 0)
+    ? levels.filter(l => song.qualities!.some(q => q.level === l))
+    : levels
 
-  return DEFAULT_QUALITY_CHOICES
+  const finalLevels = availableLevels.length > 0 ? availableLevels : levels
+
+  return finalLevels.map((lvl) => {
+    const meta = QUALITY_CONFIG[lvl]
+    const matchedQuality = song?.qualities?.find(q => q.level === lvl)
+    return {
+      level: lvl,
+      label: meta.label,
+      formatTag: meta.formatTag,
+      bitrate: lvl === 'lossless' ? 'FLAC' : lvl === 'exhigh' ? '320kbps' : '128kbps',
+      format: lvl === 'lossless' ? 'flac' : 'mp3',
+      desc: meta.desc,
+      estimatedSize: meta.estimatedSize,
+      streamUrl: matchedQuality?.streamUrl,
+    }
+  })
 })
 
 // 当歌曲改变时，默认选中最高音质
@@ -263,11 +283,11 @@ onUnmounted(() => {
                 class="group relative flex cursor-pointer items-center justify-between rounded-[var(--glass-r-lg,16px)] border p-3 transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :class="[
                   selectedLevel === choice.level
-                    ? 'border-[var(--glass-accent-border,rgba(236,72,153,0.5))] bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[var(--glass-accent-glow)]'
+                    ? 'border-[1.5px] border-pink-500/80 bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[0_0_10px_rgba(236,72,153,0.35)]'
                     : 'dialog-inner-card hover:border-white/20 hover:bg-white/[0.08]'
                 ]"
               >
-                <!-- 左侧：规格名 + 码率/格式 + 描述 (不编造位深/采样率) -->
+                <!-- 左侧：规格名 + 单一格式标签 (FLAC / MP3 320k / MP3 128k) + 不超过14字说明 -->
                 <div class="flex items-center gap-3 min-w-0 flex-1 pr-2">
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2 flex-wrap">
@@ -277,7 +297,7 @@ onUnmounted(() => {
                       >
                         {{ choice.label }}
                       </span>
-                      <!-- 格式与码率标签 -->
+                      <!-- 单一格式标签 -->
                       <span
                         class="shrink-0 rounded-[var(--glass-r-sm,8px)] px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none"
                         :class="[
@@ -288,10 +308,7 @@ onUnmounted(() => {
                               : 'bg-white/10 text-white/80 border border-white/15'
                         ]"
                       >
-                        {{ choice.bitrate }}
-                      </span>
-                      <span class="rounded bg-white/5 px-1 py-0.5 font-mono text-[11px] text-white/60 uppercase">
-                        {{ choice.format }}
+                        {{ choice.formatTag }}
                       </span>
                     </div>
                     <p class="mt-1 text-[13px] text-white/75 leading-normal truncate font-normal">
@@ -300,7 +317,7 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <!-- 右侧：预估体积区间 + 选中勾标 (无表单单选圆圈) -->
+                <!-- 右侧：预估体积区间 + 选中勾标 (不重叠) -->
                 <div class="flex items-center gap-3 shrink-0">
                   <div class="text-right">
                     <span class="font-mono text-[13px] font-medium text-white/80 tabular-nums">
@@ -318,12 +335,10 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- 底部存储与导出提示文案 -->
+            <!-- 底部存储与导出提示文案：中性信息图标，不带绿色盾牌 -->
             <div class="dialog-inner-card mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] px-3 py-2 text-[13px] text-white/75 font-normal leading-relaxed">
-              <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400"></span>
-              <span>
-                音频将<strong>存入应用内离线库</strong>（可在下载列表随时免流播放），并<strong>同步唤起本地文件保存</strong>。
-              </span>
+              <span class="icon-[mdi--information-outline] h-4 w-4 shrink-0 text-white/60"></span>
+              <span>音频将存入应用内离线库（可在下载列表随时免流播放），并同步唤起本地文件保存。</span>
             </div>
 
             <!-- 错误提示（若有） -->
@@ -335,13 +350,13 @@ onUnmounted(() => {
               <span>{{ downloadStore.errorMsg }}</span>
             </div>
 
-            <!-- 底部操作按钮 -->
+            <!-- 底部操作按钮：等高 38px，次要幽灵按钮悬停有底色 -->
             <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
               <Button
                 variant="ghost"
                 size="md"
                 rounded="xl"
-                class="px-4 text-[14px] font-semibold text-white/75 hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="h-[38px] px-4 text-[14px] font-semibold text-white/80 bg-white/5 hover:bg-white/12 border border-white/10 hover:border-white/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
@@ -352,7 +367,7 @@ onUnmounted(() => {
                 variant="gradient"
                 size="md"
                 rounded="xl"
-                class="px-6 text-[14px] font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="h-[38px] px-6 text-[14px] font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="handleConfirm"
               >
