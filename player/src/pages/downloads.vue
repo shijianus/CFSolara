@@ -286,7 +286,7 @@ const formatSize = (bytes?: number) => {
   <div class="flex flex-1 flex-col overflow-hidden p-4 sm:p-6">
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- 扁平 Header (B2) -->
-      <header class="flex items-center justify-between pb-3.5 border-b border-white/10 select-none shrink-0">
+      <header class="flex items-baseline justify-between pb-3.5 border-b border-white/10 select-none shrink-0">
         <div class="flex items-baseline gap-3">
           <h1 class="text-[22px] font-semibold tracking-tight text-white/95 leading-tight">下载列表</h1>
           <p v-if="downloads.length > 0" class="text-[13px] text-white/75 font-normal">
@@ -294,15 +294,15 @@ const formatSize = (bytes?: number) => {
           </p>
         </div>
 
-        <div v-if="downloads.length > 0" class="flex items-center gap-2">
+        <div v-if="downloads.length > 0" class="flex items-baseline">
           <button
-            class="flex items-center text-[13px] font-medium text-white/75 hover:text-red-400 px-3 py-1.5 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+            class="group inline-flex items-center gap-1.5 text-[13px] font-medium text-white/70 hover:text-red-400 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
             @click="openClearAllConfirm"
             title="清空离线音乐库"
             aria-label="清空离线音乐库"
           >
-            <span class="icon-[mdi--delete-sweep-outline] mr-1 h-4 w-4"></span>
-            清空
+            <span class="icon-[mdi--delete-sweep-outline] h-3.5 w-3.5 text-white/60 group-hover:text-red-400 transition-colors"></span>
+            <span>清空</span>
           </button>
         </div>
       </header>
@@ -311,7 +311,7 @@ const formatSize = (bytes?: number) => {
       <section
         v-if="downloads.length > 0"
         aria-label="下载列表操作栏"
-        class="my-3 flex flex-wrap items-center justify-between gap-3 shrink-0"
+        class="my-3 flex flex-wrap items-center justify-between gap-4 shrink-0"
       >
         <!-- 左侧：播放全部 / 随机播放 -->
         <div class="flex items-center gap-2">
