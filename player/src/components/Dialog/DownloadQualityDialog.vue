@@ -163,10 +163,10 @@ onUnmounted(() => {
       aria-modal="true"
       aria-labelledby="download-dialog-title"
     >
-      <!-- 背景毛玻璃遮罩 (克制通透度，遵循 b710cde 提交) -->
+      <!-- 背景毛玻璃遮罩 -->
       <Transition name="mask" appear>
         <div
-          class="absolute inset-0 bg-black/35 backdrop-blur-sm"
+          class="absolute inset-0 bg-black/30 backdrop-blur-sm"
           @click="downloadStore.closeDownloadDialog"
         />
       </Transition>
@@ -176,8 +176,8 @@ onUnmounted(() => {
         <div class="relative z-10 w-full max-w-lg">
           <div
             ref="dialogCardRef"
-            class="glass-container-strong relative overflow-hidden rounded-[var(--glass-r-xl,24px)] border border-white/15 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
-            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.75), var(--glass-accent-glow);"
+            class="download-dialog-panel relative overflow-hidden rounded-[var(--glass-r-xl,24px)] p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
+            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.65), 0 0 28px rgba(139, 92, 246, 0.15);"
           >
             <!-- 右上角关闭按钮 -->
             <button
@@ -209,7 +209,7 @@ onUnmounted(() => {
             <!-- 当前歌曲信息卡片 -->
             <div
               v-if="downloadStore.currentDownloadSong"
-              class="relative mb-4 flex items-center gap-3 overflow-hidden rounded-[var(--glass-r-md,12px)] border border-white/10 bg-white/5 p-3 backdrop-blur-sm"
+              class="dialog-inner-card relative mb-4 flex items-center gap-3 overflow-hidden rounded-[var(--glass-r-md,12px)] p-3 backdrop-blur-sm"
             >
               <!-- 封面图：严格 8px 圆角规范 -->
               <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[var(--glass-r-sm,8px)] shadow-md border border-white/10">
@@ -264,7 +264,7 @@ onUnmounted(() => {
                 :class="[
                   selectedLevel === choice.level
                     ? 'border-[var(--glass-accent-border,rgba(236,72,153,0.5))] bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[var(--glass-accent-glow)]'
-                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                    : 'dialog-inner-card hover:border-white/20 hover:bg-white/[0.08]'
                 ]"
               >
                 <!-- 左侧：规格名 + 码率/格式 + 描述 (不编造位深/采样率) -->
@@ -318,8 +318,8 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- 底部存储与导出提示文案 (基于 IndexedDB 离线库 + 浏览器文件保存双路径确证) -->
-            <div class="mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] bg-white/5 px-3 py-2 border border-white/5 text-[11px] text-primary/65 leading-relaxed">
+            <!-- 底部存储与导出提示文案 -->
+            <div class="dialog-inner-card mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] px-3 py-2 text-[11px] text-primary/65 leading-relaxed">
               <span class="icon-[mdi--shield-check] h-4 w-4 shrink-0 text-emerald-400"></span>
               <span>
                 音频将<strong>存入应用内离线库</strong>（可在下载列表随时免流播放），并<strong>同步唤起本地文件保存</strong>。
@@ -372,6 +372,18 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.download-dialog-panel {
+  background: linear-gradient(180deg, rgba(38, 30, 62, 0.90) 0%, rgba(30, 26, 52, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+}
+
+.dialog-inner-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
 .mask-enter-active,
 .mask-leave-active {
   transition: opacity var(--glass-duration-normal, 200ms) var(--glass-ease, ease);
