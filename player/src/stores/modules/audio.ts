@@ -248,12 +248,46 @@ export const useAudioStore = defineStore('audio', {
     async playSong(song?: Song, index?: number) {
       this.initAudio()
 
+      const prevSong = this.audio.currentSong
+      const isSwitchingSong = !!(song && prevSong && song.id !== prevSong.id)
+
       if (song && index !== undefined) {
         this.audio.currentSong = song
         this.audio.currentIndex = index
       }
 
       if (!this.audio.currentSong || !this.audio.audio) return
+
+      const audio = this.audio.audio
+      const currentAudioSrc = audio.getAttribute('src') || audio.src
+      const resolvedTargetUrl =
+        this.audio.currentSong.url && typeof window !== 'undefined'
+          ? new URL(this.audio.currentSong.url, window.location.href).href
+          : this.audio.currentSong.url
+      const isSrcUnchanged =
+        !!currentAudioSrc &&
+        !!this.audio.currentSong.url &&
+        (currentAudioSrc === this.audio.currentSong.url || audio.src === resolvedTargetUrl)
+
+      const isAtEnd =
+        audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.1)
+
+      // 同一首歌播放结束后重新点击播放，重置到开头从头播放
+      if (!isSwitchingSong && isSrcUnchanged && isAtEnd) {
+        audio.currentTime = 0
+        this.audio.currentTime = 0
+      }
+
+      // 同一首歌、audio.src 未变、currentTime > 0 且未播完时，从暂停恢复播放，不重载、不重设 src、不归零
+      if (!isSwitchingSong && isSrcUnchanged && audio.currentTime > 0 && !isAtEnd) {
+        try {
+          this.audio.error = null
+          await audio.play()
+          return
+        } catch (error) {
+          console.error('Resume error:', error)
+        }
+      }
 
       try {
         this.audio.error = null
@@ -334,7 +368,10 @@ export const useAudioStore = defineStore('audio', {
      */
     _loadAudioSrc(url: string) {
       if (!this.audio.audio) return
-      if (this.audio.audio.src !== url) {
+      const currentSrc = this.audio.audio.src
+      const resolved =
+        url && typeof window !== 'undefined' ? new URL(url, window.location.href).href : url
+      if (currentSrc !== resolved && this.audio.audio.getAttribute('src') !== url) {
         this.audio.audio.src = url
         this.audio.audio.load()
       }
