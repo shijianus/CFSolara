@@ -393,7 +393,20 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+const isPerfMode = ref(false)
+const updatePerfModeState = () => {
+  if (typeof document !== 'undefined') {
+    isPerfMode.value = document.documentElement.classList.contains('perf-mode')
+  }
+}
+let perfObserver: MutationObserver | null = null
+
 onMounted(() => {
+  updatePerfModeState()
+  if (typeof MutationObserver !== 'undefined') {
+    perfObserver = new MutationObserver(() => updatePerfModeState())
+    perfObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  }
   document.addEventListener('pointerdown', handleDocumentClick)
   document.addEventListener('keydown', handleKeydown)
   window.addEventListener('resize', updateQualityMenuPosition)
@@ -401,6 +414,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (perfObserver) perfObserver.disconnect()
   document.removeEventListener('pointerdown', handleDocumentClick)
   document.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('resize', updateQualityMenuPosition)
@@ -414,10 +428,11 @@ const emit = defineEmits(['show'])
     class="glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
     style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
-    <!-- 音频可视化器背景 -->
+    <!-- 独立音频频谱带 (限定在进度条上方 20px 独立带内，不透明度 <= 0.25，仅播放时出现，性能模式下不渲染) -->
     <div
-      v-if="isAnalyserInitialized && audioVisualizer.enabledInFooter"
-      class="pointer-events-none absolute bottom-0 w-full left-0 z-0 opacity-30"
+      v-if="isPlaying && isAnalyserInitialized && audioVisualizer.enabledInFooter && !isPerfMode"
+      class="footer-visualizer-strip pointer-events-none absolute left-3 right-3 h-[20px] overflow-hidden select-none z-0 opacity-25"
+      style="bottom: 34px;"
     >
       <AudioVisualizer
         :frequency-data="frequencyData"
@@ -427,7 +442,7 @@ const emit = defineEmits(['show'])
         :bar-width="3"
         :bar-gap="2"
         :gradient-colors="visualizerGradient"
-        :height="80"
+        :height="20"
       />
     </div>
 
@@ -662,13 +677,13 @@ const emit = defineEmits(['show'])
       </div>
     </div>
 
-    <!-- 进度条 -->
+    <!-- 进度条与高对比度时间文字 (对比度 >= 4.5:1，独立层级不被频谱遮盖) -->
     <div v-if="currentSong" class="relative z-10 mt-3 flex items-center space-x-3">
-      <span class="text-primary/60 text-xs">{{
+      <span class="text-white/80 text-xs font-medium font-mono tabular-nums select-none">{{
         isLoading ? t('player.loading') : formattedCurrentTime
       }}</span>
       <MusicProgress class="flex-1" />
-      <span class="text-primary/60 text-xs">{{ formattedDuration }}</span>
+      <span class="text-white/80 text-xs font-medium font-mono tabular-nums select-none">{{ formattedDuration }}</span>
     </div>
 
     <!-- 音质切换即时反馈 Toast -->
