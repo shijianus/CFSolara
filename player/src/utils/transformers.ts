@@ -257,7 +257,7 @@ export function transformSong(item: Record<string, unknown>): SongData {
         label: 'SQ 无损',
         bitrate: 'FLAC',
         format: 'flac',
-        desc: '超清无损母带音质 (FLAC / 24-bit)',
+        desc: '超清无损音质 (FLAC)',
         streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=lossless`,
       },
       {
@@ -265,7 +265,7 @@ export function transformSong(item: Record<string, unknown>): SongData {
         label: 'HQ 极高',
         bitrate: '320kbps',
         format: 'mp3',
-        desc: '极高品质MP3 (320kbps 饱满声场)',
+        desc: '极高品质 (MP3 320k)',
         streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=320`,
       },
       {

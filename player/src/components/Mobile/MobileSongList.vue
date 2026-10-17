@@ -60,20 +60,20 @@ const getQualityBadgeInfo = (song: Song) => {
   if (isLossless) {
     return {
       label: 'SQ 无损',
-      title: 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
+      title: 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
       badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40',
     }
   }
   if (isExhigh) {
     return {
       label: 'HQ 极高',
-      title: 'HQ: 极高音质 (320Kbps MP3)',
+      title: 'HQ: 极高音质 (MP3 320k)',
       badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
     }
   }
   return {
     label: '标准',
-    title: '标准: 标清音质 (128Kbps MP3)',
+    title: '标准: 标准音质 (MP3 128k)',
     badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
   }
 }

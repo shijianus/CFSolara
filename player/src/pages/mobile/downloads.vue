@@ -271,7 +271,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
       </div>
       <p class="text-sm font-semibold text-primary/70">暂无离线音乐</p>
       <p class="text-xs text-primary/40 mt-1 max-w-xs leading-relaxed">
-        在歌曲列表或播放控制台点击下载，随时离线畅听无损母带。
+        在歌曲列表或播放控制台点击下载，随时离线播放音乐。
       </p>
       <button
         @click="router.push('/search')"

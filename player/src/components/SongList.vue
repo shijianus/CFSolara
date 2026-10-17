@@ -141,8 +141,8 @@ const getQualityBadgeInfo = (song: Song) => {
     return {
       label: 'SQ',
       title: hasMultiple
-        ? `SQ: 超清无损母带 (含 ${song.qualities?.length} 档音质可在底栏切换)`
-        : 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
+        ? `SQ: 无损音质 (FLAC，仅表示该音质档位，可在底栏切换)`
+        : 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
       badgeClass: 'bg-pink-500/10 text-pink-300/90 border border-pink-500/25',
     }
   }
@@ -150,14 +150,14 @@ const getQualityBadgeInfo = (song: Song) => {
     return {
       label: 'HQ',
       title: hasMultiple
-        ? `HQ: 极高音质 (含 ${song.qualities?.length} 档音质可在底栏切换)`
-        : 'HQ: 极高音质 (320Kbps MP3)',
+        ? `HQ: 极高音质 (MP3 320k，可在底栏切换)`
+        : 'HQ: 极高音质 (MP3 320k)',
       badgeClass: 'bg-cyan-500/15 text-cyan-300/90 border border-cyan-500/25',
     }
   }
   return {
     label: '标准',
-    title: '标准: 标清流畅音质 (128Kbps MP3)',
+    title: '标准: 标准音质 (MP3 128k)',
     badgeClass: 'bg-emerald-500/15 text-emerald-300/90 border border-emerald-500/25',
   }
 }
