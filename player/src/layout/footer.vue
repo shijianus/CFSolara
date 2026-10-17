@@ -238,6 +238,13 @@ onUnmounted(() => {
   if (qualityToastTimer) clearTimeout(qualityToastTimer)
 })
 
+import {
+  probeSongQualities,
+  getCachedProbeResult,
+  type SongProbeResult,
+  type QualityLevel,
+} from '@/utils/qualityProbe'
+
 // ═══════ 音质切换与下载控制 ═══════
 const showQualityMenu = ref(false)
 const qualityMenuRef = ref<HTMLElement | null>(null)
@@ -247,48 +254,141 @@ const focusedQualityIndex = ref(0)
 const qualityToastMsg = ref('')
 let qualityToastTimer: any = null
 
-const availableQualities = computed(() => {
-  if (currentSong.value?.qualities && currentSong.value.qualities.length > 0) {
-    return currentSong.value.qualities.map((q) => {
-      let displayBitrate = '128k'
-      if (q.level === 'lossless') displayBitrate = 'FLAC'
-      else if (q.level === 'exhigh') displayBitrate = '320k'
-      else if (q.level === 'standard') displayBitrate = '128k'
-      else if (q.bitrate) displayBitrate = q.bitrate
+// 歌曲真实音质探测结果
+const currentSongProbe = ref<SongProbeResult | null>(null)
 
-      return {
-        level: q.level,
-        label: q.label,
-        bitrate: displayBitrate,
-        desc: q.desc || (q.level === 'lossless' ? '超清无损' : q.level === 'exhigh' ? '极高品质' : '标准流畅'),
+// 监听当前歌曲变化，触发统一音质探测
+watch(
+  () => currentSong.value,
+  async (newSong) => {
+    if (!newSong || !newSong.id) {
+      currentSongProbe.value = null
+      return
+    }
+    const cached = getCachedProbeResult(newSong.id)
+    if (cached) {
+      currentSongProbe.value = cached
+    }
+    try {
+      const res = await probeSongQualities(newSong)
+      if (currentSong.value && String(currentSong.value.id) === String(newSong.id)) {
+        currentSongProbe.value = res
       }
-    })
-  }
-  return [
-    { level: 'lossless', label: 'SQ 无损', bitrate: 'FLAC', desc: '超清无损' },
-    { level: 'exhigh', label: 'HQ 极高', bitrate: '320k', desc: '极高品质' },
-    { level: 'standard', label: '标准', bitrate: '128k', desc: '标准流畅' },
-  ]
-})
+    } catch (e) {
+      // 探测异常维持兜底
+    }
+  },
+  { immediate: true }
+)
 
-const currentQualityLevel = computed(() => {
+const currentQualityLevel = computed<QualityLevel>(() => {
   const badge = currentSong.value?.qualityBadge
   if (badge === 'SQ') return 'lossless'
   if (badge === 'HQ') return 'exhigh'
   if (badge === '标准' || badge === 'STANDARD') return 'standard'
-  // 若未标注则回退至首个音质规格
   const firstLevel = currentSong.value?.qualities?.[0]?.level
-  if (firstLevel) return firstLevel
+  if (firstLevel === 'lossless' || firstLevel === 'exhigh' || firstLevel === 'standard') return firstLevel
   return 'lossless'
 })
 
-const activeQualityBadge = computed(() => {
-  if (currentQualityLevel.value === 'lossless') return 'SQ 无损'
-  if (currentQualityLevel.value === 'exhigh') return 'HQ 极高'
-  return '标准'
+// 可用档位列表（由探测数据驱动）
+const availableQualities = computed(() => {
+  const probe = currentSongProbe.value
+  const levels: { level: QualityLevel; defaultLabel: string }[] = [
+    { level: 'lossless', defaultLabel: 'SQ 无损' },
+    { level: 'exhigh', defaultLabel: 'HQ 极高' },
+    { level: 'standard', defaultLabel: '标准' },
+  ]
+
+  return levels.map(({ level, defaultLabel }) => {
+    const item = probe ? probe[level] : null
+    const isAvailable = item ? item.isAvailable : true
+    const unavailableReason = item?.unavailableReason
+
+    let bitrateDisplay = ''
+    if (item) {
+      if (!isAvailable && unavailableReason) {
+        bitrateDisplay = unavailableReason
+      } else {
+        bitrateDisplay = item.bitrateLabel
+      }
+    } else {
+      bitrateDisplay = level === 'lossless' ? 'FLAC · 无损' : level === 'exhigh' ? 'MP3 · 320 kbps' : 'MP3 · 128 kbps'
+    }
+
+    return {
+      level,
+      label: item?.label || defaultLabel,
+      bitrate: bitrateDisplay,
+      isAvailable,
+      unavailableReason,
+      formatLabel: item?.formatLabel || (level === 'lossless' ? 'FLAC' : 'MP3'),
+      sizeFormatted: item?.sizeFormatted || '—',
+    }
+  })
 })
 
-const isLosslessActive = computed(() => currentQualityLevel.value === 'lossless')
+// 底栏标识与提示文本（检测是否发生静默降级）
+const qualityDisplayInfo = computed(() => {
+  const reqLevel = currentQualityLevel.value
+  const probe = currentSongProbe.value
+
+  const nominalBadge = reqLevel === 'lossless' ? 'SQ 无损' : reqLevel === 'exhigh' ? 'HQ 极高' : '标准'
+
+  if (!probe) {
+    return {
+      badge: nominalBadge,
+      tooltip: `当前音质: ${nominalBadge} (点击切换音质)`,
+      isDegraded: false,
+      isLossless: reqLevel === 'lossless',
+    }
+  }
+
+  const currentItem = probe[reqLevel]
+  if (currentItem && currentItem.isAvailable) {
+    // 请求档位真实可用
+    return {
+      badge: nominalBadge,
+      tooltip: `当前音质: ${nominalBadge} (点击切换音质)`,
+      isDegraded: false,
+      isLossless: reqLevel === 'lossless' && currentItem.formatLabel === 'FLAC',
+    }
+  }
+
+  // 请求档位不可用或被静默降级：寻找音源实际能提供的最高可用档位
+  const fallbackTier = probe.exhigh.isAvailable
+    ? probe.exhigh
+    : probe.standard.isAvailable
+      ? probe.standard
+      : null
+
+  if (fallbackTier) {
+    const actualFmt = fallbackTier.formatLabel || 'MP3'
+    const actualBitrateNum = fallbackTier.actualBitrateKbps || (fallbackTier.level === 'exhigh' ? 320 : 128)
+    const actualBadge = `${actualFmt} ${actualBitrateNum}k`
+    const tooltip = `请求 ${nominalBadge}, 音源实际提供 ${actualFmt} ${actualBitrateNum} kbps`
+
+    return {
+      badge: actualBadge,
+      tooltip,
+      isDegraded: true,
+      isLossless: false,
+    }
+  }
+
+  // 均不可用或探测失败
+  return {
+    badge: nominalBadge,
+    tooltip: `当前音质: ${nominalBadge} (音源状态未知)`,
+    isDegraded: false,
+    isLossless: false,
+  }
+})
+
+const activeQualityBadge = computed(() => qualityDisplayInfo.value.badge)
+const activeQualityTooltip = computed(() => qualityDisplayInfo.value.tooltip)
+const isLosslessActive = computed(() => qualityDisplayInfo.value.isLossless)
+const isDegradedQuality = computed(() => qualityDisplayInfo.value.isDegraded)
 
 const menuCoords = ref({ bottom: 0, right: 0 })
 
@@ -354,6 +454,8 @@ const handleQualityMenuKeydown = (e: KeyboardEvent) => {
 }
 
 const selectQuality = async (level: string) => {
+  const target = availableQualities.value.find((q) => q.level === level)
+  if (target && !target.isAvailable) return
   closeQualityMenuAndRestoreFocus()
   if (level === currentQualityLevel.value) return
   await audioStore.switchQuality(level)
@@ -558,11 +660,11 @@ const emit = defineEmits(['show'])
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
             class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500/80"
-            :title="'当前音质: ' + activeQualityBadge + ' (点击切换音质)'"
+            :title="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
-              :class="isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
+              :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
             ></span>
             <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
             <span
@@ -587,7 +689,7 @@ const emit = defineEmits(['show'])
                 right: `${menuCoords.right}px`,
                 zIndex: 60,
               }"
-              class="quality-panel-popover w-52 overflow-hidden rounded-2xl select-none"
+              class="quality-panel-popover w-56 overflow-hidden rounded-2xl select-none"
               @keydown="handleQualityMenuKeydown"
             >
               <!-- 顶部标题 -->
@@ -604,7 +706,7 @@ const emit = defineEmits(['show'])
                 </span>
               </div>
 
-              <!-- 音质选项列表 (每行约 36px 高度，左侧指示条，右侧等宽格式/码率，无单选圆圈) -->
+              <!-- 音质选项列表 (不可用项置灰并展示原因，显示真实格式与码率) -->
               <div class="p-1.5 space-y-1">
                 <button
                   v-for="(q, index) in availableQualities"
@@ -612,34 +714,44 @@ const emit = defineEmits(['show'])
                   :ref="(el) => { if (el) qualityItemRefs[index] = el as HTMLButtonElement }"
                   role="radio"
                   :aria-checked="currentQualityLevel === q.level"
-                  :tabindex="focusedQualityIndex === index ? 0 : -1"
-                  @click.stop="selectQuality(q.level)"
-                  @keydown.enter.prevent.stop="selectQuality(q.level)"
-                  @keydown.space.prevent.stop="selectQuality(q.level)"
-                  class="w-full h-9 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group cursor-pointer outline-none focus-visible:ring-1.5 focus-visible:ring-pink-500/80 focus-visible:bg-white/10"
+                  :aria-disabled="!q.isAvailable"
+                  :disabled="!q.isAvailable"
+                  :tabindex="q.isAvailable ? (focusedQualityIndex === index ? 0 : -1) : -1"
+                  @click.stop="q.isAvailable && selectQuality(q.level)"
+                  @keydown.enter.prevent.stop="q.isAvailable && selectQuality(q.level)"
+                  @keydown.space.prevent.stop="q.isAvailable && selectQuality(q.level)"
+                  class="w-full min-h-[36px] py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
                   :class="[
-                    currentQualityLevel === q.level
-                      ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm'
-                      : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary'
+                    !q.isAvailable
+                      ? 'opacity-45 cursor-not-allowed border border-transparent'
+                      : currentQualityLevel === q.level
+                        ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm cursor-pointer'
+                        : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary cursor-pointer'
                   ]"
                 >
-                  <div class="flex items-center gap-2 min-w-0">
-                    <!-- 左侧选中指示条 -->
+                  <div class="flex items-center gap-2 min-w-0 pr-1">
+                    <!-- 左侧指示条 -->
                     <span
                       class="w-1 h-3.5 rounded-full transition-all duration-150 shrink-0"
-                      :class="currentQualityLevel === q.level ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
+                      :class="currentQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
                     ></span>
                     <span
-                      class="text-xs transition-colors"
-                      :class="currentQualityLevel === q.level ? 'text-pink-200 font-bold' : 'text-primary/85 font-medium'"
+                      class="text-xs transition-colors shrink-0"
+                      :class="currentQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-primary/85 font-medium'"
                     >
                       {{ q.label }}
                     </span>
                   </div>
-                  <!-- 右侧等宽字体码率/格式标注 -->
+                  <!-- 右侧：真实规格或置灰原因 -->
                   <span
-                    class="text-[11px] font-mono shrink-0 transition-colors"
-                    :class="currentQualityLevel === q.level ? 'text-pink-300 font-semibold' : 'text-primary/60 group-hover:text-primary/80'"
+                    class="text-[11px] shrink-0 transition-colors text-right pl-1"
+                    :class="[
+                      !q.isAvailable
+                        ? 'text-white/50 font-normal font-sans'
+                        : currentQualityLevel === q.level
+                          ? 'text-pink-300 font-semibold font-mono'
+                          : 'text-primary/60 group-hover:text-primary/80 font-mono'
+                    ]"
                   >
                     {{ q.bitrate }}
                   </span>
