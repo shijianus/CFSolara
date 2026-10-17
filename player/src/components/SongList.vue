@@ -251,10 +251,21 @@ const getQualityBadgeInfo = (song: Song) => {
         <div
           v-for="(song, index) in songs"
           :key="song.id || index"
-          class="song-item group flex cursor-pointer items-center rounded-xl p-2 hover:bg-white/10"
-          :class="isCurrent(song) ? 'bg-white/10' : ''"
+          class="song-item group relative flex cursor-pointer items-center rounded-xl p-2 border transition-colors duration-150 overflow-hidden"
+          :class="[
+            isCurrent(song)
+              ? 'border-pink-500/25'
+              : 'border-transparent hover:bg-white/10 hover:border-white/10'
+          ]"
+          :style="isCurrent(song) ? { backgroundColor: 'rgba(236, 72, 153, 0.14)' } : {}"
           @dblclick="(e) => playSongWithAnimation(song, index, e)"
         >
+          <!-- 左侧 2px 强调色指示条 (当前播放行) -->
+          <span
+            v-if="isCurrent(song)"
+            class="absolute left-0 top-2 bottom-2 w-[2px] bg-pink-500 rounded-r"
+            aria-hidden="true"
+          ></span>
           <!-- 序号/播放状态 -->
           <div class="relative flex w-14 shrink-0 items-center justify-center text-center select-none">
             <!-- 未悬停且非当前播放：显示纯数字序号 -->
@@ -374,42 +385,50 @@ const getQualityBadgeInfo = (song: Song) => {
                 formatDuration(song.duration)
               }}</span>
             </div>
-            <!-- 操控按钮 (悬停或键盘聚焦时渐现，触屏设备常驻) -->
-            <div
-              class="col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
-            >
-              <Button
-                v-if="song.mvId"
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/70 hover:text-pink-400"
-                icon="icon-[mdi--movie-open-play]"
-                iconClass="h-4 w-4"
-                :title="t('common.playMV')"
-                @click.stop="openMV(song, index)"
-              />
-              <Button
-                v-if="song.id"
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/70 hover:text-primary"
-                icon="icon-[mdi--information-outline]"
-                iconClass="h-4 w-4"
-                :title="t('common.detail')"
-                @click.stop="router.push(`/song/${song.id}`)"
-              />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                rounded="full"
-                class="h-8 w-8 text-primary/70 hover:text-pink-400"
-                icon="icon-[mdi--tray-arrow-down]"
-                iconClass="h-4 w-4"
-                :title="t('common.download')"
-                @click.stop="downloadSong(song, index)"
-              />
+            <!-- 操控按钮 (常态显示低透明度的"···"，悬停显示三个 32px 按钮，间距 8px) -->
+            <div class="col-span-2 relative flex items-center justify-center min-h-[32px]">
+              <!-- 常态：低透明度 (0.5) 更多图标 -->
+              <div class="flex items-center justify-center text-white/50 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
+                <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
+              </div>
+
+              <!-- 悬停或键盘聚焦时：显示三个 32px 按钮，间距 8px (gap-2) -->
+              <div class="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('actions.play') || '播放'"
+                  @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
+                >
+                  <span class="icon-[mdi--play] h-4 w-4"></span>
+                </button>
+                <button
+                  v-if="song.mvId"
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-purple-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.playMV')"
+                  @click.stop="openMV(song, index)"
+                >
+                  <span class="icon-[mdi--movie-open-play] h-4 w-4"></span>
+                </button>
+                <button
+                  v-else-if="song.id"
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.detail')"
+                  @click.stop="router.push(`/song/${song.id}`)"
+                >
+                  <span class="icon-[mdi--information-outline] h-4 w-4"></span>
+                </button>
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.download')"
+                  @click.stop="downloadSong(song, index)"
+                >
+                  <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
