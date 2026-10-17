@@ -65,6 +65,16 @@ const setLocale = (l?: 'zh' | 'en' | 'ja') => {
   const cur = I18n.global.locale as any
   if (cur && typeof cur === 'object' && 'value' in cur) cur.value = l || cur.value
   else (I18n.global.locale as any) = l || cur
+
+  const langMap: Record<string, string> = {
+    zh: 'zh-CN',
+    ja: 'ja',
+    en: 'en',
+  }
+  const effectiveLang = l || (typeof cur === 'object' && 'value' in cur ? cur.value : cur) || 'zh'
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = langMap[effectiveLang] || 'zh-CN'
+  }
 }
-if (lang.value) setLocale(lang.value)
-watch(lang, l => setLocale(l))
+setLocale(lang.value || 'zh')
+watch(lang, (l) => setLocale(l))
