@@ -1,93 +1,307 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useDownloadStore, DEFAULT_QUALITY_CHOICES, type QualityChoice } from '@/stores/modules/download'
+import { useDownloadStore, type QualityChoice } from '@/stores/modules/download'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import Button from '@/components/Ui/Button.vue'
 
 const downloadStore = useDownloadStore()
 const selectedLevel = ref<string>('lossless')
 
-// 严格对齐 U-04 规范：单一格式标签、无位深/采样率编造、每句描述不超过 14 个汉字
-const QUALITY_CONFIG: Record<string, { label: string; formatTag: string; estimatedSize: string; desc: string }> = {
-  lossless: {
-    label: 'SQ 无损',
-    formatTag: 'FLAC',
-    estimatedSize: '约 25–50 MB',
-    desc: '超清无损音质母带级声场',
-  },
-  exhigh: {
-    label: 'HQ 极高',
-    formatTag: 'MP3 320k',
-    estimatedSize: '约 8–12 MB',
-    desc: '极高品质细节饱满通透',
-  },
-  standard: {
-    label: '标准',
-    formatTag: 'MP3 128k',
-    estimatedSize: '约 3–5 MB',
-    desc: '标准品质流畅快速省流',
-  },
+interface QualityMeta {
+  level: string
+  label: string
+  formatTag: string
+  bitrateLabel: string
+  bitrateNum: number
+  format: string
 }
 
-const availableChoices = computed<Array<QualityChoice & { formatTag: string }>>(() => {
-  const song = downloadStore.currentDownloadSong
-  const levels = ['lossless', 'exhigh', 'standard'] as const
+const QUALITY_ITEMS: QualityMeta[] = [
+  {
+    level: 'lossless',
+    label: 'SQ 无损',
+    formatTag: 'FLAC',
+    bitrateLabel: 'FLAC 无损',
+    bitrateNum: 900,
+    format: 'flac',
+  },
+  {
+    level: 'exhigh',
+    label: 'HQ 极高',
+    formatTag: 'MP3 320k',
+    bitrateLabel: 'MP3 · 320 kbps',
+    bitrateNum: 320,
+    format: 'mp3',
+  },
+  {
+    level: 'standard',
+    label: '标准',
+    formatTag: 'MP3 128k',
+    bitrateLabel: 'MP3 · 128 kbps',
+    bitrateNum: 128,
+    format: 'mp3',
+  },
+]
 
-  const availableLevels = (song?.qualities && song.qualities.length > 0)
-    ? levels.filter(l => song.qualities!.some(q => q.level === l))
-    : levels
+// ════════════ 真实探测与估算机制 (P1.1 - P1.3) ════════════
+interface ProbeInfo {
+  sizeText: string
+  subText: string
+  isAvailable: boolean
+  isProbing: boolean
+}
 
-  const finalLevels = availableLevels.length > 0 ? availableLevels : levels
+// 歌曲 id + 音质 level 的内存缓存
+const probeCache = new Map<string, ProbeInfo>()
+const probeStates = ref<Record<string, ProbeInfo>>({})
 
-  return finalLevels.map((lvl) => {
-    const meta = QUALITY_CONFIG[lvl]
-    const matchedQuality = song?.qualities?.find(q => q.level === lvl)
+let activeAbortController: AbortController | null = null
+
+const getEstimateText = (level: string, durationSec: number): { sizeText: string; subText: string } => {
+  if (level === 'lossless') {
+    if (durationSec > 0) {
+      const minMb = ((durationSec * 700 * 1000) / 8 / 1024 / 1024).toFixed(1)
+      const maxMb = ((durationSec * 1000 * 1000) / 8 / 1024 / 1024).toFixed(1)
+      return {
+        sizeText: `约 ${minMb}–${maxMb} MB 预估`,
+        subText: '实际音质以音源返回为准',
+      }
+    }
+    return { sizeText: '约 25–40 MB 预估', subText: '实际音质以音源返回为准' }
+  }
+
+  const kbps = level === 'exhigh' ? 320 : 128
+  if (durationSec > 0) {
+    const mb = ((durationSec * kbps * 1000) / 8 / 1024 / 1024).toFixed(1)
     return {
-      level: lvl,
-      label: meta.label,
-      formatTag: meta.formatTag,
-      bitrate: lvl === 'lossless' ? 'FLAC' : lvl === 'exhigh' ? '320kbps' : '128kbps',
-      format: lvl === 'lossless' ? 'flac' : 'mp3',
-      desc: meta.desc,
-      estimatedSize: meta.estimatedSize,
-      streamUrl: matchedQuality?.streamUrl,
+      sizeText: `≈ ${mb} MB`,
+      subText: `MP3 · ${kbps} kbps`,
+    }
+  }
+  return {
+    sizeText: level === 'exhigh' ? '≈ 8.0 MB' : '≈ 3.2 MB',
+    subText: `MP3 · ${kbps} kbps`,
+  }
+}
+
+const triggerProbe = async (song: any) => {
+  if (!song || !song.id) return
+
+  // 终止上一次未完成的探测
+  if (activeAbortController) {
+    activeAbortController.abort()
+  }
+  activeAbortController = new AbortController()
+  const signal = activeAbortController.signal
+
+  const durationSec = song.duration ? song.duration / 1000 : 0
+  const songId = String(song.id)
+
+  const probeTasks = QUALITY_ITEMS.map(async (item) => {
+    const cacheKey = `${songId}_${item.level}`
+    if (probeCache.has(cacheKey)) {
+      probeStates.value[item.level] = probeCache.get(cacheKey)!
+      return
+    }
+
+    // 初始状态显示计算中
+    probeStates.value[item.level] = {
+      sizeText: '计算中…',
+      subText: item.bitrateLabel,
+      isAvailable: true,
+      isProbing: true,
+    }
+
+    const br = item.level === 'lossless' ? 'lossless' : item.level === 'exhigh' ? '320' : '128'
+    let streamUrl = ''
+    const found = song.qualities?.find((q: any) => q.level === item.level)
+    if (found && found.streamUrl) {
+      streamUrl = found.streamUrl
+    } else {
+      streamUrl = `/api/music/stream?id=${encodeURIComponent(songId)}&source=netease&br=${br}&title=${encodeURIComponent(song.name || '')}&artist=${encodeURIComponent(song.artist || '')}`
+    }
+
+    let timedOut = false
+    const timeoutId = setTimeout(() => {
+      timedOut = true
+      if (probeStates.value[item.level]?.isProbing) {
+        const est = getEstimateText(item.level, durationSec)
+        probeStates.value[item.level] = {
+          sizeText: est.sizeText,
+          subText: est.subText,
+          isAvailable: true,
+          isProbing: false,
+        }
+      }
+    }, 8000)
+
+    try {
+      const res = await fetch(streamUrl, {
+        headers: { Range: 'bytes=0-0' },
+        signal,
+      })
+      clearTimeout(timeoutId)
+
+      if (signal.aborted) return
+
+      let totalBytes: number | null = null
+      const contentRange = res.headers.get('content-range')
+      if (contentRange) {
+        const match = contentRange.match(/\/(\d+)$/)
+        if (match) totalBytes = parseInt(match[1], 10)
+      }
+      if (!totalBytes) {
+        const cl = res.headers.get('content-length')
+        if (cl && res.status === 200) totalBytes = parseInt(cl, 10)
+      }
+
+      const contentType = (res.headers.get('content-type') || '').toLowerCase()
+
+      // 规则 1.2: 无损可用性判断
+      if (item.level === 'lossless') {
+        const isMpegOrSmall =
+          contentType.includes('mpeg') ||
+          contentType.includes('audio/mp3') ||
+          (totalBytes !== null && totalBytes < 9 * 1024 * 1024 && !contentType.includes('flac'))
+
+        if (isMpegOrSmall) {
+          const info: ProbeInfo = {
+            sizeText: '—',
+            subText: '该歌曲音源暂无无损',
+            isAvailable: false,
+            isProbing: false,
+          }
+          probeStates.value[item.level] = info
+          probeCache.set(cacheKey, info)
+          return
+        }
+      }
+
+      let sizeText = ''
+      if (totalBytes && totalBytes > 0) {
+        const mb = (totalBytes / 1024 / 1024).toFixed(1)
+        sizeText = `≈ ${mb} MB`
+      } else {
+        const est = getEstimateText(item.level, durationSec)
+        sizeText = est.sizeText
+      }
+
+      const info: ProbeInfo = {
+        sizeText,
+        subText: item.bitrateLabel,
+        isAvailable: true,
+        isProbing: false,
+      }
+      probeStates.value[item.level] = info
+      probeCache.set(cacheKey, info)
+    } catch (e: any) {
+      clearTimeout(timeoutId)
+      if (signal.aborted) return
+
+      // 超时或探测失败退回按时长估算 (1.1, 1.2)
+      const est = getEstimateText(item.level, durationSec)
+      const info: ProbeInfo = {
+        sizeText: est.sizeText,
+        subText: est.subText,
+        isAvailable: true,
+        isProbing: false,
+      }
+      probeStates.value[item.level] = info
+      probeCache.set(cacheKey, info)
+    }
+  })
+
+  await Promise.all(probeTasks)
+
+  // 若当前选中的音质不可用（如无损被置灰），自动切换到下一个可用最高音质
+  if (selectedLevel.value === 'lossless' && !probeStates.value['lossless']?.isAvailable) {
+    if (probeStates.value['exhigh']?.isAvailable) {
+      selectedLevel.value = 'exhigh'
+    } else if (probeStates.value['standard']?.isAvailable) {
+      selectedLevel.value = 'standard'
+    }
+  }
+}
+
+const getProbe = (level: string): ProbeInfo => {
+  return (
+    probeStates.value[level] || {
+      sizeText: '计算中…',
+      subText: '',
+      isAvailable: true,
+      isProbing: true,
+    }
+  )
+}
+
+// 可选档位列表
+const availableChoices = computed(() => {
+  return QUALITY_ITEMS.map((item) => {
+    return {
+      ...item,
+      desc: getProbe(item.level).subText,
+      estimatedSize: getProbe(item.level).sizeText,
     }
   })
 })
-
-// 当歌曲改变时，默认选中最高音质
-watch(
-  () => downloadStore.currentDownloadSong,
-  (newSong) => {
-    if (newSong) {
-      if (newSong.qualities && newSong.qualities.length > 0) {
-        selectedLevel.value = newSong.qualities[0].level
-      } else {
-        selectedLevel.value = 'lossless'
-      }
-    }
-  },
-  { immediate: true }
-)
 
 const currentChoice = computed(() => {
   return availableChoices.value.find((c) => c.level === selectedLevel.value) || availableChoices.value[0]
 })
 
+const currentChoiceAvailable = computed(() => {
+  return getProbe(selectedLevel.value).isAvailable
+})
+
+// 当歌曲改变或弹窗打开时探测
+watch(
+  () => downloadStore.currentDownloadSong,
+  (newSong) => {
+    if (newSong && downloadStore.dialogVisible) {
+      selectedLevel.value = 'lossless'
+      triggerProbe(newSong)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => downloadStore.dialogVisible,
+  (visible) => {
+    if (visible && downloadStore.currentDownloadSong) {
+      selectedLevel.value = 'lossless'
+      triggerProbe(downloadStore.currentDownloadSong)
+    } else if (!visible) {
+      if (activeAbortController) {
+        activeAbortController.abort()
+        activeAbortController = null
+      }
+    }
+  }
+)
+
 const handleConfirm = async () => {
   const song = downloadStore.currentDownloadSong
-  if (!song) return
+  if (!song || !currentChoiceAvailable.value) return
   try {
-    await downloadStore.startDownload(song, currentChoice.value)
+    const choice: QualityChoice = {
+      level: currentChoice.value.level,
+      label: currentChoice.value.label,
+      bitrate: currentChoice.value.bitrateLabel,
+      format: currentChoice.value.format,
+      desc: currentChoice.value.desc,
+      estimatedSize: currentChoice.value.estimatedSize,
+    }
+    await downloadStore.startDownload(song, choice)
   } catch (e) {
     // 错误信息已保存在 downloadStore.errorMsg
   }
 }
 
-// 歌名最大字符上限保护
+// 歌名展示
 const displayTitle = computed(() => {
   const title = downloadStore.currentDownloadSong?.name || ''
-  const MAX_LEN = 28
+  const MAX_LEN = 26
   return title.length > MAX_LEN ? title.slice(0, MAX_LEN) + '...' : title
 })
 
@@ -96,31 +310,33 @@ const dialogCardRef = ref<HTMLElement | null>(null)
 const radioItemRefs = ref<HTMLElement[]>([])
 const returnTriggerElement = ref<HTMLElement | null>(null)
 
-// 上下/左右方向键在 radiogroup 中切换并聚焦
+const selectLevel = (level: string) => {
+  if (!getProbe(level).isAvailable) return
+  selectedLevel.value = level
+}
+
 const selectNext = (delta: number) => {
-  const list = availableChoices.value
-  if (!list.length) return
-  const currentIndex = list.findIndex((c) => c.level === selectedLevel.value)
-  const nextIndex = (currentIndex + delta + list.length) % list.length
-  selectedLevel.value = list[nextIndex].level
+  const availableList = availableChoices.value.filter((c) => getProbe(c.level).isAvailable)
+  if (!availableList.length) return
+  const currentIndex = availableList.findIndex((c) => c.level === selectedLevel.value)
+  const nextIndex = (currentIndex + delta + availableList.length) % availableList.length
+  selectedLevel.value = availableList[nextIndex].level
   nextTick(() => {
-    const targetEl = radioItemRefs.value[nextIndex]
+    const fullIndex = availableChoices.value.findIndex((c) => c.level === selectedLevel.value)
+    const targetEl = radioItemRefs.value[fullIndex]
     targetEl?.focus()
   })
 }
 
-// 焦点陷阱与按键监听
 const handleKeydown = (e: KeyboardEvent) => {
   if (!downloadStore.dialogVisible) return
 
-  // 1. Esc 键安全退出
   if (e.key === 'Escape') {
     e.preventDefault()
     downloadStore.closeDownloadDialog()
     return
   }
 
-  // 2. Tab 键焦点循环陷阱 (Focus Trap)
   if (e.key === 'Tab' && dialogCardRef.value) {
     const focusableElements = dialogCardRef.value.querySelectorAll<HTMLElement>(
       'button:not([disabled]), [role="radio"][tabindex="0"], [tabindex="0"]:not([disabled])'
@@ -144,14 +360,12 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
-// 打开弹窗时捕获触发按钮，聚焦当前选中项；关闭时焦点恢复至触发源
 watch(
   () => downloadStore.dialogVisible,
   (visible) => {
     if (visible) {
       returnTriggerElement.value = document.activeElement as HTMLElement | null
       nextTick(() => {
-        // 初始聚焦落在当前选中的单选卡片上
         const currentIndex = availableChoices.value.findIndex((c) => c.level === selectedLevel.value)
         const targetCard = radioItemRefs.value[currentIndex >= 0 ? currentIndex : 0]
         targetCard?.focus()
@@ -170,6 +384,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (activeAbortController) {
+    activeAbortController.abort()
+  }
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
@@ -178,91 +395,71 @@ onUnmounted(() => {
   <Teleport to="body">
     <div
       v-if="downloadStore.dialogVisible"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="download-dialog-title"
     >
-      <!-- 背景毛玻璃遮罩 -->
+      <!-- 背景遮罩 -->
       <Transition name="mask" appear>
         <div
-          class="absolute inset-0 bg-black/30 backdrop-blur-sm"
+          class="absolute inset-0 bg-black/40 backdrop-blur-sm"
           @click="downloadStore.closeDownloadDialog"
         />
       </Transition>
 
-      <!-- 弹窗容器 -->
+      <!-- 弹窗容器 (P3.3 严格 440px 宽度、20px 圆角) -->
       <Transition name="dialog" appear>
-        <div class="relative z-10 w-full max-w-lg">
+        <div class="relative z-10 w-full max-w-[440px]">
           <div
             ref="dialogCardRef"
-            class="download-dialog-panel relative overflow-hidden rounded-[var(--glass-r-xl,24px)] p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
-            style="box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.65), 0 0 28px rgba(139, 92, 246, 0.15);"
+            class="download-dialog-panel relative overflow-hidden p-5 shadow-2xl backdrop-blur-2xl"
           >
-            <!-- 右上角关闭按钮 -->
-            <button
-              @click="downloadStore.closeDownloadDialog"
-              class="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-primary/60 transition-all hover:bg-white/15 hover:text-primary active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
-              title="关闭"
-              aria-label="关闭弹窗"
-            >
-              <span class="icon-[mdi--close] h-4 w-4"></span>
-            </button>
-
-            <!-- 顶部标题与规格说明 -->
-            <div class="mb-4 flex items-center gap-3 pr-8">
-              <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--glass-r-md,12px)] bg-gradient-to-br from-pink-500 to-purple-600 shadow-md shadow-pink-500/25"
+            <!-- 头部：标题 18px/600 + 关闭按钮，去掉副标题 -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/10 select-none">
+              <h3 id="download-dialog-title" class="text-[18px] font-semibold text-white/95 leading-tight tracking-tight">
+                选择下载音质
+              </h3>
+              <button
+                @click="downloadStore.closeDownloadDialog"
+                class="flex h-7 w-7 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                title="关闭"
+                aria-label="关闭弹窗"
               >
-                <span class="icon-[mdi--tray-arrow-down] h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 id="download-dialog-title" class="text-[18px] font-semibold text-white/95 tracking-wide leading-snug">
-                  下载音质规格选择
-                </h3>
-                <p class="mt-0.5 text-[13px] text-white/75 font-normal">
-                  选择音频规格以启动下载并导入离线音乐库
-                </p>
-              </div>
+                <span class="icon-[mdi--close] h-4 w-4"></span>
+              </button>
             </div>
 
-            <!-- 当前歌曲信息卡片 -->
+            <!-- 歌曲行：封面 48px 圆角 10px，歌名 15px/600，歌手·专辑 13px (>=64% 白)，不重复显示徽标 -->
             <div
               v-if="downloadStore.currentDownloadSong"
-              class="dialog-inner-card relative mb-4 flex items-center gap-3 overflow-hidden rounded-[var(--glass-r-md,12px)] p-3 backdrop-blur-sm"
+              class="my-3.5 flex items-center gap-3 select-none"
             >
-              <!-- 封面图：严格 8px 圆角规范 -->
-              <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[var(--glass-r-sm,8px)] shadow-md border border-white/10">
+              <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-white/5 shadow-sm">
                 <img
-                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 100, artist: downloadStore.currentDownloadSong.artist })"
+                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 96, artist: downloadStore.currentDownloadSong.artist })"
                   alt="cover"
                   class="h-full w-full object-cover"
                 />
               </div>
 
-              <!-- 歌曲与歌手信息 -->
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <h4
-                    :title="downloadStore.currentDownloadSong.name"
-                    class="truncate text-[15px] font-semibold text-white/95"
-                  >
-                    {{ displayTitle }}
-                  </h4>
-                  <span class="shrink-0 rounded-[var(--glass-r-sm,8px)] bg-pink-500/15 px-1.5 py-0.5 text-[11px] font-mono font-medium text-pink-300 border border-pink-500/30">
-                    {{ currentChoice.label }}
-                  </span>
-                </div>
-                <p class="mt-0.5 truncate text-[13px] text-white/75 font-normal">
-                  {{ downloadStore.currentDownloadSong.artist }}
+                <h4
+                  :title="downloadStore.currentDownloadSong.name"
+                  class="truncate text-[15px] font-semibold text-white/95"
+                >
+                  {{ displayTitle }}
+                </h4>
+                <p class="mt-0.5 truncate text-[13px] text-white/70 font-medium">
+                  {{ downloadStore.currentDownloadSong.artist || '未知歌手' }}
                   <span v-if="downloadStore.currentDownloadSong.album"> · 《{{ downloadStore.currentDownloadSong.album }}》</span>
                 </p>
               </div>
             </div>
 
-            <!-- 音质档位选择卡片 (语义化 radiogroup，去掉大单选圆圈，选中态采用高光边框加勾选) -->
+            <!-- 三个选项：每行高 64px，无发光，格式标签中性统一 -->
             <div
-              class="mb-4 space-y-2 select-none"
+              class="space-y-2 select-none"
               role="radiogroup"
               aria-labelledby="download-dialog-title"
             >
@@ -272,102 +469,100 @@ onUnmounted(() => {
                 :ref="el => { if (el) radioItemRefs[index] = el as HTMLElement }"
                 role="radio"
                 :aria-checked="selectedLevel === choice.level"
-                :tabindex="selectedLevel === choice.level ? 0 : -1"
-                @click="selectedLevel = choice.level"
+                :aria-disabled="!getProbe(choice.level).isAvailable"
+                :tabindex="getProbe(choice.level).isAvailable ? (selectedLevel === choice.level ? 0 : -1) : -1"
+                @click="selectLevel(choice.level)"
                 @keydown.arrow-down.prevent="selectNext(1)"
                 @keydown.arrow-right.prevent="selectNext(1)"
                 @keydown.arrow-up.prevent="selectNext(-1)"
                 @keydown.arrow-left.prevent="selectNext(-1)"
-                @keydown.space.prevent="selectedLevel = choice.level"
+                @keydown.space.prevent="selectLevel(choice.level)"
                 @keydown.enter.prevent="handleConfirm"
-                class="group relative flex cursor-pointer items-center justify-between rounded-[var(--glass-r-lg,16px)] border p-3 transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="relative h-[64px] min-h-[64px] px-3.5 flex items-center justify-between rounded-xl transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :class="[
-                  selectedLevel === choice.level
-                    ? 'border-[1.5px] border-pink-500/80 bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent shadow-[0_0_10px_rgba(236,72,153,0.35)]'
-                    : 'dialog-inner-card hover:border-white/20 hover:bg-white/[0.08]'
+                  !getProbe(choice.level).isAvailable
+                    ? 'opacity-40 cursor-not-allowed bg-white/[0.02] border border-white/[0.04]'
+                    : selectedLevel === choice.level
+                      ? 'bg-pink-500/[0.12] border border-pink-500/50 cursor-pointer'
+                      : 'bg-transparent border border-white/[0.08] hover:bg-white/[0.04] hover:border-white/15 cursor-pointer'
                 ]"
               >
-                <!-- 左侧：规格名 + 单一格式标签 (FLAC / MP3 320k / MP3 128k) + 不超过14字说明 -->
-                <div class="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span
-                        class="text-[15px] font-semibold transition-colors"
-                        :class="selectedLevel === choice.level ? 'text-white font-semibold' : 'text-white/85'"
-                      >
-                        {{ choice.label }}
-                      </span>
-                      <!-- 单一格式标签 -->
-                      <span
-                        class="shrink-0 rounded-[var(--glass-r-sm,8px)] px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none"
-                        :class="[
-                          choice.level === 'lossless'
-                            ? 'bg-pink-500/20 text-pink-300 border border-pink-500/35'
-                            : choice.level === 'exhigh'
-                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                              : 'bg-white/10 text-white/80 border border-white/15'
-                        ]"
-                      >
-                        {{ choice.formatTag }}
-                      </span>
-                    </div>
-                    <p class="mt-1 text-[13px] text-white/75 leading-normal truncate font-normal">
-                      {{ choice.desc }}
-                    </p>
+                <!-- 左侧：第一行名称 15px/600 + 中性标签，第二行格式·码率或不可用原因 13px -->
+                <div class="flex flex-col justify-center min-w-0 pr-2">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-[15px] font-semibold"
+                      :class="selectedLevel === choice.level && getProbe(choice.level).isAvailable ? 'text-white' : 'text-white/85'"
+                    >
+                      {{ choice.label }}
+                    </span>
+                    <span class="rounded px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none bg-white/10 text-white/70 border border-white/10">
+                      {{ choice.formatTag }}
+                    </span>
+                  </div>
+                  <div
+                    class="mt-1 text-[13px] font-medium leading-none truncate"
+                    :class="!getProbe(choice.level).isAvailable ? 'text-red-300/90' : 'text-white/60'"
+                  >
+                    {{ getProbe(choice.level).subText }}
                   </div>
                 </div>
 
-                <!-- 右侧：预估体积区间 + 选中勾标 (不重叠) -->
+                <!-- 右侧：大小 14px/500 等宽数字 + 勾选圆标 -->
                 <div class="flex items-center gap-3 shrink-0">
-                  <div class="text-right">
-                    <span class="font-mono text-[13px] font-medium text-white/80 tabular-nums">
-                      {{ choice.estimatedSize }}
-                    </span>
-                  </div>
-                  <!-- 勾选指示器 (仅在选中态优雅浮现) -->
-                  <div class="w-5 flex items-center justify-center">
+                  <span class="text-[14px] font-medium font-mono text-white/80 tabular-nums">
+                    {{ getProbe(choice.level).sizeText }}
+                  </span>
+                  <div
+                    class="flex h-5 w-5 items-center justify-center rounded-full border transition-all"
+                    :class="[
+                      !getProbe(choice.level).isAvailable
+                        ? 'border-white/10 bg-transparent'
+                        : selectedLevel === choice.level
+                          ? 'border-pink-500 bg-pink-500 text-white'
+                          : 'border-white/20 bg-transparent'
+                    ]"
+                  >
                     <span
-                      v-if="selectedLevel === choice.level"
-                      class="icon-[mdi--check] h-4.5 w-4.5 text-pink-400 shrink-0 drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]"
+                      v-if="selectedLevel === choice.level && getProbe(choice.level).isAvailable"
+                      class="icon-[mdi--check] h-3.5 w-3.5"
                     ></span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- 底部存储与导出提示文案：中性信息图标，不带绿色盾牌 -->
-            <div class="dialog-inner-card mb-4 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] px-3 py-2 text-[13px] text-white/75 font-normal leading-relaxed">
-              <span class="icon-[mdi--information-outline] h-4 w-4 shrink-0 text-white/60"></span>
-              <span>音频将存入应用内离线库（可在下载列表随时免流播放），并同步唤起本地文件保存。</span>
-            </div>
+            <!-- 提示：列表下方一行 13px (60% 白) 文字，去掉独立方框 -->
+            <p class="my-3.5 text-[13px] text-white/60 font-medium text-center select-none">
+              保存到离线库，并同时导出到本地文件
+            </p>
 
             <!-- 错误提示（若有） -->
             <div
               v-if="downloadStore.errorMsg"
-              class="mb-3 flex items-center gap-2 rounded-[var(--glass-r-md,12px)] border border-red-500/30 bg-red-500/15 p-2.5 text-[13px] text-red-300"
+              class="mb-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/15 p-2.5 text-[13px] text-red-300"
             >
               <span class="icon-[mdi--alert-circle] h-4 w-4 shrink-0"></span>
               <span>{{ downloadStore.errorMsg }}</span>
             </div>
 
-            <!-- 底部操作按钮：等高 38px，次要幽灵按钮悬停有底色 -->
-            <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-              <Button
-                variant="ghost"
-                size="md"
-                rounded="xl"
-                class="h-[38px] px-4 text-[14px] font-semibold text-white/80 bg-white/5 hover:bg-white/12 border border-white/10 hover:border-white/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+            <!-- 底部操作按钮：右对齐，取消为幽灵按钮，主按钮为下载(音质)，均 40px 高、14px/600 -->
+            <div class="flex items-center justify-end gap-3 pt-2 select-none">
+              <button
+                type="button"
+                class="h-[40px] px-4 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
                 取消
-              </Button>
+              </button>
 
               <Button
+                v-if="currentChoiceAvailable"
                 variant="gradient"
-                size="md"
+                size="none"
                 rounded="xl"
-                class="h-[38px] px-6 text-[14px] font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/35 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="h-[40px] px-5 text-[14px] font-semibold shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30 transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 :disabled="downloadStore.isDownloading"
                 @click="handleConfirm"
               >
@@ -376,7 +571,7 @@ onUnmounted(() => {
                   class="icon-[mdi--loading] mr-1.5 h-4 w-4 animate-spin"
                 ></span>
                 <span v-else class="icon-[mdi--tray-arrow-down] mr-1.5 h-4 w-4"></span>
-                <span>{{ downloadStore.isDownloading ? '正在下载中...' : `确认下载 (${currentChoice.label})` }}</span>
+                <span>{{ downloadStore.isDownloading ? '正在下载...' : `下载 (${currentChoice.label})` }}</span>
               </Button>
             </div>
           </div>
@@ -388,20 +583,17 @@ onUnmounted(() => {
 
 <style scoped>
 .download-dialog-panel {
-  background: linear-gradient(180deg, rgba(38, 30, 62, 0.90) 0%, rgba(30, 26, 52, 0.92) 100%);
+  background: rgba(30, 26, 52, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(28px) saturate(1.7);
-  -webkit-backdrop-filter: blur(28px) saturate(1.7);
-}
-
-.dialog-inner-card {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
 }
 
 .mask-enter-active,
 .mask-leave-active {
-  transition: opacity var(--glass-duration-normal, 200ms) var(--glass-ease, ease);
+  transition: opacity 200ms ease;
 }
 .mask-enter-from,
 .mask-leave-to {
@@ -410,11 +602,11 @@ onUnmounted(() => {
 
 .dialog-enter-active,
 .dialog-leave-active {
-  transition: all var(--glass-duration-normal, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dialog-enter-from,
 .dialog-leave-to {
   opacity: 0;
-  transform: scale(0.96) translateY(8px);
+  transform: scale(0.96) translateY(6px);
 }
 </style>
