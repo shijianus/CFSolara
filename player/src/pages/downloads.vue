@@ -32,6 +32,8 @@ const handleVisibilityChange = () => {
 }
 
 // ══════ P1.4 真实音频元数据动态解析 (music-metadata-browser) ══════
+export type ResolvedBlobTier = 'lossless' | 'exhigh' | 'standard'
+
 interface ParsedAudioMeta {
   container?: string
   codec?: string
@@ -39,6 +41,7 @@ interface ParsedAudioMeta {
   sampleRate?: number
   bitsPerSample?: number
   isLossless?: boolean
+  resolvedTier: ResolvedBlobTier
   displayTag: string
   detailText: string
   mismatchWarning: string | null
@@ -62,30 +65,39 @@ const parseBlobMetadata = async (item: DownloadedSong) => {
     const meta = await mm.parseBlob(headerBlob)
     const fmt = meta.format
 
-    const isFlacOrLossless = Boolean(fmt.lossless || fmt.container === 'FLAC' || fmt.codec === 'FLAC')
+    const container = (fmt.container || '').toUpperCase()
+    const codec = (fmt.codec || '').toUpperCase()
+    const isLossless = Boolean(
+      fmt.lossless ||
+      container.includes('FLAC') || codec.includes('FLAC') ||
+      container.includes('WAV') || codec.includes('WAV') ||
+      container.includes('ALAC') || codec.includes('ALAC')
+    )
     const bitrateKbps = fmt.bitrate ? Math.round(fmt.bitrate / 1000) : null
 
+    // 分类规则: FLAC/ALAC/WAV → SQ; MP3/AAC ≥ 256 kbps → HQ; 其余 → 标准
+    let resolvedTier: ResolvedBlobTier = 'standard'
     let displayTag = 'MP3'
-    if (isFlacOrLossless) {
-      displayTag = 'FLAC'
-    } else if (bitrateKbps && bitrateKbps >= 300) {
-      displayTag = 'MP3 320k'
-    } else if (bitrateKbps && bitrateKbps <= 160) {
-      displayTag = 'MP3 128k'
-    } else if (bitrateKbps) {
-      displayTag = `MP3 ${bitrateKbps}k`
-    } else if (item.format) {
-      displayTag = item.format.toUpperCase()
+    if (isLossless) {
+      resolvedTier = 'lossless'
+      displayTag = container.includes('WAV') || codec.includes('WAV') ? 'WAV' : 'FLAC'
+    } else if (bitrateKbps && bitrateKbps >= 256) {
+      resolvedTier = 'exhigh'
+      displayTag = bitrateKbps >= 300 ? 'MP3 320k' : `MP3 ${bitrateKbps}k`
+    } else {
+      resolvedTier = 'standard'
+      displayTag = bitrateKbps ? `MP3 ${bitrateKbps}k` : 'MP3 128k'
     }
 
     // 检查请求音质与实际格式是否不符 (P1.4 警示提示)
     let mismatchWarning: string | null = null
     const reqQuality = item.qualityLevel || (item.qualityBadge === 'SQ' ? 'lossless' : item.qualityBadge === 'HQ' ? 'exhigh' : 'standard')
-    if (reqQuality === 'lossless' && !isFlacOrLossless) {
+    if (reqQuality === 'lossless' && !isLossless) {
       const actualBitrateStr = bitrateKbps ? `${bitrateKbps} kbps` : '128 kbps'
       mismatchWarning = `请求 SQ 无损, 实际为 MP3 ${actualBitrateStr}`
-    } else if (reqQuality === 'exhigh' && bitrateKbps && bitrateKbps < 250) {
-      mismatchWarning = `请求 HQ 极高, 实际为 MP3 ${bitrateKbps} kbps`
+    } else if (reqQuality === 'exhigh' && (!bitrateKbps || bitrateKbps < 256)) {
+      const actualBitrateStr = bitrateKbps ? `${bitrateKbps} kbps` : '128 kbps'
+      mismatchWarning = `请求 HQ 极高, 实际为 MP3 ${actualBitrateStr}`
     }
 
     const details: string[] = []
@@ -102,7 +114,8 @@ const parseBlobMetadata = async (item: DownloadedSong) => {
       bitrate: fmt.bitrate,
       sampleRate: fmt.sampleRate,
       bitsPerSample: fmt.bitsPerSample,
-      isLossless: isFlacOrLossless,
+      isLossless,
+      resolvedTier,
       displayTag,
       detailText: details.join(' · '),
       mismatchWarning,
@@ -110,14 +123,16 @@ const parseBlobMetadata = async (item: DownloadedSong) => {
 
     metadataCache.set(idStr, parsed)
     parsedMetaMap.value[idStr] = parsed
-  } catch (err) {
-    // 解析异常降级使用基本字段
-    const fallbackTag = item.format === 'flac' ? 'FLAC' : item.qualityBadge === 'HQ' ? 'MP3 320k' : 'MP3 128k'
+  } catch {
+    // 解析异常降级仅依据实际扩展名/格式判定，绝不使用请求落库的 qualityBadge
+    const isFlac = item.format === 'flac' || item.format === 'wav' || item.format === 'alac'
+    const fallbackTag = isFlac ? item.format.toUpperCase() : 'MP3 128k'
     const parsed: ParsedAudioMeta = {
       displayTag: fallbackTag,
       detailText: '',
       mismatchWarning: null,
-      isLossless: item.format === 'flac' || item.qualityBadge === 'SQ',
+      isLossless: isFlac,
+      resolvedTier: isFlac ? 'lossless' : 'standard',
     }
     metadataCache.set(idStr, parsed)
     parsedMetaMap.value[idStr] = parsed
@@ -126,14 +141,30 @@ const parseBlobMetadata = async (item: DownloadedSong) => {
 
 const getParsedMeta = (item: DownloadedSong): ParsedAudioMeta => {
   const idStr = String(item.id)
-  return (
-    parsedMetaMap.value[idStr] || {
-      displayTag: item.format === 'flac' ? 'FLAC' : item.qualityBadge === 'HQ' ? 'MP3 320k' : 'MP3 128k',
-      detailText: '',
-      mismatchWarning: null,
-      isLossless: item.format === 'flac' || item.qualityBadge === 'SQ',
-    }
-  )
+  if (parsedMetaMap.value[idStr]) {
+    return parsedMetaMap.value[idStr]
+  }
+  const isFlac = item.format === 'flac' || item.format === 'wav' || item.format === 'alac'
+  return {
+    displayTag: isFlac ? item.format.toUpperCase() : 'MP3 128k',
+    detailText: '',
+    mismatchWarning: null,
+    isLossless: isFlac,
+    resolvedTier: isFlac ? 'lossless' : 'standard',
+  }
+}
+
+/** 基于解析 blob 获取真实音质档位 (FLAC/ALAC/WAV -> SQ; >=256k -> HQ; 其余 -> 标准) */
+const getSongActualTier = (item: DownloadedSong): ResolvedBlobTier => {
+  const meta = parsedMetaMap.value[String(item.id)]
+  if (meta) {
+    return meta.resolvedTier
+  }
+  // 未完成解析前仅依据文件实际扩展名判定，不使用 qualityBadge
+  if (item.format === 'flac' || item.format === 'wav' || item.format === 'alac') {
+    return 'lossless'
+  }
+  return 'standard'
 }
 
 onMounted(() => {
@@ -159,24 +190,15 @@ watch(
   { immediate: true, deep: true }
 )
 
-// 真实音质统计
+// 真实音质统计 (一律基于 blob 实际格式解析)
 const sqCount = computed(() =>
-  downloads.value.filter((d) => {
-    const meta = parsedMetaMap.value[String(d.id)]
-    return meta ? meta.isLossless : d.format === 'flac' || d.qualityBadge === 'SQ'
-  }).length
+  downloads.value.filter((d) => getSongActualTier(d) === 'lossless').length
 )
 const hqCount = computed(() =>
-  downloads.value.filter((d) => {
-    const meta = parsedMetaMap.value[String(d.id)]
-    return meta ? meta.displayTag.includes('320') : d.qualityBadge === 'HQ' || d.qualityLevel === 'exhigh'
-  }).length
+  downloads.value.filter((d) => getSongActualTier(d) === 'exhigh').length
 )
 const standardCount = computed(() =>
-  downloads.value.filter((d) => {
-    const meta = parsedMetaMap.value[String(d.id)]
-    return meta ? (!meta.isLossless && !meta.displayTag.includes('320')) : d.qualityBadge === '标准' || d.qualityLevel === 'standard'
-  }).length
+  downloads.value.filter((d) => getSongActualTier(d) === 'standard').length
 )
 
 // 分段控件配置
@@ -236,22 +258,13 @@ const handleQualityKeydown = (e: KeyboardEvent) => {
 const filteredDownloads = computed(() => {
   let list = [...downloads.value]
 
-  // 1. 音质筛选
+  // 1. 音质筛选 (一律基于 blob 实际格式解析)
   if (selectedQualityFilter.value === 'lossless') {
-    list = list.filter((d) => {
-      const meta = parsedMetaMap.value[String(d.id)]
-      return meta ? meta.isLossless : d.format === 'flac' || d.qualityBadge === 'SQ'
-    })
+    list = list.filter((d) => getSongActualTier(d) === 'lossless')
   } else if (selectedQualityFilter.value === 'exhigh') {
-    list = list.filter((d) => {
-      const meta = parsedMetaMap.value[String(d.id)]
-      return meta ? meta.displayTag.includes('320') : d.qualityBadge === 'HQ' || d.qualityLevel === 'exhigh'
-    })
+    list = list.filter((d) => getSongActualTier(d) === 'exhigh')
   } else if (selectedQualityFilter.value === 'standard') {
-    list = list.filter((d) => {
-      const meta = parsedMetaMap.value[String(d.id)]
-      return meta ? (!meta.isLossless && !meta.displayTag.includes('320')) : d.qualityBadge === '标准' || d.qualityLevel === 'standard'
-    })
+    list = list.filter((d) => getSongActualTier(d) === 'standard')
   }
 
   // 2. 关键词检索 (歌名、歌手、专辑)

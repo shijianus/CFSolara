@@ -22,11 +22,11 @@ const selectedQuality = ref<'all' | 'lossless' | 'exhigh' | 'standard'>('all')
 const filteredDownloads = computed(() => {
   let list = [...downloads.value]
   if (selectedQuality.value === 'lossless') {
-    list = list.filter((d) => d.qualityLevel === 'lossless' || d.qualityBadge === 'SQ')
+    list = list.filter((d) => d.format === 'flac' || d.format === 'wav' || d.format === 'alac')
   } else if (selectedQuality.value === 'exhigh') {
-    list = list.filter((d) => d.qualityLevel === 'exhigh' || d.qualityBadge === 'HQ')
+    list = list.filter((d) => (d.qualityLevel === 'exhigh' || d.bitrate?.includes('320')) && d.format !== 'flac')
   } else if (selectedQuality.value === 'standard') {
-    list = list.filter((d) => d.qualityLevel === 'standard' || d.qualityBadge === '标准')
+    list = list.filter((d) => d.format !== 'flac' && !d.bitrate?.includes('320'))
   }
 
   const q = searchQuery.value.trim().toLowerCase()
