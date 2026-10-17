@@ -491,6 +491,7 @@ const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && showQualityMenu.value) {
+    e.preventDefault()
     closeQualityMenuAndRestoreFocus()
   }
 }
