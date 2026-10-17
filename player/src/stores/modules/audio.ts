@@ -245,11 +245,21 @@ export const useAudioStore = defineStore('audio', {
     },
 
     /** 播放歌曲（自动获取缺失的播放地址） */
-    async playSong(song?: Song, index?: number) {
+    async playSong(song?: Song, index?: number, force = false) {
       this.initAudio()
 
       const prevSong = this.audio.currentSong
-      const isSwitchingSong = !!(song && prevSong && song.id !== prevSong.id)
+      const prevIndex = this.audio.currentIndex
+      // 判定是否正在切换歌曲：显式 force，或者传入了不同歌曲对象/不同索引/不同 ID/不同 URL
+      const isSwitchingSong =
+        force ||
+        !!(
+          song &&
+          (!prevSong ||
+            (index !== undefined && index !== prevIndex) ||
+            song.id !== prevSong.id ||
+            (song.url && prevSong.url && song.url !== prevSong.url))
+        )
 
       if (song && index !== undefined) {
         this.audio.currentSong = song
@@ -265,6 +275,8 @@ export const useAudioStore = defineStore('audio', {
           ? new URL(this.audio.currentSong.url, window.location.href).href
           : this.audio.currentSong.url
       const isSrcUnchanged =
+        !force &&
+        !isSwitchingSong &&
         !!currentAudioSrc &&
         !!this.audio.currentSong.url &&
         (currentAudioSrc === this.audio.currentSong.url || audio.src === resolvedTargetUrl)
@@ -343,25 +355,38 @@ export const useAudioStore = defineStore('audio', {
 
       try {
         this.audio.error = null
+        this.audio.isLoading = true
 
         // 若无 URL 则拉取（本地音乐除外）
         if (!this.audio.currentSong.url && !this.audio.currentSong.isLocal) {
-          this.audio.isLoading = true
           await this._fetchAndApplyUrl()
         }
 
-        // 如果 URL 变化，重新加载
-        this._loadAudioSrc(this.audio.currentSong.url || '')
+        if (!this.audio.currentSong.url) {
+          throw new Error('无法获取播放地址')
+        }
+
+        // 切歌时复位进度到开头，强制更新音频源
+        if (isSwitchingSong) {
+          audio.currentTime = 0
+          this.audio.currentTime = 0
+        }
+        this._loadAudioSrc(this.audio.currentSong.url || '', isSwitchingSong)
         await this.audio.audio.play()
 
         // 添加到播放历史
         this.addToHistory(this.audio.currentSong)
-      } catch (error) {
+      } catch (error: any) {
         this.audio.error = '播放失败，请检查网络连接'
+        this.audio.isPlaying = false
         console.error('Play error:', error)
         // 播放失败时也尝试刷新 URL 后重试
         const id = this.audio.currentSong?.id ?? null
-        if (id) this.refreshAndReplay()
+        if (id && !this.audio.currentSong.isLocal) {
+          await this.refreshAndReplay()
+        }
+      } finally {
+        this.audio.isLoading = false
       }
     },
 
@@ -376,6 +401,7 @@ export const useAudioStore = defineStore('audio', {
       this.audio.isLoading = true
       try {
         await this._fetchAndApplyUrl()
+        if (!this.audio.currentSong.url) return
         this._loadAudioSrc(this.audio.currentSong!.url || '')
         await this.audio.audio!.play()
         this.audio.error = null
@@ -463,17 +489,18 @@ export const useAudioStore = defineStore('audio', {
     },
 
     // 下一首
-    nextSong() {
+    nextSong(isAutoEnd = false) {
       if (this.audio.playlist.length === 0) return
 
       let nextIndex = this.audio.currentIndex
 
-      switch (this.audio.playMode) {
-        case PlayMode.SINGLE:
-          // 单曲循环，重新播放当前歌曲
-          this.playSong(this.audio.currentSong!, this.audio.currentIndex)
-          return
+      // 如果是单曲播放结束触发的自动切歌，单曲循环模式下重播当前歌曲
+      if (isAutoEnd && this.audio.playMode === PlayMode.SINGLE) {
+        this.playSong(this.audio.currentSong!, this.audio.currentIndex, true)
+        return
+      }
 
+      switch (this.audio.playMode) {
         case PlayMode.RANDOM:
           // 随机播放
           const availableIndexes = this.audio.playlist
@@ -482,19 +509,22 @@ export const useAudioStore = defineStore('audio', {
 
           if (availableIndexes.length > 0) {
             nextIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)]
+          } else {
+            nextIndex = 0
           }
           break
 
+        case PlayMode.SINGLE:
         case PlayMode.LIST:
         default:
-          // 列表循环
+          // 列表循环（单曲循环下手动点击下一首也切换到下一首）
           nextIndex = (this.audio.currentIndex + 1) % this.audio.playlist.length
           break
       }
 
       const nextSong = this.audio.playlist[nextIndex]
       if (nextSong) {
-        this.playSong(nextSong, nextIndex)
+        this.playSong(nextSong, nextIndex, true)
       }
     },
 
@@ -505,27 +535,25 @@ export const useAudioStore = defineStore('audio', {
       let prevIndex = this.audio.currentIndex
 
       switch (this.audio.playMode) {
-        case PlayMode.SINGLE:
-          // 单曲循环，重新播放当前歌曲
-          this.playSong(this.audio.currentSong!, this.audio.currentIndex)
-          return
-
         case PlayMode.RANDOM:
           // 随机播放 - 从历史记录中获取上一首
           if (this.audio.playHistory.length > 1) {
             const prevSong = this.audio.playHistory[this.audio.playHistory.length - 2]
-            prevIndex = this.audio.playlist.findIndex(
+            const foundIdx = this.audio.playlist.findIndex(
               (song: { id: any }) => song.id === prevSong.id
             )
+            prevIndex =
+              foundIdx !== -1 ? foundIdx : Math.floor(Math.random() * this.audio.playlist.length)
           } else {
             // 如果没有历史记录，随机选择
             prevIndex = Math.floor(Math.random() * this.audio.playlist.length)
           }
           break
 
+        case PlayMode.SINGLE:
         case PlayMode.LIST:
         default:
-          // 列表循环
+          // 列表循环（单曲循环下手动点击上一首也切换到上一首）
           prevIndex =
             this.audio.currentIndex <= 0
               ? this.audio.playlist.length - 1
@@ -535,7 +563,7 @@ export const useAudioStore = defineStore('audio', {
 
       const prevSong = this.audio.playlist[prevIndex]
       if (prevSong) {
-        this.playSong(prevSong, prevIndex)
+        this.playSong(prevSong, prevIndex, true)
       }
     },
 
@@ -544,14 +572,14 @@ export const useAudioStore = defineStore('audio', {
       switch (this.audio.playMode) {
         case PlayMode.SINGLE:
           // 单曲循环
-          this.playSong(this.audio.currentSong!, this.audio.currentIndex)
+          this.playSong(this.audio.currentSong!, this.audio.currentIndex, true)
           break
 
         case PlayMode.LIST:
         case PlayMode.RANDOM:
         default:
           // 列表循环或随机播放
-          this.nextSong()
+          this.nextSong(true)
           break
       }
     },
@@ -811,7 +839,8 @@ export const useAudioStore = defineStore('audio', {
     // 播放指定索引的歌曲
     playByIndex(index: number) {
       if (index >= 0 && index < this.audio.playlist.length) {
-        this.playSong(this.audio.playlist[index], index)
+        const isCurrent = index === this.audio.currentIndex
+        this.playSong(this.audio.playlist[index], index, !isCurrent)
       }
     },
 
