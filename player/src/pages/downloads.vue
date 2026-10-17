@@ -536,44 +536,48 @@ const formatSize = (bytes?: number) => {
                 {{ formatSize(item.fileSize || item.file?.size) }}
               </div>
 
-              <!-- 操作按钮 (Col 6: 2 cols) (B5 悬停或键盘聚焦显示) -->
+              <!-- 操作列 (Col 6: 2 cols) -->
               <div
                 role="cell"
-                class="row-hover-show col-span-2 flex items-center justify-center gap-1 transition-opacity duration-150"
+                class="col-span-2 relative flex items-center justify-center min-h-[32px]"
               >
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  rounded="full"
-                  class="h-8 w-8 text-primary/80 hover:text-pink-400 focus:opacity-100 focus:text-pink-400"
-                  icon="icon-[mdi--play]"
-                  icon-class="h-4 w-4"
-                  aria-label="播放歌曲"
-                  title="播放"
-                  @click.stop="playSingle(item, index)"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  rounded="full"
-                  class="h-8 w-8 text-primary/80 hover:text-primary focus:opacity-100 focus:text-primary"
-                  icon="icon-[mdi--tray-arrow-down]"
-                  icon-class="h-4 w-4"
-                  aria-label="导出音频文件"
-                  title="导出音频文件"
-                  @click.stop="handleExport(item)"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  rounded="full"
-                  class="h-8 w-8 text-primary/70 hover:text-red-400 focus:opacity-100 focus:text-red-400"
-                  icon="icon-[mdi--trash-can-outline]"
-                  icon-class="h-4 w-4"
-                  aria-label="从离线库删除"
-                  title="从离线库删除"
-                  @click.stop="openDeleteConfirm(item)"
-                />
+                <!-- 非悬停时：显示低透明度 (0.5) 的更多图标 -->
+                <div class="row-default-more flex items-center justify-center text-white/50 transition-opacity duration-150">
+                  <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
+                </div>
+
+                <!-- 悬停或行内聚焦时：显示播放、重新导出、删除三个图标按钮 (32px 点击区域，悬停有底色) -->
+                <div
+                  class="row-action-buttons absolute inset-0 flex items-center justify-center gap-1 transition-opacity duration-150"
+                >
+                  <button
+                    type="button"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    aria-label="播放歌曲"
+                    title="播放"
+                    @click.stop="playSingle(item, index)"
+                  >
+                    <span class="icon-[mdi--play] h-4 w-4"></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    aria-label="导出音频文件"
+                    title="重新导出"
+                    @click.stop="handleExport(item)"
+                  >
+                    <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+                    aria-label="从离线库删除"
+                    title="删除"
+                    @click.stop="openDeleteConfirm(item)"
+                  >
+                    <span class="icon-[mdi--trash-can-outline] h-4 w-4"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -716,6 +720,31 @@ const formatSize = (bytes?: number) => {
 .download-song-item:hover .row-hover-hide,
 .download-song-item:focus-within .row-hover-hide {
   opacity: 0;
+}
+
+/* 操作列：非悬停显示低透明度 (0.5) 更多图标，悬停/行内聚焦显示三个图标按钮 */
+.download-song-item .row-default-more {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.15s ease;
+}
+
+.download-song-item:hover .row-default-more,
+.download-song-item:focus-within .row-default-more {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.download-song-item .row-action-buttons {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.download-song-item:hover .row-action-buttons,
+.download-song-item:focus-within .row-action-buttons {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .download-song-item.active-playing-row {
