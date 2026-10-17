@@ -252,24 +252,24 @@ const resetFilters = () => {
   selectedQualityFilter.value = 'all'
 }
 
-// 规格真实性徽章（只用实际数据，绝不编造）
+// 规格真实性徽章（只用实际数据，绝不编造；SQ 无损使用透明底、1px 强调色描边）
 const getQualityBadgeInfo = (item: DownloadedSong) => {
   if (item.qualityBadge === 'SQ' || item.qualityLevel === 'lossless') {
     return {
       label: 'SQ 无损',
-      class: 'bg-pink-500/20 text-pink-300 border border-pink-500/35',
+      class: 'bg-transparent text-pink-300 border border-pink-500/80',
     }
   }
   if (item.qualityBadge === 'HQ' || item.qualityLevel === 'exhigh') {
     return {
       label: 'HQ 极高',
-      class: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/35',
+      class: 'bg-transparent text-cyan-300 border border-cyan-500/70',
     }
   }
   if (item.qualityBadge === '标准' || item.qualityLevel === 'standard') {
     return {
       label: '标准',
-      class: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35',
+      class: 'bg-transparent text-emerald-300 border border-emerald-500/70',
     }
   }
   return null
@@ -434,13 +434,20 @@ const formatSize = (bytes?: number) => {
               :aria-label="`${item.name} - ${item.artist}`"
               @dblclick="playSingle(item, index)"
               @keydown.enter.self="playSingle(item, index)"
-              class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500/50 cursor-pointer"
+              class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500/50 cursor-pointer overflow-hidden border"
               :class="[
                 isCurrentSong(item)
-                  ? 'bg-pink-500/10 border border-pink-500/30 shadow-[0_0_16px_rgba(236,72,153,0.12)]'
-                  : 'border border-transparent hover:bg-white/[0.06] hover:border-white/10'
+                  ? 'active-playing-row'
+                  : 'border-transparent hover:bg-white/[0.06] hover:border-white/10'
               ]"
+              :style="isCurrentSong(item) ? { backgroundColor: 'rgba(236, 72, 153, 0.14)', borderColor: 'rgba(236, 72, 153, 0.25)' } : {}"
             >
+              <!-- 左侧 2px 强调色指示条 (当前播放行) -->
+              <span
+                v-if="isCurrentSong(item)"
+                class="absolute left-0 top-2 bottom-2 w-[2px] bg-pink-500 rounded-r"
+                aria-hidden="true"
+              ></span>
               <!-- 序号 / 播放动效 / 悬停播放键 (Col 1) -->
               <div role="cell" class="col-span-1 relative flex items-center justify-center text-center select-none">
                 <!-- 未播放：显示数字序号 -->
@@ -494,7 +501,7 @@ const formatSize = (bytes?: number) => {
                     <h3
                       :title="item.name"
                       class="truncate text-[15px] font-semibold transition-colors"
-                      :class="isCurrentSong(item) ? 'text-pink-300' : 'text-white/95 group-hover:text-pink-300'"
+                      :class="isCurrentSong(item) ? 'text-pink-200' : 'text-white/95 group-hover:text-pink-300'"
                     >
                       {{ item.name }}
                     </h3>
@@ -709,6 +716,11 @@ const formatSize = (bytes?: number) => {
 .download-song-item:hover .row-hover-hide,
 .download-song-item:focus-within .row-hover-hide {
   opacity: 0;
+}
+
+.download-song-item.active-playing-row {
+  background-color: rgba(236, 72, 153, 0.14) !important;
+  border-color: rgba(236, 72, 153, 0.25) !important;
 }
 
 /* 动效遵守 prefers-reduced-motion (B4, B9) */
