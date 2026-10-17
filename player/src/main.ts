@@ -52,8 +52,8 @@ watch([theme, preferredDark], () => applyThemeClass(resolveTheme(theme.value)))
 
 const { width } = useWindowSize()
 const setRootFontSize = (w: number) => {
-  const raw = 13 + (w - 1280) / 960
-  const size = Math.min(15, Math.max(11, Math.round(raw * 10) / 10))
+  const raw = 15 + (w - 1280) / 960
+  const size = Math.min(18, Math.max(15, Math.round(raw * 10) / 10))
   document.documentElement.style.fontSize = `${size}px`
 }
 setRootFontSize(window.innerWidth)
