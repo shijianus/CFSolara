@@ -295,6 +295,10 @@ export async function probeSongQualities(
       probeTier(song, 'standard', parentCtrl.signal, durationSec),
     ])
 
+    if (parentCtrl.signal.aborted) {
+      throw new DOMException('Probe aborted', 'AbortError')
+    }
+
     // ══════ 裁定规则应用 ══════
     // 1. 标准档 (基础档)
     const stdOk = Boolean(
