@@ -653,6 +653,7 @@ const emit = defineEmits(['show'])
         <!-- 音质切换按钮 -->
         <div v-if="currentSong" class="relative">
           <button
+            id="footer-quality-btn"
             ref="qualityBtnRef"
             @click.stop="toggleQualityMenu"
             @keydown.down.prevent="openAndFocusQualityMenu"
