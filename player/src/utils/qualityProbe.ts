@@ -215,6 +215,9 @@ async function probeTier(
       }
     }
 
+    // 读取响应头后立即关闭响应体流，避免上游返回 200 时继续下载完整音频
+    res.body?.cancel?.().catch(() => {})
+
     let actualBitrateKbps: number | null = null
     if (totalBytes && durationSec > 0) {
       actualBitrateKbps = Math.round((totalBytes * 8) / durationSec / 1000)
@@ -300,8 +303,10 @@ export async function probeSongQualities(
       stdRaw.totalBytes &&
       stdRaw.totalBytes > 0
     )
-    const stdFormat = extractFormatLabel(stdRaw.contentType, 'standard')
-    const stdBitrateText = `${stdFormat} · ${stdRaw.actualBitrateKbps ? `${stdRaw.actualBitrateKbps} kbps` : '128 kbps'}`
+    const stdFormat = stdOk ? extractFormatLabel(stdRaw.contentType, 'standard') : '未知'
+    const stdBitrateText = stdOk
+      ? `${stdFormat} · ${stdRaw.actualBitrateKbps ? `${stdRaw.actualBitrateKbps} kbps` : '码率未知'}`
+      : '大小未知'
 
     const standardItem: ProbeQualityItem = {
       level: 'standard',
@@ -311,7 +316,7 @@ export async function probeSongQualities(
       totalBytes: stdRaw.totalBytes,
       actualBitrateKbps: stdRaw.actualBitrateKbps,
       isAvailable: stdOk,
-      unavailableReason: stdOk ? undefined : (stdRaw.timedOut ? '探测超时' : '大小未知'),
+      unavailableReason: stdOk ? undefined : '大小未知',
       sizeFormatted: formatBytes(stdRaw.totalBytes),
       formatLabel: stdFormat,
       bitrateLabel: stdBitrateText,
@@ -331,7 +336,7 @@ export async function probeSongQualities(
 
     if (!hqStatusOk) {
       hqAvailable = false
-      hqReason = hqRaw.timedOut ? '探测超时' : '大小未知'
+      hqReason = '大小未知'
     } else if (stdOk && stdRaw.totalBytes && hqRaw.totalBytes) {
       // 规则: 任一档的总长度与更低一档相同或相差小于 2% → 该档不可用 ("音源未提供更高音质")
       const diffRatio = (hqRaw.totalBytes - stdRaw.totalBytes) / stdRaw.totalBytes
@@ -341,8 +346,10 @@ export async function probeSongQualities(
       }
     }
 
-    const hqFormat = extractFormatLabel(hqRaw.contentType, 'exhigh')
-    const hqBitrateText = `${hqFormat} · ${hqRaw.actualBitrateKbps ? `${hqRaw.actualBitrateKbps} kbps` : '320 kbps'}`
+    const hqFormat = hqStatusOk ? extractFormatLabel(hqRaw.contentType, 'exhigh') : '未知'
+    const hqBitrateText = hqStatusOk
+      ? `${hqFormat} · ${hqRaw.actualBitrateKbps ? `${hqRaw.actualBitrateKbps} kbps` : '码率未知'}`
+      : '大小未知'
 
     const exhighItem: ProbeQualityItem = {
       level: 'exhigh',
@@ -372,7 +379,7 @@ export async function probeSongQualities(
 
     if (!sqStatusOk) {
       sqAvailable = false
-      sqReason = sqRaw.timedOut ? '探测超时' : '大小未知'
+      sqReason = '大小未知'
     } else {
       // 规则 1: 请求无损但返回的不是 FLAC/ALAC/WAV → 无损不可用 ("音源未提供无损音质")
       const isLossless = isLosslessContentType(sqRaw.contentType)
@@ -381,7 +388,7 @@ export async function probeSongQualities(
         sqReason = '音源未提供无损音质'
       } else {
         // 规则 2: 任一档的总长度与更低一档相同或相差小于 2% → 该档不可用 ("音源未提供更高音质")
-        const lowerBytes = (hqAvailable && hqRaw.totalBytes)
+        const lowerBytes = (hqStatusOk && hqRaw.totalBytes)
           ? hqRaw.totalBytes
           : (stdOk && stdRaw.totalBytes)
             ? stdRaw.totalBytes
@@ -393,10 +400,14 @@ export async function probeSongQualities(
       }
     }
 
-    const sqFormat = extractFormatLabel(sqRaw.contentType, 'lossless')
-    const sqBitrateText = isLosslessContentType(sqRaw.contentType)
-      ? `${sqFormat} · 无损`
-      : `${sqFormat} · ${sqRaw.actualBitrateKbps ? `${sqRaw.actualBitrateKbps} kbps` : '128 kbps'}`
+    const sqFormat = sqStatusOk ? extractFormatLabel(sqRaw.contentType, 'lossless') : '未知'
+    const sqBitrateText = !sqStatusOk
+      ? '大小未知'
+      : sqRaw.actualBitrateKbps
+        ? `${sqFormat} · ${sqRaw.actualBitrateKbps} kbps`
+        : isLosslessContentType(sqRaw.contentType)
+          ? `${sqFormat} · 无损`
+          : `${sqFormat} · 码率未知`
 
     const losslessItem: ProbeQualityItem = {
       level: 'lossless',
