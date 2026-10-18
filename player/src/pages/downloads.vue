@@ -9,6 +9,7 @@ import GlassSelect from '@/components/Ui/GlassSelect.vue'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import type { Song } from '@/stores/interface'
 import type { DownloadedSong } from '@/utils/indexedDB'
+import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/audioBlobParser'
 
 const router = useRouter()
 const downloadStore = useDownloadStore()
@@ -31,22 +32,7 @@ const handleVisibilityChange = () => {
   isPageVisible.value = !document.hidden
 }
 
-// ══════ P1.4 真实音频元数据动态解析 (music-metadata-browser) ══════
-export type ResolvedBlobTier = 'lossless' | 'exhigh' | 'standard'
-
-interface ParsedAudioMeta {
-  container?: string
-  codec?: string
-  bitrate?: number
-  sampleRate?: number
-  bitsPerSample?: number
-  isLossless?: boolean
-  resolvedTier: ResolvedBlobTier
-  displayTag: string
-  detailText: string
-  mismatchWarning: string | null
-}
-
+// ══════ P1.4 真实音频元数据解析 (audioBlobParser) ══════
 const parsedMetaMap = ref<Record<string, ParsedAudioMeta>>({})
 const metadataCache = new Map<string, ParsedAudioMeta>()
 
@@ -59,80 +45,19 @@ const parseBlobMetadata = async (item: DownloadedSong) => {
   }
 
   try {
-    const mm = await import('music-metadata-browser')
-    // 仅读取前 512KB 数据段解析头部
-    const headerBlob = item.file.slice(0, 524288)
-    const meta = await mm.parseBlob(headerBlob)
-    const fmt = meta.format
-
-    const container = (fmt.container || '').toUpperCase()
-    const codec = (fmt.codec || '').toUpperCase()
-    const isLossless = Boolean(
-      fmt.lossless ||
-      container.includes('FLAC') || codec.includes('FLAC') ||
-      container.includes('WAV') || codec.includes('WAV') ||
-      container.includes('ALAC') || codec.includes('ALAC')
-    )
-    const bitrateKbps = fmt.bitrate ? Math.round(fmt.bitrate / 1000) : null
-
-    // 分类规则: FLAC/ALAC/WAV → SQ; MP3/AAC ≥ 256 kbps → HQ; 其余 → 标准
-    let resolvedTier: ResolvedBlobTier = 'standard'
-    let displayTag = 'MP3'
-    if (isLossless) {
-      resolvedTier = 'lossless'
-      displayTag = container.includes('WAV') || codec.includes('WAV') ? 'WAV' : 'FLAC'
-    } else if (bitrateKbps && bitrateKbps >= 256) {
-      resolvedTier = 'exhigh'
-      displayTag = bitrateKbps >= 300 ? 'MP3 320k' : `MP3 ${bitrateKbps}k`
-    } else {
-      resolvedTier = 'standard'
-      displayTag = bitrateKbps ? `MP3 ${bitrateKbps}k` : 'MP3 128k'
-    }
-
-    // 检查请求音质与实际格式是否不符 (P1.4 警示提示)
-    let mismatchWarning: string | null = null
     const reqQuality = item.qualityLevel || (item.qualityBadge === 'SQ' ? 'lossless' : item.qualityBadge === 'HQ' ? 'exhigh' : 'standard')
-    if (reqQuality === 'lossless' && !isLossless) {
-      const actualBitrateStr = bitrateKbps ? `${bitrateKbps} kbps` : '128 kbps'
-      mismatchWarning = `请求 SQ 无损, 实际为 MP3 ${actualBitrateStr}`
-    } else if (reqQuality === 'exhigh' && (!bitrateKbps || bitrateKbps < 256)) {
-      const actualBitrateStr = bitrateKbps ? `${bitrateKbps} kbps` : '128 kbps'
-      mismatchWarning = `请求 HQ 极高, 实际为 MP3 ${actualBitrateStr}`
-    }
-
-    const details: string[] = []
-    if (fmt.sampleRate) {
-      details.push(`${(fmt.sampleRate / 1000).toFixed(1)}kHz`)
-    }
-    if (fmt.bitsPerSample) {
-      details.push(`${fmt.bitsPerSample}bit`)
-    }
-
-    const parsed: ParsedAudioMeta = {
-      container: fmt.container,
-      codec: fmt.codec,
-      bitrate: fmt.bitrate,
-      sampleRate: fmt.sampleRate,
-      bitsPerSample: fmt.bitsPerSample,
-      isLossless,
-      resolvedTier,
-      displayTag,
-      detailText: details.join(' · '),
-      mismatchWarning,
-    }
-
+    const parsed = await parseAudioBlob(item.file, item.duration, reqQuality)
     metadataCache.set(idStr, parsed)
     parsedMetaMap.value[idStr] = parsed
   } catch {
-    // 解析异常降级仅依据实际扩展名/格式判定，绝不使用请求落库的 qualityBadge
     const isFlac = item.format === 'flac' || item.format === 'wav' || item.format === 'alac'
     const fallbackTag = isFlac ? item.format.toUpperCase() : 'MP3 128k'
     const parsed: ParsedAudioMeta = {
       displayTag: fallbackTag,
       detailText: '',
       mismatchWarning: null,
-      isLossless: isFlac,
-      resolvedTier: isFlac ? 'lossless' : 'standard',
+      isLossless: false,
+      resolvedTier: 'standard',
     }
     metadataCache.set(idStr, parsed)
     parsedMetaMap.value[idStr] = parsed
@@ -144,13 +69,12 @@ const getParsedMeta = (item: DownloadedSong): ParsedAudioMeta => {
   if (parsedMetaMap.value[idStr]) {
     return parsedMetaMap.value[idStr]
   }
-  const isFlac = item.format === 'flac' || item.format === 'wav' || item.format === 'alac'
   return {
-    displayTag: isFlac ? item.format.toUpperCase() : 'MP3 128k',
+    displayTag: '—',
     detailText: '',
     mismatchWarning: null,
-    isLossless: isFlac,
-    resolvedTier: isFlac ? 'lossless' : 'standard',
+    isLossless: false,
+    resolvedTier: 'standard',
   }
 }
 
@@ -159,10 +83,6 @@ const getSongActualTier = (item: DownloadedSong): ResolvedBlobTier => {
   const meta = parsedMetaMap.value[String(item.id)]
   if (meta) {
     return meta.resolvedTier
-  }
-  // 未完成解析前仅依据文件实际扩展名判定，不使用 qualityBadge
-  if (item.format === 'flac' || item.format === 'wav' || item.format === 'alac') {
-    return 'lossless'
   }
   return 'standard'
 }
