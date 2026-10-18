@@ -9,7 +9,7 @@ import GlassSelect from '@/components/Ui/GlassSelect.vue'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import type { Song } from '@/stores/interface'
 import type { DownloadedSong } from '@/utils/indexedDB'
-import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/audioBlobParser'
+import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/blobMetadataParser'
 
 const router = useRouter()
 const downloadStore = useDownloadStore()
