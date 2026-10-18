@@ -61,16 +61,21 @@ const adjustSelectedIfUnavailable = (res: SongProbeResult) => {
   }
 }
 
+// 记录最近探测中的歌曲 ID，避免弹窗关闭时 currentDownloadSong 被先设为 null 导致无法取消
+const lastProbingSongId = ref<string | null>(null)
+
 // 弹窗可见性监听
 watch(
   () => [downloadStore.dialogVisible, downloadStore.currentDownloadSong?.id],
-  ([visible]) => {
+  ([visible, songId], [prevVisible, prevSongId] = [false, undefined]) => {
     if (visible && downloadStore.currentDownloadSong) {
+      lastProbingSongId.value = String(downloadStore.currentDownloadSong.id)
       selectedLevel.value = 'lossless'
       runProbe(downloadStore.currentDownloadSong)
     } else if (!visible) {
-      if (downloadStore.currentDownloadSong) {
-        cancelSongProbe(downloadStore.currentDownloadSong.id)
+      const idToCancel = songId || prevSongId || lastProbingSongId.value
+      if (idToCancel) {
+        cancelSongProbe(idToCancel)
       }
       isProbing.value = false
     }
