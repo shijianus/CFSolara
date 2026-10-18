@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useDownloadStore, type QualityChoice } from '@/stores/modules/download'
+import { useAudioStore } from '@/stores/modules/audio'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import {
   probeSongQualities,
@@ -12,7 +13,21 @@ import {
 } from '@/utils/qualityProbe'
 
 const downloadStore = useDownloadStore()
+const audioStore = useAudioStore()
 const selectedLevel = ref<QualityLevel>('lossless')
+const coverLoadFailed = ref(false)
+
+// 与底栏使用相同的封面解析来源：优先歌曲自带封面，其次当前播放同曲封面，再回退歌手封面接口
+const dialogCoverUrl = computed(() => {
+  const song = downloadStore.currentDownloadSong
+  if (!song) return ''
+  const curPlaying = audioStore.currentSong
+  const rawCover =
+    song.cover ||
+    (curPlaying && String(curPlaying.id) === String(song.id) ? curPlaying.cover : '') ||
+    ''
+  return formatCoverUrl(rawCover, { size: 128, artist: song.artist })
+})
 
 // 真实探测状态
 const probeResult = ref<SongProbeResult | null>(null)
@@ -31,6 +46,7 @@ const runProbe = async (song: any) => {
     return
   }
 
+  probeResult.value = null
   isProbing.value = true
   try {
     const res = await probeSongQualities(song)
@@ -69,6 +85,7 @@ watch(
   () => [downloadStore.dialogVisible, downloadStore.currentDownloadSong?.id],
   ([visible, songId], [prevVisible, prevSongId] = [false, undefined]) => {
     if (visible && downloadStore.currentDownloadSong) {
+      coverLoadFailed.value = false
       lastProbingSongId.value = String(downloadStore.currentDownloadSong.id)
       selectedLevel.value = 'lossless'
       runProbe(downloadStore.currentDownloadSong)
@@ -278,10 +295,11 @@ onUnmounted(() => {
             >
               <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-white/5">
                 <img
-                  v-if="downloadStore.currentDownloadSong.cover"
-                  :src="formatCoverUrl(downloadStore.currentDownloadSong.cover, { size: 96, artist: downloadStore.currentDownloadSong.artist })"
+                  v-if="dialogCoverUrl && !coverLoadFailed"
+                  :src="dialogCoverUrl"
                   alt="cover"
                   class="h-full w-full object-cover"
+                  @error="coverLoadFailed = true"
                 />
                 <div v-else class="h-full w-full flex items-center justify-center bg-white/5 text-white/40">
                   <span class="icon-[mdi--music] h-6 w-6"></span>
