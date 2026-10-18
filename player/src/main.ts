@@ -42,8 +42,10 @@ const applyThemeClass = (t: 'light' | 'dark') => {
   const root = document.documentElement
   if (t === 'dark') {
     root.classList.add('dark')
+    root.style.colorScheme = 'dark'
   } else {
     root.classList.remove('dark')
+    root.style.colorScheme = 'light'
   }
 }
 const resolveTheme = (t?: 'light' | 'dark' | 'system') => (t === 'system' ? (preferredDark.value ? 'dark' : 'light') : t || 'dark')
