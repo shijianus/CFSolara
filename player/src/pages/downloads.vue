@@ -601,7 +601,7 @@ const formatSize = (bytes?: number) => {
               <!-- 音质规格徽章 (Col 4: 1 col, P1.4 真实格式与警示图标) -->
               <div role="cell" class="col-span-1 text-center hidden md:flex items-center justify-center gap-1.5">
                 <span
-                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium select-none"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium select-none whitespace-nowrap"
                   :class="[
                     getParsedMeta(item).isLossless
                       ? 'bg-transparent text-pink-300 border border-pink-500/70'
