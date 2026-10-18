@@ -75,6 +75,12 @@ const adjustSelectedIfUnavailable = (res: SongProbeResult) => {
       selectedLevel.value = 'standard'
     }
   }
+  if (downloadStore.dialogVisible) {
+    nextTick(() => {
+      const idx = QUALITY_LEVELS.findIndex((q) => q.level === selectedLevel.value)
+      if (idx >= 0) radioItemRefs.value[idx]?.focus()
+    })
+  }
 }
 
 // 记录最近探测中的歌曲 ID，避免弹窗关闭时 currentDownloadSong 被先设为 null 导致无法取消
@@ -89,6 +95,10 @@ watch(
       lastProbingSongId.value = String(downloadStore.currentDownloadSong.id)
       selectedLevel.value = 'lossless'
       runProbe(downloadStore.currentDownloadSong)
+      nextTick(() => {
+        const idx = QUALITY_LEVELS.findIndex((q) => q.level === selectedLevel.value)
+        if (idx >= 0) radioItemRefs.value[idx]?.focus()
+      })
     } else if (!visible) {
       const idToCancel = songId || prevSongId || lastProbingSongId.value
       if (idToCancel) {
@@ -341,13 +351,13 @@ onUnmounted(() => {
                 @keydown.arrow-left.prevent="selectNext(-1)"
                 @keydown.space.prevent="selectLevel(choice.level)"
                 @keydown.enter.prevent="handleConfirm"
-                class="option-row relative h-[68px] min-h-[68px] px-4 flex items-center justify-between rounded-xl transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="option-row relative h-[68px] min-h-[68px] px-4 flex items-center justify-between rounded-xl transition-colors duration-150 outline-none"
                 :class="[
                   !choice.isAvailable
-                    ? 'opacity-45 cursor-not-allowed border border-transparent bg-transparent'
+                    ? 'disabled-option cursor-not-allowed'
                     : selectedLevel === choice.level
-                      ? 'selected-option bg-white/[0.08] border border-white/[0.28] cursor-pointer'
-                      : 'unselected-option bg-transparent border border-white/[0.08] hover:bg-white/[0.04] hover:border-white/15 cursor-pointer'
+                      ? 'selected-option cursor-pointer'
+                      : 'unselected-option cursor-pointer'
                 ]"
               >
                 <!-- 左侧：第一行名称 15px/600，第二行格式·码率 13px (格式只出现一次，去掉重复小标签) -->
@@ -475,6 +485,28 @@ onUnmounted(() => {
 /* 唯一的渐变主按钮 */
 .download-btn-gradient {
   background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+}
+
+/* 选项卡片状态样式 */
+.option-row.unselected-option {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.option-row.unselected-option:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.option-row.selected-option {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.option-row.disabled-option {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  opacity: 0.45;
 }
 
 /* 过渡动画遵守 prefers-reduced-motion */
