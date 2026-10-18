@@ -313,7 +313,7 @@ const availableQualities = computed(() => {
         bitrateDisplay = item.bitrateLabel
       }
     } else {
-      bitrateDisplay = level === 'lossless' ? 'FLAC · 无损' : level === 'exhigh' ? 'MP3 · 320 kbps' : 'MP3 · 128 kbps'
+      bitrateDisplay = '探测中…'
     }
 
     return {
@@ -322,7 +322,7 @@ const availableQualities = computed(() => {
       bitrate: bitrateDisplay,
       isAvailable,
       unavailableReason,
-      formatLabel: item?.formatLabel || (level === 'lossless' ? 'FLAC' : 'MP3'),
+      formatLabel: item?.formatLabel || '未知',
       sizeFormatted: item?.sizeFormatted || '—',
     }
   })
@@ -338,7 +338,7 @@ const qualityDisplayInfo = computed(() => {
   if (!probe) {
     return {
       badge: nominalBadge,
-      tooltip: `当前音质: ${nominalBadge} (点击切换音质)`,
+      tooltip: `当前音质: ${nominalBadge} (探测中…)`,
       isDegraded: false,
       isLossless: reqLevel === 'lossless',
     }
@@ -349,9 +349,9 @@ const qualityDisplayInfo = computed(() => {
     // 请求档位真实可用
     return {
       badge: nominalBadge,
-      tooltip: `当前音质: ${nominalBadge} (点击切换音质)`,
+      tooltip: `当前音质: ${nominalBadge} (${currentItem.bitrateLabel})`,
       isDegraded: false,
-      isLossless: reqLevel === 'lossless' && currentItem.formatLabel === 'FLAC',
+      isLossless: reqLevel === 'lossless' && (currentItem.formatLabel === 'FLAC' || currentItem.formatLabel === 'WAV' || currentItem.formatLabel === 'ALAC'),
     }
   }
 
@@ -366,7 +366,7 @@ const qualityDisplayInfo = computed(() => {
     const actualFmt = fallbackTier.formatLabel || 'MP3'
     const actualBitrateNum = fallbackTier.actualBitrateKbps || (fallbackTier.level === 'exhigh' ? 320 : 128)
     const actualBadge = `${actualFmt} ${actualBitrateNum}k`
-    const tooltip = `请求 ${nominalBadge}, 音源实际提供 ${actualFmt} ${actualBitrateNum} kbps`
+    const tooltip = `请求 ${nominalBadge},音源实际提供 ${actualFmt} ${actualBitrateNum} kbps`
 
     return {
       badge: actualBadge,
@@ -378,7 +378,7 @@ const qualityDisplayInfo = computed(() => {
 
   // 均不可用或探测失败
   return {
-    badge: nominalBadge,
+    badge: '未知',
     tooltip: `当前音质: ${nominalBadge} (音源状态未知)`,
     isDegraded: false,
     isLossless: false,
@@ -691,7 +691,7 @@ const emit = defineEmits(['show'])
                 right: `${menuCoords.right}px`,
                 zIndex: 60,
               }"
-              class="quality-panel-popover w-56 overflow-hidden rounded-2xl select-none"
+              class="quality-panel-popover w-64 overflow-hidden rounded-2xl select-none"
               @keydown="handleQualityMenuKeydown"
             >
               <!-- 顶部标题 -->
@@ -701,7 +701,7 @@ const emit = defineEmits(['show'])
               >
                 <div class="flex items-center gap-1.5">
                   <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-pink-400"></span>
-                  <span id="quality-menu-title" class="text-[11px] font-semibold text-primary/85 tracking-wider">音频规格</span>
+                  <span id="quality-menu-title" class="text-[11px] font-semibold text-white/90 tracking-wider">音频规格</span>
                 </div>
                 <span class="text-[11px] font-mono font-medium text-pink-300">
                   {{ activeQualityBadge }}
@@ -728,7 +728,7 @@ const emit = defineEmits(['show'])
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
                       : currentQualityLevel === q.level
                         ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm cursor-pointer'
-                        : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary cursor-pointer'
+                        : 'border border-transparent text-white/85 hover:bg-white/10 hover:text-white cursor-pointer'
                   ]"
                 >
                   <div class="flex items-center gap-2 min-w-0 pr-1">
@@ -739,7 +739,7 @@ const emit = defineEmits(['show'])
                     ></span>
                     <span
                       class="text-xs transition-colors shrink-0"
-                      :class="currentQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-primary/85 font-medium'"
+                      :class="currentQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-white/90 font-medium'"
                     >
                       {{ q.label }}
                     </span>
@@ -749,10 +749,10 @@ const emit = defineEmits(['show'])
                     class="text-[11px] shrink-0 transition-colors text-right pl-1"
                     :class="[
                       !q.isAvailable
-                        ? 'text-white/50 font-normal font-sans'
+                        ? 'text-white/65 font-normal font-sans'
                         : currentQualityLevel === q.level
                           ? 'text-pink-300 font-semibold font-mono'
-                          : 'text-primary/60 group-hover:text-primary/80 font-mono'
+                          : 'text-white/65 group-hover:text-white/85 font-mono'
                     ]"
                   >
                     {{ q.bitrate }}
@@ -893,20 +893,18 @@ const emit = defineEmits(['show'])
   }
 }
 
-/* 音质规格上浮菜单毛玻璃容器 (带纯色回退机制，模糊半径限制在 24px 内) */
+/* 音质规格上浮菜单毛玻璃容器 (深紫玻璃底色，模糊半径限制在 24px 内) */
 .quality-panel-popover {
-  /* 纯色回退背景 (当不支持 backdrop-filter 时) */
-  background-color: light-dark(#f8f9fa, #120e1e);
-  border: 1px solid light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.16));
+  background-color: #1e1a34;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 16px 36px -8px rgba(0, 0, 0, 0.55),
-    0 0 24px -4px rgba(236, 72, 153, 0.20),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
+    0 16px 36px -8px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .quality-panel-popover {
-    background-color: light-dark(rgba(255, 255, 255, 0.90), rgba(20, 16, 36, 0.90));
+    background-color: rgba(30, 26, 52, 0.94);
     backdrop-filter: blur(var(--glass-blur, 24px));
     -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
   }
