@@ -265,10 +265,11 @@ onUnmounted(() => {
       aria-modal="true"
       aria-labelledby="download-dialog-title"
     >
-      <!-- 半透明遮罩 -->
+      <!-- 半透明遮罩 (rgba(0,0,0,0.40)，背景模糊不超过 6px) -->
       <Transition name="mask" appear>
         <div
-          class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          class="absolute inset-0"
+          style="background-color: rgba(0, 0, 0, 0.40); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);"
           @click="downloadStore.closeDownloadDialog"
         />
       </Transition>
@@ -298,20 +299,24 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <!-- 歌曲行：封面 48px 圆角 10px，歌名 15px/600，歌手·专辑 13px (颜色不低于 64% 白) -->
+            <!-- 歌曲行：封面固定 48px × 48px 圆角 10px，歌名 15px/600，歌手·专辑 13px (颜色不低于 64% 白) -->
             <div
               v-if="downloadStore.currentDownloadSong"
               class="my-4 flex items-center gap-3.5"
             >
-              <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-white/5">
+              <div
+                class="relative shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-white/5"
+                style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;"
+              >
                 <img
                   v-if="dialogCoverUrl && !coverLoadFailed"
                   :src="dialogCoverUrl"
                   alt="cover"
                   class="h-full w-full object-cover"
+                  style="width: 48px; height: 48px;"
                   @error="coverLoadFailed = true"
                 />
-                <div v-else class="h-full w-full flex items-center justify-center bg-white/5 text-white/40">
+                <div v-else class="h-full w-full flex items-center justify-center bg-white/5 text-white/40" style="width: 48px; height: 48px;">
                   <span class="icon-[mdi--music] h-6 w-6"></span>
                 </div>
               </div>
@@ -384,30 +389,34 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <!-- 右侧：真实大小 (14px/500 等宽数字) + 强调色勾选圆标 (非实心粉块、非洋红渐变填充) -->
+                <!-- 右侧：真实大小 (14px/500 等宽数字) + 强调色勾选圆标 (不可用档位显示"—"，不再保留空的单选圆圈) -->
                 <div class="flex items-center gap-3 shrink-0">
                   <template v-if="choice.isItemProbing">
                     <span class="inline-block h-4 w-12 rounded bg-white/10 animate-pulse"></span>
                   </template>
-                  <template v-else>
+                  <template v-else-if="choice.isAvailable">
                     <span class="text-[14px] font-medium font-mono text-white/80 tabular-nums">
                       {{ choice.sizeFormatted }}
                     </span>
                   </template>
+                  <template v-else>
+                    <span class="text-[14px] font-medium font-mono text-white/40 tabular-nums">
+                      —
+                    </span>
+                  </template>
 
-                  <!-- 勾选指示器：未选中为中性细圈，选中为强调色圆标加对勾，不可用为浅灰圈 -->
+                  <!-- 勾选指示器：仅可用档位保留单选圆圈；不可用档位不保留圆圈 -->
                   <div
+                    v-if="choice.isAvailable"
                     class="flex h-5 w-5 items-center justify-center rounded-full border transition-all"
                     :class="[
-                      !choice.isAvailable
-                        ? 'border-white/10 bg-transparent'
-                        : selectedLevel === choice.level
-                          ? 'border-pink-400 bg-pink-500/20 text-pink-300'
-                          : 'border-white/20 bg-transparent'
+                      selectedLevel === choice.level
+                        ? 'border-pink-400 bg-pink-500/20 text-pink-300'
+                        : 'border-white/20 bg-transparent'
                     ]"
                   >
                     <span
-                      v-if="selectedLevel === choice.level && choice.isAvailable"
+                      v-if="selectedLevel === choice.level"
                       class="icon-[mdi--check] h-3.5 w-3.5"
                     ></span>
                   </div>
@@ -511,12 +520,19 @@ onUnmounted(() => {
 
 /* 过渡动画遵守 prefers-reduced-motion */
 .mask-enter-active,
-.mask-leave-active {
+.mask-leave-active,
+.mask-appear-active {
   transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .mask-enter-from,
-.mask-leave-to {
+.mask-leave-to,
+.mask-appear-from {
   opacity: 0;
+}
+.mask-enter-to,
+.mask-leave-from,
+.mask-appear-to {
+  opacity: 1;
 }
 
 .dialog-enter-active,

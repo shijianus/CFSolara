@@ -268,6 +268,23 @@ const currentQualityLevel = computed<QualityLevel>(() => {
   return 'lossless'
 })
 
+// 实际生效的音质档位（当请求档位不可用时降级至实际生效档位，如标准）
+const effectiveQualityLevel = computed<QualityLevel>(() => {
+  const req = currentQualityLevel.value
+  const probe = currentSongProbe.value
+  if (!probe) return req
+
+  const currentItem = probe[req]
+  if (currentItem && currentItem.isAvailable) {
+    return req
+  }
+
+  // 请求档位不可用或静默降级：寻找音源实际能提供的最高可用档位
+  if (probe.exhigh.isAvailable) return 'exhigh'
+  if (probe.standard.isAvailable) return 'standard'
+  return 'standard'
+})
+
 let probingSongId = ''
 
 // 触发音质探测（仅在打开浮层或当前档位非标准需判断降级时触发）
@@ -455,7 +472,7 @@ const updateQualityMenuPosition = () => {
 const openAndFocusQualityMenu = () => {
   updateQualityMenuPosition()
   showQualityMenu.value = true
-  const activeIdx = availableQualities.value.findIndex(q => q.level === currentQualityLevel.value)
+  const activeIdx = availableQualities.value.findIndex(q => q.level === effectiveQualityLevel.value)
   focusedQualityIndex.value = activeIdx >= 0 ? activeIdx : 0
   nextTick(() => {
     qualityItemRefs.value[focusedQualityIndex.value]?.focus()
@@ -766,7 +783,7 @@ const emit = defineEmits(['show'])
                   :key="q.level"
                   :ref="(el) => { if (el) qualityItemRefs[index] = el as HTMLButtonElement }"
                   role="radio"
-                  :aria-checked="currentQualityLevel === q.level"
+                  :aria-checked="effectiveQualityLevel === q.level && q.isAvailable"
                   :aria-disabled="!q.isAvailable"
                   :disabled="!q.isAvailable"
                   :tabindex="q.isAvailable ? (focusedQualityIndex === index ? 0 : -1) : -1"
@@ -777,33 +794,40 @@ const emit = defineEmits(['show'])
                   :class="[
                     !q.isAvailable
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
-                      : currentQualityLevel === q.level
+                      : effectiveQualityLevel === q.level
                         ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm cursor-pointer'
                         : 'border border-transparent text-white/85 hover:bg-white/10 hover:text-white cursor-pointer'
                   ]"
                 >
-                  <div class="flex items-center gap-2 min-w-0 pr-1">
+                  <div class="flex items-center gap-1.5 min-w-0 pr-1">
                     <!-- 左侧指示条 -->
                     <span
                       class="w-1 h-3.5 rounded-full transition-all duration-150 shrink-0"
-                      :class="currentQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
                     ></span>
                     <span
                       class="text-xs transition-colors shrink-0"
-                      :class="currentQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-white/90 font-medium'"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-white/90 font-medium'"
                     >
                       {{ q.label }}
                     </span>
+                    <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
+                    <span
+                      v-if="effectiveQualityLevel === q.level && q.isAvailable"
+                      class="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-medium shrink-0"
+                    >
+                      当前
+                    </span>
                   </div>
-                  <!-- 右侧：真实规格或置灰原因 -->
+                  <!-- 右侧：真实规格或置灰原因 (不可用原因文字统一 13px) -->
                   <span
-                    class="text-[11px] shrink-0 transition-colors text-right pl-1"
+                    class="shrink-0 transition-colors text-right pl-1"
                     :class="[
                       !q.isAvailable
-                        ? 'text-white/65 font-normal font-sans'
-                        : currentQualityLevel === q.level
-                          ? 'text-pink-300 font-semibold font-mono'
-                          : 'text-white/65 group-hover:text-white/85 font-mono'
+                        ? 'text-[13px] text-white/65 font-normal font-sans'
+                        : effectiveQualityLevel === q.level
+                          ? 'text-xs text-pink-300 font-semibold font-mono'
+                          : 'text-xs text-white/65 group-hover:text-white/85 font-mono'
                     ]"
                   >
                     {{ q.bitrate }}
@@ -920,15 +944,23 @@ const emit = defineEmits(['show'])
 
 /* 音质菜单与反馈弹窗过渡 (引用设计令牌并遵守 prefers-reduced-motion) */
 .quality-pop-enter-active,
-.quality-pop-leave-active {
+.quality-pop-leave-active,
+.quality-pop-appear-active {
   transition:
-    opacity var(--glass-duration-normal, 200ms) var(--glass-ease, cubic-bezier(0.16, 1, 0.3, 1)),
-    transform var(--glass-duration-normal, 200ms) var(--glass-ease, cubic-bezier(0.16, 1, 0.3, 1));
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .quality-pop-enter-from,
-.quality-pop-leave-to {
+.quality-pop-leave-to,
+.quality-pop-appear-from {
   opacity: 0;
   transform: translateY(6px) scale(0.97);
+}
+.quality-pop-enter-to,
+.quality-pop-leave-from,
+.quality-pop-appear-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
