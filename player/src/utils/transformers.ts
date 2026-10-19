@@ -251,6 +251,7 @@ export function transformSong(item: Record<string, unknown>): SongData {
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
     sha: (item?.sha as string) || (song?.sha as string) || '',
     qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || 'SQ',
+    // 音质档位基础元数据（音质弹窗与规格展示已完全接入 qualityProbe.ts 真实网络探测，不包含 estimatedSize 估算字段）
     qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [
       {
         level: 'lossless',
