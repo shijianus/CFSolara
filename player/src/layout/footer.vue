@@ -241,6 +241,7 @@ onUnmounted(() => {
 import {
   probeSongQualities,
   getCachedProbeResult,
+  cancelSongProbe,
   type SongProbeResult,
   type QualityLevel,
 } from '@/utils/qualityProbe'
@@ -257,30 +258,6 @@ let qualityToastTimer: any = null
 // 歌曲真实音质探测结果
 const currentSongProbe = ref<SongProbeResult | null>(null)
 
-// 监听当前歌曲变化，触发统一音质探测
-watch(
-  () => currentSong.value,
-  async (newSong) => {
-    if (!newSong || !newSong.id) {
-      currentSongProbe.value = null
-      return
-    }
-    const cached = getCachedProbeResult(newSong.id)
-    if (cached) {
-      currentSongProbe.value = cached
-    }
-    try {
-      const res = await probeSongQualities(newSong)
-      if (currentSong.value && String(currentSong.value.id) === String(newSong.id)) {
-        currentSongProbe.value = res
-      }
-    } catch (e) {
-      // 探测异常维持兜底
-    }
-  },
-  { immediate: true }
-)
-
 const currentQualityLevel = computed<QualityLevel>(() => {
   const badge = currentSong.value?.qualityBadge
   if (badge === 'SQ') return 'lossless'
@@ -290,6 +267,79 @@ const currentQualityLevel = computed<QualityLevel>(() => {
   if (firstLevel === 'lossless' || firstLevel === 'exhigh' || firstLevel === 'standard') return firstLevel
   return 'lossless'
 })
+
+let probingSongId = ''
+
+// 触发音质探测（仅在打开浮层或当前档位非标准需判断降级时触发）
+const triggerProbeIfNeeded = async () => {
+  const song = currentSong.value
+  if (!song || !song.id) {
+    currentSongProbe.value = null
+    return
+  }
+
+  const cached = getCachedProbeResult(song.id)
+  if (cached) {
+    currentSongProbe.value = cached
+    return
+  }
+
+  if (probingSongId === String(song.id)) {
+    return
+  }
+
+  // 只在用户打开音质浮层，或需要判断降级（当前请求档位不是标准）时才探测
+  const needsProbe = showQualityMenu.value || currentQualityLevel.value !== 'standard'
+  if (!needsProbe) {
+    return
+  }
+
+  probingSongId = String(song.id)
+  try {
+    const res = await probeSongQualities(song)
+    if (currentSong.value && String(currentSong.value.id) === String(song.id)) {
+      currentSongProbe.value = res
+    }
+  } catch (e) {
+    // 探测异常或中止维持兜底
+  } finally {
+    if (probingSongId === String(song.id)) {
+      probingSongId = ''
+    }
+  }
+}
+
+// 监听当前歌曲变化，切歌时取消旧歌未完成探测
+watch(
+  () => currentSong.value,
+  (newSong, oldSong) => {
+    if (oldSong?.id && String(oldSong.id) !== String(newSong?.id)) {
+      cancelSongProbe(oldSong.id)
+    }
+    if (!newSong || !newSong.id) {
+      currentSongProbe.value = null
+      return
+    }
+    const cached = getCachedProbeResult(newSong.id)
+    if (cached) {
+      currentSongProbe.value = cached
+      return
+    }
+    currentSongProbe.value = null
+    triggerProbeIfNeeded()
+  },
+  { immediate: true }
+)
+
+// 监听浮层展开状态：用户打开浮层时按需探测
+watch(
+  () => showQualityMenu.value,
+  (isOpen) => {
+    if (isOpen) {
+      triggerProbeIfNeeded()
+    }
+  }
+)
 
 // 可用档位列表（由探测数据驱动）
 const availableQualities = computed(() => {
@@ -336,9 +386,10 @@ const qualityDisplayInfo = computed(() => {
   const nominalBadge = reqLevel === 'lossless' ? 'SQ 无损' : reqLevel === 'exhigh' ? 'HQ 极高' : '标准'
 
   if (!probe) {
+    const isProbing = reqLevel !== 'standard' || showQualityMenu.value
     return {
       badge: nominalBadge,
-      tooltip: `当前音质: ${nominalBadge} (探测中…)`,
+      tooltip: isProbing ? `当前音质: ${nominalBadge} (探测中…)` : `当前音质: ${nominalBadge}`,
       isDegraded: false,
       isLossless: reqLevel === 'lossless',
     }
