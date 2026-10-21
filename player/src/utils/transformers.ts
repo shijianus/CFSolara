@@ -10,7 +10,10 @@ export interface BannerData {
   coverImgUrl: string
   title: string
   description: string
-  url: string
+  url?: string
+  targetId?: number | string
+  targetType?: number
+  internalTo: string
 }
 
 export interface PlaylistData {
@@ -124,25 +127,69 @@ export function extractArray<T = unknown>(
 
 /**
  * 转换 Banner 数据
+ * 严格屏蔽纯外部商业活动，并将单曲/专辑等引导至站内闭环播放与浏览
  */
-export function transformBanner(item: Record<string, unknown>): BannerData {
+export function transformBanner(item: Record<string, unknown>): BannerData | null {
+  const targetType = Number(item?.targetType ?? 0)
+  let targetId = (item?.targetId as number | string) || ''
+  const rawUrl = String(item?.url || '')
+
+  // 若未直接提供 targetId，尝试从 URL 解析
+  if (!targetId && rawUrl) {
+    const match = rawUrl.match(/(?:song|album|playlist|mv)[/=](\d+)/i) || rawUrl.match(/id=(\d+)/i)
+    if (match) targetId = match[1]
+  }
+
+  // 1. 严格屏蔽纯外部商业活动（targetType === 3000 或无有效音乐实体的外链）
+  if (targetType === 3000 || (!targetId && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')))) {
+    return null
+  }
+
+  // 2. 根据类型构建安全的站内闭环路由
+  let internalTo = ''
+  if (targetType === 1 && targetId) {
+    internalTo = `/song/${targetId}?autoplay=1`
+  } else if (targetType === 10 && targetId) {
+    internalTo = `/album/${targetId}?autoplay=1`
+  } else if (targetType === 1000 && targetId) {
+    internalTo = `/playlist/${targetId}`
+  } else if (targetType === 1004 && targetId) {
+    internalTo = `/mv-player/${targetId}`
+  } else if (rawUrl.startsWith('/')) {
+    internalTo = rawUrl
+  } else if (targetId) {
+    internalTo = `/song/${targetId}?autoplay=1`
+  } else {
+    // 无法定位站内实体则直接丢弃，不予展示
+    return null
+  }
+
   return {
-    coverImgUrl: (item?.pic as string) || (item?.imageUrl as string) || '',
-    title: (item?.typeTitle as string) || '',
+    coverImgUrl: (item?.pic as string) || (item?.imageUrl as string) || (item?.bigImageUrl as string) || '',
+    title: (item?.typeTitle as string) || 'Sonic 独家推荐',
     description: (item?.title as string) || '',
-    url: (item?.url as string) || '',
+    targetId,
+    targetType,
+    internalTo,
+    url: internalTo,
   }
 }
 
 /**
- * 批量转换 Banner
+ * 批量转换 Banner（自动剔除外部推广卡片，仅保留可站内闭环消费的项目）
  */
 export function transformBanners(
   response: ApiResponse,
   limit?: number
 ): BannerData[] {
   const list = extractArray(response, 'data.banners', 'banners')
-  const result = list.map(item => transformBanner(item as Record<string, unknown>))
+  const result: BannerData[] = []
+  for (const item of list) {
+    const bannerItem = transformBanner(item as Record<string, unknown>)
+    if (bannerItem && bannerItem.internalTo) {
+      result.push(bannerItem)
+    }
+  }
   return limit ? result.slice(0, limit) : result
 }
 

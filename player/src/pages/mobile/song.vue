@@ -39,6 +39,9 @@ const load = async (id: string) => {
       state.album = song?.al?.name || song?.album?.name || ''
       state.duration = song?.dt ?? song?.duration ?? 0
       state.cover = song?.al?.picUrl || song?.album?.picUrl || ''
+      if (route.query.autoplay === '1') {
+        playCurrent()
+      }
     }
     const raw = (lrcRes as any)?.lrc?.lyric || (lrcRes as any)?.lyric || (lrcRes as any)?.rawLyric || ''
     state.lrc = raw ? parseAnyLrc(raw) : []

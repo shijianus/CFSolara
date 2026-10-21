@@ -89,6 +89,9 @@ const loadInfo = async () => {
         album: albumName.value,
         duration: duration.value,
       })
+      if (route.query.autoplay === '1') {
+        playCurrent()
+      }
     }
   } catch {}
 }

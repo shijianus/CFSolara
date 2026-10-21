@@ -91,10 +91,32 @@ export async function handleUpstreamEndpoint(
       });
       const data: any = await resp.json();
       if (data && data.banners) {
-        const banners = data.banners.map((b: any) => ({
-          ...b,
-          typeTitle: b.typeTitle ? `Sonic ${b.typeTitle.replace('首发', '独家').replace('网易', '')}` : 'Sonic 精选',
-        }));
+        // 严格屏蔽纯外部商业活动（targetType === 3000 或无有效音乐实体的外链）
+        const filtered = data.banners.filter((b: any) => {
+          if (b.targetType === 3000) return false;
+          const tid = b.targetId || (typeof b.url === 'string' && (b.url.match(/song\/(\d+)/) || b.url.match(/album\/(\d+)/))?.[1]);
+          if (!tid) return false;
+          // 仅允许单曲(1)、专辑(10)、歌单(1000)、MV(1004)在站内闭环展示
+          return [1, 10, 1000, 1004].includes(b.targetType);
+        });
+
+        const banners = filtered.map((b: any) => {
+          const tid = b.targetId || (typeof b.url === 'string' && (b.url.match(/song\/(\d+)/) || b.url.match(/album\/(\d+)/))?.[1]);
+          let internalPath = '';
+          if (b.targetType === 1) internalPath = `/song/${tid}?autoplay=1`;
+          else if (b.targetType === 10) internalPath = `/album/${tid}?autoplay=1`;
+          else if (b.targetType === 1000) internalPath = `/playlist/${tid}`;
+          else if (b.targetType === 1004) internalPath = `/mv-player/${tid}`;
+          else internalPath = `/song/${tid}?autoplay=1`;
+
+          return {
+            ...b,
+            targetId: tid,
+            url: internalPath, // 替换为纯净的站内路由，绝不泄漏任何 orpheus:// 或外站 URL
+            typeTitle: b.typeTitle ? `Sonic ${b.typeTitle.replace('首发', '独家').replace('网易', '')}` : 'Sonic 独家推荐',
+          };
+        });
+
         return jsonResponse(
           { code: 200, brand: 'Sonic', banners: desensitizeData(banners) },
           { headers: { 'Cache-Control': 'public, max-age=1800' } },

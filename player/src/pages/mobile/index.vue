@@ -23,6 +23,13 @@ import {
 import { formatCoverUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
+const router = useRouter()
+
+const handleBannerClick = (item: BannerData) => {
+  if (item.internalTo) {
+    router.push(item.internalTo)
+  }
+}
 
 interface HomeState {
   banners: BannerData[]
@@ -87,10 +94,11 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             class="home-swiper h-44 overflow-visible rounded-2xl"
           >
             <SwiperSlide v-for="(item, i) in banners" :key="i" class="rounded-2xl">
-              <a
-                :href="item.url || '#'"
-                target="_blank"
-                class="relative block h-full w-full overflow-hidden rounded-2xl"
+              <div
+                role="button"
+                tabindex="0"
+                @click="handleBannerClick(item)"
+                class="relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl select-none"
               >
                 <LazyImage
                   :src="item.coverImgUrl"
@@ -108,7 +116,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                     {{ item.title }}
                   </span>
                 </div>
-              </a>
+              </div>
             </SwiperSlide>
           </Swiper>
         </section>

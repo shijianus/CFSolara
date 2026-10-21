@@ -27,6 +27,7 @@ import {
 } from '@/utils/transformers'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const state = reactive({
   banners: [] as BannerData[],
@@ -79,6 +80,12 @@ const onSwiper = (sw: SwiperClass) => {
   state.swiper = sw
 }
 
+const handleBannerClick = (item: BannerData) => {
+  if (item.internalTo) {
+    router.push(item.internalTo)
+  }
+}
+
 const swiperModules = [Navigation, Pagination, Autoplay, EffectCoverflow]
 
 onMounted(() => {
@@ -110,10 +117,12 @@ onMounted(() => {
             class="overflow-hidden rounded-2xl"
           >
             <SwiperSlide v-for="(item, idx) in banners" :key="idx">
-              <a
-                :href="item.url"
-                target="_blank"
-                class="group relative block aspect-[1.8/0.4] overflow-hidden rounded-2xl"
+              <div
+                role="button"
+                tabindex="0"
+                @click="handleBannerClick(item)"
+                @keydown.enter="handleBannerClick(item)"
+                class="group relative block aspect-[1.8/0.4] cursor-pointer overflow-hidden rounded-2xl select-none"
               >
                 <LazyImage
                   :src="item.coverImgUrl"
@@ -133,7 +142,7 @@ onMounted(() => {
                     {{ item.description }}
                   </h3>
                 </div>
-              </a>
+              </div>
             </SwiperSlide>
           </Swiper>
           <div class="home-pagination mt-4 flex justify-center gap-1.5"></div>
