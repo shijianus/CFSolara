@@ -26,8 +26,12 @@ import {
   type MVData,
 } from '@/utils/transformers'
 
+import { useAudio } from '@/composables/useAudio'
+import type { Song as StoreSong } from '@/stores/interface'
+
 const { t } = useI18n()
 const router = useRouter()
+const { play, setPlaylist } = useAudio()
 
 const state = reactive({
   banners: [] as BannerData[],
@@ -81,7 +85,20 @@ const onSwiper = (sw: SwiperClass) => {
 }
 
 const handleBannerClick = (item: BannerData) => {
-  if (item.internalTo) {
+  if (item.targetType === 1 && item.targetId) {
+    const storeSong: StoreSong = {
+      id: Number(item.targetId),
+      name: item.description || item.title || 'Sonic 推荐新歌',
+      artist: item.title || 'Sonic 独家精选',
+      cover: item.coverImgUrl,
+      duration: 0,
+    }
+    setPlaylist([storeSong], 0)
+    play(storeSong, 0)
+    router.push(`/song/${item.targetId}?autoplay=1`)
+  } else if (item.targetType === 10 && item.targetId) {
+    router.push(`/album/${item.targetId}?autoplay=1`)
+  } else if (item.internalTo) {
     router.push(item.internalTo)
   }
 }

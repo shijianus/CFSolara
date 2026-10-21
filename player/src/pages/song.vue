@@ -54,6 +54,10 @@ const playCurrent = () => {
     duration: duration.value,
     cover: albumCover.value,
   }
+  // 若当前正在播放此歌曲且未暂停，不重复打断加载
+  if (currentSong.value && String(currentSong.value.id) === String(state.info.id) && isPlaying.value) {
+    return
+  }
   setPlaylist([song], 0)
   play(song, 0)
 }
@@ -65,7 +69,9 @@ const isCurrent = computed(() => {
 
 const loadInfo = async () => {
   try {
-    const res: any = await songDetail({ ids: String(songId.value) })
+    const rawId = String(songId.value)
+    const formattedIds = rawId.startsWith('[') ? rawId : `[${rawId}]`
+    const res: any = await songDetail({ ids: formattedIds })
     const song = Array.isArray(res?.songs) ? res.songs[0] : res?.songs
     state.info = song
     const artistNameVal = Array.isArray(song?.ar)

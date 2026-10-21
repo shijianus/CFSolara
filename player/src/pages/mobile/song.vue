@@ -17,14 +17,15 @@ const state = reactive({
   liked: false,
 })
 
-const { play, togglePlay } = useAudio()
+const { play, setPlaylist, currentSong, isPlaying } = useAudio()
 
 import { parseAnyLrc } from '@/composables/useLyrics'
 
 
 const load = async (id: string) => {
   try {
-    const [detailRes, lrcRes] = await Promise.all([songDetail({ ids: id }), lyric({ id })])
+    const formattedId = String(id).startsWith('[') ? String(id) : `[${id}]`
+    const [detailRes, lrcRes] = await Promise.all([songDetail({ ids: formattedId }), lyric({ id })])
     const song =
       (detailRes as any)?.songs?.[0] ||
       (detailRes as any)?.data?.songs?.[0] ||
@@ -67,6 +68,10 @@ const playCurrent = () => {
     cover: state.cover,
     liked: state.liked,
   }
+  if (currentSong.value && String(currentSong.value.id) === String(state.id) && isPlaying.value) {
+    return
+  }
+  setPlaylist([s], 0)
   play(s, 0)
 }
 
