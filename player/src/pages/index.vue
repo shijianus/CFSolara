@@ -116,7 +116,7 @@ onMounted(() => {
       <HomeSkeleton v-if="isLoading" />
       <div v-else class="space-y-10 p-5 pb-8">
         <!-- ═══════ Banner 轮播 ═══════ -->
-        <section v-if="banners.length" v-scroll-in="{ direction: 'up', duration: 0.8 }" class="relative">
+        <section v-if="banners.length" v-scroll-in="{ direction: 'up', duration: 0.8 }" class="relative max-h-[50vh]">
           <Swiper
             @swiper="onSwiper"
             :modules="swiperModules"
@@ -139,25 +139,26 @@ onMounted(() => {
                 tabindex="0"
                 @click="handleBannerClick(item)"
                 @keydown.enter="handleBannerClick(item)"
-                class="group relative block aspect-[1.8/0.4] cursor-pointer overflow-hidden rounded-2xl select-none"
+                class="group relative block aspect-[1080/400] max-h-[46vh] cursor-pointer overflow-hidden rounded-2xl select-none"
               >
                 <LazyImage
                   :src="item.coverImgUrl"
                   alt="banner"
                   img-class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
-                <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
-                <div class="absolute right-0 bottom-0 left-0 p-5 lg:p-7">
+                <div class="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-90" />
+                <div v-if="item.description" class="pointer-events-none absolute bottom-3.5 left-4 z-10 max-w-[65%] lg:bottom-4 lg:left-5">
+                  <h3 class="line-clamp-1 text-sm font-semibold tracking-tight text-white/95 drop-shadow-md lg:text-base">
+                    {{ item.description }}
+                  </h3>
+                </div>
+                <div v-if="item.title" class="pointer-events-none absolute right-3.5 bottom-3.5 z-10 flex items-center gap-2 lg:right-4 lg:bottom-4">
                   <span
-                    v-if="item.title"
-                    class="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1 text-[11px] font-medium tracking-wide text-white/90 backdrop-blur-md"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[11px] font-medium tracking-wide text-white/95 shadow-sm backdrop-blur-md"
                   >
                     <span class="icon-[mdi--fire] h-3 w-3 text-orange-400" />
                     {{ item.title }}
                   </span>
-                  <h3 class="line-clamp-2 text-lg font-bold tracking-tight text-white drop-shadow-lg lg:text-xl">
-                    {{ item.description }}
-                  </h3>
                 </div>
               </div>
             </SwiperSlide>

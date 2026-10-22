@@ -107,7 +107,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             :space-between="12"
             :autoplay="{ delay: 4000, disableOnInteraction: false }"
             :pagination="{ clickable: true }"
-            class="home-swiper h-44 overflow-visible rounded-2xl"
+            class="home-swiper w-full aspect-[1080/400] max-h-[45vh] overflow-visible rounded-2xl"
           >
             <SwiperSlide v-for="(item, i) in banners" :key="i" class="rounded-2xl">
               <div
@@ -122,13 +122,13 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   imgClass="h-full w-full object-cover"
                 />
                 <div
-                  class="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent"
+                  class="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent"
                 ></div>
-                <div v-if="item.title" class="absolute right-3 bottom-3 left-3">
+                <div v-if="item.title" class="pointer-events-none absolute right-3 bottom-3 z-10">
                   <span
-                    class="text-primary inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium backdrop-blur-md"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white/95 backdrop-blur-md shadow-sm"
                   >
-                    <span class="icon-[mdi--fire] h-3.5 w-3.5 text-orange-300"></span>
+                    <span class="icon-[mdi--fire] h-3 w-3 text-orange-300"></span>
                     {{ item.title }}
                   </span>
                 </div>
