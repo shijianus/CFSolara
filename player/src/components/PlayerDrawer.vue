@@ -475,9 +475,58 @@ watch(
   }
 )
 
+let prevActiveElement: HTMLElement | null = null
+let hasPushedDrawerHistory = false
+
+const handleUserClose = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    if (hasPushedDrawerHistory && window.history.state?.sonicDrawer) {
+      window.history.back()
+    }
+  }
+}
+
+const handleDrawerKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isOpen.value) {
+    e.preventDefault()
+    handleUserClose()
+  }
+}
+
+const handlePopState = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    hasPushedDrawerHistory = false
+  }
+}
+
+watch(isOpen, val => {
+  if (val) {
+    prevActiveElement = document.activeElement as HTMLElement | null
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleDrawerKeydown)
+    window.addEventListener('popstate', handlePopState)
+    if (!window.history.state?.sonicDrawer) {
+      window.history.pushState({ sonicDrawer: true }, '')
+      hasPushedDrawerHistory = true
+    }
+    nextTick(() => drawerRef.value?.focus())
+  } else {
+    document.body.style.overflow = ''
+    window.removeEventListener('keydown', handleDrawerKeydown)
+    window.removeEventListener('popstate', handlePopState)
+    hasPushedDrawerHistory = false
+    prevActiveElement?.focus?.()
+  }
+})
+
 onUnmounted(() => {
   stopWordSyncLoop()
   stopBackgroundBreathing()
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleDrawerKeydown)
+  window.removeEventListener('popstate', handlePopState)
 })
 </script>
 
@@ -485,7 +534,11 @@ onUnmounted(() => {
   <div
     v-if="isRendered"
     ref="drawerRef"
-    class="bg-overlay/95 absolute inset-0 z-50 flex backdrop-blur-md backdrop-filter"
+    role="dialog"
+    aria-modal="true"
+    aria-label="全屏音乐播放器与歌词"
+    tabindex="-1"
+    class="bg-overlay/95 absolute inset-0 z-50 flex backdrop-blur-md backdrop-filter outline-none"
   >
     <div v-show="useCoverBg" class="absolute inset-0 -z-10 overflow-hidden">
       <div ref="bgARef" class="bg-layer absolute inset-0 opacity-0" :style="bgAStyle"></div>
@@ -652,11 +705,14 @@ onUnmounted(() => {
 
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-md"
             rounded="lg"
-            @click="isOpen = false"
+            @click="handleUserClose"
             icon="icon-[mdi--chevron-down]"
             icon-class="h-5 w-5"
+            title="关闭播放器 (Esc)"
+            aria-label="关闭播放器"
+            class="min-h-[40px] min-w-[40px]"
           />
         </div>
       </div>
