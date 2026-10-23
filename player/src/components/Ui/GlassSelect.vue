@@ -3,12 +3,12 @@
     <button
       ref="triggerRef"
       type="button"
-      class="glass-button text-white/90 flex w-full h-[36px] items-center justify-between overflow-hidden rounded-xl px-3 text-left text-[13px] font-medium"
+      class="glass-button text-primary flex w-full h-[36px] items-center justify-between overflow-hidden rounded-xl px-3 text-left text-[13px] font-medium"
       @click="toggle"
     >
-      <span class="truncate text-[13px] font-medium text-white/90">{{ selectedLabel }}</span>
+      <span class="truncate text-[13px] font-medium text-primary">{{ selectedLabel }}</span>
       <span
-        class="icon-[mdi--chevron-down] text-white/60 h-4 w-4 shrink-0 transition"
+        class="icon-[mdi--chevron-down] text-primary/70 h-4 w-4 shrink-0 transition"
         :class="{ 'rotate-180': open }"
       ></span>
     </button>
