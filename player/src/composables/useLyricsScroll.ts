@@ -96,10 +96,38 @@ export function useLyricsScroll(options: LyricsScrollOptions) {
     }
   }
 
+  let autoResumeTimer: ReturnType<typeof setTimeout> | null = null
+
+  /**
+   * 用户手动滚动/拖动浏览歌词时调用：
+   * 暂时脱离自动跟踪，并在静止 3.5 秒后自动柔和吸附回当前播发行，无需人工点击找回
+   */
+  const markUserInteracted = (delay = 3500) => {
+    state.autoScroll = false
+    if (autoResumeTimer) {
+      clearTimeout(autoResumeTimer)
+      autoResumeTimer = null
+    }
+    if (delay > 0) {
+      autoResumeTimer = setTimeout(() => {
+        state.autoScroll = true
+        scrollToCurrentLyric(false)
+      }, delay)
+    }
+  }
+
+  const cancelAutoResume = () => {
+    if (autoResumeTimer) {
+      clearTimeout(autoResumeTimer)
+      autoResumeTimer = null
+    }
+  }
+
   /**
    * 切换自动滚动
    */
   const toggleAutoScroll = () => {
+    cancelAutoResume()
     state.autoScroll = !state.autoScroll
     if (state.autoScroll) updateCurrentLyric(true)
   }
@@ -108,6 +136,7 @@ export function useLyricsScroll(options: LyricsScrollOptions) {
    * 重置歌词状态（切换歌曲时调用）
    */
   const resetLyrics = () => {
+    cancelAutoResume()
     state.currentIndex = 0
     state.positioned = false
   }
@@ -143,5 +172,7 @@ export function useLyricsScroll(options: LyricsScrollOptions) {
     resetLyrics,
     increaseScale,
     decreaseScale,
+    markUserInteracted,
+    cancelAutoResume,
   }
 }

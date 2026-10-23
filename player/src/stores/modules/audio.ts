@@ -16,6 +16,8 @@ let eventsBound = false
 let lastRetrySongId: string | number | null = null
 /** 上次重试时间戳 */
 let lastRetryTime = 0
+/** 标记当前播放歌曲是否已触发过下一首预加载，避免重复发起 */
+let hasPreloadedNext = false
 
 /** 获取 Audio 单例（懒初始化） */
 const getAudioSingleton = (): HTMLAudioElement => {
@@ -217,7 +219,14 @@ export const useAudioStore = defineStore('audio', {
 
       // 时间更新
       audio.addEventListener('timeupdate', () => {
-        this.audio.currentTime = audio.currentTime || 0
+        const cur = audio.currentTime || 0
+        this.audio.currentTime = cur
+        const dur = audio.duration || 0
+        // 主动预判：当播放剩余时间少于 15 秒且非重复触发时，后台静默预解析下一首歌曲地址
+        if (dur > 25 && dur - cur < 15 && !hasPreloadedNext) {
+          hasPreloadedNext = true
+          this.preloadNextTrack()
+        }
       })
 
       // 音量变化
@@ -366,8 +375,9 @@ export const useAudioStore = defineStore('audio', {
           throw new Error('无法获取播放地址')
         }
 
-        // 切歌时复位进度到开头，强制更新音频源
+        // 切歌时复位进度到开头，强制更新音频源，并重置预加载状态
         if (isSwitchingSong) {
+          hasPreloadedNext = false
           audio.currentTime = 0
           this.audio.currentTime = 0
         }
@@ -413,16 +423,39 @@ export const useAudioStore = defineStore('audio', {
     },
 
     /**
-     * 内部方法：获取歌曲播放地址并同步到 currentSong 和 playlist
-     * 抽取自 playSong 和 refreshAndReplay 的公共逻辑
+     * 智能预解析下一首歌曲播放地址
+     * 实现用户切歌或歌曲自然结束时 0 延迟瞬时起播
      */
-    async _fetchAndApplyUrl() {
-      if (!this.audio.currentSong) return
+    async preloadNextTrack() {
+      if (!this.audio.playlist.length) return
+      let nextIndex = this.audio.currentIndex + 1
+      if (nextIndex >= this.audio.playlist.length) {
+        if (this.audio.playMode === PlayMode.LIST) {
+          nextIndex = 0
+        } else {
+          return
+        }
+      }
+      const nextSong = this.audio.playlist[nextIndex]
+      if (nextSong && !nextSong.url && !nextSong.isLocal) {
+        try {
+          await this._fetchAndApplyUrl(nextSong)
+        } catch {}
+      }
+    },
+
+    /**
+     * 内部方法：获取歌曲播放地址并同步到 currentSong 和 playlist
+     * 抽取自 playSong 和 refreshAndReplay 的公共逻辑，支持传入目标歌曲进行预解析
+     */
+    async _fetchAndApplyUrl(targetSong?: Song) {
+      const song = targetSong || this.audio.currentSong
+      if (!song) return
       const settingsStore = useSettingsStore()
       let url = ''
       try {
         const res: any = await songUrlV1({
-          id: String(this.audio.currentSong.id),
+          id: String(song.id),
           level: settingsStore.audioQuality,
         })
         url = res?.data?.[0]?.url || res?.data?.data?.[0]?.url || res?.url || ''
@@ -430,13 +463,13 @@ export const useAudioStore = defineStore('audio', {
 
       // Sonic 多源聚合网关智能兜底
       if (!url) {
-        url = `/api/music/stream?id=${encodeURIComponent(String(this.audio.currentSong.id))}&source=netease`
+        url = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease`
       }
 
-      this.audio.currentSong.url = url
+      song.url = url
       // 同步到播放列表对应项
-      const idx = this.audio.currentIndex
-      if (idx >= 0 && idx < this.audio.playlist.length) {
+      const idx = this.audio.playlist.findIndex(p => p.id === song.id)
+      if (idx !== -1) {
         this.audio.playlist[idx].url = url
       }
     },
