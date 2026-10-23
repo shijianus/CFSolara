@@ -178,7 +178,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   </div>
                 </div>
               </div>
-              <p class="playlist-name line-clamp-2 text-xs leading-tight">{{ pl.name }}</p>
+              <p class="playlist-name line-clamp-2 leading-tight">{{ pl.name }}</p>
             </router-link>
           </div>
         </section>
@@ -339,6 +339,8 @@ html.dark .playlist-cover {
 .playlist-name {
   color: var(--glass-text-primary);
   opacity: 0.8;
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .artist-avatar {
