@@ -10,6 +10,7 @@
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
     "test:auth": "jiti scripts/test-auth-compatibility.mjs",
     "test:cover": "jiti scripts/test-cover-gateway.mjs",
+    "lint:theme": "node scripts/lint-theme.mjs",
     "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs"
   }
 }
