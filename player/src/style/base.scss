@@ -4,6 +4,7 @@ body,
   height: 100%;
   width: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  touch-action: manipulation;
 }
 
 :lang(zh-CN),
@@ -18,6 +19,11 @@ input,
 select,
 textarea {
   font-family: inherit;
+  touch-action: manipulation;
+}
+
+a {
+  touch-action: manipulation;
 }
 
 #app {
