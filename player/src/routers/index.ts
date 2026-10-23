@@ -182,9 +182,27 @@ const router = createRouter({
             () => import('@/pages/mobile/settings.vue')
           ),
         },
+        {
+          path: '/:pathMatch(.*)*',
+          name: 'not-found',
+          component: () => import('@/pages/not-found.vue'),
+        },
       ],
     },
   ],
+})
+
+router.onError((error, to) => {
+  const msg = error?.message || ''
+  if (
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Importing a module script failed')
+  ) {
+    if (!sessionStorage.getItem('sonic_chunk_reload')) {
+      sessionStorage.setItem('sonic_chunk_reload', '1')
+      window.location.href = to.fullPath
+    }
+  }
 })
 
 const routeTitles: Record<string, string> = {
