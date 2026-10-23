@@ -76,6 +76,12 @@
     );
     --glass-skeleton: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
 
+    /* ── 播放器歌词：封面背景上的固定深色衬底与前景 ── */
+    --glass-lyrics-scrim: rgba(4, 12, 24, 0.72);
+    --glass-lyrics-active: var(--glass-text-accent);
+    --glass-lyrics-inactive: color-mix(in srgb, var(--glass-text-accent) 68%, transparent);
+    --glass-lyrics-glow: color-mix(in srgb, var(--glass-text-accent) 40%, transparent);
+
     /* ── 强调色与流光 ── */
     --glass-accent-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
     --glass-accent-subtle: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.12) 100%);
