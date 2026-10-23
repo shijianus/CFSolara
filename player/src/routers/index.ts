@@ -186,4 +186,39 @@ const router = createRouter({
     },
   ],
 })
+
+const routeTitles: Record<string, string> = {
+  home: '首页',
+  playlist: '歌单详情',
+  'mv-list': 'MV 推荐',
+  'mv-player': 'MV 播放',
+  recent: '最近播放',
+  'my-music': '我的音乐',
+  likes: '我喜欢的音乐',
+  search: '音乐搜索',
+  charts: '排行榜',
+  artists: '歌手列表',
+  artist: '歌手详情',
+  'new-albums': '新碟上架',
+  song: '歌曲详情',
+  album: '专辑详情',
+  downloads: '下载管理',
+  'local-music': '本地音乐',
+  settings: '系统设置',
+  'not-found': '404 页面未找到',
+}
+
+router.afterEach((to) => {
+  if (to.name === 'search' && to.query.q) {
+    document.title = `搜索: ${to.query.q} - Sonic`
+    return
+  }
+  const pageTitle = (to.name && routeTitles[String(to.name)]) || (to.meta?.title as string) || ''
+  if (pageTitle) {
+    document.title = `${pageTitle} - Sonic`
+  } else {
+    document.title = 'Sonic - Cloud Music Platform'
+  }
+})
+
 export default router
