@@ -425,7 +425,7 @@ const maxScore = computed(() => {
               >NEW</span>
 
               <!-- 热度值 -->
-              <span class="text-primary/15 w-10 shrink-0 text-right text-[10px] tabular-nums">
+              <span class="text-primary/70 w-10 shrink-0 text-right text-[11px] tabular-nums">
                 {{ Math.round(item.score / 10000) }}w
               </span>
             </button>
