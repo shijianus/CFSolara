@@ -378,9 +378,54 @@ onMounted(() => {
   }
 })
 
+let hasPushedDrawerHistoryMobile = false
+
+const closeDrawerMobile = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    if (hasPushedDrawerHistoryMobile && window.history.state?.sonicDrawerMobile) {
+      window.history.back()
+    }
+  }
+}
+
+const handlePopStateMobile = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    hasPushedDrawerHistoryMobile = false
+  }
+}
+
+const handleKeydownMobile = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isOpen.value) {
+    e.preventDefault()
+    closeDrawerMobile()
+  }
+}
+
+watch(isOpen, val => {
+  if (val) {
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeydownMobile)
+    window.addEventListener('popstate', handlePopStateMobile)
+    if (!window.history.state?.sonicDrawerMobile) {
+      window.history.pushState({ sonicDrawerMobile: true }, '')
+      hasPushedDrawerHistoryMobile = true
+    }
+  } else {
+    document.body.style.overflow = ''
+    window.removeEventListener('keydown', handleKeydownMobile)
+    window.removeEventListener('popstate', handlePopStateMobile)
+    hasPushedDrawerHistoryMobile = false
+  }
+})
+
 onUnmounted(() => {
   stopWordSyncLoop()
   stopBackgroundBreathing()
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleKeydownMobile)
+  window.removeEventListener('popstate', handlePopStateMobile)
 })
 
 // 播放模式图标
@@ -401,7 +446,11 @@ const playModeIcon = computed(() => {
   <div
     v-if="isRendered"
     ref="drawerRef"
-    class="bg-overlay/95 fixed inset-0 z-9999 flex flex-col backdrop-blur-xl"
+    role="dialog"
+    aria-modal="true"
+    aria-label="全屏音乐播放器与歌词"
+    tabindex="-1"
+    class="bg-overlay/95 fixed inset-0 z-9999 flex flex-col backdrop-blur-xl outline-none"
   >
     <!-- 封面模糊背景（可切换启用） -->
     <div v-show="useCoverBg" class="absolute inset-0 -z-10 overflow-hidden">
@@ -426,7 +475,9 @@ const playModeIcon = computed(() => {
         rounded="full"
         icon="icon-[mdi--chevron-down]"
         icon-class="h-7 w-7 text-primary/90"
-        @click="isOpen = false"
+        title="关闭播放器 (Esc)"
+        aria-label="关闭播放器"
+        @click="closeDrawerMobile"
       />
 
       <div class="flex flex-col items-center">
