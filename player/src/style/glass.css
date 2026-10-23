@@ -535,7 +535,12 @@
   html.perf-mode .glass-dock,
   html.perf-mode .glass-card,
   html.perf-mode .glass-container,
+  html.perf-mode .glass-container-strong,
+  html.perf-mode .glass-nav,
+  html.perf-mode .section-container,
   html.perf-mode .sidebar {
-    background-color: rgba(18, 18, 22, 0.96) !important;
+    background-color: var(--glass-bg-solid) !important;
+    background-image: none !important;
+    box-shadow: none !important;
   }
 }
