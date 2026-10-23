@@ -244,12 +244,12 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         :class="[
           isCurrentPlaying(item)
             ? 'border-pink-500/50 bg-pink-500/10 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
-            : 'border-white/5 bg-white/[0.03] active:bg-white/10'
+            : 'border-primary/10 bg-primary/[0.03] active:bg-primary/10'
         ]"
       >
         <div class="flex items-center gap-3 min-w-0 flex-1">
           <!-- 封面艺术图 -->
-          <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-sm border border-white/5">
+          <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-sm border border-primary/10">
             <img
               :src="formatCoverUrl(item.cover, { size: 100, artist: item.artist })"
               alt="cover"
@@ -270,19 +270,19 @@ const formatSongTitle = (title: string, maxLen = 18) => {
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
               <h4
-                class="truncate text-sm font-semibold transition-colors"
-                :class="isCurrentPlaying(item) ? 'text-pink-300 font-bold' : 'text-primary'"
+                class="truncate text-sm font-semibold text-primary transition-colors"
+                :class="{ 'font-bold': isCurrentPlaying(item) }"
               >
                 {{ formatSongTitle(item.name, 18) }}
               </h4>
               <span
-                class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-mono font-medium leading-none select-none whitespace-nowrap"
+                class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none select-none whitespace-nowrap"
                 :class="[
                   getParsedMeta(item).isLossless
-                    ? 'bg-violet-600/20 text-pink-300 border border-pink-500/40'
+                    ? 'bg-violet-600/20 text-primary border border-pink-500/40'
                     : getParsedMeta(item).displayTag.includes('320')
-                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                      : 'bg-white/10 text-primary/70 border border-white/20'
+                      ? 'bg-indigo-500/20 text-primary border border-indigo-500/30'
+                      : 'bg-primary/10 text-primary/70 border border-primary/20'
                 ]"
               >
                 {{ getParsedMeta(item).displayTag }}

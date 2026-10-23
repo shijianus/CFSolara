@@ -348,10 +348,10 @@ const formatSize = (bytes?: number) => {
   <div class="flex flex-1 flex-col overflow-hidden p-4 sm:p-6">
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- 扁平 Header (P3.4 标题 22px/600，清空按钮基线严格对齐) -->
-      <header class="flex items-center justify-between pb-3.5 border-b border-white/10 select-none shrink-0 min-h-[44px]">
+      <header class="flex items-center justify-between pb-3.5 border-b border-glass select-none shrink-0 min-h-[44px]">
         <div id="downloads-header-title-box" class="flex items-baseline gap-3">
-          <h1 id="downloads-title-heading" class="text-[22px] font-semibold tracking-tight text-white/95 leading-none">下载列表</h1>
-          <p v-if="downloads.length > 0" class="text-[13px] text-white/70 font-medium leading-none">
+          <h1 id="downloads-title-heading" class="text-[22px] font-semibold tracking-tight text-primary leading-none">下载列表</h1>
+          <p v-if="downloads.length > 0" class="text-[13px] text-primary/70 font-medium leading-none">
             {{ downloads.length }} 首 · {{ totalSizeFormatted }} · 离线可用
           </p>
         </div>
@@ -359,12 +359,12 @@ const formatSize = (bytes?: number) => {
         <div v-if="downloads.length > 0" class="flex items-center">
           <button
             id="downloads-clear-all-btn"
-            class="group inline-flex items-center gap-1.5 text-[13px] font-medium text-white/70 hover:text-red-400 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 leading-none"
+            class="group inline-flex items-center gap-1.5 text-[13px] font-medium text-primary/70 hover:text-red-500 dark:hover:text-red-400 px-2.5 py-1.5 rounded-lg border border-glass bg-button-glass hover:border-red-500/30 hover:bg-red-500/10 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 leading-none"
             @click="openClearAllConfirm"
             title="清空离线音乐库"
             aria-label="清空离线音乐库"
           >
-            <span class="icon-[mdi--delete-sweep-outline] h-3.5 w-3.5 text-white/60 group-hover:text-red-400 transition-colors"></span>
+            <span class="icon-[mdi--delete-sweep-outline] h-3.5 w-3.5 text-primary/60 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors"></span>
             <span>清空</span>
           </button>
         </div>
@@ -394,7 +394,7 @@ const formatSize = (bytes?: number) => {
             variant="soft"
             size="none"
             rounded="full"
-            class="h-[36px] px-3.5 text-[13px] font-medium text-white/85 hover:text-white bg-white/10 hover:bg-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="h-[36px] px-3.5 text-[13px] font-medium text-primary bg-button-glass hover:bg-hover-button-glass disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="filteredDownloads.length === 0"
             @click="shufflePlay"
             aria-label="随机播放"
@@ -408,7 +408,7 @@ const formatSize = (bytes?: number) => {
         <div
           role="radiogroup"
           aria-label="按音质筛选"
-          class="flex items-center h-[36px] rounded-xl bg-white/[0.04] p-1 border border-white/10 select-none gap-1"
+          class="flex items-center h-[36px] rounded-xl bg-button-glass p-1 border border-glass select-none gap-1"
           @keydown="handleQualityKeydown"
         >
           <button
@@ -422,8 +422,8 @@ const formatSize = (bytes?: number) => {
             class="relative h-[28px] rounded-lg px-2.5 flex items-center text-[13px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/60 cursor-pointer border"
             :class="[
               selectedQualityFilter === opt.value
-                ? 'bg-pink-500/20 text-pink-300 border-pink-500/40 font-medium shadow-sm'
-                : 'border-transparent text-white/70 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-pink-500/20 text-primary border-pink-500/40 font-medium shadow-sm'
+                : 'border-transparent text-primary/70 hover:text-primary hover:bg-hover-glass'
             ]"
             @click="selectedQualityFilter = (opt.value as any)"
           >
@@ -441,14 +441,14 @@ const formatSize = (bytes?: number) => {
               type="text"
               placeholder="搜索歌名、歌手、专辑..."
               aria-label="搜索歌名、歌手、专辑"
-              class="w-full h-[36px] rounded-xl border border-white/10 bg-white/[0.04] py-0 pr-8 pl-8 text-[13px] font-medium text-white/95 placeholder:text-white/50 focus:border-pink-500/50 focus:bg-white/[0.08] focus:outline-none transition-all"
+              class="w-full h-[36px] rounded-xl border border-glass bg-button-glass py-0 pr-8 pl-8 text-[13px] font-medium text-primary placeholder:text-primary/60 focus:border-pink-500/50 focus:outline-none transition-all"
             />
-            <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none"></span>
+            <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none"></span>
             <button
               v-if="searchQuery"
               type="button"
               @click="searchQuery = ''"
-              class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-white/50 hover:text-white focus:outline-none cursor-pointer"
+              class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-primary/60 hover:text-primary focus:outline-none cursor-pointer"
               aria-label="清空搜索内容"
             >
               <span class="icon-[mdi--close-circle] h-4 w-4"></span>
@@ -476,14 +476,14 @@ const formatSize = (bytes?: number) => {
           <!-- 表头 (桌面端：13px/500，严格对齐数据列) -->
           <div
             role="row"
-            class="text-white/70 mb-1 hidden items-center border-b border-white/10 py-2.5 px-2.5 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
+            class="text-primary/70 mb-1 hidden items-center border-b border-primary/10 py-2.5 px-2.5 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
           >
-            <div role="columnheader" class="col-span-1 text-center font-mono text-[13px] font-medium text-white/70">#</div>
-            <div role="columnheader" class="col-span-5 text-[13px] font-medium text-white/70">歌曲</div>
-            <div role="columnheader" class="col-span-2 text-[13px] font-medium text-white/70">专辑</div>
-            <div role="columnheader" class="col-span-1 text-center text-[13px] font-medium text-white/70">音质规格</div>
-            <div role="columnheader" class="col-span-1 text-right font-mono text-[13px] font-medium text-white/70">大小</div>
-            <div role="columnheader" class="col-span-2 text-center text-[13px] font-medium text-white/70">操作</div>
+            <div role="columnheader" class="col-span-1 text-center font-mono text-[13px] font-medium text-primary/70">#</div>
+            <div role="columnheader" class="col-span-5 text-[13px] font-medium text-primary/70">歌曲</div>
+            <div role="columnheader" class="col-span-2 text-[13px] font-medium text-primary/70">专辑</div>
+            <div role="columnheader" class="col-span-1 text-center text-[13px] font-medium text-primary/70">音质规格</div>
+            <div role="columnheader" class="col-span-1 text-right font-mono text-[13px] font-medium text-primary/70">大小</div>
+            <div role="columnheader" class="col-span-2 text-center text-[13px] font-medium text-primary/70">操作</div>
           </div>
 
           <!-- 歌曲行容器 (role="rowgroup") -->
@@ -503,7 +503,7 @@ const formatSize = (bytes?: number) => {
                   ? 'border-pink-500/30'
                   : isCurrentPaused(item)
                     ? 'border-pink-500/15'
-                    : 'border-transparent hover:bg-white/[0.06] hover:border-white/10'
+                    : 'border-transparent hover:bg-primary/[0.06] hover:border-primary/10'
               ]"
               :style="{
                 backgroundColor: isCurrentPlaying(item)
@@ -537,7 +537,7 @@ const formatSize = (bytes?: number) => {
                 <!-- 状态 2: 当前但暂停 -> 静态暂停图标，无动画 -->
                 <div
                   v-else-if="isCurrentPaused(item)"
-                  class="flex items-center justify-center text-pink-400"
+                  class="flex items-center justify-center text-primary"
                   aria-label="已暂停"
                   title="已暂停"
                 >
@@ -547,13 +547,13 @@ const formatSize = (bytes?: number) => {
                 <!-- 状态 3 & 4: 非当前或当前为在线歌曲 -> 显示常规数字序号，悬停浮现播放键 -->
                 <template v-else>
                   <span
-                    class="row-hover-hide font-mono text-[13px] font-medium text-white/70 transition-opacity duration-150"
+                    class="row-hover-hide font-mono text-[13px] font-medium text-primary/70 transition-opacity duration-150"
                   >
                     {{ String(index + 1).padStart(2, '0') }}
                   </span>
                   <button
                     type="button"
-                    class="row-hover-show absolute inset-0 flex items-center justify-center text-pink-400 hover:text-pink-300 active:scale-95 cursor-pointer focus:outline-none"
+                    class="row-hover-show absolute inset-0 flex items-center justify-center text-primary/80 hover:text-primary active:scale-95 cursor-pointer focus:outline-none"
                     aria-label="播放"
                     title="播放"
                     @click.stop="playSingle(item, index)"
@@ -565,7 +565,7 @@ const formatSize = (bytes?: number) => {
 
               <!-- 封面与歌曲标题 + 歌手 (Col 2: 5 cols) -->
               <div role="cell" class="col-span-5 flex min-w-0 items-center gap-3">
-                <div class="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg shadow-sm border border-white/10 bg-white/5">
+                <div class="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg shadow-sm border border-primary/10 bg-primary/5">
                   <LazyImage
                     :src="formatCoverUrl(item.cover, { size: 80, artist: item.artist })"
                     :fallback-src="formatCoverUrl('', { artist: item.artist })"
@@ -580,12 +580,11 @@ const formatSize = (bytes?: number) => {
                 <div class="min-w-0 flex-1">
                   <h3
                     :title="item.name"
-                    class="truncate text-[15px] font-semibold transition-colors"
-                    :class="isCurrentOffline(item) ? 'text-pink-200' : 'text-white/95 group-hover:text-pink-300'"
+                    class="truncate text-[15px] font-semibold text-primary transition-colors"
                   >
                     {{ item.name }}
                   </h3>
-                  <p :title="item.artist" class="mt-0.5 truncate text-[13px] text-white/70 font-medium">
+                  <p :title="item.artist" class="mt-0.5 truncate text-[13px] text-primary/70 font-medium">
                     {{ item.artist || '未知歌手' }}
                   </p>
                 </div>
@@ -593,7 +592,7 @@ const formatSize = (bytes?: number) => {
 
               <!-- 专辑 (Col 3: 2 cols) -->
               <div role="cell" class="col-span-2 min-w-0 hidden md:block">
-                <span :title="item.album" class="truncate text-[13px] text-white/70 font-medium block">
+                <span :title="item.album" class="truncate text-[13px] text-primary/70 font-medium block">
                   {{ item.album || '-' }}
                 </span>
               </div>
@@ -604,10 +603,10 @@ const formatSize = (bytes?: number) => {
                   class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium select-none whitespace-nowrap"
                   :class="[
                     getParsedMeta(item).isLossless
-                      ? 'bg-transparent text-pink-300 border border-pink-500/70'
+                      ? 'bg-transparent text-primary border border-pink-500/70'
                       : getParsedMeta(item).displayTag.includes('320')
-                        ? 'bg-transparent text-purple-300 border border-purple-500/60'
-                        : 'bg-transparent text-white/70 border border-white/20'
+                        ? 'bg-transparent text-primary border border-purple-500/60'
+                        : 'bg-transparent text-primary/70 border border-primary/20'
                   ]"
                 >
                   {{ getParsedMeta(item).displayTag }}
@@ -630,7 +629,7 @@ const formatSize = (bytes?: number) => {
               </div>
 
               <!-- 大小 (Col 5: 1 col, 严格使用实际 blob.size) -->
-              <div role="cell" class="col-span-1 text-right font-mono text-[13px] text-white/70 font-medium hidden md:block">
+              <div role="cell" class="col-span-1 text-right font-mono text-[13px] text-primary/70 font-medium hidden md:block">
                 {{ formatSize(item.file?.size || item.fileSize) }}
               </div>
 
@@ -640,7 +639,7 @@ const formatSize = (bytes?: number) => {
                 class="col-span-2 relative flex items-center justify-center min-h-[32px]"
               >
                 <!-- 非悬停时：显示低透明度 (0.5) 的更多图标 -->
-                <div class="row-default-more flex items-center justify-center text-white/50 transition-opacity duration-150">
+                <div class="row-default-more flex items-center justify-center text-primary/60 transition-opacity duration-150">
                   <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
                 </div>
 
@@ -650,7 +649,7 @@ const formatSize = (bytes?: number) => {
                 >
                   <button
                     type="button"
-                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                     aria-label="播放歌曲"
                     title="播放"
                     @click.stop="playSingle(item, index)"
@@ -659,7 +658,7 @@ const formatSize = (bytes?: number) => {
                   </button>
                   <button
                     type="button"
-                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
                     aria-label="导出音频文件"
                     title="重新导出"
                     @click.stop="handleExport(item)"
@@ -668,7 +667,7 @@ const formatSize = (bytes?: number) => {
                   </button>
                   <button
                     type="button"
-                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-white/70 hover:text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
                     aria-label="从离线库删除"
                     title="删除"
                     @click.stop="openDeleteConfirm(item)"
@@ -686,7 +685,7 @@ const formatSize = (bytes?: number) => {
           v-else-if="downloads.length > 0 && filteredDownloads.length === 0"
           class="flex h-full min-h-[260px] flex-col items-center justify-center py-14 text-center select-none"
         >
-          <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10">
+          <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.04] border border-primary/10">
             <span class="icon-[mdi--text-search] h-7 w-7 text-primary/50"></span>
           </div>
           <h2 class="text-sm font-semibold text-primary">未找到匹配的音乐</h2>
@@ -708,7 +707,7 @@ const formatSize = (bytes?: number) => {
           v-else
           class="flex h-full min-h-[320px] flex-col items-center justify-center py-16 text-center select-none"
         >
-          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner">
+          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/[0.04] border border-primary/10 shadow-inner">
             <span class="icon-[mdi--tray-arrow-down] h-8 w-8 text-primary/50"></span>
           </div>
           <h2 class="text-base font-semibold text-primary">暂无离线下载音乐</h2>
@@ -743,7 +742,7 @@ const formatSize = (bytes?: number) => {
         >
           <div
             id="delete-confirm-dialog"
-            class="w-full max-w-sm rounded-2xl border border-white/20 bg-neutral-900 text-white p-6 shadow-2xl backdrop-blur-md"
+            class="w-full max-w-sm rounded-2xl border border-white/20 bg-neutral-900 text-accent p-6 shadow-2xl backdrop-blur-md"
             @click.stop
           >
             <div class="flex items-center gap-3">
@@ -751,7 +750,7 @@ const formatSize = (bytes?: number) => {
                 <span class="icon-[mdi--alert-circle-outline] h-5 w-5"></span>
               </div>
               <div>
-                <h3 id="confirm-dialog-title" class="text-base font-semibold text-white">
+                <h3 id="confirm-dialog-title" class="text-base font-semibold text-accent">
                   {{ isClearAllConfirm ? '清空所有下载？' : '确认删除歌曲？' }}
                 </h3>
                 <p class="text-xs text-zinc-300 mt-1 font-medium">
@@ -765,7 +764,7 @@ const formatSize = (bytes?: number) => {
                 variant="soft"
                 size="sm"
                 rounded="xl"
-                class="px-4 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/10"
+                class="px-4 py-2 text-xs font-medium text-zinc-300 hover:text-accent hover:bg-white/10"
                 @click="closeDeleteModal"
                 aria-label="取消"
               >
