@@ -52,6 +52,19 @@ const resolveTheme = (t?: 'light' | 'dark' | 'system') => (t === 'system' ? (pre
 applyThemeClass(resolveTheme(theme.value))
 watch([theme, preferredDark], () => applyThemeClass(resolveTheme(theme.value)))
 
+// 动态同步 html lang
+const updateHtmlLang = (locale?: string) => {
+  const langMap: Record<string, string> = {
+    zh: 'zh-CN',
+    en: 'en-US',
+    ja: 'ja-JP',
+  }
+  const l = locale || lang.value || 'zh'
+  document.documentElement.lang = langMap[l] || l || 'zh-CN'
+}
+updateHtmlLang(lang.value)
+watch(lang, v => updateHtmlLang(v))
+
 const { width } = useWindowSize()
 const setRootFontSize = (w: number) => {
   let size: number
