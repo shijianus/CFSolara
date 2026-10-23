@@ -106,7 +106,7 @@ const handleClick = async (_event: MouseEvent) => {
       padding: 24px;
       opacity: 0;
     ">
-      <img src="${cleanCover}" referrerpolicy="no-referrer" style="
+      <img src="${cleanCover}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display='none';" style="
         width: 200px;
         height: 200px;
         border-radius: 16px;
