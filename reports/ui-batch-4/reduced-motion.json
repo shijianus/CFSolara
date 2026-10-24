@@ -1,0 +1,12 @@
+{
+  "reduced": {
+    "pauseButton": true,
+    "autoplayRunning": false,
+    "hiddenStaggerItems": 0,
+    "activeIndex": 0
+  },
+  "reducedAfter": {
+    "autoplayRunning": false,
+    "activeIndex": 0
+  }
+}

@@ -4,6 +4,9 @@ import { useAudio } from '@/composables/useAudio'
 import type { Song } from '@/stores/interface'
 import { formatDurationOrDash } from '@/utils/time'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 type ListVariant = 'compact' | 'card'
 
@@ -44,31 +47,26 @@ const handleClick = (_song: Song, i: number) => {
   play(queue[i], i)
 }
 
-const formatSongTitle = (title: string, maxLen = 18) => {
-  if (!title) return ''
-  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
-}
-
 const getQualityBadgeInfo = (song: Song) => {
   const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
   const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
   if (isLossless) {
     return {
-      label: 'SQ 无损',
-      title: 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
+      label: t('quality.lossless'),
+      title: t('quality.tips.lossless'),
       badgeClass: 'bg-gradient-to-r from-blue-600/30 to-sky-600/30 text-sky-300 border border-sky-500/40',
     }
   }
   if (isExhigh) {
     return {
-      label: 'HQ 极高',
-      title: 'HQ: 极高音质 (MP3 320k)',
+      label: t('quality.exhigh'),
+      title: t('quality.tips.exhigh'),
       badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
     }
   }
   return {
-    label: '标准',
-    title: '标准: 标准音质 (MP3 128k)',
+    label: t('quality.standard'),
+    title: t('quality.tips.standard'),
     badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
   }
 }
@@ -106,10 +104,10 @@ const getQualityBadgeInfo = (song: Song) => {
         <div class="flex items-center gap-1.5">
           <p
             :title="song.name"
-            class="song-name truncate text-sm font-medium"
+            class="song-name line-clamp-1 text-sm font-medium"
             :class="isCurrent(song) ? 'text-sky-400' : ''"
           >
-            {{ formatSongTitle(song.name, 18) }}
+            {{ song.name }}
           </p>
           <span
             v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
@@ -170,10 +168,10 @@ const getQualityBadgeInfo = (song: Song) => {
         <div class="flex items-center gap-1.5">
           <p
             :title="song.name"
-            class="song-name truncate text-sm font-medium"
+            class="song-name line-clamp-1 text-sm font-medium"
             :class="isCurrent(song) ? 'text-sky-400' : ''"
           >
-            {{ formatSongTitle(song.name, 18) }}
+            {{ song.name }}
           </p>
           <span
             v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"

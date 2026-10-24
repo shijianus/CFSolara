@@ -43,6 +43,26 @@ const DB_VERSION = 2
 
 let globalDbPromise: Promise<IDBDatabase> | null = null
 
+/** 关闭并删除整个本地音乐数据库（用于“清除全部本地数据”） */
+export async function deleteMusicDatabase(): Promise<void> {
+  if (typeof indexedDB === 'undefined') return
+  if (globalDbPromise) {
+    try {
+      const db = await globalDbPromise
+      db.close()
+    } catch {
+      // 数据库未成功打开时直接继续删除
+    }
+    globalDbPromise = null
+  }
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(DB_NAME)
+    request.onsuccess = () => resolve()
+    request.onerror = () => reject(request.error)
+    request.onblocked = () => resolve()
+  })
+}
+
 function openDatabase(): Promise<IDBDatabase> {
   if (globalDbPromise) return globalDbPromise
 

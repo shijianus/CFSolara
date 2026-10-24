@@ -246,6 +246,8 @@ import {
   probeSongQualities,
   getCachedProbeResult,
   cancelSongProbe,
+  qualityLabel,
+  qualityReason,
   type SongProbeResult,
   type QualityLevel,
 } from '@/utils/qualityProbe'
@@ -365,35 +367,28 @@ watch(
 // 可用档位列表（由探测数据驱动）
 const availableQualities = computed(() => {
   const probe = currentSongProbe.value
-  const levels: { level: QualityLevel; defaultLabel: string }[] = [
-    { level: 'lossless', defaultLabel: 'SQ 无损' },
-    { level: 'exhigh', defaultLabel: 'HQ 极高' },
-    { level: 'standard', defaultLabel: '标准' },
-  ]
+  const levels: QualityLevel[] = ['lossless', 'exhigh', 'standard']
 
-  return levels.map(({ level, defaultLabel }) => {
+  return levels.map((level) => {
     const item = probe ? probe[level] : null
     const isAvailable = item ? item.isAvailable : true
     const unavailableReason = item?.unavailableReason
 
     let bitrateDisplay = ''
     if (item) {
-      if (!isAvailable && unavailableReason) {
-        bitrateDisplay = unavailableReason
-      } else {
-        bitrateDisplay = item.bitrateLabel
-      }
+      bitrateDisplay =
+        !isAvailable && unavailableReason ? qualityReason(unavailableReason) : item.bitrateLabel
     } else {
-      bitrateDisplay = '探测中…'
+      bitrateDisplay = t('quality.probing')
     }
 
     return {
       level,
-      label: item?.label || defaultLabel,
+      label: qualityLabel(level),
       bitrate: bitrateDisplay,
       isAvailable,
       unavailableReason,
-      formatLabel: item?.formatLabel || '未知',
+      formatLabel: item?.formatLabel || '—',
       sizeFormatted: item?.sizeFormatted || '—',
     }
   })
@@ -404,13 +399,15 @@ const qualityDisplayInfo = computed(() => {
   const reqLevel = currentQualityLevel.value
   const probe = currentSongProbe.value
 
-  const nominalBadge = reqLevel === 'lossless' ? 'SQ 无损' : reqLevel === 'exhigh' ? 'HQ 极高' : '标准'
+  const nominalBadge = qualityLabel(reqLevel)
 
   if (!probe) {
     const isProbing = reqLevel !== 'standard' || showQualityMenu.value
     return {
       badge: nominalBadge,
-      tooltip: isProbing ? `当前音质: ${nominalBadge} (探测中…)` : `当前音质: ${nominalBadge}`,
+      tooltip: isProbing
+        ? t('quality.currentQualityProbing', { quality: nominalBadge })
+        : t('quality.currentQuality', { quality: nominalBadge }),
       isDegraded: false,
       isLossless: reqLevel === 'lossless',
     }
@@ -421,7 +418,10 @@ const qualityDisplayInfo = computed(() => {
     // 请求档位真实可用
     return {
       badge: nominalBadge,
-      tooltip: `当前音质: ${nominalBadge} (${currentItem.bitrateLabel})`,
+      tooltip: t('quality.currentQualityBitrate', {
+        quality: nominalBadge,
+        bitrate: currentItem.bitrateLabel,
+      }),
       isDegraded: false,
       isLossless: reqLevel === 'lossless' && (currentItem.formatLabel === 'FLAC' || currentItem.formatLabel === 'WAV' || currentItem.formatLabel === 'ALAC'),
     }
@@ -438,7 +438,10 @@ const qualityDisplayInfo = computed(() => {
     const actualFmt = fallbackTier.formatLabel || 'MP3'
     const actualBitrateNum = fallbackTier.actualBitrateKbps || (fallbackTier.level === 'exhigh' ? 320 : 128)
     const actualBadge = `${actualFmt} ${actualBitrateNum}k`
-    const tooltip = `请求 ${nominalBadge},音源实际提供 ${actualFmt} ${actualBitrateNum} kbps`
+    const tooltip = t('quality.actualQuality', {
+      requested: nominalBadge,
+      actual: `${actualFmt} ${actualBitrateNum} kbps`,
+    })
 
     return {
       badge: actualBadge,
@@ -450,8 +453,8 @@ const qualityDisplayInfo = computed(() => {
 
   // 均不可用或探测失败
   return {
-    badge: '未知',
-    tooltip: `当前音质: ${nominalBadge} (音源状态未知)`,
+    badge: t('quality.unknown'),
+    tooltip: t('quality.unknownSource', { quality: nominalBadge }),
     isDegraded: false,
     isLossless: false,
   }
@@ -546,12 +549,9 @@ const selectQuality = async (level: string) => {
   }
 
   closeQualityMenuAndRestoreFocus()
-  const labelMap: Record<string, string> = {
-    lossless: 'SQ 无损音质',
-    exhigh: 'HQ 极高音质',
-    standard: '标准音质',
-  }
-  qualityToastMsg.value = `已切换至 ${labelMap[level] || '目标音质'}`
+  qualityToastMsg.value = t('quality.switchedTo', {
+    quality: qualityLabel(level as QualityLevel) || t('quality.target'),
+  })
   if (qualityToastTimer) clearTimeout(qualityToastTimer)
   qualityToastTimer = setTimeout(() => {
     qualityToastMsg.value = ''
@@ -562,11 +562,6 @@ const downloadCurrentSong = () => {
   if (currentSong.value) {
     downloadStore.openDownloadDialog(currentSong.value)
   }
-}
-
-const formatSongTitle = (title?: string, maxLen = 22) => {
-  if (!title) return ''
-  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
 }
 
 const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
@@ -670,8 +665,8 @@ const emit = defineEmits(['show'])
           </button>
         </div>
         <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
-          <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
-            {{ currentSong ? formatSongTitle(currentSong.name) : t('player.selectSongToStart') }}
+          <p :title="currentSong?.name" class="text-primary line-clamp-1 text-sm font-medium">
+            {{ currentSong ? currentSong.name : t('player.selectSongToStart') }}
           </p>
           <p v-if="currentSong" class="text-primary/80 truncate text-xs">
             {{ currentSong.artist || t('player.unknownArtist') }}
@@ -766,7 +761,7 @@ const emit = defineEmits(['show'])
             aria-haspopup="true"
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
-            class="footer-quality-pill group flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
+            class="footer-quality-pill group flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-glass bg-[var(--glass-interactive-hover-muted)] hover:bg-[var(--glass-interactive-hover)] text-primary hover:border-[var(--glass-accent-border)] select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
             :aria-label="activeQualityTooltip"
           >
@@ -802,14 +797,13 @@ const emit = defineEmits(['show'])
             >
               <!-- 顶部标题 -->
               <div
-                class="px-3 py-2 flex items-center justify-between border-b border-white/10"
-                style="background: linear-gradient(135deg, rgba(56,189,248, 0.12), rgba(37,99,235, 0.10));"
+                class="px-3 py-2 flex items-center justify-between border-b border-glass bg-[var(--glass-accent-subtle)]"
               >
                 <div class="flex items-center gap-1.5">
                   <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-sky-400"></span>
-                  <span id="quality-menu-title" class="text-[11px] font-semibold text-white/90 tracking-wider">音频规格</span>
+                  <span id="quality-menu-title" class="text-[11px] font-semibold text-primary/90 tracking-wider">{{ t('quality.title') }}</span>
                 </div>
-                <span class="text-[11px] font-mono font-medium text-sky-300">
+                <span class="text-[11px] font-mono font-medium text-primary/70">
                   {{ activeQualityBadge }}
                 </span>
               </div>
@@ -833,8 +827,8 @@ const emit = defineEmits(['show'])
                     !q.isAvailable
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
                       : effectiveQualityLevel === q.level
-                        ? 'bg-sky-500/15 border border-sky-500/40 text-sky-200 font-semibold shadow-sm cursor-pointer'
-                        : 'border border-transparent text-white/85 hover:bg-white/10 hover:text-white cursor-pointer'
+                        ? 'bg-[var(--glass-interactive-active)] border border-[var(--glass-accent-border)] text-primary font-semibold shadow-sm cursor-pointer'
+                        : 'border border-transparent text-primary/85 hover:bg-[var(--glass-interactive-hover-muted)] hover:text-primary cursor-pointer'
                   ]"
                 >
                   <div class="flex items-center gap-1.5 min-w-0 pr-1">
@@ -845,16 +839,16 @@ const emit = defineEmits(['show'])
                     ></span>
                     <span
                       class="text-xs transition-colors shrink-0"
-                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-sky-200 font-bold' : 'text-white/90 font-medium'"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-primary font-bold' : 'text-primary/90 font-medium'"
                     >
                       {{ q.label }}
                     </span>
                     <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
                     <span
                       v-if="effectiveQualityLevel === q.level && q.isAvailable"
-                      class="text-[11px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
+                      class="text-[11px] px-1.5 py-0.2 rounded bg-[var(--glass-interactive-active)] text-primary font-medium shrink-0"
                     >
-                      当前
+                      {{ t('quality.current') }}
                     </span>
                   </div>
                   <!-- 右侧：真实规格或置灰原因 (不可用原因文字统一 13px) -->
@@ -862,10 +856,10 @@ const emit = defineEmits(['show'])
                     class="shrink-0 transition-colors text-right pl-1"
                     :class="[
                       !q.isAvailable
-                        ? 'text-[13px] text-white/65 font-normal font-sans'
+                        ? 'text-[13px] text-primary/65 font-normal font-sans'
                         : effectiveQualityLevel === q.level
-                          ? 'text-xs text-sky-300 font-semibold font-mono'
-                          : 'text-xs text-white/65 group-hover:text-white/85 font-mono'
+                          ? 'text-xs text-primary/80 font-semibold font-mono'
+                          : 'text-xs text-primary/65 group-hover:text-primary/85 font-mono'
                     ]"
                   >
                     {{ q.bitrate }}
@@ -884,7 +878,7 @@ const emit = defineEmits(['show'])
           icon="icon-[mdi--tray-arrow-down]"
           icon-class="size-5"
           class="text-primary/70 hover:text-sky-400 flex h-11 w-11 items-center justify-center transition-colors cursor-pointer"
-          :title="t('common.download') + '当前歌曲'"
+          :title="t('quality.downloadCurrent')"
           :aria-label="t('common.download')"
           @click.stop="downloadCurrentSong"
         />
@@ -1061,20 +1055,18 @@ const emit = defineEmits(['show'])
   }
 }
 
-/* 音质规格上浮菜单毛玻璃容器 (深紫玻璃底色，模糊半径限制在 24px 内) */
+/* 音质规格上浮菜单：使用主题令牌，跟随深浅色模式 */
 .quality-panel-popover {
-  background-color: #0a1f3d;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    0 16px 36px -8px rgba(0, 0, 0, 0.65),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+  background-color: var(--glass-bg-overlay);
+  border: 1px solid var(--glass-border-default);
+  box-shadow: var(--glass-shadow-xl);
 }
 
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .quality-panel-popover {
-    background-color: rgba(10,31,61, 0.94);
-    backdrop-filter: blur(var(--glass-blur, 24px));
-    -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
+    background-color: var(--glass-bg-overlay);
+    backdrop-filter: blur(var(--glass-blur-lg, 24px));
+    -webkit-backdrop-filter: blur(var(--glass-blur-lg, 24px));
   }
 }
 

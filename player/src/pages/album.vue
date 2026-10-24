@@ -13,6 +13,7 @@ import {
   type AlbumData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { formatDateLong } from '@/utils/time'
 
 const route = useRoute()
 const albumId = computed(() => Number(route.params.id))
@@ -97,9 +98,7 @@ onMounted(() => load())
                 <span class="glass-button px-2 py-1"
                   >{{ $t('albumPage.published') }}
                   {{
-                    state.info?.publishTime
-                      ? new Date(state.info.publishTime).toLocaleDateString()
-                      : '-'
+                    state.info?.publishTime ? formatDateLong(state.info.publishTime) : '-'
                   }}</span
                 >
                 <span v-if="state.info?.artist" class="glass-button px-2 py-1">{{
@@ -107,7 +106,7 @@ onMounted(() => load())
                 }}</span>
                 <span class="glass-button px-2 py-1"
                   >{{ $t('albumPage.tracks') }}
-                  {{ $t('commonUnits.songsShort', state.songs.length) }}</span
+                  {{ $t('commonUnits.songsShort', { count: state.songs.length }) }}</span
                 >
               </div>
             </div>

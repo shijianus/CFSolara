@@ -6,6 +6,7 @@ import type { Song as StoreSong } from '@/stores/interface'
 import MobileSongList from '@/components/Mobile/MobileSongList.vue'
 import { useLibraryStore } from '@/stores/modules/library'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
 import 'swiper/css'
@@ -24,6 +25,8 @@ const creativeEffect = {
 }
 
 const { t } = useI18n()
+const reducedMotion = usePreferredReducedMotion()
+const prefersReduced = computed(() => reducedMotion.value === 'reduce')
 const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
 const libraryStore = useLibraryStore()
 const likedCount = computed(() => libraryStore.likedSongCount)
@@ -128,7 +131,7 @@ const tabs = computed(() => [
         :modules="[EffectCreative]"
         effect="creative"
         :creative-effect="creativeEffect"
-        :speed="300"
+        :speed="prefersReduced ? 0 : 300"
         @swiper="onSwiper"
         @slideChange="onSlideChange"
       >
@@ -143,7 +146,7 @@ const tabs = computed(() => [
                 {{ t('mobile.recent.nowPlaying') }}
               </p>
               <button
-                class="clear-button flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200"
+                class="clear-button flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200"
                 @click="handleClearQueue"
               >
                 <span class="icon-[mdi--delete-outline] h-4 w-4" />
@@ -186,7 +189,7 @@ const tabs = computed(() => [
                 {{ t('mobile.recent.recentlyPlayed') }}
               </p>
               <button
-                class="play-all-button flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-primary shadow-lg transition-all duration-200 active:scale-95"
+                class="play-all-button flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-primary shadow-lg transition-all duration-200 active:scale-95"
                 @click="playAllRecent"
               >
                 <span class="icon-[mdi--play] h-4 w-4" />

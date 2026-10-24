@@ -1,9 +1,18 @@
 /**
  * 时间与数字格式化工具
  * 提供歌曲时长、播放次数、日期等格式化方法
+ * 所有面向界面的数字与日期均通过 Intl 格式化，并跟随当前界面语言
  */
 import i18n from '@/languages'
-const { t } = i18n.global
+
+/** 读取当前 vue-i18n locale，兼容 composition / legacy 两种模式 */
+const getLocale = (): string => {
+  const locale = i18n.global.locale as unknown
+  if (locale && typeof locale === 'object' && 'value' in locale) {
+    return String((locale as { value: string }).value)
+  }
+  return String(locale || 'zh')
+}
 
 /**
  * 格式化歌曲时长（毫秒 → m:ss）
@@ -26,51 +35,90 @@ export const formatDurationOrDash = (ms?: number) => {
 }
 
 /**
- * 格式化播放次数等大数字（自动转为 万/亿 单位）
- * @param count - 数字或字符串
- * @returns 格式化后的字符串，如 "3.2万"、"1.5亿"
+ * 使用 Intl.NumberFormat 格式化普通数字（千分位等，跟随当前语言）
  */
-export const formatCount = (count: number | string) => {
-  const num = typeof count === 'string' ? parseInt(count) : count
-  if (isNaN(num)) return count
-  if (num >= 100000000) return (num / 100000000).toFixed(1) + t('common.units.billion')
-  if (num >= 10000) return (num / 10000).toFixed(1) + t('common.units.tenThousand')
-  return num
+export const formatNumber = (value: number | string) => {
+  const num = typeof value === 'string' ? Number(value) : value
+  if (!Number.isFinite(num)) return String(value)
+  return new Intl.NumberFormat(getLocale()).format(num)
 }
 
 /**
- * 格式化时间戳
+ * 格式化播放次数等大数字（Intl compact notation，自动使用 万/亿、K/M 等）
+ * @param count - 数字或字符串
+ * @returns 格式化后的字符串，如 "3.2万"、"1.5M"
+ */
+export const formatCount = (count: number | string) => {
+  const num = typeof count === 'string' ? Number(count) : count
+  if (!Number.isFinite(num)) return String(count)
+  if (Math.abs(num) < 1000) return new Intl.NumberFormat(getLocale()).format(num)
+  return new Intl.NumberFormat(getLocale(), {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(num)
+}
+
+/**
+ * 格式化时间戳：1 小时内使用相对时间，超过 24 小时使用本地化日期
  * @param time 时间戳（毫秒）
  * @returns 格式化后的时间字符串
  */
 export const formatDate = (time: number) => {
   const date = new Date(time)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
+  if (Number.isNaN(date.getTime())) return ''
 
-  // 1分钟内
+  const locale = getLocale()
+  const diff = Date.now() - date.getTime()
+
   if (diff < 60000) {
-    return t('common.justNow')
+    return i18n.global.t('common.justNow')
   }
 
-  // 1小时内
   if (diff < 3600000) {
-    return Math.floor(diff / 60000) + t('common.minutesAgo')
+    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'short' }).format(
+      -Math.floor(diff / 60000),
+      'minute'
+    )
   }
 
-  // 24小时内
   if (diff < 86400000) {
-    return Math.floor(diff / 3600000) + t('common.hoursAgo')
+    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'short' }).format(
+      -Math.floor(diff / 3600000),
+      'hour'
+    )
   }
 
-  // 超过24小时显示具体日期
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  
-  if (year === now.getFullYear()) {
-    return `${month}月${day}日`
-  }
-  
-  return `${year}年${month}月${day}日`
+  const sameYear = date.getFullYear() === new Date().getFullYear()
+  return new Intl.DateTimeFormat(
+    locale,
+    sameYear ? { month: 'short', day: 'numeric' } : { year: 'numeric', month: 'short', day: 'numeric' }
+  ).format(date)
+}
+
+/**
+ * 本地化长日期（用于评论、发行日期等需要完整年份的场景）
+ */
+export const formatDateLong = (value: number | string | Date) => {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat(getLocale(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
+/**
+ * 本地化日期 + 时间
+ */
+export const formatDateTime = (value: number | string | Date) => {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat(getLocale(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }

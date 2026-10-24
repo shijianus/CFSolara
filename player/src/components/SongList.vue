@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useDownloadStore } from '@/stores/modules/download'
 import { useLibraryStore } from '@/stores/modules/library'
+import { prefersReducedMotion } from '@/utils/motion'
 
 interface Props {
   songs: Song[]
@@ -58,6 +59,14 @@ const playSongWithAnimation = async (song: Song, index: number, event?: MouseEve
       }
     }
 
+    // 减少动效偏好下直接播放，不执行飞行动画
+    if (prefersReducedMotion()) {
+      setPlaylist(props.songs, index)
+      play(props.songs[index], index)
+      emit('play', song, index)
+      return
+    }
+
     // 如果能获取到元素，执行飞行动画
     if (sourceCover && targetCover && song.cover) {
       // 先设置播放列表
@@ -65,7 +74,7 @@ const playSongWithAnimation = async (song: Song, index: number, event?: MouseEve
 
       // 执行抛物线飞行动画
       await flyTo(sourceCover, targetCover, formatCoverUrl(song.cover, { size: 128, artist: song.artist }), {
-        duration: 0.55,
+        duration: 0.25,
         ease: 'power2.out',
         borderRadius: { from: '8px', to: '8px' },
         scale: { from: 1, to: 1 },
@@ -120,12 +129,6 @@ const downloadSong = (song: Song, index: number) => {
   downloadStore.openDownloadDialog(song)
 }
 
-const MAX_TITLE_LEN = 28
-const formatSongTitle = (title: string, maxLen = MAX_TITLE_LEN) => {
-  if (!title) return ''
-  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
-}
-
 const isPredominantlyLossless = computed(() => {
   if (!props.songs || props.songs.length === 0) return false
   const sqCount = props.songs.filter(
@@ -152,8 +155,8 @@ const getQualityBadgeInfo = (song: Song) => {
     return {
       label: 'SQ',
       title: hasMultiple
-        ? `SQ: 无损音质 (FLAC，仅表示该音质档位，可在底栏切换)`
-        : 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
+        ? `${t('quality.tips.lossless')} · ${t('player.playMode')}`
+        : t('quality.tips.lossless'),
       badgeClass: 'bg-sky-500/10 text-sky-300/90 border border-sky-500/25',
     }
   }
@@ -161,14 +164,14 @@ const getQualityBadgeInfo = (song: Song) => {
     return {
       label: 'HQ',
       title: hasMultiple
-        ? `HQ: 极高音质 (MP3 320k，可在底栏切换)`
-        : 'HQ: 极高音质 (MP3 320k)',
+        ? `${t('quality.tips.exhigh')} · ${t('player.playMode')}`
+        : t('quality.tips.exhigh'),
       badgeClass: 'bg-cyan-500/15 text-cyan-300/90 border border-cyan-500/25',
     }
   }
   return {
-    label: '标准',
-    title: '标准: 标准音质 (MP3 128k)',
+    label: t('quality.standard'),
+    title: t('quality.tips.standard'),
     badgeClass: 'bg-emerald-500/15 text-emerald-300/90 border border-emerald-500/25',
   }
 }
@@ -249,7 +252,7 @@ const getQualityBadgeInfo = (song: Song) => {
       <!-- 列表头部 -->
       <div
         v-if="showHeader"
-        class="song-list-header text-primary/60 mb-2 hidden items-center border-b border-white/5 py-3 text-xs font-medium tracking-wider uppercase md:flex"
+        class="song-list-header text-primary/60 mb-2 hidden items-center border border-transparent border-b-white/5 py-3 text-xs font-medium tracking-wider uppercase md:flex"
       >
         <div class="w-14 text-center">#</div>
         <div class="song-grid grid min-w-0 flex-1 grid-cols-12 items-center gap-4 px-4">
@@ -345,7 +348,7 @@ const getQualityBadgeInfo = (song: Song) => {
               v-if="!isCurrent(song)"
               type="button"
               class="song-row-play absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-visible:opacity-100 text-primary hover:text-sky-400 active:scale-90 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
-              :title="t('actions.play') || '播放'"
+              :title="t('actions.play')"
               :aria-label="t('actions.play')"
               @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
             >
@@ -376,9 +379,9 @@ const getQualityBadgeInfo = (song: Song) => {
                 <div class="flex items-center gap-2">
                   <h3
                     :title="song.name"
-                    class="text-primary truncate text-base font-medium transition-colors group-hover:text-sky-300"
+                    class="text-primary line-clamp-1 text-base font-medium transition-colors group-hover:text-sky-300"
                   >
-                    {{ formatSongTitle(song.name) }}
+                    <span class="line-clamp-1">{{ song.name }}</span>
                   </h3>
                   <!-- 精炼降噪音质徽章 (全列表以SQ为主时不重复显眼刷屏，只标出例外；多音质收归进交互提示) -->
                   <span
@@ -457,7 +460,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <button
                   type="button"
                   class="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
-                  :title="t('actions.play') || '播放'"
+                  :title="t('actions.play')"
                   :aria-label="t('actions.play')"
                   @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
                 >

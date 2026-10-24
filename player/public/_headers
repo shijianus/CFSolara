@@ -3,10 +3,13 @@
   Access-Control-Allow-Origin: *
 
 /
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store
 
 /index.html
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store
+
+/404.html
+  Cache-Control: no-store
 
 /static/*
   Cache-Control: public, max-age=31536000, immutable

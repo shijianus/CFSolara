@@ -4,6 +4,8 @@
  */
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { BRAND_PRODUCT } from '@/config/brand'
+import { formatDateLong } from '@/utils/time'
+import i18n from '@/languages'
 
 // ============ 类型定义 ============
 
@@ -178,7 +180,9 @@ export function transformBanner(item: Record<string, unknown>): BannerData | nul
 
   return {
     coverImgUrl: (item?.pic as string) || (item?.imageUrl as string) || (item?.bigImageUrl as string) || '',
-    title: (item?.typeTitle as string) || `${BRAND_PRODUCT} 独家推荐`,
+    title:
+      (item?.typeTitle as string) ||
+      i18n.global.t('home.exclusiveRecommend', { brand: BRAND_PRODUCT }),
     description: (item?.title as string) || '',
     targetId,
     targetType,
@@ -210,7 +214,7 @@ export function transformBanners(
  */
 export function transformPlaylist(
   item: Record<string, unknown>,
-  fallbackName = '未知歌单'
+  fallbackName = i18n.global.t('common.unknownPlaylist')
 ): PlaylistData {
   return {
     id: (item?.id as number | string) || 0,
@@ -227,7 +231,7 @@ export function transformPlaylist(
 export function transformPlaylists(
   response: ApiResponse,
   limit?: number,
-  fallbackName = '未知歌单'
+  fallbackName = i18n.global.t('common.unknownPlaylist')
 ): PlaylistData[] {
   const list = extractArray(response, 'result', 'data.result', 'playlists', 'data.playlists')
   const result = list.map(item =>
@@ -415,9 +419,7 @@ export function transformAlbum(item: Record<string, unknown>): AlbumData {
     picUrl: (item?.picUrl as string) || (item?.blurPicUrl as string) || '',
     artist: (artist?.name as string) || (item?.artistName as string) || '',
     artistId: (artist?.id as number | string) || 0,
-    publishTime: item?.publishTime
-      ? new Date(item.publishTime as number).toLocaleDateString()
-      : '',
+    publishTime: item?.publishTime ? formatDateLong(item.publishTime as number) : '',
     size: (item?.size as number) || 0,
     description: (item?.description as string) || '',
   }
@@ -447,7 +449,7 @@ export function transformAlbums(
  */
 export function transformPlaylistDetail(
   response: ApiResponse,
-  fallbackCategory = '歌单'
+  fallbackCategory = i18n.global.t('home.playlistFallback')
 ): PlaylistDetailData | null {
   const detail = extractData<Record<string, unknown>>(
     response,
@@ -466,9 +468,7 @@ export function transformPlaylistDetail(
     description: (detail?.description as string) || '',
     creator: (creator?.nickname as string) || '',
     creatorAvatar: (creator?.avatarUrl as string) || '',
-    createTime: detail?.createTime
-      ? new Date(detail.createTime as number).toLocaleDateString()
-      : '',
+    createTime: detail?.createTime ? formatDateLong(detail.createTime as number) : '',
     songCount: (detail?.trackCount as number) || 0,
     playCount: (detail?.playCount as string | number) || 0,
     likes: (detail?.subscribedCount as number) || (detail?.bookedCount as number) || 0,

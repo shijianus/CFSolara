@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { formatCount } from '@/utils/time'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { prefersReducedMotion } from '@/utils/motion'
 
 interface Props {
   id: number | string
@@ -20,7 +21,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
-const overlayRef = ref<HTMLElement | null>(null)
 const isHovering = ref(false)
 const isAnimating = ref(false)
 const resolvedHref = computed(() => router.resolve(props.to).href)
@@ -37,7 +37,7 @@ const tiltConfig = {
 const glareRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  if (props.enableTilt && cardRef.value) {
+  if (props.enableTilt && cardRef.value && !prefersReducedMotion()) {
     const glareEl = document.createElement('div')
     glareEl.className = 'tilt-glare'
     glareEl.style.cssText = `
@@ -69,7 +69,7 @@ onUnmounted(() => {
 
 // 3D Tilt 鼠标移动
 const handleMouseMove = (e: MouseEvent) => {
-  if (!cardRef.value) return
+  if (!cardRef.value || prefersReducedMotion()) return
 
   const card = cardRef.value
   const rect = card.getBoundingClientRect()
@@ -104,7 +104,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
 // 悬停效果
 const handleMouseEnter = () => {
-  if (!cardRef.value) return
+  if (!cardRef.value || prefersReducedMotion()) return
   isHovering.value = true
 
   if (!props.enableTilt) {
@@ -142,7 +142,7 @@ const handleMouseEnter = () => {
 }
 
 const handleMouseLeave = () => {
-  if (!cardRef.value) return
+  if (!cardRef.value || prefersReducedMotion()) return
   isHovering.value = false
 
   gsap.to(cardRef.value, {
@@ -180,7 +180,12 @@ const handleMouseLeave = () => {
 const handleClick = async (event: MouseEvent) => {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
   event.preventDefault()
-  if (isAnimating.value || !cardRef.value) {
+  if (isAnimating.value) return
+  if (!cardRef.value) {
+    router.push(props.to)
+    return
+  }
+  if (prefersReducedMotion()) {
     router.push(props.to)
     return
   }
@@ -284,14 +289,14 @@ const handleClick = async (event: MouseEvent) => {
         overlay.remove()
         card.style.opacity = '1'
         isAnimating.value = false
-      }, 50)
+      }, 0)
     },
   })
 
   // 背景淡入
   tl.to(overlay, {
     background: 'rgba(0,0,0,0.7)',
-    duration: 0.3,
+    duration: 0.12,
     ease: 'power2.out',
   }, 0)
 
@@ -302,16 +307,16 @@ const handleClick = async (event: MouseEvent) => {
     left: targetLeft,
     top: targetTop,
     borderRadius: '20px',
-    duration: 0.5,
+    duration: 0.18,
     ease: 'power3.out',
   }, 0)
 
   // 短暂停留后淡出
   tl.to([clone, overlay], {
     opacity: 0,
-    duration: 0.2,
+    duration: 0.05,
     ease: 'power2.in',
-  }, '+=0.1')
+  }, '+=0.01')
 }
 </script>
 

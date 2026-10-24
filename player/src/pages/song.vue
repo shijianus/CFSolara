@@ -120,7 +120,7 @@ watch(songId, () => loadInfo())
           <div class="group relative h-72 w-72 shrink-0 overflow-hidden rounded-2xl shadow-2xl">
             <LazyImage
               :src="formatCoverUrl(albumCover, { size: 300 })"
-              alt="封面"
+              :alt="$t('song.coverAlt')"
               imgClass="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               wrapperClass="h-full w-full"
             />
@@ -180,7 +180,7 @@ watch(songId, () => loadInfo())
                 @click="showComments = true"
               >
                 <span class="icon-[mdi--comment-outline] h-5 w-5"></span>
-                评论
+                {{ $t('song.comments') }}
               </button>
             </div>
           </div>
@@ -190,7 +190,7 @@ watch(songId, () => loadInfo())
           <div class="lg:col-span-2">
             <div class="glass-card overflow-hidden rounded-2xl">
               <div class="border-b border-white/10 px-6 py-4">
-                <h2 class="text-lg font-semibold">歌词</h2>
+                <h2 class="text-lg font-semibold">{{ $t('song.lyrics') }}</h2>
               </div>
               <div class="custom-scrollbar overflow-y-auto p-6">
                 <div v-if="mergedLines.length" class="space-y-3">
@@ -208,7 +208,7 @@ watch(songId, () => loadInfo())
                   <span
                     class="icon-[mdi--text-box-remove-outline] text-primary/30 mb-3 h-12 w-12"
                   ></span>
-                  <p class="text-primary/50">暂无歌词</p>
+                  <p class="text-primary/50">{{ $t('song.noLyrics') }}</p>
                 </div>
               </div>
             </div>
@@ -217,7 +217,7 @@ watch(songId, () => loadInfo())
           <div class="space-y-6">
             <div v-if="state.similarSongs.length" class="glass-card overflow-hidden rounded-2xl">
               <div class="border-b border-white/10 px-6 py-4">
-                <h2 class="text-lg font-semibold">相似歌曲</h2>
+                <h2 class="text-lg font-semibold">{{ $t('song.similarSongs') }}</h2>
               </div>
               <div class="custom-scrollbar max-h-[400px] overflow-y-auto">
                 <div
@@ -243,7 +243,7 @@ watch(songId, () => loadInfo())
               class="glass-card overflow-hidden rounded-2xl"
             >
               <div class="border-b border-white/10 px-6 py-4">
-                <h2 class="text-lg font-semibold">相关歌单</h2>
+                <h2 class="text-lg font-semibold">{{ $t('song.relatedPlaylists') }}</h2>
               </div>
               <div class="grid grid-cols-2 gap-3 p-4">
                 <router-link
@@ -267,7 +267,7 @@ watch(songId, () => loadInfo())
                   >
                     {{ pl.name }}
                   </p>
-                  <p class="text-primary/50 truncate text-xs">{{ pl.trackCount }} 首</p>
+                  <p class="text-primary/50 truncate text-xs">{{ $t('song.trackCount', { count: pl.trackCount }) }}</p>
                 </router-link>
               </div>
             </div>

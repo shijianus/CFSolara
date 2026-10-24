@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 const props = defineProps<{
   songCount: number
   likes: string
@@ -33,6 +37,9 @@ onUnmounted(() => document.removeEventListener('pointerdown', onDocClick))
       class="info-trigger flex h-7 w-7 items-center justify-center rounded-full"
       icon="icon-[mdi--information-outline]"
       icon-class="h-4 w-4 text-primary/60"
+      :title="t('common.detail')"
+      :aria-label="t('common.detail')"
+      :aria-expanded="open"
       @click.stop="toggle"
     />
     <Transition name="popover">
@@ -44,15 +51,15 @@ onUnmounted(() => document.removeEventListener('pointerdown', onDocClick))
         <div class="space-y-2 text-xs">
           <div class="flex items-center gap-2">
             <span class="icon-[mdi--music-note] h-4 w-4 text-sky-400"></span>
-            <span class="text-primary/80">{{ songCount }}首歌曲</span>
+            <span class="text-primary/80">{{ t('commonUnits.songCount', { count: songCount }) }}</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="icon-[mdi--heart] h-4 w-4 text-sky-400"></span>
-            <span class="text-primary/80">{{ likes }}收藏</span>
+            <span class="text-primary/80">{{ t('commonUnits.favoriteCount', { count: likes }) }}</span>
           </div>
           <div v-if="playCount" class="flex items-center gap-2">
             <span class="icon-[mdi--play] h-4 w-4 text-sky-400"></span>
-            <span class="text-primary/80">{{ playCount }}播放</span>
+            <span class="text-primary/80">{{ t('commonUnits.playCount', { count: playCount }) }}</span>
           </div>
           <div v-if="category" class="flex items-center gap-2">
             <span class="icon-[mdi--tag] h-4 w-4 text-sky-400"></span>
@@ -70,7 +77,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', onDocClick))
 
 <style scoped>
 .info-trigger {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-interactive-hover-muted);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: all 0.2s ease;
@@ -78,15 +85,15 @@ onUnmounted(() => document.removeEventListener('pointerdown', onDocClick))
 
 .info-trigger:active {
   transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--glass-interactive-hover);
 }
 
 .info-popover {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: var(--glass-bg-overlay);
+  backdrop-filter: blur(var(--glass-blur-lg));
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg));
+  border: 1px solid var(--glass-border-default);
+  box-shadow: var(--glass-shadow-xl);
 }
 
 .popover-enter-active,

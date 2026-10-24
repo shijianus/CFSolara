@@ -39,13 +39,13 @@ export const useAudio = () => {
   const playModeText = computed(() => {
     switch (playMode.value) {
       case PlayMode.LIST:
-        return '列表循环'
+        return i18n.global.t('player.listLoop')
       case PlayMode.SINGLE:
-        return '单曲循环'
+        return i18n.global.t('player.singleLoop')
       case PlayMode.RANDOM:
-        return '随机播放'
+        return i18n.global.t('player.randomPlay')
       default:
-        return '列表循环'
+        return i18n.global.t('player.listLoop')
     }
   })
 
@@ -164,6 +164,10 @@ export const useAudio = () => {
 
   const setPlaylist = (songs: Song[], startIndex?: number) => {
     audioStore.setPlaylist(songs, startIndex)
+  }
+
+  const playAfterCurrent = (song: Song) => {
+    audioStore.playAfterCurrent(song)
   }
 
   const playByIndex = (index: number) => {
@@ -317,6 +321,7 @@ export const useAudio = () => {
     queueNext,
     removeSongs,
     setPlaylist,
+    playAfterCurrent,
     playByIndex,
 
     // 其他功能

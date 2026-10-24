@@ -23,9 +23,9 @@ const goBack = () => {
     </div>
     
     <h1 class="text-4xl font-extrabold tracking-tight text-primary md:text-5xl">404</h1>
-    <p class="mt-2 text-base font-semibold text-primary/80">页面走丢了，音符飘散在宇宙中</p>
+    <p class="mt-2 text-base font-semibold text-primary/80">{{ t('notFound.title') }}</p>
     <p class="mt-1 max-w-md text-xs text-primary/50 leading-relaxed">
-      您访问的链接可能已失效、不存在或已被迁移。您可以返回首页探索更多音乐，或使用搜索查找曲目。
+      {{ t('notFound.desc') }}
     </p>
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -37,7 +37,7 @@ const goBack = () => {
         @click="router.push('/')"
       >
         <span class="icon-[mdi--home] h-4 w-4"></span>
-        返回首页
+        {{ t('notFound.home') }}
       </Button>
       <Button
         variant="glass"
@@ -47,7 +47,7 @@ const goBack = () => {
         @click="goBack"
       >
         <span class="icon-[mdi--arrow-left] h-4 w-4"></span>
-        返回上一页
+        {{ t('notFound.back') }}
       </Button>
       <Button
         variant="ghost"
@@ -57,7 +57,7 @@ const goBack = () => {
         @click="router.push('/search')"
       >
         <span class="icon-[mdi--magnify] h-4 w-4"></span>
-        去搜索
+        {{ t('notFound.search') }}
       </Button>
     </div>
   </div>

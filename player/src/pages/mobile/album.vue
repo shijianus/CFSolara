@@ -161,7 +161,7 @@ const goToArtist = () => {
               <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-accent/60">
                 <span class="flex items-center gap-1">
                   <span class="icon-[mdi--music-note] h-3.5 w-3.5"></span>
-                  {{ $t('commonUnits.songsShort', state.info.songCount) }}
+                  {{ $t('commonUnits.songsShort', { count: state.info.songCount }) }}
                 </span>
                 <span v-if="state.info.publishTime" class="flex items-center gap-1">
                   <span class="icon-[mdi--calendar] h-3.5 w-3.5"></span>

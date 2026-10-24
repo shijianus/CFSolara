@@ -4,6 +4,7 @@
  */
 import type { StateTree } from 'pinia'
 import type { PersistenceOptions } from 'pinia-plugin-persistedstate'
+import { safeStorage } from '@/utils/safeStorage'
 
 /**
  * 生成 Pinia Store 的持久化配置
@@ -14,7 +15,7 @@ import type { PersistenceOptions } from 'pinia-plugin-persistedstate'
 const piniaPersistConfig = <S extends StateTree = StateTree>(key: string, paths?: string[]): PersistenceOptions<S> => {
   const persist: PersistenceOptions<S> = {
     key,
-    storage: localStorage,
+    storage: safeStorage,
     pick: paths,
   }
   return persist

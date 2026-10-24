@@ -2,6 +2,7 @@
 import { banner, topPlaylist, topSong, topArtists, personalizedMv } from '@/api'
 import { BRAND_PRODUCT } from '@/config/brand'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules'
 import type SwiperClass from 'swiper'
@@ -81,16 +82,49 @@ const loadData = async () => {
   }
 }
 
+const reducedMotion = usePreferredReducedMotion()
+const prefersReduced = computed(() => reducedMotion.value === 'reduce')
+const autoplayPaused = ref(false)
+const hoverPaused = ref(false)
+
+const syncAutoplay = () => {
+  const swiper = state.swiper
+  if (!swiper?.autoplay) return
+  if (prefersReduced.value || autoplayPaused.value || hoverPaused.value) {
+    swiper.autoplay.stop()
+  } else {
+    swiper.autoplay.start()
+  }
+}
+
 const onSwiper = (sw: SwiperClass) => {
   state.swiper = sw
+  syncAutoplay()
 }
+
+const toggleAutoplay = () => {
+  autoplayPaused.value = !autoplayPaused.value
+  syncAutoplay()
+}
+
+const pauseForInteraction = () => {
+  hoverPaused.value = true
+  syncAutoplay()
+}
+
+const resumeAfterInteraction = () => {
+  hoverPaused.value = false
+  syncAutoplay()
+}
+
+watch(prefersReduced, syncAutoplay)
 
 const handleBannerClick = (item: BannerData) => {
   if (item.targetType === 1 && item.targetId) {
     const storeSong: StoreSong = {
       id: Number(item.targetId),
-      name: item.description || item.title || `${BRAND_PRODUCT} 推荐新歌`,
-      artist: item.title || `${BRAND_PRODUCT} 独家精选`,
+      name: item.description || item.title || t('home.bannerSongFallback', { brand: BRAND_PRODUCT }),
+      artist: item.title || t('home.bannerArtistFallback', { brand: BRAND_PRODUCT }),
       cover: item.coverImgUrl,
       duration: 0,
     }
@@ -117,7 +151,24 @@ onMounted(() => {
       <HomeSkeleton v-if="isLoading" />
       <div v-else class="space-y-10 p-5 pb-8">
         <!-- ═══════ Banner 轮播 ═══════ -->
-        <section v-if="banners.length" v-scroll-in="{ direction: 'up', duration: 0.8 }" class="relative max-h-[50vh]">
+        <section
+          v-if="banners.length"
+          v-scroll-in="{ direction: 'up', duration: 0.8 }"
+          class="relative max-h-[50vh]"
+          @mouseenter="pauseForInteraction"
+          @mouseleave="resumeAfterInteraction"
+          @focusin="pauseForInteraction"
+          @focusout="resumeAfterInteraction"
+        >
+          <button
+            type="button"
+            class="absolute top-3 right-3 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-glass bg-[var(--glass-bg-overlay)] text-primary shadow-lg transition-colors hover:bg-[var(--glass-interactive-hover)] focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+            :aria-label="autoplayPaused ? t('home.playCarousel') : t('home.pauseCarousel')"
+            :title="autoplayPaused ? t('home.playCarousel') : t('home.pauseCarousel')"
+            @click="toggleAutoplay"
+          >
+            <span :class="autoplayPaused ? 'icon-[mdi--play]' : 'icon-[mdi--pause]'" class="h-5 w-5"></span>
+          </button>
           <Swiper
             @swiper="onSwiper"
             :modules="swiperModules"
@@ -125,7 +176,8 @@ onMounted(() => {
             :space-between="20"
             :centered-slides="true"
             :loop="true"
-            :autoplay="{ delay: 5000, disableOnInteraction: false }"
+            :speed="prefersReduced ? 0 : 300"
+            :autoplay="prefersReduced ? false : { delay: 5000, disableOnInteraction: false }"
             :pagination="{ clickable: true, el: '.home-pagination' }"
             :breakpoints="{
               640: { slidesPerView: 1.15 },
@@ -179,7 +231,7 @@ onMounted(() => {
           </div>
           <div
             v-scroll-in="{ stagger: true, staggerDelay: 0.04 }"
-            class="grid grid-cols-3 gap-3.5 sm:grid-cols-5 lg:grid-cols-7 xl:grid-cols-10"
+            class="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
           >
             <HeroCard
               v-for="item in recommendPlaylists"

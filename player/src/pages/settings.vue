@@ -2,8 +2,10 @@
 import { defineAsyncComponent } from 'vue'
 import GlassSelect from '@/components/Ui/GlassSelect.vue'
 import GlassCheckbox from '@/components/Ui/GlassCheckbox.vue'
+import PrivacyDataSection from '@/components/Settings/PrivacyDataSection.vue'
 import { useSettingsStore } from '@/stores/modules/settings'
 import { useGlobalStore } from '@/stores/modules/global'
+import { useToastStore } from '@/stores/modules/toast'
 import I18n from '@/languages'
 import { useI18n } from 'vue-i18n'
 import {
@@ -31,11 +33,12 @@ const ShadowBlingSettingsPanel = defineAsyncComponent(
 const settings = useSettingsStore()
 const { backgroundType, footerLyrics, audioQuality, audioVisualizer } = storeToRefs(settings)
 const globalStore = useGlobalStore()
+const toastStore = useToastStore()
 const { theme, lang } = storeToRefs(globalStore)
 const { t } = useI18n()
 const bgOptions = computed(() => getBackgroundOptions(t))
 const themeOptions = computed(() => getThemeOptions(t))
-const langOptions = computed(() => getLangOptions(t))
+const langOptions = computed(() => getLangOptions())
 const qualityOptions = computed(() => getAudioQualityOptions(t))
 const visualizerTypeOptions = computed(() => getVisualizerTypeOptions(t))
 const initialLocale = (() => {
@@ -53,13 +56,20 @@ const state = reactive({ isPageLoading: false })
 const toggleMode = (mode: 'original' | 'trans' | 'roma', checked: boolean) => {
   const modes = new Set(footerLyrics.value.modes)
   if (checked) {
+    if (modes.size >= 2 && !modes.has(mode)) {
+      toastStore.show({ message: t('components.settings.footerLyricsLimit'), type: 'warning' })
+      return
+    }
     modes.add(mode)
-    const arr = Array.from(modes).slice(0, 2)
-    settings.setFooterLyricsModes(arr as Array<'original' | 'trans' | 'roma'>)
+    settings.setFooterLyricsModes(Array.from(modes) as Array<'original' | 'trans' | 'roma'>)
   } else {
+    if (modes.size <= 1) {
+      settings.setFooterLyricsEnabled(false)
+      toastStore.show({ message: t('components.settings.footerLyricsAtLeastOne'), type: 'warning' })
+      return
+    }
     modes.delete(mode)
-    const arr = Array.from(modes)
-    settings.setFooterLyricsModes(arr as Array<'original' | 'trans' | 'roma'>)
+    settings.setFooterLyricsModes(Array.from(modes) as Array<'original' | 'trans' | 'roma'>)
   }
 }
 
@@ -292,10 +302,10 @@ onMounted(() => {
               </div>
               <div>
                 <h3 class="text-primary text-sm font-semibold">
-                  性能优先模式
+                  {{ t('components.settings.performanceMode') }}
                 </h3>
                 <p class="text-primary/50 text-xs">
-                  关闭毛玻璃高斯模糊与背景流光特效，降低低配设备 CPU/GPU 负载
+                  {{ t('components.settings.performanceModeDesc') }}
                 </p>
               </div>
             </div>
@@ -319,9 +329,16 @@ onMounted(() => {
             </button>
           </div>
           <div class="text-primary/60 text-xs">
-            当前状态：<span :class="isPerformanceMode ? 'text-sky-400 font-bold' : 'text-primary/80 font-medium'">{{ isPerformanceMode ? '已开启 (零模糊高帧率)' : '标准模式 (全特效玻璃质感)' }}</span>
+            {{ t('components.settings.performanceModeStatus') }}
+            <span :class="isPerformanceMode ? 'text-sky-400 font-bold' : 'text-primary/80 font-medium'">
+              {{ isPerformanceMode ? t('components.settings.performanceModeOn') : t('components.settings.performanceModeOff') }}
+            </span>
           </div>
         </div>
+      </div>
+
+      <div class="mt-6">
+        <PrivacyDataSection />
       </div>
 
       <div class="mt-6">

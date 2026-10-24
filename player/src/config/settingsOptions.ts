@@ -15,7 +15,7 @@ export const getThemeOptions = (t: (k: string) => string): Option<string>[] => [
   { value: 'system', label: t('components.settings.themeOptions.system') },
 ]
 
-export const getLangOptions = (t: (k: string) => string): Option<string>[] => [
+export const getLangOptions = (): Option<string>[] => [
   { value: 'zh', label: '中文' },
   { value: 'en', label: 'English' },
   { value: 'ja', label: '日本語' },

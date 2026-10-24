@@ -202,7 +202,7 @@ const totalDuration = computed(() => {
                       {{ $t('playlistBubble.title') }}
                     </h4>
                     <p class="bubble-subtitle mt-0.5 text-sm">
-                      {{ playlist.length }} {{ $t('playlistBubble.tracks', '首') }}
+                      {{ $t('playlistBubble.tracks', { count: playlist.length }) }}
                       <span class="mx-1 opacity-30">|</span>
                       {{ formatDuration(totalDuration) }}
                     </p>
@@ -215,6 +215,8 @@ const totalDuration = computed(() => {
                   icon="icon-[mdi--close]"
                   icon-class="h-5 w-5"
                   class="bubble-close-btn"
+                  :title="$t('common.close')"
+                  :aria-label="$t('common.close')"
                   @click="open = false"
                 />
               </div>
@@ -223,7 +225,7 @@ const totalDuration = computed(() => {
               <div class="bubble-toolbar flex items-center gap-1.5 px-4 py-2">
                 <button class="tb-btn" @click="selectAll">
                   <span class="icon-[mdi--checkbox-multiple-outline] h-5 w-5"></span>
-                  <span>{{ $t('playlistBubble.selectAll', '全选') }}</span>
+                  <span>{{ $t('playlistBubble.selectAll') }}</span>
                 </button>
                 <button
                   class="tb-btn"
@@ -232,7 +234,7 @@ const totalDuration = computed(() => {
                   @click="doQueueNextSelected"
                 >
                   <span class="icon-[mdi--playlist-plus] h-5 w-5"></span>
-                  <span>{{ $t('playlistBubble.queueNext', '下一首播放') }}</span>
+                  <span>{{ $t('playlistBubble.queueNext') }}</span>
                 </button>
                 <button
                   class="tb-btn tb-btn--danger"
@@ -241,7 +243,7 @@ const totalDuration = computed(() => {
                   @click="doDeleteSelected"
                 >
                   <span class="icon-[mdi--delete-outline] h-5 w-5"></span>
-                  <span>{{ $t('playlistBubble.delete', '删除') }}</span>
+                  <span>{{ $t('playlistBubble.delete') }}</span>
                   <span v-if="selectedCount > 0" class="selected-badge">{{ selectedCount }}</span>
                 </button>
                 <div class="flex-1"></div>
@@ -358,10 +360,10 @@ const totalDuration = computed(() => {
                   <span class="icon-[mdi--playlist-music-outline] h-10 w-10"></span>
                 </div>
                 <p class="empty-text text-sm font-medium">
-                  {{ $t('playlistBubble.empty', '播放列表为空') }}
+                  {{ $t('playlistBubble.empty') }}
                 </p>
                 <p class="empty-hint mt-2 text-xs">
-                  {{ $t('playlistBubble.emptyHint', '双击歌曲即可添加到播放列表') }}
+                  {{ $t('playlistBubble.emptyHint') }}
                 </p>
               </div>
 

@@ -304,6 +304,7 @@ onMounted(async () => {
   const initial = String(route.query.q || '').trim()
   if (initial) {
     state.q = initial
+    state.hasSearched = true
     globalStore.addSearchHistory(initial)
     await searchAll()
   } else {
@@ -470,7 +471,7 @@ watch(
             @focus="handleInputFocus"
             type="text"
             :placeholder="placeholder || $t('common.search.placeholder')"
-            class="search-input min-w-0 flex-1 bg-transparent text-sm outline-none"
+            class="search-input min-h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
           />
           <Button
             v-if="q"
@@ -558,7 +559,7 @@ watch(
           <div
             v-for="keyword in searchHistory"
             :key="keyword"
-            class="history-chip flex min-h-12 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-colors"
+            class="history-chip flex min-h-12 items-center rounded-full border border-glass bg-button-glass text-xs font-medium transition-colors"
           >
             <button
               type="button"
@@ -593,9 +594,9 @@ watch(
             :key="i"
             class="flex min-h-11 items-center gap-3 rounded-xl px-3"
           >
-            <div class="h-5 w-5 animate-pulse rounded bg-white/[0.05]"></div>
+            <div class="h-5 w-5 animate-pulse rounded bg-primary/5"></div>
             <div
-              class="h-3 animate-pulse rounded bg-white/[0.05]"
+              class="h-3 animate-pulse rounded bg-primary/5"
               :style="{ width: `${30 + Math.random() * 35}%` }"
             ></div>
           </div>
@@ -606,7 +607,7 @@ watch(
             v-for="(item, index) in hotSearches"
             :key="item.searchWord"
             type="button"
-            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors active:bg-white/[0.04]"
+            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors active:bg-hover-glass"
             @click="runSearch(item.searchWord)"
           >
             <span

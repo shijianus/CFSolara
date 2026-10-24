@@ -3,6 +3,8 @@ import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { formatCount } from '@/utils/time'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useI18n } from 'vue-i18n'
+import { prefersReducedMotion } from '@/utils/motion'
 
 interface Props {
   id: number | string
@@ -22,6 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const router = useRouter()
+const { t } = useI18n()
 const cardRef = ref<HTMLElement | null>(null)
 const isAnimating = ref(false)
 const resolvedHref = computed(() => router.resolve(props.to).href)
@@ -75,7 +78,12 @@ const handleClick = async (event: MouseEvent) => {
   // 保留 Ctrl/Cmd/中键在新标签页打开的原生行为
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
   event.preventDefault()
-  if (isAnimating.value || !cardRef.value) {
+  if (isAnimating.value) return
+  if (!cardRef.value) {
+    router.push(props.to)
+    return
+  }
+  if (prefersReducedMotion()) {
     router.push(props.to)
     return
   }
@@ -174,14 +182,14 @@ const handleClick = async (event: MouseEvent) => {
         overlay.remove()
         card.style.opacity = '1'
         isAnimating.value = false
-      }, 100)
+      }, 0)
     },
   })
 
   // 背景遮罩淡入
   tl.to(overlay, {
     background: 'rgba(0,0,0,0.6)',
-    duration: 0.3,
+    duration: 0.12,
     ease: 'power2.out',
   }, 0)
 
@@ -192,35 +200,35 @@ const handleClick = async (event: MouseEvent) => {
     left: (window.innerWidth - Math.min(600, window.innerWidth - 48)) / 2,
     top: (window.innerHeight - Math.min(500, window.innerHeight - 100)) / 2,
     borderRadius: '24px',
-    duration: 0.5,
+    duration: 0.18,
     ease: 'power3.out',
   }, 0)
 
   // 内容淡入
   tl.to(content, {
     opacity: 1,
-    duration: 0.3,
+    duration: 0.1,
     ease: 'power2.out',
-  }, 0.2)
+  }, 0.06)
 
   // 短暂停留后淡出
   tl.to(clone, {
     opacity: 0,
-    scale: 1.05,
-    duration: 0.2,
+    scale: 1.02,
+    duration: 0.05,
     ease: 'power2.in',
-  }, '+=0.15')
+  }, '+=0.01')
 
   tl.to(overlay, {
     background: 'rgba(0,0,0,0)',
-    duration: 0.2,
+    duration: 0.05,
     ease: 'power2.in',
-  }, '-=0.2')
+  }, '-=0.05')
 }
 
 // 3D Tilt 悬停效果
 const handleMouseMove = (e: MouseEvent) => {
-  if (!props.enableTilt || !cardRef.value) return
+  if (!props.enableTilt || !cardRef.value || prefersReducedMotion()) return
 
   const card = cardRef.value
   const rect = card.getBoundingClientRect()
@@ -254,6 +262,7 @@ const handleMouseMove = (e: MouseEvent) => {
 }
 
 const handleMouseEnter = () => {
+  if (prefersReducedMotion()) return
   if (!props.enableTilt && cardRef.value) {
     // 如果没有启用 tilt，使用简单的悬停效果
     gsap.to(cardRef.value, {
@@ -266,6 +275,7 @@ const handleMouseEnter = () => {
 }
 
 const handleMouseLeave = () => {
+  if (prefersReducedMotion()) return
   if (cardRef.value) {
     gsap.to(cardRef.value, {
       rotateX: 0,
@@ -323,7 +333,7 @@ const handleMouseLeave = () => {
         </p>
         <div v-if="trackCount" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-white/70">
           <span class="icon-[mdi--music-note] h-3 w-3" />
-          <span>{{ trackCount }}首</span>
+          <span>{{ t('commonUnits.songs', { count: trackCount }) }}</span>
         </div>
       </div>
 
@@ -343,6 +353,7 @@ const handleMouseLeave = () => {
 
 <style scoped>
 .hero-card {
+  min-width: 140px;
   will-change: transform;
   transform-origin: center center;
   transform-style: preserve-3d;

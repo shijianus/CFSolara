@@ -4,11 +4,14 @@ import { useRouter } from 'vue-router'
 import { useDownloadStore } from '@/stores/modules/download'
 import { useAudioStore } from '@/stores/modules/audio'
 import { formatCoverUrl } from '@/utils/imageUrl'
-import { formatDuration } from '@/utils/time'
+import { formatDuration, formatNumber } from '@/utils/time'
 import type { Song } from '@/stores/interface'
 import type { DownloadedSong } from '@/utils/indexedDB'
 import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/blobMetadataParser'
+import { useI18n } from 'vue-i18n'
+import { useDialogA11y } from '@/composables/useDialogA11y'
 
+const { t } = useI18n()
 const router = useRouter()
 const downloadStore = useDownloadStore()
 const audioStore = useAudioStore()
@@ -93,7 +96,7 @@ const filteredDownloads = computed(() => {
 const toSongList = (items: typeof downloads.value): Song[] => {
   return items.map((d) => {
     const meta = getParsedMeta(d)
-    const badge = meta.isLossless ? 'SQ' : meta.displayTag.includes('320') ? 'HQ' : '标准'
+    const badge = meta.isLossless ? 'SQ' : meta.displayTag.includes('320') ? 'HQ' : t('quality.standard')
     return {
       id: d.id,
       name: d.name,
@@ -123,7 +126,7 @@ const playAll = () => {
   audioStore.playSong(songList[0], 0)
 }
 
-const playSingle = (item: any, index: number) => {
+const playSingle = (_item: any, index: number) => {
   const songList = toSongList(filteredDownloads.value)
   audioStore.setPlaylist(songList, index)
   audioStore.playSong(songList[index], index)
@@ -137,8 +140,8 @@ const handleExport = (item: any) => {
   const blobUrl = URL.createObjectURL(item.file)
   const a = document.createElement('a')
   a.href = blobUrl
-  const safeArtist = (item.artist || '未知歌手').replace(/[\\/:*?"<>|]/g, '_')
-  const safeTitle = (item.name || '未知歌曲').replace(/[\\/:*?"<>|]/g, '_')
+  const safeArtist = (item.artist || t('player.unknownArtist')).replace(/[\\/:*?"<>|]/g, '_')
+  const safeTitle = (item.name || t('player.unknownSong')).replace(/[\\/:*?"<>|]/g, '_')
   a.download = `${safeArtist} - ${safeTitle} [${item.qualityBadge}].${item.format}`
   document.body.appendChild(a)
   a.click()
@@ -146,15 +149,28 @@ const handleExport = (item: any) => {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 10000)
 }
 
-const handleDelete = async (id: string | number) => {
-  if (confirm('确定从本地离线下载中删除此歌曲？')) {
-    await downloadStore.deleteDownload(id)
-  }
+const itemToDelete = ref<DownloadedSong | null>(null)
+const deleteDialogRef = ref<HTMLElement | null>(null)
+const isDeleteOpen = computed(() => itemToDelete.value !== null)
+
+const openDeleteConfirm = (item: DownloadedSong) => {
+  itemToDelete.value = item
 }
 
-const formatSongTitle = (title: string, maxLen = 18) => {
-  if (!title) return ''
-  return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
+const closeDeleteConfirm = () => {
+  itemToDelete.value = null
+}
+
+useDialogA11y({
+  isOpen: isDeleteOpen,
+  containerRef: deleteDialogRef,
+  onClose: closeDeleteConfirm,
+})
+
+const confirmDelete = async () => {
+  const target = itemToDelete.value
+  closeDeleteConfirm()
+  if (target) await downloadStore.deleteDownload(target.id)
 }
 </script>
 
@@ -165,17 +181,17 @@ const formatSongTitle = (title: string, maxLen = 18) => {
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/30">
-            <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-white"></span>
+            <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-[var(--glass-text-accent)]"></span>
           </div>
           <div>
             <h1 class="text-lg font-bold text-primary">
-              下载列表
+              {{ t('downloads.title') }}
             </h1>
             <p v-if="downloads.length > 0" class="text-xs text-primary/60 mt-0.5">
-              共 {{ downloadStore.totalCount }} 首 · 占用 {{ downloadStore.totalSizeFormatted }}
+              {{ t('downloads.mobileSummary', { count: formatNumber(downloadStore.totalCount), size: downloadStore.totalSizeFormatted }) }}
             </p>
             <p v-else class="text-xs text-primary/50 mt-0.5">
-              暂无离线音乐 · 支持随时免流播放
+              {{ t('downloads.mobileEmptyHint') }}
             </p>
           </div>
         </div>
@@ -183,10 +199,10 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         <button
           v-if="downloads.length > 0"
           @click="playAll"
-          class="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-sky-500/30 active:scale-95 transition-all"
+          class="flex min-h-11 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-[var(--glass-text-accent)] shadow-md shadow-sky-500/30 active:scale-95 transition-all"
         >
           <span class="icon-[mdi--play] h-4 w-4"></span>
-          播放全部
+          {{ t('actions.playAll') }}
         </button>
       </div>
 
@@ -195,8 +211,8 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="搜索已下载歌曲或歌手..."
-          class="w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder-primary/40 focus:outline-none focus:border-sky-500/50"
+          :placeholder="t('downloads.mobileSearchPlaceholder')"
+          class="min-h-11 w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder:text-primary/40 focus:outline-none focus:border-sky-500/50"
         />
         <span class="icon-[mdi--magnify] absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary/40"></span>
       </div>
@@ -205,31 +221,31 @@ const formatSongTitle = (title: string, maxLen = 18) => {
       <div v-if="downloads.length > 0" class="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         <button
           @click="selectedQuality = 'all'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'all' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          :class="selectedQuality === 'all' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
-          全部
+          {{ t('downloads.filterAll') }}
         </button>
         <button
           @click="selectedQuality = 'lossless'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'lossless' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          :class="selectedQuality === 'lossless' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
-          SQ 无损
+          {{ t('downloads.filterLossless') }}
         </button>
         <button
           @click="selectedQuality = 'exhigh'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'exhigh' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          :class="selectedQuality === 'exhigh' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
-          HQ 极高
+          {{ t('downloads.filterExhigh') }}
         </button>
         <button
           @click="selectedQuality = 'standard'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'standard' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          :class="selectedQuality === 'standard' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
-          标准
+          {{ t('downloads.filterStandard') }}
         </button>
       </div>
     </div>
@@ -270,10 +286,11 @@ const formatSongTitle = (title: string, maxLen = 18) => {
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
               <h4
-                class="truncate text-sm font-semibold text-primary transition-colors"
+                :title="item.name"
+                class="line-clamp-1 text-sm font-semibold text-primary transition-colors"
                 :class="{ 'font-bold': isCurrentPlaying(item) }"
               >
-                {{ formatSongTitle(item.name, 18) }}
+                {{ item.name }}
               </h4>
               <span
                 class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none select-none whitespace-nowrap"
@@ -301,15 +318,15 @@ const formatSongTitle = (title: string, maxLen = 18) => {
           </span>
           <button
             @click.stop="handleExport(item)"
-            class="p-1.5 text-primary/45 hover:text-primary active:scale-90 transition-all"
-            title="导出音频"
+            class="flex h-11 w-11 items-center justify-center text-primary/45 hover:text-primary active:scale-90 transition-all"
+            :title="t('downloads.exportAudio')"
           >
             <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
           </button>
           <button
-            @click.stop="handleDelete(item.id)"
-            class="p-1.5 text-primary/40 hover:text-red-400 active:scale-90 transition-all"
-            title="删除"
+            @click.stop="openDeleteConfirm(item)"
+            class="flex h-11 w-11 items-center justify-center text-primary/40 hover:text-red-400 active:scale-90 transition-all"
+            :title="t('common.delete')"
           >
             <span class="icon-[mdi--trash-can-outline] h-4 w-4"></span>
           </button>
@@ -319,19 +336,75 @@ const formatSongTitle = (title: string, maxLen = 18) => {
 
     <!-- 空状态 -->
     <div v-else class="flex flex-col items-center justify-center py-20 text-center">
-      <div class="mb-3 rounded-2xl bg-white/5 p-5 border border-white/5">
+      <div class="mb-3 rounded-2xl bg-primary/5 p-5 border border-glass">
         <span class="icon-[mdi--music-box-outline] h-12 w-12 text-sky-400/40"></span>
       </div>
-      <p class="text-sm font-semibold text-primary/70">暂无离线音乐</p>
+      <p class="text-sm font-semibold text-primary/70">{{ t('downloads.mobileEmptyTitle') }}</p>
       <p class="text-xs text-primary/40 mt-1 max-w-xs leading-relaxed">
-        在歌曲列表或播放控制台点击下载，随时离线播放音乐。
+        {{ t('downloads.mobileEmptyDesc') }}
       </p>
       <button
         @click="router.push('/search')"
-        class="mt-4 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-2 text-xs font-bold text-white shadow-md shadow-sky-500/25 active:scale-95 transition-all"
+        class="mt-4 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-2 text-xs font-bold text-[var(--glass-text-accent)] shadow-md shadow-sky-500/25 active:scale-95 transition-all"
       >
-        去搜索歌曲
+        {{ t('downloads.mobileDiscover') }}
       </button>
     </div>
+
+    <!-- 删除确认（与桌面端一致的定制弹窗，不使用原生 confirm） -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="isDeleteOpen"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-delete-dialog-title"
+          @click.self="closeDeleteConfirm"
+        >
+          <div
+            ref="deleteDialogRef"
+            tabindex="-1"
+            class="w-full max-w-sm rounded-2xl border border-glass bg-[var(--glass-bg-overlay)] p-6 text-primary shadow-[var(--glass-shadow-xl)] outline-none"
+            @click.stop
+          >
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/30 bg-red-500/15 text-red-400">
+                <span class="icon-[mdi--alert-circle-outline] h-5 w-5"></span>
+              </div>
+              <div class="min-w-0">
+                <h3 id="mobile-delete-dialog-title" class="text-base font-semibold text-primary">
+                  {{ t('downloads.deleteTitle') }}
+                </h3>
+                <p class="mt-1 text-xs font-medium text-primary/70">
+                  {{ t('downloads.deleteDesc', { name: itemToDelete?.name || '' }) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+              <Button
+                variant="soft"
+                size="sm"
+                rounded="xl"
+                class="min-h-11 px-4 text-xs font-medium text-primary/70 hover:bg-hover-glass hover:text-primary"
+                @click="closeDeleteConfirm"
+              >
+                {{ t('common.cancel') }}
+              </Button>
+              <Button
+                variant="soft"
+                size="sm"
+                rounded="xl"
+                class="min-h-11 border border-red-500/40 bg-red-500/20 px-4 text-xs font-semibold text-red-300 hover:bg-red-500/30"
+                @click="confirmDelete"
+              >
+                {{ t('downloads.confirmDelete') }}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router
 import { defineComponent, h, defineAsyncComponent } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { BRAND_FULL, BRAND_TITLE } from '@/config/brand'
+import i18n from '@/languages'
 
 const mode = import.meta.env.VITE_ROUTER_MODE || 'hash'
 
@@ -200,40 +201,25 @@ router.onError((error, to) => {
     msg.includes('Failed to fetch dynamically imported module') ||
     msg.includes('Importing a module script failed')
   ) {
-    if (!sessionStorage.getItem('sonic_chunk_reload')) {
-      sessionStorage.setItem('sonic_chunk_reload', '1')
-      window.location.href = to.fullPath
+    try {
+      if (!sessionStorage.getItem('sonic_chunk_reload')) {
+        sessionStorage.setItem('sonic_chunk_reload', '1')
+        window.location.href = to.fullPath
+      }
+    } catch {
+      // 存储不可用时无法记录重试标记，放弃自动刷新以避免陷入循环
     }
   }
 })
 
-const routeTitles: Record<string, string> = {
-  home: '首页',
-  playlist: '歌单详情',
-  'mv-list': 'MV 推荐',
-  'mv-player': 'MV 播放',
-  recent: '最近播放',
-  'my-music': '我的音乐',
-  likes: '我喜欢的音乐',
-  search: '音乐搜索',
-  charts: '排行榜',
-  artists: '歌手列表',
-  artist: '歌手详情',
-  'new-albums': '新碟上架',
-  song: '歌曲详情',
-  album: '专辑详情',
-  downloads: '下载管理',
-  'local-music': '本地音乐',
-  settings: '系统设置',
-  'not-found': '404 页面未找到',
-}
-
 router.afterEach((to) => {
   if (to.name === 'search' && to.query.q) {
-    document.title = `搜索: ${to.query.q} - ${BRAND_FULL}`
+    const searchTitle = i18n.global.t('routes.searchQuery', { query: String(to.query.q) })
+    document.title = `${searchTitle} - ${BRAND_FULL}`
     return
   }
-  const pageTitle = (to.name && routeTitles[String(to.name)]) || (to.meta?.title as string) || ''
+  const key = to.name ? `routes.${String(to.name)}` : ''
+  const pageTitle = key && i18n.global.te(key) ? i18n.global.t(key) : ''
   if (pageTitle) {
     document.title = `${pageTitle} - ${BRAND_FULL}`
   } else {

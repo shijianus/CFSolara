@@ -6,6 +6,7 @@ import PageSkeleton from '@/components/PageSkeleton.vue'
 import Button from '@/components/Ui/Button.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useDialogA11y } from '@/composables/useDialogA11y'
+import { formatDateLong, formatNumber } from '@/utils/time'
 
 const show = defineModel<boolean>('show', { default: false })
 const props = defineProps<{ songId: number | string | null }>()
@@ -91,14 +92,7 @@ const onTouchEnd = () => {
   translateY.value = 0
 }
 
-const formatTime = (t: number | string) => {
-  if (!t) return ''
-  return new Date(Number(t)).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-}
+const formatTime = (t: number | string) => (t ? formatDateLong(Number(t)) : '')
 </script>
 
 <template>
@@ -148,7 +142,7 @@ const formatTime = (t: number | string) => {
                 {{ $t('comments.title') }}
               </h2>
               <p class="drawer-subtitle mt-0.5 text-sm">
-                {{ $t('comments.total', { total: state.total }) }}
+                {{ $t('comments.total', { total: formatNumber(state.total) }) }}
               </p>
             </div>
           </div>
@@ -215,7 +209,7 @@ const formatTime = (t: number | string) => {
 
                 <div class="like-count flex shrink-0 items-center gap-1.5">
                   <span class="icon-[mdi--thumb-up-outline] h-5 w-5" />
-                  <span class="text-xs font-medium">{{ c.likedCount || 0 }}</span>
+                  <span class="text-xs font-medium">{{ formatNumber(c.likedCount || 0) }}</span>
                 </div>
               </div>
 
@@ -238,7 +232,7 @@ const formatTime = (t: number | string) => {
                     <div class="h-6 w-6 shrink-0 overflow-hidden rounded-full">
                       <img
                         v-if="r?.user?.avatarUrl"
-                        :src="formatCoverUrl(r.user.avatarUrl, { size: 50 })"
+                        :src="formatCoverUrl(r?.user?.avatarUrl, { size: 50 })"
                         class="h-full w-full object-cover"
                         alt=""
                         referrerpolicy="no-referrer"

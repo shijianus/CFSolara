@@ -47,9 +47,7 @@ const isIntersecting = ref(false)
 const isTimeout = ref(false)
 let timeoutTimer: ReturnType<typeof setTimeout> | null = null
 
-const resolvedLoadingText = computed(
-  () => props.loadingText || t('common.loading') || '正在加载更多...'
-)
+const resolvedLoadingText = computed(() => props.loadingText || t('common.loading'))
 const resolvedRetryText = computed(
   () => props.retryText || t('components.infiniteScroll.retry')
 )

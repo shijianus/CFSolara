@@ -28,9 +28,9 @@ const handleSearch = () => {
 }
 
 const themeList = [
-  { val: 'dark' as const, icon: 'icon-[mdi--weather-night]', label: 'Dark' },
-  { val: 'light' as const, icon: 'icon-[mdi--weather-sunny]', label: 'Light' },
-  { val: 'system' as const, icon: 'icon-[mdi--theme-light-dark]', label: 'System' },
+  { val: 'dark' as const, icon: 'icon-[mdi--weather-night]', labelKey: 'components.settings.themeOptions.dark' },
+  { val: 'light' as const, icon: 'icon-[mdi--weather-sunny]', labelKey: 'components.settings.themeOptions.light' },
+  { val: 'system' as const, icon: 'icon-[mdi--theme-light-dark]', labelKey: 'components.settings.themeOptions.system' },
 ]
 
 const sections = [
@@ -49,7 +49,7 @@ const sections = [
     titleKey: 'layout.aside.myMusic',
     items: [
       { to: '/likes', labelKey: 'layout.aside.menu.likes', icon: 'mdi--heart-outline' },
-      { to: '/my-music', labelKey: 'layout.aside.menu.recent', icon: 'mdi--music-box-multiple' },
+      { to: '/recent', labelKey: 'layout.aside.menu.recent', icon: 'mdi--history' },
       {
         to: '/downloads',
         labelKey: 'layout.aside.menu.downloads',
@@ -110,7 +110,7 @@ const routeChunkLoaders: Record<string, () => Promise<any>> = {
   '/artists': () => import('@/pages/artists.vue'),
   '/new-albums': () => import('@/pages/new-albums.vue'),
   '/search': () => import('@/pages/search.vue'),
-  '/my-music': () => import('@/pages/my-music.vue'),
+  '/recent': () => import('@/pages/recent.vue'),
   '/likes': () => import('@/pages/likes.vue'),
   '/downloads': () => import('@/pages/downloads.vue'),
   '/local-music': () => import('@/pages/local-music.vue'),
@@ -162,6 +162,24 @@ const isActive = (path: string) => {
   }
   return route.path.startsWith(path)
 }
+
+// 根据浏览器历史状态禁用不可用的前进/后退按钮
+const historyVersion = ref(0)
+const syncHistoryState = () => {
+  historyVersion.value += 1
+}
+const canGoBack = computed(() => {
+  void historyVersion.value
+  return Boolean((window.history.state as { back?: string | null } | null)?.back)
+})
+const canGoForward = computed(() => {
+  void historyVersion.value
+  return Boolean((window.history.state as { forward?: string | null } | null)?.forward)
+})
+
+watch(() => route.fullPath, syncHistoryState)
+onMounted(() => window.addEventListener('popstate', syncHistoryState))
+onUnmounted(() => window.removeEventListener('popstate', syncHistoryState))
 </script>
 <template>
   <aside class="hidden md:flex w-64 xl:w-72 shrink-0 h-full flex-col">
@@ -189,17 +207,21 @@ const isActive = (path: string) => {
           <div class="flex items-center gap-0.5 rounded-full bg-white/5 border border-white/10 p-0.5">
             <button
               @click="router.back()"
-              title="Back"
-              aria-label="Back"
-              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              :title="$t('common.back')"
+              :aria-label="$t('common.back')"
+              :disabled="!canGoBack"
+              :aria-disabled="!canGoBack"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
             >
               <span class="icon-[mdi--chevron-left] h-3.5 w-3.5"></span>
             </button>
             <button
               @click="router.forward()"
-              title="Forward"
-              aria-label="Forward"
-              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              :title="$t('common.forward')"
+              :aria-label="$t('common.forward')"
+              :disabled="!canGoForward"
+              :aria-disabled="!canGoForward"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
             >
               <span class="icon-[mdi--chevron-right] h-3.5 w-3.5"></span>
             </button>
@@ -285,7 +307,7 @@ const isActive = (path: string) => {
                   class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
-                    'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
+                    'hover:bg-hover-glass': !isActive(`/playlist/${pl.id}`),
                   }"
                 >
                   <span
@@ -311,8 +333,9 @@ const isActive = (path: string) => {
               'flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all',
               theme === t.val ? 'bg-white/15 text-primary shadow-sm' : 'text-primary/40 hover:text-primary'
             ]"
-            :title="t.label"
-            :aria-label="t.label"
+            :title="$t(t.labelKey)"
+            :aria-label="$t(t.labelKey)"
+            :aria-pressed="theme === t.val"
           >
             <span :class="[t.icon, 'h-3.5 w-3.5']"></span>
           </button>

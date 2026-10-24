@@ -2,6 +2,7 @@
 import { banner, personalized, personalizedNewsong, personalizedMv, topArtists } from '@/api'
 import { BRAND_PRODUCT } from '@/config/brand'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
 import 'swiper/css'
@@ -33,8 +34,8 @@ const handleBannerClick = (item: BannerData) => {
   if (item.targetType === 1 && item.targetId) {
     const storeSong: StoreSong = {
       id: Number(item.targetId),
-      name: item.description || item.title || `${BRAND_PRODUCT} 推荐新歌`,
-      artist: item.title || `${BRAND_PRODUCT} 独家精选`,
+      name: item.description || item.title || t('home.bannerSongFallback', { brand: BRAND_PRODUCT }),
+      artist: item.title || t('home.bannerArtistFallback', { brand: BRAND_PRODUCT }),
       cover: item.coverImgUrl,
       duration: 0,
     }
@@ -92,6 +93,43 @@ const loadHomeData = async () => {
 onMounted(loadHomeData)
 
 const swiperModules = [Autoplay, Pagination, EffectCards]
+
+const reducedMotion = usePreferredReducedMotion()
+const prefersReduced = computed(() => reducedMotion.value === 'reduce')
+const bannerSwiper = ref<any>(null)
+const autoplayPaused = ref(false)
+const hoverPaused = ref(false)
+
+const syncAutoplay = () => {
+  if (!bannerSwiper.value?.autoplay) return
+  if (prefersReduced.value || autoplayPaused.value || hoverPaused.value) {
+    bannerSwiper.value.autoplay.stop()
+  } else {
+    bannerSwiper.value.autoplay.start()
+  }
+}
+
+const onBannerSwiper = (swiper: any) => {
+  bannerSwiper.value = swiper
+  syncAutoplay()
+}
+
+const toggleAutoplay = () => {
+  autoplayPaused.value = !autoplayPaused.value
+  syncAutoplay()
+}
+
+const pauseForInteraction = () => {
+  hoverPaused.value = true
+  syncAutoplay()
+}
+
+const resumeAfterInteraction = () => {
+  hoverPaused.value = false
+  syncAutoplay()
+}
+
+watch(prefersReduced, syncAutoplay)
 </script>
 
 <template>
@@ -101,12 +139,30 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
         <MobileHomeSkeleton />
       </template>
       <template v-else>
-        <section v-if="banners.length" class="mb-6 px-4 pt-2">
+        <section
+          v-if="banners.length"
+          class="relative mb-6 px-4 pt-2"
+          @mouseenter="pauseForInteraction"
+          @mouseleave="resumeAfterInteraction"
+          @focusin="pauseForInteraction"
+          @focusout="resumeAfterInteraction"
+        >
+          <button
+            type="button"
+            class="absolute top-4 right-6 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-glass bg-[var(--glass-bg-overlay)] text-primary shadow-lg transition-colors active:scale-95"
+            :aria-label="autoplayPaused ? t('home.playCarousel') : t('home.pauseCarousel')"
+            :title="autoplayPaused ? t('home.playCarousel') : t('home.pauseCarousel')"
+            @click="toggleAutoplay"
+          >
+            <span :class="autoplayPaused ? 'icon-[mdi--play]' : 'icon-[mdi--pause]'" class="h-5 w-5"></span>
+          </button>
           <Swiper
             :modules="swiperModules"
             :slides-per-view="1"
             :space-between="12"
-            :autoplay="{ delay: 4000, disableOnInteraction: false }"
+            :speed="prefersReduced ? 0 : 300"
+            :autoplay="prefersReduced ? false : { delay: 4000, disableOnInteraction: false }"
+            @swiper="onBannerSwiper"
             :pagination="{ clickable: true }"
             class="home-swiper w-full aspect-[1080/400] max-h-[45vh] overflow-visible rounded-2xl"
           >
@@ -315,6 +371,8 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
 .view-more-link {
   display: flex;
   align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
   gap: 0.125rem;
   font-size: 0.75rem;
   color: var(--glass-text-primary);

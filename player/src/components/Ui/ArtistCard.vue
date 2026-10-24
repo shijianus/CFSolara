@@ -2,6 +2,7 @@
 import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { prefersReducedMotion } from '@/utils/motion'
 
 interface Props {
   id: number | string
@@ -21,7 +22,12 @@ const resolvedHref = computed(() => router.resolve(props.to).href)
 const handleClick = async (event: MouseEvent) => {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
   event.preventDefault()
-  if (isAnimating.value || !cardRef.value || !imageRef.value) {
+  if (isAnimating.value) return
+  if (!cardRef.value || !imageRef.value) {
+    router.push(props.to)
+    return
+  }
+  if (prefersReducedMotion()) {
     router.push(props.to)
     return
   }
@@ -77,14 +83,14 @@ const handleClick = async (event: MouseEvent) => {
         overlay.remove()
         imageEl.style.opacity = '1'
         isAnimating.value = false
-      }, 50)
+      }, 0)
     },
   })
 
   // 背景淡入
   tl.to(overlay, {
     background: 'rgba(0,0,0,0.5)',
-    duration: 0.3,
+    duration: 0.12,
     ease: 'power2.out',
   }, 0)
 
@@ -94,7 +100,7 @@ const handleClick = async (event: MouseEvent) => {
     height: targetSize,
     left: targetX,
     top: targetY,
-    duration: 0.45,
+    duration: 0.18,
     ease: 'power3.out',
   }, 0)
 
@@ -117,28 +123,29 @@ const handleClick = async (event: MouseEvent) => {
   tl.to(ring, {
     opacity: 1,
     scale: 1.3,
-    duration: 0.3,
+    duration: 0.06,
     ease: 'power2.out',
-  }, 0.2)
+  }, 0.02)
 
   tl.to(ring, {
     opacity: 0,
     scale: 1.5,
-    duration: 0.2,
+    duration: 0.06,
     ease: 'power2.in',
     onComplete: () => ring.remove(),
-  }, 0.4)
+  }, 0.10)
 
   // 淡出过渡到新页面
   tl.to([clone, overlay], {
     opacity: 0,
-    duration: 0.15,
+    duration: 0.05,
     ease: 'power2.in',
-  }, '+=0.05')
+  }, '+=0.01')
 }
 
 // 悬停效果
 const handleMouseEnter = () => {
+  if (prefersReducedMotion()) return
   if (imageRef.value) {
     gsap.to(imageRef.value, {
       scale: 1.08,
@@ -149,6 +156,7 @@ const handleMouseEnter = () => {
 }
 
 const handleMouseLeave = () => {
+  if (prefersReducedMotion()) return
   if (imageRef.value) {
     gsap.to(imageRef.value, {
       scale: 1,
