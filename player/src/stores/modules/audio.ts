@@ -6,6 +6,7 @@ import { defineStore } from 'pinia'
 import { songUrlV1 } from '@/api'
 import { Song, PlayMode, AudioStoreState } from '../interface'
 import { useSettingsStore } from './settings'
+import { inspectGatewayHeaders, markStreamFailure, gatewayHealth } from '@/utils/gatewayHealth'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -169,6 +170,12 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isPlaying = true
         this.audio.isPaused = false
         this.audio.error = null
+        if (gatewayHealth.statusKind === 'track-fail') {
+          gatewayHealth.statusKind = gatewayHealth.degraded ? 'degraded' : 'normal'
+          gatewayHealth.message = gatewayHealth.degraded
+            ? '边缘降级模式 · 本地解析引擎重连中，当前由 Cloudflare 边缘提供检索与歌词'
+            : ''
+        }
       })
 
       // 播放暂停
@@ -235,12 +242,39 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isMuted = audio.muted
       })
 
-      // 错误处理
-      audio.addEventListener('error', (e: any) => {
+      // 错误处理（区分“本地引擎降级导致的流不可用 503”与“单曲版权/普通播放失败”）
+      audio.addEventListener('error', async (e: any) => {
         this.audio.error = '播放出错，请重试'
         this.audio.isLoading = false
         this.audio.isPlaying = false
         console.error('Audio error:', e)
+
+        const failedSrc = audio.currentSrc || audio.src || ''
+        if (failedSrc && failedSrc.includes('/api/music/stream')) {
+          try {
+            const diagRes = await fetch(failedSrc, {
+              method: 'GET',
+              headers: { Range: 'bytes=0-0' },
+            })
+            inspectGatewayHeaders(diagRes.headers)
+            if (diagRes.status === 503 || diagRes.headers.get('x-sonic-degraded') === '1') {
+              let errBody: any = null
+              try {
+                errBody = await diagRes.json()
+              } catch {}
+              if (diagRes.status === 503 || errBody?.error?.code === 'STREAM_UNAVAILABLE_DEGRADED') {
+                this.audio.error = '服务降级运行：本地引擎离线，边缘节点暂无法获取该曲音频流'
+                markStreamFailure('stream-degraded-fail', this.audio.error)
+                return
+              }
+            } else if (diagRes.status === 404) {
+              this.audio.error = '当前曲目暂无可用音源或受版权限制'
+              markStreamFailure('track-fail', this.audio.error)
+              return
+            }
+          } catch {}
+        }
+
         // 触发一次刷新播放地址并重试，10秒内同一歌曲仅重试一次
         const now = Date.now()
         const id = this.audio.currentSong?.id ?? null
