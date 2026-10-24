@@ -1,0 +1,5 @@
+boot: viewport
+boot: nav seed
+boot: storage seed
+boot: downloads seed
+boot: downloads seed done

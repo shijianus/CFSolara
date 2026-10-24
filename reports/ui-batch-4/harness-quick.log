@@ -1,0 +1,14 @@
+boot: viewport
+boot: nav seed
+boot: storage seed
+boot: downloads seed
+boot: downloads seed done
+shot downloads 1440x900 light
+shot downloads 1440x900 dark
+shot downloads 820x700 light
+shot downloads 820x700 dark
+shot downloads 844x390 light
+shot downloads 844x390 dark
+shot downloads 390x844 light
+shot downloads 390x844 dark
+i18n sweep issues: 0
