@@ -66,21 +66,24 @@ updateHtmlLang(lang.value)
 watch(lang, v => updateHtmlLang(v))
 
 const { width } = useWindowSize()
+// 16px 下限保证 text-xs(0.75rem) ≥ 12px、正文(1rem) ≥ 16px；
+// 同时让 text-sm(0.875rem) 保持在 14px 以上。
+const MIN_ROOT_FONT_SIZE = 16
 const setRootFontSize = (w: number) => {
   let size: number
   if (w < 768) {
     // < 768px 保持当前公式
     const raw = 13 + (w - 1280) / 960
-    size = Math.min(15, Math.max(12, Math.round(raw * 10) / 10))
+    size = Math.max(MIN_ROOT_FONT_SIZE, Math.round(raw * 10) / 10)
   } else if (w <= 1280) {
     // 768px 到 1280px 之间平滑线性过渡（768px 保持当前值，1280px 为 15px）
     const val768 = 13 + (768 - 1280) / 960
     const raw = val768 + ((w - 768) / (1280 - 768)) * (15 - val768)
-    size = Math.round(raw * 10) / 10
+    size = Math.max(MIN_ROOT_FONT_SIZE, Math.round(raw * 10) / 10)
   } else {
     // >= 1280px 保持原公式
     const raw = 15 + (w - 1280) / 960
-    size = Math.min(18, Math.max(15, Math.round(raw * 10) / 10))
+    size = Math.min(18, Math.max(MIN_ROOT_FONT_SIZE, Math.round(raw * 10) / 10))
   }
   document.documentElement.style.fontSize = `${size}px`
 }
