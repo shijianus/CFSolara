@@ -9,7 +9,7 @@ import { formatCoverUrl } from '@/utils/imageUrl'
 const show = defineModel<boolean>('show', { default: false })
 const props = defineProps<{ songId: number | string | null }>()
 
-const isMobile = useMediaQuery('(max-width: 768px)')
+const isMobile = useMediaQuery('(max-width: 819px), (max-height: 499px)')
 
 const state = reactive({
   loading: false,
@@ -389,15 +389,15 @@ const formatTime = (t: number | string) => {
 }
 
 /* Desktop: slide from right */
-@media (min-width: 769px) {
+@media (min-width: 820px) and (min-height: 500px) {
   .drawer-enter-from .drawer-panel,
   .drawer-leave-to .drawer-panel {
     transform: translateX(100%);
   }
 }
 
-/* Mobile: slide from bottom */
-@media (max-width: 768px) {
+/* Mobile / landscape phone: slide from bottom */
+@media (max-width: 819px), (max-height: 499px) {
   .drawer-enter-from .drawer-panel,
   .drawer-leave-to .drawer-panel {
     transform: translateY(100%);

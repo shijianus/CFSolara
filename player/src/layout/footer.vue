@@ -613,7 +613,7 @@ const emit = defineEmits(['show'])
 </script>
 <template>
   <footer
-    class="glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
+    class="footer-dock glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
     style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
     <!-- 独立音频频谱带 (限定在进度条上方 20px 独立带内，不透明度 <= 0.25，仅播放时出现，性能模式下不渲染) -->
@@ -636,7 +636,7 @@ const emit = defineEmits(['show'])
 
     <div class="relative z-10 flex items-center justify-between">
       <!-- 左侧：当前歌曲信息 -->
-      <div class="flex min-w-0 flex-1 space-x-4">
+      <div class="footer-left flex min-w-0 flex-1 gap-4">
         <!-- 封面容器 - 3D 翻转效果 -->
         <div class="cover-container" style="perspective: 800px;">
           <div
@@ -664,7 +664,7 @@ const emit = defineEmits(['show'])
             </div>
           </div>
         </div>
-        <div id="footer-song-info" class="flex min-w-0 flex-col justify-around">
+        <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
           <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
             {{ formatSongTitle(currentSong?.name) || t('player.unknownSong') }}
           </p>
@@ -674,7 +674,7 @@ const emit = defineEmits(['show'])
         </div>
         <div
           v-if="footerLyrics.enabled && mergedLines.length"
-          class="flex min-w-0 flex-col justify-around"
+          class="footer-lyrics flex min-w-0 flex-col justify-around"
         >
           <template v-for="mode in footerLyrics.modes" :key="mode">
             <p v-if="mode === 'original'" class="text-primary/80 truncate text-sm">
@@ -691,7 +691,7 @@ const emit = defineEmits(['show'])
       </div>
 
       <!-- 中间：播放控制 -->
-      <div class="flex items-center space-x-4">
+      <div class="footer-controls flex items-center gap-4">
         <Button
           variant="text"
           size="none"
@@ -734,7 +734,7 @@ const emit = defineEmits(['show'])
       </div>
 
       <!-- 右侧：音质切换、下载、音量和其他控制 -->
-      <div class="relative flex flex-1 items-center justify-end space-x-2.5 sm:space-x-3.5">
+      <div class="footer-tools relative flex flex-1 items-center justify-end gap-2.5 sm:gap-3.5">
         <!-- 音质切换按钮 -->
         <div v-if="currentSong" class="relative">
           <button
@@ -746,14 +746,14 @@ const emit = defineEmits(['show'])
             aria-haspopup="true"
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
-            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
+            class="footer-quality-pill group flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
               :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-sky-400 animate-pulse shadow-[0_0_6px_#38bdf8]' : 'bg-cyan-400'"
             ></span>
-            <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
+            <span class="whitespace-nowrap text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
             <span
               class="icon-[mdi--chevron-up] text-xs transition-transform duration-200"
               :class="{ 'rotate-180': showQualityMenu }"
@@ -867,7 +867,9 @@ const emit = defineEmits(['show'])
           @click.stop="downloadCurrentSong"
         />
 
-        <VolumeControl />
+        <div class="footer-volume">
+          <VolumeControl />
+        </div>
         <PlaylistBubble v-model:show="showQueue" placement="top-right" :offset-y="20">
           <template #trigger>
             <Button
@@ -906,6 +908,45 @@ const emit = defineEmits(['show'])
 </template>
 
 <style scoped>
+/* 歌名区域至少保留 8 个字符宽度，避免窄桌面下被音质/控制区挤没 */
+.footer-song-info {
+  min-width: 8em;
+}
+
+/* 820–1180px 窄桌面/平板：紧凑底栏，优先保证歌名与音质胶囊完整 */
+@media (max-width: 1180px) {
+  .footer-dock {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .footer-left {
+    gap: 0.5rem;
+  }
+
+  .footer-lyrics {
+    display: none;
+  }
+
+  .footer-controls {
+    gap: 0.5rem;
+  }
+
+  .footer-tools {
+    gap: 0.5rem;
+  }
+
+  .footer-dock .cover-inner {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .footer-volume {
+    display: none;
+  }
+}
+
 /* 封面容器 */
 .cover-container {
   position: relative;
