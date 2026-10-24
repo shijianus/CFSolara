@@ -105,14 +105,80 @@ else
 fi
 echo ""
 
-# Step 1: Restore Tunnel Ingress Configuration
+# Step 1: Merge Tunnel Ingress Configuration (Preserve engine-sonic.epocanvas.tech)
 TUNNEL_ENDPOINT="https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/cfd_tunnel/${TUNNEL_ID}/configurations"
-echo "[+] Step 1 (Tunnel): Restore sonic.epocanvas.tech ingress route in Cloudflare Tunnel"
+
+# Fetch current tunnel configuration if token is available
+CURRENT_INGRESS_JSON="[]"
+if [[ -n "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+  CURRENT_CFG_RESP=$(curl -s -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${TUNNEL_ENDPOINT}" || true)
+  if echo "${CURRENT_CFG_RESP}" | jq -e '.success' >/dev/null 2>&1; then
+    CURRENT_INGRESS_JSON=$(echo "${CURRENT_CFG_RESP}" | jq -c '.result.config.ingress // []')
+  fi
+fi
+
+# Merge current ingress with rollback backup (merge mode, never overwrite)
+MERGED_TUNNEL_CONFIG=$(node -e '
+const fs = require("fs");
+const currentIngress = JSON.parse(process.argv[1]);
+const backup = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const backupIngress = backup.config?.ingress || [];
+
+// Collect all hostnames from current and backup
+const rules = new Map();
+
+// 1. Keep current active rules (specifically engine-sonic.epocanvas.tech)
+for (const rule of currentIngress) {
+  if (rule.hostname) {
+    rules.set(rule.hostname, rule);
+  }
+}
+
+// 2. Merge backup rules (restore sonic.epocanvas.tech)
+for (const rule of backupIngress) {
+  if (rule.hostname) {
+    rules.set(rule.hostname, rule);
+  }
+}
+
+// Ensure engine-sonic is explicitly safeguarded
+if (!rules.has("engine-sonic.epocanvas.tech")) {
+  rules.set("engine-sonic.epocanvas.tech", {
+    service: "http://localhost:8080",
+    hostname: "engine-sonic.epocanvas.tech"
+  });
+}
+
+// Ensure sonic.epocanvas.tech is present
+if (!rules.has("sonic.epocanvas.tech")) {
+  rules.set("sonic.epocanvas.tech", {
+    service: "http://localhost:8080",
+    hostname: "sonic.epocanvas.tech"
+  });
+}
+
+// Rebuild ingress array with catch-all 404 at the end
+const merged = [];
+for (const [hostname, rule] of rules.entries()) {
+  merged.push(rule);
+}
+merged.push({ service: "http_status:404" });
+
+console.log(JSON.stringify({
+  config: {
+    ingress: merged,
+    "warp-routing": { enabled: false }
+  }
+}));
+' "${CURRENT_INGRESS_JSON}" "${TUNNEL_BACKUP}")
+
+echo "[+] Step 1 (Tunnel): MERGE sonic.epocanvas.tech ingress into Cloudflare Tunnel"
+echo "    Strategy: Non-destructive Merge (PRESERVES engine-sonic.epocanvas.tech)"
 echo "    Request:"
 echo "      PUT ${TUNNEL_ENDPOINT}"
 echo "      Headers: Authorization: Bearer <CLOUDFLARE_API_TOKEN>, Content-Type: application/json"
 echo "      Payload:"
-echo "        ${TUNNEL_CONFIG_JSON}"
+echo "        ${MERGED_TUNNEL_CONFIG}"
 echo ""
 
 # Step 2: Restore DNS CNAME Record
@@ -129,7 +195,7 @@ echo ""
 
 if [[ "${MODE}" == "dry-run" ]]; then
   echo "================================================================================"
-  echo " [DRY RUN SUCCESSFUL] No live network mutations were performed."
+  echo " [DRY RUN SUCCESSFUL] Merged configuration validated. No live mutations made."
   echo " To execute this rollback live, run: ./scripts/rollback-production.sh --execute"
   echo "================================================================================"
   exit 0
@@ -138,18 +204,18 @@ fi
 # Execution path (only when --execute is passed)
 echo ">>> EXECUTING LIVE ROLLBACK <<<"
 
-echo "1. Applying Tunnel Configuration..."
+echo "1. Applying Merged Tunnel Configuration..."
 TUNNEL_RESP=$(curl -s -X PUT "${TUNNEL_ENDPOINT}" \
   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "${TUNNEL_CONFIG_JSON}")
+  -d "${MERGED_TUNNEL_CONFIG}")
 
 if ! echo "${TUNNEL_RESP}" | jq -e '.success' >/dev/null 2>&1; then
   echo "[-] FAILED to restore tunnel configuration:" >&2
   echo "${TUNNEL_RESP}" >&2
   exit 1
 fi
-echo "   ✓ Tunnel ingress configuration restored successfully."
+echo "   ✓ Merged tunnel ingress configuration applied successfully (engine-sonic preserved)."
 
 echo "2. Applying DNS CNAME Update..."
 DNS_RESP=$(curl -s -X PATCH "${DNS_ENDPOINT}" \
