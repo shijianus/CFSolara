@@ -187,8 +187,8 @@ export const useAudioStore = defineStore('audio', {
             // 页面刷新后 blob: URL 失效，异步从 IndexedDB 重建，避免先加载坏源
             this.restoreCurrentSongSource()
           } else {
+            // 仅设置源，不主动 load：避免恢复历史歌曲时自动请求并弹出播放错误
             this.audio.audio.src = (this.audio.currentSong && this.audio.currentSong.url) || ''
-            this.audio.audio.load()
           }
         }
       }
