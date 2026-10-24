@@ -9,6 +9,7 @@ dist/
 .dev.vars
 dist-server/
 rollback-backups/
+rollback-*.json
 screenshots/
 player/node_modules
 player/node_modules/
