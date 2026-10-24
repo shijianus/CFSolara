@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { banner, topPlaylist, topSong, topArtists, personalizedMv } from '@/api'
+import { BRAND_PRODUCT } from '@/config/brand'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules'
@@ -88,8 +89,8 @@ const handleBannerClick = (item: BannerData) => {
   if (item.targetType === 1 && item.targetId) {
     const storeSong: StoreSong = {
       id: Number(item.targetId),
-      name: item.description || item.title || 'Sonic 推荐新歌',
-      artist: item.title || 'Sonic 独家精选',
+      name: item.description || item.title || `${BRAND_PRODUCT} 推荐新歌`,
+      artist: item.title || `${BRAND_PRODUCT} 独家精选`,
       cover: item.coverImgUrl,
       duration: 0,
     }
@@ -170,7 +171,7 @@ onMounted(() => {
         <section v-if="recommendPlaylists.length" v-scroll-in="{ direction: 'up', delay: 0.1 }">
           <div class="mb-6 flex items-baseline justify-between">
             <h2 class="text-primary flex items-center gap-2.5 text-xl font-bold tracking-tight">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-pink-500 to-purple-600">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600">
                 <span class="icon-[mdi--playlist-star] h-5 w-5 text-white"></span>
               </span>
               {{ t('home.recommendPlaylists') }}
@@ -198,7 +199,7 @@ onMounted(() => {
         <section v-if="artists.length" v-scroll-in="{ direction: 'up', delay: 0.1 }">
           <div class="mb-6 flex items-baseline justify-between">
             <h2 class="text-primary flex items-center gap-2.5 text-xl font-bold tracking-tight">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-amber-500 to-orange-600">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600">
                 <span class="icon-[mdi--account-music] h-5 w-5 text-white"></span>
               </span>
               {{ t('components.discover.hotArtists') }}
@@ -267,7 +268,7 @@ onMounted(() => {
         <section v-if="mvs.length" v-scroll-in="{ direction: 'up', delay: 0.1 }">
           <div class="mb-6 flex items-baseline justify-between">
             <h2 class="text-primary flex items-center gap-2.5 text-xl font-bold tracking-tight">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-rose-500 to-red-600">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-blue-600">
                 <span class="icon-[mdi--video] h-5 w-5 text-white"></span>
               </span>
               {{ t('components.discover.recommendMv') }}

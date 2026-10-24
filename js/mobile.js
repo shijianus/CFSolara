@@ -16,7 +16,7 @@
         if (!dom.mobileToolbarTitle) {
             return;
         }
-        dom.mobileToolbarTitle.textContent = "Sonic";
+        dom.mobileToolbarTitle.textContent = "epocanvas sonic";
     }
 
     function updateMobileOverlayScrim() {

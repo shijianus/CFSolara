@@ -66,7 +66,7 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
 
 <template>
   <div class="relative flex h-full w-full overflow-hidden">
-    <div class="custom-theme absolute inset-0 h-full w-full bg-[#07070d]">
+    <div class="custom-theme absolute inset-0 h-full w-full bg-[#07101f]">
       <transition appear name="fade-bg" mode="out-in">
         <component
           :is="currentBackgroundComponent"
@@ -79,8 +79,8 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
 
     <!-- Sonic 风格氛围光晕流光层 (Ambient Glowing Drift Blobs) -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
-      <div class="absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-drift-a opacity-35 dark:opacity-40" style="background: #8b5cf6;"></div>
-      <div class="absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] animate-drift-b opacity-30 dark:opacity-35" style="background: #ec4899;"></div>
+      <div class="absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-drift-a opacity-35 dark:opacity-40" style="background: #2563eb;"></div>
+      <div class="absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] animate-drift-b opacity-30 dark:opacity-35" style="background: #38bdf8;"></div>
       <div class="absolute top-[30%] left-[35%] size-[38vmax] rounded-full blur-[100px] animate-drift-c opacity-20 dark:opacity-25" style="background: #3b82f6;"></div>
     </div>
 

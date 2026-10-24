@@ -291,7 +291,7 @@ onUnmounted(() => {
               </h3>
               <button
                 @click="downloadStore.closeDownloadDialog"
-                class="flex h-7 w-7 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="flex h-7 w-7 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 title="关闭"
                 aria-label="关闭弹窗"
               >
@@ -411,7 +411,7 @@ onUnmounted(() => {
                     class="flex h-5 w-5 items-center justify-center rounded-full border transition-all"
                     :class="[
                       selectedLevel === choice.level
-                        ? 'border-pink-400 bg-pink-500/20 text-pink-300'
+                        ? 'border-sky-400 bg-sky-500/20 text-sky-300'
                         : 'border-white/20 bg-transparent'
                     ]"
                   >
@@ -442,7 +442,7 @@ onUnmounted(() => {
             <div class="flex items-center justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="h-[40px] px-4 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="h-[40px] px-4 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
@@ -451,7 +451,7 @@ onUnmounted(() => {
 
               <button
                 type="button"
-                class="download-btn-gradient h-[40px] px-5 rounded-xl text-[14px] font-semibold text-white shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="download-btn-gradient h-[40px] px-5 rounded-xl text-[14px] font-semibold text-white shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 :class="[
                   !hasAnyAvailable || !currentChoice.isAvailable || downloadStore.isDownloading
                     ? 'opacity-40 cursor-not-allowed pointer-events-none'
@@ -479,7 +479,7 @@ onUnmounted(() => {
 <style scoped>
 /* 弹窗面板：深紫玻璃底色、1px 白描边、无外发光 */
 .download-dialog-panel {
-  background-color: rgba(30, 26, 52, 0.92);
+  background-color: rgba(10,31,61, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
 }
@@ -493,7 +493,7 @@ onUnmounted(() => {
 
 /* 唯一的渐变主按钮 */
 .download-btn-gradient {
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
 }
 
 /* 选项卡片状态样式 */

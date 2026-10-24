@@ -3,10 +3,10 @@
   "private": true,
   "version": "2.1.0",
   "type": "module",
-  "description": "Sonic Music Cloud Platform & Streaming Web Player (by EpoCanvas)",
+  "description": "epocanvas sonic Music Cloud Platform & Streaming Web Player",
   "license": "CC BY-NC-SA",
   "author": {
-    "name": "EpoCanvas",
+    "name": "epocanvas",
     "url": "https://epocanvas.com"
   },
   "scripts": {

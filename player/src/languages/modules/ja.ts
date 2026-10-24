@@ -280,7 +280,7 @@ export default {
       all: '全部',
       official: '公式',
       live: 'ライブ',
-      netease: 'Sonicオリジナル',
+      netease: 'sonic オリジナル',
     },
     actions: {
       loadMore: 'もっと見る',
@@ -321,6 +321,14 @@ export default {
     },
   },
   likes: {
+    title: 'お気に入りの音楽',
+    subtitle: '保存した曲・プレイリスト・MV',
+    tabs: {
+      all: 'すべて',
+      song: '曲',
+      playlist: 'プレイリスト',
+      mv: 'MV',
+    },
     empty: 'お気に入りの曲はまだありません',
   },
   recent: {

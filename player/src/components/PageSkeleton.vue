@@ -9,7 +9,7 @@ const listCount = computed(() => props.listCount ?? 8)
     <div class="h-full overflow-auto p-6">
       <section v-if="sections.includes('hero')" class="relative mb-6 overflow-hidden rounded-2xl">
         <div class="relative h-40 w-full overflow-hidden rounded-2xl">
-          <div class="absolute inset-0 bg-linear-to-br from-gray-600 to-red-600 opacity-40"></div>
+          <div class="absolute inset-0 bg-linear-to-br from-slate-700 to-blue-800 opacity-40"></div>
           <div class="absolute inset-0 animate-shimmer bg-white/10"></div>
           <div class="absolute left-6 top-6 h-6 w-1/3 rounded bg-white/20"></div>
           <div class="absolute left-6 top-14 h-4 w-1/2 rounded bg-white/15"></div>

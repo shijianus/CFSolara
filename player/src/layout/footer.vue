@@ -78,7 +78,7 @@ const coverRef = ref<HTMLElement | null>(null)
 // 计算可视化器渐变颜色
 const visualizerGradient = computed(() => {
   if (state.footerGradient.length === 0) {
-    return ['#3b82f6', '#8b5cf6', '#ec4899']
+    return ['#3b82f6', '#2563eb', '#38bdf8']
   }
   // 提取渐变中的颜色
   const colors = state.footerGradient.map((color: string) => {
@@ -631,7 +631,7 @@ const emit = defineEmits(['show'])
             :style="{
               backgroundImage: state.displayCover
                 ? `url(${formatCoverUrl(state.displayCover, { size: 128 })})`
-                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #3b82f6 100%)',
+                : 'linear-gradient(135deg, #2563eb 0%, #38bdf8 50%, #3b82f6 100%)',
             }"
           >
             <!-- 播放状态指示器 -->
@@ -729,12 +729,12 @@ const emit = defineEmits(['show'])
             aria-haspopup="true"
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
-            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500/80"
+            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
-              :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
+              :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-sky-400 animate-pulse shadow-[0_0_6px_#38bdf8]' : 'bg-cyan-400'"
             ></span>
             <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
             <span
@@ -765,13 +765,13 @@ const emit = defineEmits(['show'])
               <!-- 顶部标题 -->
               <div
                 class="px-3 py-2 flex items-center justify-between border-b border-white/10"
-                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.10));"
+                style="background: linear-gradient(135deg, rgba(56,189,248, 0.12), rgba(37,99,235, 0.10));"
               >
                 <div class="flex items-center gap-1.5">
-                  <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-pink-400"></span>
+                  <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-sky-400"></span>
                   <span id="quality-menu-title" class="text-[11px] font-semibold text-white/90 tracking-wider">音频规格</span>
                 </div>
-                <span class="text-[11px] font-mono font-medium text-pink-300">
+                <span class="text-[11px] font-mono font-medium text-sky-300">
                   {{ activeQualityBadge }}
                 </span>
               </div>
@@ -795,7 +795,7 @@ const emit = defineEmits(['show'])
                     !q.isAvailable
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
                       : effectiveQualityLevel === q.level
-                        ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm cursor-pointer'
+                        ? 'bg-sky-500/15 border border-sky-500/40 text-sky-200 font-semibold shadow-sm cursor-pointer'
                         : 'border border-transparent text-white/85 hover:bg-white/10 hover:text-white cursor-pointer'
                   ]"
                 >
@@ -803,18 +803,18 @@ const emit = defineEmits(['show'])
                     <!-- 左侧指示条 -->
                     <span
                       class="w-1 h-3.5 rounded-full transition-all duration-150 shrink-0"
-                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-sky-500 to-blue-500 shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'bg-transparent'"
                     ></span>
                     <span
                       class="text-xs transition-colors shrink-0"
-                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-white/90 font-medium'"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-sky-200 font-bold' : 'text-white/90 font-medium'"
                     >
                       {{ q.label }}
                     </span>
                     <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
                     <span
                       v-if="effectiveQualityLevel === q.level && q.isAvailable"
-                      class="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-medium shrink-0"
+                      class="text-[10px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
                     >
                       当前
                     </span>
@@ -826,7 +826,7 @@ const emit = defineEmits(['show'])
                       !q.isAvailable
                         ? 'text-[13px] text-white/65 font-normal font-sans'
                         : effectiveQualityLevel === q.level
-                          ? 'text-xs text-pink-300 font-semibold font-mono'
+                          ? 'text-xs text-sky-300 font-semibold font-mono'
                           : 'text-xs text-white/65 group-hover:text-white/85 font-mono'
                     ]"
                   >
@@ -845,7 +845,7 @@ const emit = defineEmits(['show'])
           size="none"
           icon="icon-[mdi--tray-arrow-down]"
           icon-class="size-5"
-          class="text-primary/70 hover:text-pink-400 flex items-center transition-colors cursor-pointer"
+          class="text-primary/70 hover:text-sky-400 flex items-center transition-colors cursor-pointer"
           :title="t('common.download') + '当前歌曲'"
           @click.stop="downloadCurrentSong"
         />
@@ -879,9 +879,9 @@ const emit = defineEmits(['show'])
     <Transition name="fade">
       <div
         v-if="qualityToastMsg"
-        class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-pink-500/30 bg-neutral-900/90 px-4 py-1.5 text-xs font-semibold text-pink-300 shadow-xl backdrop-blur-xl"
+        class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-sky-500/30 bg-neutral-900/90 px-4 py-1.5 text-xs font-semibold text-sky-300 shadow-xl backdrop-blur-xl"
       >
-        <span class="icon-[mdi--check-circle] h-4 w-4 text-pink-400"></span>
+        <span class="icon-[mdi--check-circle] h-4 w-4 text-sky-400"></span>
         <span>{{ qualityToastMsg }}</span>
       </div>
     </Transition>
@@ -903,10 +903,10 @@ const emit = defineEmits(['show'])
 /* 播放时微微脉动 */
 @keyframes pulse-subtle {
   0%, 100% {
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+    box-shadow: 0 4px 12px rgba(56,189,248, 0.2);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.35);
+    box-shadow: 0 4px 20px rgba(56,189,248, 0.35);
   }
 }
 
@@ -978,7 +978,7 @@ const emit = defineEmits(['show'])
 
 /* 音质规格上浮菜单毛玻璃容器 (深紫玻璃底色，模糊半径限制在 24px 内) */
 .quality-panel-popover {
-  background-color: #1e1a34;
+  background-color: #0a1f3d;
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
     0 16px 36px -8px rgba(0, 0, 0, 0.65),
@@ -987,7 +987,7 @@ const emit = defineEmits(['show'])
 
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .quality-panel-popover {
-    background-color: rgba(30, 26, 52, 0.94);
+    background-color: rgba(10,31,61, 0.94);
     backdrop-filter: blur(var(--glass-blur, 24px));
     -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
   }

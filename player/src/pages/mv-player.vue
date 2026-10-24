@@ -53,9 +53,9 @@ const loadMV = async (id: number) => {
       playCount: String(d?.playCount || d?.playCountTxt || ''),
       likes: String(d?.likedCount || ''),
       publishDate: d?.publishTime || d?.publishDate || '',
-      category: d?.subed ? '已订阅' : 'Sonic MV',
+      category: d?.subed ? '已订阅' : 'sonic MV',
       emoji: '🎬',
-      gradient: 'from-indigo-500 to-primary-600',
+      gradient: 'from-blue-500 to-primary-600',
       liked: !!d?.liked,
       isNew: false,
       description: d?.desc || d?.briefDesc || '',
@@ -71,7 +71,7 @@ const loadMV = async (id: number) => {
         playCount: String(mv?.playCount || ''),
         cover: mv?.cover || mv?.coverImg || mv?.picUrl || '',
         emoji: '🎵',
-        gradient: 'from-pink-400 to-primary-500',
+        gradient: 'from-sky-400 to-primary-500',
       })
     )
   } catch {
@@ -157,7 +157,7 @@ watch(
                   <Button
                     variant="ghost"
                     size="sm"
-                    class="text-primary/70 flex items-center gap-2 text-sm font-medium transition-colors hover:text-pink-400"
+                    class="text-primary/70 flex items-center gap-2 text-sm font-medium transition-colors hover:text-sky-400"
                     icon="icon-[mdi--account-music]"
                     icon-class="h-5 w-5"
                     @click="router.push(`/artist/${currentMV.artistId}`)"
@@ -185,8 +185,8 @@ watch(
                     class="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all"
                     :class="
                       state.isLiked
-                        ? 'border-pink-500/30! bg-pink-500/20! text-pink-400!'
-                        : 'text-primary hover:text-pink-400'
+                        ? 'border-sky-500/30! bg-sky-500/20! text-sky-400!'
+                        : 'text-primary hover:text-sky-400'
                     "
                     :icon="state.isLiked ? 'mdi--thumb-up' : 'mdi--thumb-up-outline'"
                     icon-class="h-5 w-5"
@@ -197,7 +197,7 @@ watch(
                   <Button
                     variant="glass"
                     size="md"
-                    class="text-primary flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:text-pink-400"
+                    class="text-primary flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:text-sky-400"
                     icon="icon-[mdi--share-variant-outline]"
                     icon-class="h-5 w-5"
                     @click="shareMV"
@@ -233,7 +233,7 @@ watch(
                     />
                     <div
                       v-else
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-pink-400 to-purple-500 text-sm font-medium text-white"
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-sky-400 to-blue-500 text-sm font-medium text-white"
                     >
                       {{ c.username.charAt(0) }}
                     </div>
@@ -247,7 +247,7 @@ watch(
                         <Button
                           variant="ghost"
                           size="none"
-                          class="text-primary/40 flex items-center gap-1.5 text-xs transition-colors hover:text-pink-400"
+                          class="text-primary/40 flex items-center gap-1.5 text-xs transition-colors hover:text-sky-400"
                           icon="icon-[mdi--thumb-up-outline]"
                           icon-class="h-4 w-4"
                         >
@@ -308,7 +308,7 @@ watch(
                     </div>
                     <div class="min-w-0 flex-1 py-1">
                       <h3
-                        class="text-primary mb-1.5 line-clamp-2 text-sm leading-tight font-medium transition-colors group-hover:text-pink-400"
+                        class="text-primary mb-1.5 line-clamp-2 text-sm leading-tight font-medium transition-colors group-hover:text-sky-400"
                       >
                         {{ mv.title }}
                       </h3>

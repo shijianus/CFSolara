@@ -89,7 +89,7 @@ const handlePlayOne = (music: any) => {
     <div class="flex items-center justify-between border-b border-glass p-6">
       <div class="flex items-center gap-4">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-green-500 to-emerald-600 shadow-md"
+          class="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500 to-blue-600 shadow-md"
         >
           <span class="icon-[mdi--folder-music-outline] h-6 w-6 text-white" />
         </div>
@@ -140,11 +140,11 @@ const handlePlayOne = (music: any) => {
     <!-- 拖拽提示 -->
     <div
       v-if="isDragging"
-      class="absolute inset-0 z-20 flex items-center justify-center bg-green-500/10 backdrop-blur-sm"
+      class="absolute inset-0 z-20 flex items-center justify-center bg-blue-500/10 backdrop-blur-sm"
     >
       <div class="text-center">
         <div class="mb-4 flex justify-center">
-          <div class="rounded-full bg-green-500/20 p-6">
+          <div class="rounded-full bg-blue-500/20 p-6">
             <span class="icon-[mdi--cloud-upload] h-16 w-16 text-green-500"></span>
           </div>
         </div>

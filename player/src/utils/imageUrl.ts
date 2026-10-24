@@ -4,7 +4,7 @@
  */
 
 export const DEFAULT_COVER_DATA_URI =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='50%25' stop-color='%23ec4899'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='300' height='300' rx='28' fill='url(%23g)'/%3E%3Ccircle cx='150' cy='150' r='54' fill='rgba(255,255,255,0.18)'/%3E%3Cpath d='M142 118v46a18 18 0 1 0 12 17v-40l24-7v-16z' fill='%23ffffff'/%3E%3C/svg%3E"
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='50%25' stop-color='%2338bdf8'/%3E%3Cstop offset='100%25' stop-color='%231d4ed8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='300' height='300' rx='28' fill='url(%23g)'/%3E%3Ccircle cx='150' cy='150' r='54' fill='rgba(255,255,255,0.18)'/%3E%3Cpath d='M142 118v46a18 18 0 1 0 12 17v-40l24-7v-16z' fill='%23ffffff'/%3E%3C/svg%3E"
 
 export interface FormatCoverOptions {
   size?: number | string

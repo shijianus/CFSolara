@@ -54,7 +54,7 @@ const playSongWithAnimation = async (song: Song, index: number, event?: MouseEve
     if (event && sourceCover) {
       const container = sourceCover.closest('.song-item') as HTMLElement
       if (container) {
-        createRipple(event, container, 'rgba(236, 72, 153, 0.3)')
+        createRipple(event, container, 'rgba(56,189,248, 0.3)')
       }
     }
 
@@ -143,7 +143,7 @@ const getQualityBadgeInfo = (song: Song) => {
       title: hasMultiple
         ? `SQ: 无损音质 (FLAC，仅表示该音质档位，可在底栏切换)`
         : 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
-      badgeClass: 'bg-pink-500/10 text-pink-300/90 border border-pink-500/25',
+      badgeClass: 'bg-sky-500/10 text-sky-300/90 border border-sky-500/25',
     }
   }
   if (isExhigh) {
@@ -254,16 +254,16 @@ const getQualityBadgeInfo = (song: Song) => {
           class="song-item group relative flex cursor-pointer items-center rounded-xl p-2 border transition-colors duration-150 overflow-hidden"
           :class="[
             isCurrent(song)
-              ? 'border-pink-500/25'
+              ? 'border-sky-500/25'
               : 'border-transparent hover:bg-white/10 hover:border-white/10'
           ]"
-          :style="isCurrent(song) ? { backgroundColor: 'rgba(236, 72, 153, 0.14)' } : {}"
+          :style="isCurrent(song) ? { backgroundColor: 'rgba(56,189,248, 0.14)' } : {}"
           @dblclick="(e) => playSongWithAnimation(song, index, e)"
         >
           <!-- 左侧 2px 强调色指示条 (当前播放行) -->
           <span
             v-if="isCurrent(song)"
-            class="absolute left-0 top-2 bottom-2 w-[2px] bg-pink-500 rounded-r"
+            class="absolute left-0 top-2 bottom-2 w-[2px] bg-sky-500 rounded-r"
             aria-hidden="true"
           ></span>
           <!-- 序号/播放状态 -->
@@ -287,7 +287,7 @@ const getQualityBadgeInfo = (song: Song) => {
             <button
               v-if="!isCurrent(song)"
               type="button"
-              class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-primary hover:text-pink-400 active:scale-90 cursor-pointer"
+              class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-primary hover:text-sky-400 active:scale-90 cursor-pointer"
               :title="t('actions.play') || '播放'"
               @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
             >
@@ -318,7 +318,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <div class="flex items-center gap-2">
                   <h3
                     :title="song.name"
-                    class="text-primary truncate text-base font-medium transition-colors group-hover:text-pink-300"
+                    class="text-primary truncate text-base font-medium transition-colors group-hover:text-sky-300"
                   >
                     {{ formatSongTitle(song.name) }}
                   </h3>
@@ -345,7 +345,7 @@ const getQualityBadgeInfo = (song: Song) => {
                     <RouterLink
                       :to="`/artist/${ar.id}`"
                       :title="ar.name"
-                      class="transition-colors hover:text-pink-400"
+                      class="transition-colors hover:text-sky-400"
                     >
                       {{ ar.name }}
                     </RouterLink>
@@ -357,7 +357,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <RouterLink
                   :to="`/artist/${song.artistId}`"
                   :title="song.artist"
-                  class="text-primary/80 truncate text-sm transition-colors hover:text-pink-400"
+                  class="text-primary/80 truncate text-sm transition-colors hover:text-sky-400"
                 >
                   {{ song.artist }}
                 </RouterLink>
@@ -396,7 +396,7 @@ const getQualityBadgeInfo = (song: Song) => {
               <div class="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                 <button
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('actions.play') || '播放'"
                   @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
                 >
@@ -405,7 +405,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <button
                   v-if="song.mvId"
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-purple-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-blue-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.playMV')"
                   @click.stop="openMV(song, index)"
                 >
@@ -414,7 +414,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <button
                   v-else-if="song.id"
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.detail')"
                   @click.stop="router.push(`/song/${song.id}`)"
                 >
@@ -422,7 +422,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 </button>
                 <button
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.download')"
                   @click.stop="downloadSong(song, index)"
                 >

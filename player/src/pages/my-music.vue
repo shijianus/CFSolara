@@ -77,7 +77,7 @@ const tabs = computed(() => [
           variant="solid"
           size="sm"
           rounded="lg"
-          class="gap-2 shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30"
+          class="gap-2 shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30"
           @click="playAllQueue"
         >
           <span class="icon-[mdi--play] h-4 w-4" />
@@ -88,7 +88,7 @@ const tabs = computed(() => [
           variant="solid"
           size="sm"
           rounded="lg"
-          class="gap-2 shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30"
+          class="gap-2 shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30"
           @click="playAllRecent"
         >
           <span class="icon-[mdi--play] h-4 w-4" />

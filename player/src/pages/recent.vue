@@ -63,7 +63,7 @@ const playAll = () => {
                 variant="solid"
                 size="md"
                 rounded="full"
-                class="px-6 py-3 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40"
+                class="px-6 py-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
                 :disabled="!recentList.length"
                 @click="playAll"
               >

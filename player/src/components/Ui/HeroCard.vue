@@ -327,7 +327,7 @@ const handleMouseLeave = () => {
         class="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100"
       >
         <div
-          class="flex h-12 w-12 scale-75 items-center justify-center rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] text-white shadow-[0_10px_30px_rgba(139,92,246,0.6)] transition-transform duration-300 group-hover:scale-100 ring-1 ring-white/40"
+          class="flex h-12 w-12 scale-75 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] text-white shadow-[0_10px_30px_rgba(37,99,235,0.6)] transition-transform duration-300 group-hover:scale-100 ring-1 ring-white/40"
         >
           <span class="icon-[mdi--play] h-6 w-6 text-white" />
         </div>

@@ -11,7 +11,7 @@ const { t } = useI18n()
     <div class="relative mb-6 overflow-hidden">
       <!-- 背景装饰 -->
       <div class="absolute inset-0 overflow-hidden rounded-3xl">
-        <div class="h-full w-full scale-110 bg-linear-to-br from-green-500/20 to-emerald-600/20 blur-3xl"></div>
+        <div class="h-full w-full scale-110 bg-linear-to-br from-blue-500/20 to-cyan-600/20 blur-3xl"></div>
       </div>
 
       <!-- 内容 -->
@@ -19,7 +19,7 @@ const { t } = useI18n()
         <div class="glass-container p-6 md:p-8">
           <div class="flex items-center gap-4">
             <div
-              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-green-500 to-emerald-600 shadow-lg"
+              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-500 to-blue-600 shadow-lg"
             >
               <span class="icon-[mdi--folder-music-outline] h-7 w-7 text-white" />
             </div>

@@ -93,7 +93,7 @@ const handleClick = async (_event: MouseEvent) => {
       left: ${rect.left}px;
       top: ${rect.top}px;
       border-radius: 12px;
-      border: 2px solid rgba(236, 72, 153, 0.6);
+      border: 2px solid rgba(56,189,248, 0.6);
       pointer-events: none;
     `
     document.body.appendChild(ripple)
@@ -196,7 +196,7 @@ const handleMouseLeave = () => {
       class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold tracking-tight"
       :class="
         index < 3
-          ? 'bg-gradient-to-br from-[#8b5cf6] via-[#ec4899] to-[#3b82f6] text-white shadow-[0_0_12px_rgba(139,92,246,0.55)]'
+          ? 'bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] text-white shadow-[0_0_12px_rgba(37,99,235,0.55)]'
           : 'bg-primary/5 text-primary/40'
       "
     >
@@ -220,7 +220,7 @@ const handleMouseLeave = () => {
 
     <!-- 信息 -->
     <div class="min-w-0 flex-1">
-      <p class="text-primary truncate text-sm font-semibold transition-colors group-hover:text-[#a78bfa]">
+      <p class="text-primary truncate text-sm font-semibold transition-colors group-hover:text-[#60a5fa]">
         {{ song.name }}
       </p>
       <p class="text-primary/50 mt-0.5 truncate text-xs">{{ song.artist }}</p>

@@ -141,11 +141,11 @@ onUnmounted(() => {
     <!-- 状态 1：加载中（无超时），展示自动微动效与极光光圈 -->
     <div
       v-if="loading && !isTimeout && !error"
-      class="animate-in fade-in slide-in-from-bottom-2 duration-300 flex items-center justify-center gap-3 rounded-full border border-pink-500/20 bg-black/40 px-5 py-2 backdrop-blur-md shadow-lg shadow-pink-500/5"
+      class="animate-in fade-in slide-in-from-bottom-2 duration-300 flex items-center justify-center gap-3 rounded-full border border-sky-500/20 bg-black/40 px-5 py-2 backdrop-blur-md shadow-lg shadow-sky-500/5"
     >
       <div class="relative flex h-4 w-4 items-center justify-center">
-        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-400 opacity-25"></span>
-        <div class="h-4 w-4 rounded-full border-2 border-violet-500/30 border-t-pink-500 animate-spin"></div>
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-25"></span>
+        <div class="h-4 w-4 rounded-full border-2 border-blue-500/30 border-t-sky-500 animate-spin"></div>
       </div>
       <span class="text-xs font-medium tracking-wide text-primary/80">
         {{ resolvedLoadingText }}
@@ -159,12 +159,12 @@ onUnmounted(() => {
     >
       <button
         type="button"
-        class="group relative inline-flex items-center gap-2 rounded-full border border-pink-500/40 bg-gradient-to-r from-violet-600/20 to-pink-600/20 px-5 py-2 text-xs font-medium text-pink-300 backdrop-blur-md transition-all duration-300 hover:border-pink-500/80 hover:bg-pink-500/20 hover:text-white hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 cursor-pointer"
+        class="group relative inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-gradient-to-r from-blue-600/20 to-sky-600/20 px-5 py-2 text-xs font-medium text-sky-300 backdrop-blur-md transition-all duration-300 hover:border-sky-500/80 hover:bg-sky-500/20 hover:text-white hover:shadow-lg hover:shadow-sky-500/20 active:scale-95 cursor-pointer"
         @click="handleManualRetry"
       >
-        <span class="icon-[mdi--refresh] h-4 w-4 transition-transform duration-500 group-hover:rotate-180 text-pink-400"></span>
+        <span class="icon-[mdi--refresh] h-4 w-4 transition-transform duration-500 group-hover:rotate-180 text-sky-400"></span>
         <span>{{ resolvedRetryText }}</span>
-        <span class="inline-flex items-center rounded-md bg-pink-500/20 px-1.5 py-0.5 text-[10px] text-pink-300 group-hover:text-white">
+        <span class="inline-flex items-center rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] text-sky-300 group-hover:text-white">
           重试
         </span>
       </button>
@@ -180,9 +180,9 @@ onUnmounted(() => {
     >
       <span class="h-px w-10 sm:w-16 bg-gradient-to-r from-transparent to-primary/20"></span>
       <span class="flex items-center gap-1.5 font-medium tracking-wider text-[11px]">
-        <span class="h-1 w-1 rounded-full bg-pink-500/50"></span>
+        <span class="h-1 w-1 rounded-full bg-sky-500/50"></span>
         {{ resolvedNoMoreText }}
-        <span class="h-1 w-1 rounded-full bg-violet-500/50"></span>
+        <span class="h-1 w-1 rounded-full bg-blue-500/50"></span>
       </span>
       <span class="h-px w-10 sm:w-16 bg-gradient-to-l from-transparent to-primary/20"></span>
     </div>

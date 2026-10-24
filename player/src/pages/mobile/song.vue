@@ -105,12 +105,12 @@ const toggleLike = () => {
           </div>
           <div class="min-w-0 flex-1">
             <h1 class="text-primary truncate text-lg font-bold">{{ state.name }}</h1>
-            <p class="truncate text-xs text-purple-300">{{ state.artist }}</p>
-            <p class="truncate text-[11px] text-purple-400">{{ state.album }}</p>
+            <p class="truncate text-xs text-blue-300">{{ state.artist }}</p>
+            <p class="truncate text-[11px] text-blue-400">{{ state.album }}</p>
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="glass-button text-primary rounded-full bg-linear-to-r from-pink-500 to-purple-600 px-3 py-2 text-sm"
+              class="glass-button text-primary rounded-full bg-linear-to-r from-sky-500 to-blue-600 px-3 py-2 text-sm"
               @click="playCurrent"
             >
               <span class="icon-[mdi--play] h-4 w-4"></span>

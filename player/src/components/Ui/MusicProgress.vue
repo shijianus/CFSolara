@@ -13,7 +13,7 @@ const props = defineProps({
 const gradientStyle = computed(() => {
   if (props.color.length === 0) {
     // 使用默认渐变
-    return 'linear-gradient(90deg, #ec4899, #8b5cf6)'
+    return 'linear-gradient(90deg, #38bdf8, #2563eb)'
   }
   // 使用传入的颜色数组生成渐变
   return `linear-gradient(90deg, ${props.color.join(', ')})`
@@ -195,7 +195,7 @@ const previewPositionPercent = computed(() => {
 }
 
 .progress-fill {
-  box-shadow: 0 0 12px rgba(236, 72, 153, 0.35);
+  box-shadow: 0 0 12px rgba(56,189,248, 0.35);
   transition: width 0.05s linear;
 }
 

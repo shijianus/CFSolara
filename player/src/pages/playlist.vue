@@ -73,7 +73,7 @@ const {
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 const { t } = useI18n()
 
-const gradients: string[] = ['from-purple-500 to-pink-500']
+const gradients: string[] = ['from-blue-500 to-sky-500']
 const emojis: string[] = ['🎵', '🎶', '♪', '♫', '🎼']
 
 const pickGradient = (): string => gradients[Math.floor(Math.random() * gradients.length)]
@@ -216,7 +216,7 @@ const submitComment = () => {
   const comment = {
     username: t('common.me'),
     avatar: t('common.me'),
-    avatarGradient: 'from-pink-400 to-purple-500',
+    avatarGradient: 'from-sky-400 to-blue-500',
     time: t('common.justNow'),
     content: state.newComment,
     likes: 0,
@@ -309,7 +309,7 @@ const tabsWithCount = computed(() =>
                     @click="playAll"
                   >
                     <div
-                      class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-r from-pink-500 to-purple-600 text-white shadow-2xl transition-transform hover:scale-110"
+                      class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600 text-white shadow-2xl transition-transform hover:scale-110"
                     >
                       <span class="icon-[mdi--play] h-10 w-10"></span>
                     </div>
@@ -386,7 +386,7 @@ const tabsWithCount = computed(() =>
                       variant="solid"
                       size="md"
                       rounded="full"
-                      class="px-8 py-3 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40"
+                      class="px-8 py-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
                       @click="playAll"
                     >
                       <span class="icon-[mdi--play] mr-2 h-5 w-5"></span>
@@ -465,7 +465,7 @@ const tabsWithCount = computed(() =>
                   <textarea
                     v-model="newComment"
                     :placeholder="$t('comments.placeholder')"
-                    class="text-primary glass-card placeholder-glass-50 w-full resize-none rounded-xl border border-glass p-4 text-sm transition-all focus:border-pink-400/50 focus:ring-2 focus:ring-pink-400/20 focus:outline-none"
+                    class="text-primary glass-card placeholder-glass-50 w-full resize-none rounded-xl border border-glass p-4 text-sm transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/20 focus:outline-none"
                     rows="3"
                   ></textarea>
                   <div class="mt-3 flex items-center justify-end">
@@ -625,7 +625,7 @@ const tabsWithCount = computed(() =>
                 </div>
                 <div class="p-3">
                   <p
-                    class="text-primary mb-1.5 line-clamp-2 text-sm leading-snug font-semibold transition-colors group-hover:text-pink-400"
+                    class="text-primary mb-1.5 line-clamp-2 text-sm leading-snug font-semibold transition-colors group-hover:text-sky-400"
                   >
                     {{ pl.name }}
                   </p>

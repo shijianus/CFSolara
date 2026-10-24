@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { getBackgroundOptions, getThemeOptions, getLangOptions, getAudioQualityOptions } from '@/config/settingsOptions'
 import I18n from '@/languages'
 import Button from '@/components/Ui/Button.vue'
+import { BRAND_FULL } from '@/config/brand'
 
 const settings = useSettingsStore()
 const { footerLyrics, backgroundType, audioQuality } = storeToRefs(settings)
@@ -93,7 +94,7 @@ onMounted(() => {
 
     <section class="settings-card mb-4">
       <div class="card-header">
-        <div class="icon-wrapper bg-linear-to-br from-violet-500 to-purple-600">
+        <div class="icon-wrapper bg-linear-to-br from-blue-500 to-blue-600">
           <span class="icon-[mdi--palette-outline] h-4 w-4 text-primary"></span>
         </div>
         <div>
@@ -165,7 +166,7 @@ onMounted(() => {
 
     <section class="settings-card mb-4">
       <div class="card-header">
-        <div class="icon-wrapper bg-linear-to-br from-amber-500 to-orange-600">
+        <div class="icon-wrapper bg-linear-to-br from-sky-500 to-blue-600">
           <span class="icon-[mdi--translate] h-4 w-4 text-primary"></span>
         </div>
         <div>
@@ -190,7 +191,7 @@ onMounted(() => {
 
     <section class="settings-card mb-4">
       <div class="card-header">
-        <div class="icon-wrapper bg-linear-to-br from-emerald-500 to-teal-600">
+        <div class="icon-wrapper bg-linear-to-br from-cyan-500 to-blue-600">
           <span class="icon-[mdi--music-circle] h-4 w-4 text-primary"></span>
         </div>
         <div>
@@ -239,7 +240,7 @@ onMounted(() => {
 
     <section class="settings-card">
       <div class="card-header">
-        <div class="icon-wrapper bg-linear-to-br from-pink-500 to-rose-600">
+        <div class="icon-wrapper bg-linear-to-br from-sky-500 to-blue-600">
           <span class="icon-[mdi--music-note] h-4 w-4 text-primary"></span>
         </div>
         <div class="flex-1">
@@ -300,7 +301,7 @@ onMounted(() => {
     </section>
 
     <div class="mt-8 text-center">
-      <p class="text-primary/30 text-xs">Glass Music Player</p>
+      <p class="text-primary/30 text-xs">{{ BRAND_FULL }}</p>
     </div>
   </div>
 </template>
@@ -361,8 +362,8 @@ onMounted(() => {
 }
 
 .theme-option.active {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
-  border-color: rgba(236, 72, 153, 0.4);
+  background: linear-gradient(135deg, rgba(56,189,248, 0.15), rgba(37,99,235, 0.15));
+  border-color: rgba(56,189,248, 0.4);
 }
 
 .option-icon {
@@ -373,7 +374,7 @@ onMounted(() => {
 }
 
 .theme-option.active .option-icon {
-  color: rgb(236, 72, 153);
+  color: rgb(37, 99, 235);
   opacity: 1;
 }
 
@@ -399,7 +400,7 @@ onMounted(() => {
 }
 
 .toggle-switch.active {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(139, 92, 246));
+  background: linear-gradient(135deg, rgb(56, 189, 248), rgb(37, 99, 235));
   border-color: transparent;
 }
 
@@ -439,9 +440,9 @@ onMounted(() => {
 }
 
 .mode-chip.active {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  border-color: rgba(236, 72, 153, 0.5);
-  color: rgb(236, 72, 153);
+  background: linear-gradient(135deg, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
+  border-color: rgba(56,189,248, 0.5);
+  color: rgb(37, 99, 235);
   opacity: 1;
 }
 </style>

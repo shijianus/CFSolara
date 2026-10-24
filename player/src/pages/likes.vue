@@ -24,7 +24,7 @@ const liked = [
     name: '夜に駆ける',
     artist: 'YOASOBI',
     emoji: '🌙',
-    gradient: 'from-indigo-400 to-purple-500',
+    gradient: 'from-blue-400 to-blue-500',
     time: '刚刚',
   },
   {
@@ -32,7 +32,7 @@ const liked = [
     name: 'Lemon',
     artist: '米津玄師',
     emoji: '🍋',
-    gradient: 'from-yellow-400 to-orange-500',
+    gradient: 'from-sky-400 to-blue-600',
     time: '1天前',
   },
   {
@@ -48,7 +48,7 @@ const liked = [
     name: '打上花火',
     artist: 'DAOKO',
     emoji: '🎆',
-    gradient: 'from-blue-400 to-purple-500',
+    gradient: 'from-blue-400 to-blue-500',
     time: '1周前',
   },
 ]
@@ -61,8 +61,8 @@ const filtered = computed(() =>
 <template>
   <div class="relative flex-1 overflow-hidden">
     <div class="absolute inset-0 -z-10">
-      <div class="glow top-16 left-24 bg-pink-500/30"></div>
-      <div class="glow right-24 bottom-20 bg-purple-500/30"></div>
+      <div class="glow top-16 left-24 bg-sky-500/30"></div>
+      <div class="glow right-24 bottom-20 bg-blue-500/30"></div>
       <div class="glow top-1/2 right-10 bg-blue-500/25"></div>
     </div>
 
@@ -98,10 +98,10 @@ const filtered = computed(() =>
             class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           >
             <div
-              class="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-pink-500/10 blur-2xl"
+              class="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-sky-500/10 blur-2xl"
             ></div>
             <div
-              class="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-purple-500/10 blur-2xl"
+              class="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-blue-500/10 blur-2xl"
             ></div>
           </div>
 
@@ -129,23 +129,23 @@ const filtered = computed(() =>
                 >
                   {{ item.type.toUpperCase() }}
                 </span>
-                <span class="text-xs text-purple-300">{{ item.time }}</span>
+                <span class="text-xs text-blue-300">{{ item.time }}</span>
               </div>
               <h3
-                class="mt-1 truncate text-base font-semibold text-primary group-hover:text-pink-300"
+                class="mt-1 truncate text-base font-semibold text-primary group-hover:text-sky-300"
               >
                 {{ item.name }}
               </h3>
-              <p class="truncate text-sm text-purple-300">{{ item.artist }}</p>
+              <p class="truncate text-sm text-blue-300">{{ item.artist }}</p>
             </div>
 
             <div
               class="flex shrink-0 items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100"
             >
-              <button class="text-pink-400 transition-colors hover:text-primary">
+              <button class="text-sky-400 transition-colors hover:text-primary">
                 <span class="icon-[mdi--heart] h-5 w-5"></span>
               </button>
-              <button class="text-purple-300 transition-colors hover:text-primary">
+              <button class="text-blue-300 transition-colors hover:text-primary">
                 <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
               </button>
             </div>

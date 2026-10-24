@@ -93,7 +93,7 @@ onMounted(() => loadAlbums(true))
             v-for="opt in areaOptions"
             :key="opt.key"
             class="rounded-lg px-3 py-1.5 text-xs transition-all"
-            :class="area === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+            :class="area === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
             @click="area = opt.key as any"
           >
             {{ t(opt.labelKey) }}

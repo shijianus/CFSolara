@@ -282,7 +282,7 @@ export default {
       all: 'All',
       official: 'Official',
       live: 'Live',
-      netease: 'Sonic Originals',
+      netease: 'sonic Originals',
     },
     actions: {
       loadMore: 'Load More',
@@ -323,6 +323,14 @@ export default {
     },
   },
   likes: {
+    title: 'My Favorites',
+    subtitle: 'Songs, playlists and MVs you have saved',
+    tabs: {
+      all: 'All',
+      song: 'Songs',
+      playlist: 'Playlists',
+      mv: 'MVs',
+    },
     empty: 'No liked songs yet',
   },
   recent: {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { banner, personalized, personalizedNewsong, personalizedMv, topArtists } from '@/api'
+import { BRAND_PRODUCT } from '@/config/brand'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
@@ -32,8 +33,8 @@ const handleBannerClick = (item: BannerData) => {
   if (item.targetType === 1 && item.targetId) {
     const storeSong: StoreSong = {
       id: Number(item.targetId),
-      name: item.description || item.title || 'Sonic 推荐新歌',
-      artist: item.title || 'Sonic 独家精选',
+      name: item.description || item.title || `${BRAND_PRODUCT} 推荐新歌`,
+      artist: item.title || `${BRAND_PRODUCT} 独家精选`,
       cover: item.coverImgUrl,
       duration: 0,
     }
@@ -141,7 +142,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
           <div class="mb-4 flex items-center justify-between">
             <h2 class="section-title">
               <span
-                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-pink-500 to-purple-600"
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600"
               >
                 <span class="icon-[mdi--playlist-star] text-primary h-4 w-4"></span>
               </span>
@@ -174,7 +175,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   <div
                     class="flex h-6 w-6 items-center justify-center rounded-full bg-white/90 shadow-md dark:bg-black/70"
                   >
-                    <span class="icon-[mdi--play] h-3.5 w-3.5 text-pink-500"></span>
+                    <span class="icon-[mdi--play] h-3.5 w-3.5 text-sky-500"></span>
                   </div>
                 </div>
               </div>
@@ -187,7 +188,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
           <div class="mb-3 flex items-center justify-between px-4">
             <h2 class="section-title">
               <span
-                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-amber-500 to-orange-600"
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600"
               >
                 <span class="icon-[mdi--account-music] text-primary h-4 w-4"></span>
               </span>
@@ -233,7 +234,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
           <div class="mb-4 flex items-center justify-between">
             <h2 class="section-title">
               <span
-                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-rose-500 to-red-600"
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-blue-600"
               >
                 <span class="icon-[mdi--video] text-primary h-4 w-4"></span>
               </span>
@@ -362,12 +363,12 @@ html.dark .artist-avatar {
 }
 
 .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
 }
 
 :root.dark .song-item-active,
 html.dark .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(139, 92, 246, 0.3));
+  background: linear-gradient(to right, rgba(56,189,248, 0.3), rgba(37,99,235, 0.3));
 }
 
 .song-index {

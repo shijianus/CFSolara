@@ -3,6 +3,7 @@
  * 统一处理各种 API 响应格式的数据转换
  */
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { BRAND_PRODUCT } from '@/config/brand'
 
 // ============ 类型定义 ============
 
@@ -166,7 +167,7 @@ export function transformBanner(item: Record<string, unknown>): BannerData | nul
 
   return {
     coverImgUrl: (item?.pic as string) || (item?.imageUrl as string) || (item?.bigImageUrl as string) || '',
-    title: (item?.typeTitle as string) || 'Sonic 独家推荐',
+    title: (item?.typeTitle as string) || `${BRAND_PRODUCT} 独家推荐`,
     description: (item?.title as string) || '',
     targetId,
     targetType,

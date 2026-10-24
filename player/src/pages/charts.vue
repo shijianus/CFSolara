@@ -127,7 +127,7 @@ onMounted(() => {
           size="sm"
           rounded="xl"
           class="w-full justify-start gap-3"
-          :class="activeType === type.key ? 'bg-hover-glass text-pink-400! shadow-sm' : ''"
+          :class="activeType === type.key ? 'bg-hover-glass text-sky-400! shadow-sm' : ''"
           @click="activeType = type.key as any"
         >
           <span
@@ -162,13 +162,13 @@ onMounted(() => {
               v-if="state.selectedList?.id === item.id"
               class="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40"
             >
-              <span class="icon-[mdi--equalizer] h-5 w-5 text-pink-400" />
+              <span class="icon-[mdi--equalizer] h-5 w-5 text-sky-400" />
             </div>
           </div>
           <div class="min-w-0 flex-1">
             <p
               class="truncate text-sm font-medium transition-colors"
-              :class="state.selectedList?.id === item.id ? 'text-pink-400' : 'text-primary'"
+              :class="state.selectedList?.id === item.id ? 'text-sky-400' : 'text-primary'"
             >
               {{ item.name }}
             </p>
@@ -195,7 +195,7 @@ onMounted(() => {
           variant="solid"
           size="md"
           rounded="lg"
-          class="gap-2 shadow-md shadow-pink-500/20"
+          class="gap-2 shadow-md shadow-sky-500/20"
           @click="playAll"
         >
           <span class="icon-[mdi--play] h-5 w-5" />

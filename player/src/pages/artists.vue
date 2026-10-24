@@ -108,7 +108,7 @@ onMounted(() => loadArtists(true))
               v-for="opt in typeOptions"
               :key="opt.key"
               class="rounded-lg px-3 py-1.5 text-xs transition-all"
-              :class="type === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+              :class="type === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
               @click="type = opt.key"
             >
               {{ t(opt.labelKey) }}
@@ -123,7 +123,7 @@ onMounted(() => loadArtists(true))
               v-for="opt in areaOptions"
               :key="opt.key"
               class="rounded-lg px-3 py-1.5 text-xs transition-all"
-              :class="area === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+              :class="area === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
               @click="area = opt.key"
             >
               {{ t(opt.labelKey) }}
@@ -137,7 +137,7 @@ onMounted(() => loadArtists(true))
             v-for="opt in initialOptions"
             :key="opt.key"
             class="rounded px-2 py-1 text-xs transition-all"
-            :class="initial === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+            :class="initial === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
             @click="initial = opt.key"
           >
             {{ opt.key || t(opt.labelKey) }}

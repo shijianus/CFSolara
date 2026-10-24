@@ -145,7 +145,7 @@ const flipCover = (newCover: string) => {
     vinylLabelRef.value,
     { boxShadow: 'inset 0 2px 20px rgba(0, 0, 0, 0.3)' },
     {
-      boxShadow: 'inset 0 2px 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(236, 72, 153, 0.5)',
+      boxShadow: 'inset 0 2px 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(56,189,248, 0.5)',
       duration: 0.2,
       yoyo: true,
       repeat: 1,
@@ -238,7 +238,7 @@ defineExpose({
         :style="{
           backgroundImage: state.displayCover
             ? `url(${formatCoverUrl(state.displayCover, { size: 320 })})`
-            : 'linear-gradient(135deg, rgba(167,139,250,0.6) 0%, rgba(108,92,231,0.6) 100%)',
+            : 'linear-gradient(135deg, rgba(96,165,250,0.6) 0%, rgba(108,92,231,0.6) 100%)',
           transformStyle: 'preserve-3d',
           backfaceVisibility: 'hidden',
         }"
@@ -281,7 +281,7 @@ defineExpose({
 .vinyl-disc {
   background:
     conic-gradient(from 20deg, transparent 0 8%, rgba(255, 255, 255, 0.16) 12%, transparent 18% 50%, rgba(255, 255, 255, 0.12) 62%, transparent 68%),
-    repeating-radial-gradient(circle at center, #07070d 0 1.5px, #17171d 2.5px 3.5px);
+    repeating-radial-gradient(circle at center, #07101f 0 1.5px, #10213c 2.5px 3.5px);
   box-shadow:
     0 30px 80px -20px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(255, 255, 255, 0.12),
@@ -324,7 +324,7 @@ defineExpose({
 .vinyl-label.flipping {
   box-shadow:
     inset 0 2px 20px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(139, 92, 246, 0.7);
+    0 0 40px rgba(37,99,235, 0.7);
 }
 
 .spindle {

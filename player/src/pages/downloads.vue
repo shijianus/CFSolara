@@ -382,7 +382,7 @@ const formatSize = (bytes?: number) => {
             variant="gradient"
             size="none"
             rounded="full"
-            class="h-[36px] px-4 text-[13px] font-semibold shadow-md shadow-pink-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="h-[36px] px-4 text-[13px] font-semibold shadow-md shadow-sky-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="filteredDownloads.length === 0"
             @click="playAll"
             aria-label="播放全部"
@@ -419,10 +419,10 @@ const formatSize = (bytes?: number) => {
             role="radio"
             :aria-checked="selectedQualityFilter === opt.value"
             :tabindex="selectedQualityFilter === opt.value ? 0 : -1"
-            class="relative h-[28px] rounded-lg px-2.5 flex items-center text-[13px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/60 cursor-pointer border"
+            class="relative h-[28px] rounded-lg px-2.5 flex items-center text-[13px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 cursor-pointer border"
             :class="[
               selectedQualityFilter === opt.value
-                ? 'bg-pink-500/20 text-primary border-pink-500/40 font-medium shadow-sm'
+                ? 'bg-sky-500/20 text-primary border-sky-500/40 font-medium shadow-sm'
                 : 'border-transparent text-primary/70 hover:text-primary hover:bg-hover-glass'
             ]"
             @click="selectedQualityFilter = (opt.value as any)"
@@ -441,7 +441,7 @@ const formatSize = (bytes?: number) => {
               type="text"
               placeholder="搜索歌名、歌手、专辑..."
               aria-label="搜索歌名、歌手、专辑"
-              class="w-full h-[36px] rounded-xl border border-glass bg-button-glass py-0 pr-8 pl-8 text-[13px] font-medium text-primary placeholder:text-primary/60 focus:border-pink-500/50 focus:outline-none transition-all"
+              class="w-full h-[36px] rounded-xl border border-glass bg-button-glass py-0 pr-8 pl-8 text-[13px] font-medium text-primary placeholder:text-primary/60 focus:border-sky-500/50 focus:outline-none transition-all"
             />
             <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none"></span>
             <button
@@ -497,19 +497,19 @@ const formatSize = (bytes?: number) => {
               :aria-label="`${item.name} - ${item.artist}`"
               @dblclick="playSingle(item, index)"
               @keydown.enter.self="playSingle(item, index)"
-              class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500/50 cursor-pointer overflow-hidden border min-h-[56px] h-[56px]"
+              class="download-song-item group relative grid grid-cols-12 items-center gap-3 rounded-xl p-2.5 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/50 cursor-pointer overflow-hidden border min-h-[56px] h-[56px]"
               :class="[
                 isCurrentPlaying(item)
-                  ? 'border-pink-500/30'
+                  ? 'border-sky-500/30'
                   : isCurrentPaused(item)
-                    ? 'border-pink-500/15'
+                    ? 'border-sky-500/15'
                     : 'border-transparent hover:bg-primary/[0.06] hover:border-primary/10'
               ]"
               :style="{
                 backgroundColor: isCurrentPlaying(item)
-                  ? 'rgba(236, 72, 153, 0.10)'
+                  ? 'rgba(56,189,248, 0.10)'
                   : isCurrentPaused(item)
-                    ? 'rgba(236, 72, 153, 0.05)'
+                    ? 'rgba(56,189,248, 0.05)'
                     : 'transparent'
               }"
             >
@@ -517,7 +517,7 @@ const formatSize = (bytes?: number) => {
               <span
                 v-if="isCurrentOffline(item)"
                 class="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
-                :class="isCurrentPlaying(item) ? 'bg-pink-500' : 'bg-pink-500/50'"
+                :class="isCurrentPlaying(item) ? 'bg-sky-500' : 'bg-sky-500/50'"
                 aria-hidden="true"
               ></span>
 
@@ -603,9 +603,9 @@ const formatSize = (bytes?: number) => {
                   class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium select-none whitespace-nowrap"
                   :class="[
                     getParsedMeta(item).isLossless
-                      ? 'bg-transparent text-primary border border-pink-500/70'
+                      ? 'bg-transparent text-primary border border-sky-500/70'
                       : getParsedMeta(item).displayTag.includes('320')
-                        ? 'bg-transparent text-primary border border-purple-500/60'
+                        ? 'bg-transparent text-primary border border-blue-500/60'
                         : 'bg-transparent text-primary/70 border border-primary/20'
                   ]"
                 >
@@ -649,7 +649,7 @@ const formatSize = (bytes?: number) => {
                 >
                   <button
                     type="button"
-                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                     aria-label="播放歌曲"
                     title="播放"
                     @click.stop="playSingle(item, index)"
@@ -658,7 +658,7 @@ const formatSize = (bytes?: number) => {
                   </button>
                   <button
                     type="button"
-                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                    class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                     aria-label="导出音频文件"
                     title="重新导出"
                     @click.stop="handleExport(item)"
@@ -718,7 +718,7 @@ const formatSize = (bytes?: number) => {
             variant="gradient"
             size="md"
             rounded="full"
-            class="mt-6 px-5 py-2.5 text-xs font-semibold shadow-md shadow-pink-500/20"
+            class="mt-6 px-5 py-2.5 text-xs font-semibold shadow-md shadow-sky-500/20"
             @click="router.push('/search')"
             aria-label="去发现音乐"
           >

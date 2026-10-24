@@ -44,8 +44,8 @@ async function runAudit() {
   try {
     const metaRes = await fetch(`${TARGET_HOST}/api`);
     const meta = await metaRes.json();
-    logCheck('API Metadata GET /api returns Sonic and © EpoCanvas', 
-      metaRes.status === 200 && meta.name?.includes('Sonic') && meta.copyright?.includes('EpoCanvas'),
+    logCheck('API Metadata GET /api returns epocanvas sonic and © epocanvas',
+      metaRes.status === 200 && meta.name?.includes('epocanvas sonic') && meta.copyright?.includes('© epocanvas'),
       { status: metaRes.status, meta }
     );
   } catch (err) {
@@ -108,7 +108,9 @@ async function runAudit() {
       const leakedDocs = headerLinks.filter(l => forbiddenDocs.some(d => l.includes(d)));
       const hasLogin = headerButtons.some(b => /login|登录|sign in/i.test(b)) || /t\(['"]auth\.login['"]\)/i.test(headerHtml);
 
-      const hasSonicBrand = headerText.includes('Sonic') || headerHtml.includes('Sonic');
+      const hasSonicBrand =
+        (headerText.includes('epocanvas') && headerText.includes('sonic')) ||
+        headerHtml.includes('epocanvas sonic');
 
       const mainContainer = document.querySelector('.glass-container');
       const containerRadius = mainContainer ? window.getComputedStyle(mainContainer).borderRadius : '';
@@ -131,7 +133,7 @@ async function runAudit() {
       };
     });
 
-    logCheck('Desktop Header contains "Sonic" branding', desktopAudit.hasSonicBrand, { text: desktopAudit.headerText });
+    logCheck('Desktop Header contains "epocanvas sonic" branding', desktopAudit.hasSonicBrand, { text: desktopAudit.headerText });
     logCheck('Desktop Header has ZERO external doc links from GlassMusicPlayer', desktopAudit.leakedDocs.length === 0, { leakedDocs: desktopAudit.leakedDocs });
     logCheck('Desktop Header has ZERO Login button', !desktopAudit.hasLogin, { hasLogin: desktopAudit.hasLogin });
     logCheck('Main container uses rounded squircle styling (>= 24px)', parseInt(desktopAudit.containerRadius) >= 24, { radius: desktopAudit.containerRadius });
@@ -152,7 +154,7 @@ async function runAudit() {
       const headerText = header?.innerText || '';
       const headerButtons = Array.from(header ? header.querySelectorAll('button') : []).map(b => b.innerText || b.title || '');
       const hasLogin = headerButtons.some(b => /login|登录/i.test(b));
-      const hasSonicBrand = headerText.includes('Sonic');
+      const hasSonicBrand = headerText.includes('epocanvas') && headerText.includes('sonic');
       const notGlassPlayer = !headerText.includes('Glass Music Player');
 
       const mobileNav = document.querySelector('nav.fixed');
@@ -168,7 +170,7 @@ async function runAudit() {
       };
     });
 
-    logCheck('Mobile Header contains "Sonic" branding and not "Glass Music Player"', mobileAudit.hasSonicBrand && mobileAudit.notGlassPlayer, mobileAudit);
+    logCheck('Mobile Header contains "epocanvas sonic" branding and not "Glass Music Player"', mobileAudit.hasSonicBrand && mobileAudit.notGlassPlayer, mobileAudit);
     logCheck('Mobile Header has ZERO Login button', !mobileAudit.hasLogin, { hasLogin: mobileAudit.hasLogin });
     logCheck('Mobile floating TabBar uses rounded pill styling (>= 20px) with navigation links', parseInt(mobileAudit.navRadius) >= 20 && mobileAudit.navLinks >= 4, mobileAudit);
 

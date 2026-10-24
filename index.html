@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
-    <title>Sonic</title>
-    <meta name="apple-mobile-web-app-title" content="Sonic">
+    <title>epocanvas sonic</title>
+    <meta name="apple-mobile-web-app-title" content="epocanvas sonic">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="shortcut icon" href="/favicon.png">
@@ -78,7 +78,7 @@
             <button class="mobile-toolbar__button" id="mobileExploreButton" type="button" aria-label="探索雷达">
                 <i class="fas fa-satellite-dish" aria-hidden="true"></i>
             </button>
-            <div class="mobile-toolbar__title" id="mobileToolbarTitle">Sonic</div>
+            <div class="mobile-toolbar__title" id="mobileToolbarTitle">epocanvas sonic</div>
             <div class="mobile-toolbar__actions">
                 <button class="mobile-toolbar__button" id="mobileSearchToggle" type="button" aria-label="打开搜索">
                     <i class="fas fa-search" aria-hidden="true"></i>
@@ -86,8 +86,8 @@
             </div>
         </div>
         <div class="header">
-            <h1>Sonic</h1>
-            <div class="warning">© EpoCanvas · Sonic 多源聚合音乐云平台 | 接入 EpoMail OAuth 真人验证与网关 API</div>
+            <h1>epocanvas sonic</h1>
+            <div class="warning">© epocanvas · sonic 多源聚合音乐云平台 | 接入 EpoMail OAuth 真人验证与网关 API</div>
             <div class="top-actions-wrapper">
                 <button id="epomailLoginBtn" class="epomail-auth-btn" type="button" title="EpoMail 唯一接入与 API 平台">
                     <i class="fas fa-shield-halved" aria-hidden="true"></i>
@@ -105,7 +105,7 @@
         <div id="apiKeyModal" class="sonic-modal-backdrop solara-modal-backdrop" style="display:none;" aria-hidden="true">
             <div class="sonic-modal-card solara-modal-card">
                 <div class="sonic-modal-header solara-modal-header">
-                    <h3><i class="fas fa-key"></i> Sonic 开发者专案连结 (Sonic Pass)</h3>
+                    <h3><i class="fas fa-key"></i> epocanvas sonic 开发者专案连结 (sonic Pass)</h3>
                     <button type="button" id="closeApiKeyModalX" class="sonic-modal-close solara-modal-close" aria-label="关闭">&times;</button>
                 </div>
                 <div class="sonic-modal-body solara-modal-body">
@@ -116,13 +116,13 @@
                             <small id="solaraUserEmail">user@epocanvas.com</small>
                         </div>
                     </div>
-                    <p class="sonic-modal-tip solara-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 Sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
+                    <p class="sonic-modal-tip solara-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
                     <div class="api-key-box">
                         <input type="text" id="userApiKeyInput" readonly value="sonic_live_..." />
                         <button type="button" id="copyApiKeyBtn"><i class="fas fa-copy"></i> 复制 Key</button>
                     </div>
                     <div class="api-endpoints-preview">
-                        <strong>快速接入端点 (Sonic 网关)：</strong>
+                        <strong>快速接入端点 (epocanvas sonic 网关)：</strong>
                         <code>GET /api/sonic/search/nexus?q={关键词}</code><br/>
                         <code>GET /api/sonic/lyrics/nexus?title={歌名}&artist={歌手}</code><br/>
                         <code>GET /api/music/stream?id={歌曲ID}</code>

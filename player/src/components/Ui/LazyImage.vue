@@ -36,12 +36,12 @@ const gradientPalette = computed(() => {
     hash |= 0
   }
   const palettes = [
-    'from-violet-600/50 via-purple-600/40 to-pink-500/50',
-    'from-rose-500/50 via-pink-600/40 to-amber-500/40',
-    'from-cyan-500/50 via-blue-600/40 to-indigo-500/50',
-    'from-emerald-500/50 via-teal-600/40 to-cyan-500/50',
-    'from-fuchsia-600/50 via-purple-500/40 to-indigo-600/50',
-    'from-amber-500/50 via-orange-500/40 to-rose-500/50',
+    'from-blue-600/50 via-blue-600/40 to-sky-500/50',
+    'from-blue-600/50 via-sky-500/40 to-cyan-400/40',
+    'from-cyan-500/50 via-blue-600/40 to-blue-500/50',
+    'from-blue-500/50 via-cyan-500/40 to-sky-400/50',
+    'from-sky-600/50 via-blue-500/40 to-blue-600/50',
+    'from-sky-500/50 via-blue-500/40 to-cyan-400/50',
   ]
   return palettes[Math.abs(hash) % palettes.length]
 })
@@ -175,7 +175,7 @@ const handleError = () => {
       v-if="isLoading && !activeSrc.startsWith('data:')"
       class="absolute inset-0 flex items-center justify-center bg-white/10 animate-pulse"
     >
-      <div class="h-3 w-3 rounded-full border border-pink-400/60 border-t-transparent animate-spin"></div>
+      <div class="h-3 w-3 rounded-full border border-sky-400/60 border-t-transparent animate-spin"></div>
     </div>
   </div>
 </template>

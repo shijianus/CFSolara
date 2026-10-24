@@ -187,7 +187,7 @@ watch(visible, v => {
           <div class="relative p-6 pb-4">
             <div class="mb-6 flex items-center gap-4">
               <div
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-pink-500 to-purple-600 shadow-lg shadow-pink-500/25"
+                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/25"
               >
                 <span class="icon-[mdi--account-circle] h-6 w-6 text-white" />
               </div>
@@ -231,7 +231,7 @@ watch(visible, v => {
                     }}
                   </label>
                   <div
-                    class="glass-card group flex items-center gap-3 rounded-xl px-4 py-3 transition-all focus-within:ring-2 focus-within:ring-pink-400/50"
+                    class="glass-card group flex items-center gap-3 rounded-xl px-4 py-3 transition-all focus-within:ring-2 focus-within:ring-sky-400/50"
                   >
                     <span
                       :class="
@@ -239,7 +239,7 @@ watch(visible, v => {
                           ? 'icon-[mdi--email-outline]'
                           : 'icon-[mdi--cellphone]'
                       "
-                      class="text-primary/40 h-5 w-5 transition-colors group-focus-within:text-pink-400"
+                      class="text-primary/40 h-5 w-5 transition-colors group-focus-within:text-sky-400"
                     />
                     <input
                       v-if="accountType === 'phone'"
@@ -263,10 +263,10 @@ watch(visible, v => {
                     t('auth.password') || '密码'
                   }}</label>
                   <div
-                    class="glass-card group flex items-center gap-3 rounded-xl px-4 py-3 transition-all focus-within:ring-2 focus-within:ring-purple-400/50"
+                    class="glass-card group flex items-center gap-3 rounded-xl px-4 py-3 transition-all focus-within:ring-2 focus-within:ring-blue-400/50"
                   >
                     <span
-                      class="icon-[mdi--lock-outline] text-primary/40 h-5 w-5 transition-colors group-focus-within:text-purple-400"
+                      class="icon-[mdi--lock-outline] text-primary/40 h-5 w-5 transition-colors group-focus-within:text-blue-400"
                     />
                     <input
                       v-model="password"

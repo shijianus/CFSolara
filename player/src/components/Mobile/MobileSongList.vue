@@ -61,7 +61,7 @@ const getQualityBadgeInfo = (song: Song) => {
     return {
       label: 'SQ 无损',
       title: 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
-      badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40',
+      badgeClass: 'bg-gradient-to-r from-blue-600/30 to-sky-600/30 text-sky-300 border border-sky-500/40',
     }
   }
   if (isExhigh) {
@@ -110,7 +110,7 @@ const getQualityBadgeInfo = (song: Song) => {
           <p
             :title="song.name"
             class="song-name truncate text-sm font-medium"
-            :class="isCurrent(song) ? 'text-pink-400' : ''"
+            :class="isCurrent(song) ? 'text-sky-400' : ''"
           >
             {{ formatSongTitle(song.name, 18) }}
           </p>
@@ -155,7 +155,7 @@ const getQualityBadgeInfo = (song: Song) => {
         <span
           v-else
           class="song-index text-xs font-bold"
-          :class="index < 3 ? 'text-pink-400' : ''"
+          :class="index < 3 ? 'text-sky-400' : ''"
           >{{ index + 1 }}</span
         >
       </div>
@@ -172,7 +172,7 @@ const getQualityBadgeInfo = (song: Song) => {
           <p
             :title="song.name"
             class="song-name truncate text-sm font-medium"
-            :class="isCurrent(song) ? 'text-pink-400' : ''"
+            :class="isCurrent(song) ? 'text-sky-400' : ''"
           >
             {{ formatSongTitle(song.name, 18) }}
           </p>
@@ -210,12 +210,12 @@ const getQualityBadgeInfo = (song: Song) => {
 }
 
 .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
 }
 
 :root.dark .song-item-active,
 html.dark .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.25), rgba(139, 92, 246, 0.25));
+  background: linear-gradient(to right, rgba(56,189,248, 0.25), rgba(37,99,235, 0.25));
 }
 
 .song-item-compact:not(.song-item-active):active {

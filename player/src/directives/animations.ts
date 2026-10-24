@@ -509,7 +509,7 @@ export const vMagnetic: Directive<
  *
  * 使用方式:
  * <div v-spotlight>卡片容器</div>
- * <div v-spotlight="{ color: 'rgba(236, 72, 153, 0.15)', size: 300 }">粉色光晕</div>
+ * <div v-spotlight="{ color: 'rgba(56,189,248, 0.15)', size: 300 }">粉色光晕</div>
  */
 export const vSpotlight: Directive<
   HTMLElement,
@@ -592,7 +592,7 @@ export const vCardSpotlight: Directive<
 > = {
   mounted(el: HTMLElement, binding) {
     const {
-      color = 'rgba(236, 72, 153, 0.5)',
+      color = 'rgba(56,189,248, 0.5)',
       borderRadius = 'inherit',
     } = binding.value || {}
 

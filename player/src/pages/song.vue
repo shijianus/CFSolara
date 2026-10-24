@@ -122,7 +122,7 @@ watch(songId, () => loadInfo())
               class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             >
               <button
-                class="flex h-16 w-16 items-center justify-center rounded-full bg-pink-500/90 text-white shadow-lg transition-transform hover:scale-110"
+                class="flex h-16 w-16 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-lg transition-transform hover:scale-110"
                 @click="playCurrent"
               >
                 <span v-if="isCurrent && isPlaying" class="icon-[mdi--pause] h-8 w-8"></span>
@@ -159,7 +159,7 @@ watch(songId, () => loadInfo())
 
             <div class="flex items-center gap-3">
               <button
-                class="inline-flex items-center gap-2 rounded-full bg-pink-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:bg-pink-600 hover:shadow-xl"
+                class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:bg-sky-600 hover:shadow-xl"
                 @click="playCurrent"
               >
                 <span v-if="isCurrent && isPlaying" class="icon-[mdi--pause] h-5 w-5"></span>
@@ -219,7 +219,7 @@ watch(songId, () => loadInfo())
                 >
                   <span class="text-primary/40 w-6 text-center text-sm">{{ index + 1 }}</span>
                   <div class="min-w-0 flex-1">
-                    <p class="text-primary truncate text-sm font-medium group-hover:text-pink-300">
+                    <p class="text-primary truncate text-sm font-medium group-hover:text-sky-300">
                       {{ song.name }}
                     </p>
                     <p class="text-primary/60 truncate text-xs">{{ song.artist }}</p>
@@ -254,7 +254,7 @@ watch(songId, () => loadInfo())
                     ></div>
                   </div>
                   <p
-                    class="text-primary mt-2 truncate text-xs font-medium group-hover:text-pink-300"
+                    class="text-primary mt-2 truncate text-xs font-medium group-hover:text-sky-300"
                   >
                     {{ pl.name }}
                   </p>

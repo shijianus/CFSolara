@@ -172,7 +172,7 @@ onMounted(() => {
                 class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               >
                 <div
-                  class="flex h-14 w-14 items-center justify-center rounded-full bg-pink-500/90 text-white shadow-2xl backdrop-blur-sm"
+                  class="flex h-14 w-14 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-2xl backdrop-blur-sm"
                 >
                   <span class="icon-[mdi--play] h-8 w-8"></span>
                 </div>
@@ -192,7 +192,7 @@ onMounted(() => {
 
             <div class="p-4">
               <h3
-                class="text-primary mb-2 truncate text-base font-semibold transition-colors group-hover:text-pink-400"
+                class="text-primary mb-2 truncate text-base font-semibold transition-colors group-hover:text-sky-400"
               >
                 {{ mv.title }}
               </h3>
@@ -205,14 +205,14 @@ onMounted(() => {
                   class="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                 >
                   <button
-                    class="text-primary/50 hover:bg-hover-glass rounded-full p-1.5 transition-all hover:text-pink-400"
+                    class="text-primary/50 hover:bg-hover-glass rounded-full p-1.5 transition-all hover:text-sky-400"
                     :title="t('mvList.actions.like')"
                     @click.prevent.stop="toggleLike(mv)"
                   >
                     <span
                       class="h-5 w-5"
                       :class="
-                        mv.liked ? 'icon-[mdi--heart] text-pink-400' : 'icon-[mdi--heart-outline]'
+                        mv.liked ? 'icon-[mdi--heart] text-sky-400' : 'icon-[mdi--heart-outline]'
                       "
                     ></span>
                   </button>

@@ -3,6 +3,7 @@
 // with complete desensitization, privacy anonymization, and Edge CDN caching.
 
 import { jsonResponse } from '../http';
+import { BRAND_PRODUCT } from '../brand';
 import { SONIC_UA } from './config';
 
 const UPSTREAM_HEADERS = {
@@ -49,16 +50,16 @@ const HOT_SEARCH_LIST = [
 ];
 
 /**
- * Deep desensitize text & objects by replacing third-party provider brands with Sonic
+ * Deep desensitize text & objects by replacing third-party provider brands with the product brand
  */
 export function desensitizeData<T>(obj: T): T {
   if (!obj) return obj;
   if (typeof obj === 'string') {
     return (obj as string)
-      .replace(/网易云音乐/g, 'Sonic')
-      .replace(/网易出品/g, 'Sonic 甄选')
-      .replace(/网易/g, 'Sonic')
-      .replace(/NetEase/gi, 'Sonic') as unknown as T;
+      .replace(/网易云音乐/g, BRAND_PRODUCT)
+      .replace(/网易出品/g, `${BRAND_PRODUCT} 甄选`)
+      .replace(/网易/g, BRAND_PRODUCT)
+      .replace(/NetEase/gi, BRAND_PRODUCT) as unknown as T;
   }
   if (Array.isArray(obj)) {
     return obj.map((item) => desensitizeData(item)) as unknown as T;
@@ -123,7 +124,7 @@ export async function handleUpstreamEndpoint(
             ...b,
             targetId: tid,
             url: internalPath, // 替换为纯净的站内路由，绝不泄漏任何 orpheus:// 或外站 URL
-            typeTitle: `Sonic ${cleanTitle}`,
+            typeTitle: `${BRAND_PRODUCT} ${cleanTitle}`,
           };
         });
 
@@ -147,7 +148,7 @@ export async function handleUpstreamEndpoint(
       const data: any = await resp.json();
       const playlists = (data.playlists || []).map((p: any) => ({
         ...p,
-        copywriter: 'Sonic 甄选歌单',
+        copywriter: `${BRAND_PRODUCT} 甄选歌单`,
       }));
       return jsonResponse(
         {
@@ -238,7 +239,7 @@ export async function handleUpstreamEndpoint(
     const offset = url.searchParams.get('offset') || '0';
     const order = url.searchParams.get('order') || '最新';
     let type = url.searchParams.get('type') || '';
-    if (type === 'Sonic出品' || type === 'Sonic 甄选' || type === 'netease') type = '网易出品';
+    if (['Sonic出品', 'sonic出品', 'Sonic 甄选', 'sonic 甄选', 'netease'].includes(type)) type = '网易出品';
 
     try {
       const upstreamUrl = `https://music.163.com/api/mv/all?limit=${limit}&offset=${offset}&order=${encodeURIComponent(order)}${type ? `&type=${encodeURIComponent(type)}` : ''}`;

@@ -163,13 +163,13 @@ const maxScore = computed(() => {
       <div class="mb-5 shrink-0">
         <!-- 搜索结果标题 -->
         <div class="mb-4 flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg shadow-pink-500/20">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/20">
             <span class="icon-[mdi--magnify] h-5 w-5 text-white"></span>
           </div>
           <div>
             <h1 class="text-primary text-xl font-bold">
               {{ $t('search.resultsFor') }}
-              <span class="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">"{{ q }}"</span>
+              <span class="bg-gradient-to-r from-sky-400 to-blue-400 bg-clip-text text-transparent">"{{ q }}"</span>
             </h1>
             <p v-if="total > 0" class="text-primary/50 text-sm">
               {{ $t('search.foundResults', { count: total }) }}
@@ -284,13 +284,13 @@ const maxScore = computed(() => {
               class="flex items-center gap-3 rounded-full border px-5 py-3.5 backdrop-blur-2xl transition-all duration-300"
               :class="[
                 inputFocused
-                  ? 'border-pink-500/40 bg-white/[0.08] ring-4 ring-[#8b5cf6]/20 shadow-[0_0_35px_rgba(236,72,153,0.15),0_8px_32px_rgba(0,0,0,0.25)]'
+                  ? 'border-sky-500/40 bg-white/[0.08] ring-4 ring-[#2563eb]/20 shadow-[0_0_35px_rgba(56,189,248,0.15),0_8px_32px_rgba(0,0,0,0.25)]'
                   : 'border-white/[0.12] bg-white/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:border-white/20'
               ]"
             >
               <span
                 class="icon-[mdi--magnify] h-5 w-5 shrink-0 transition-all duration-300"
-                :class="inputFocused ? 'text-pink-400' : 'text-primary/40'"
+                :class="inputFocused ? 'text-sky-400' : 'text-primary/40'"
               />
               <input
                 ref="inputRef"
@@ -342,14 +342,14 @@ const maxScore = computed(() => {
             <button
               v-for="(keyword, ki) in searchHistory"
               :key="keyword"
-              class="history-chip group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:border-pink-500/30 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95"
+              class="history-chip group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:border-sky-500/30 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95"
               :style="{ animationDelay: `${ki * 35}ms` }"
               @click="doSearch(keyword)"
             >
               <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
               <span class="text-primary/80 group-hover:text-white transition-colors">{{ keyword }}</span>
               <span
-                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/40 hover:text-pink-400!"
+                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/40 hover:text-sky-400!"
                 @click.stop="globalStore.removeSearchHistory(keyword)"
               />
             </button>
@@ -385,11 +385,11 @@ const maxScore = computed(() => {
                 class="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md text-[11px] font-bold leading-none"
                 :class="[
                   index === 0
-                    ? 'bg-gradient-to-br from-rose-500 to-orange-500 text-white'
+                    ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white'
                     : index === 1
-                      ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white'
+                      ? 'bg-gradient-to-br from-sky-400 to-blue-600 text-white'
                       : index === 2
-                        ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-amber-900'
+                        ? 'bg-gradient-to-br from-cyan-400 to-blue-500 text-amber-900'
                         : 'text-primary/25'
                 ]"
               >
@@ -408,7 +408,7 @@ const maxScore = computed(() => {
                 <div class="mt-1 h-[2px] w-full overflow-hidden rounded-full bg-white/[0.04]">
                   <div
                     class="h-full rounded-full transition-all duration-500"
-                    :class="index < 3 ? 'bg-gradient-to-r from-pink-500/60 to-purple-500/40' : 'bg-white/[0.08]'"
+                    :class="index < 3 ? 'bg-gradient-to-r from-sky-500/60 to-blue-500/40' : 'bg-white/[0.08]'"
                     :style="{ width: `${Math.max(8, (item.score / maxScore) * 100)}%` }"
                   />
                 </div>
@@ -417,7 +417,7 @@ const maxScore = computed(() => {
               <!-- 标签 -->
               <span
                 v-if="item.iconType === 1"
-                class="shrink-0 rounded-md bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-400"
+                class="shrink-0 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-blue-400"
               >HOT</span>
               <span
                 v-else-if="item.iconType === 5"
@@ -439,11 +439,11 @@ const maxScore = computed(() => {
 <style scoped>
 /* ═══ 背景氛围光 ═══ */
 .ambient-a {
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.07) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(56,189,248, 0.07) 0%, transparent 65%);
   animation: ambient-float 12s ease-in-out infinite;
 }
 .ambient-b {
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(37,99,235, 0.05) 0%, transparent 65%);
   animation: ambient-float 15s ease-in-out infinite reverse;
 }
 @keyframes ambient-float {
@@ -454,11 +454,11 @@ const maxScore = computed(() => {
 
 /* ═══ 搜索按钮渐变 ═══ */
 .search-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  box-shadow: 0 4px 16px rgba(56,189,248, 0.25);
 }
 .search-btn:hover {
-  box-shadow: 0 6px 24px rgba(236, 72, 153, 0.35);
+  box-shadow: 0 6px 24px rgba(56,189,248, 0.35);
   filter: brightness(1.1);
 }
 

@@ -126,7 +126,7 @@ const tabs = computed(() => [
             />
             <div
               v-else
-              class="h-full w-full bg-linear-to-br from-pink-500/30 to-purple-600/30"
+              class="h-full w-full bg-linear-to-br from-sky-500/30 to-blue-600/30"
             ></div>
           </div>
 
@@ -143,7 +143,7 @@ const tabs = computed(() => [
               <div class="shrink-0">
                 <div class="group relative">
                   <div
-                    class="h-48 w-48 overflow-hidden rounded-full ring-4 ring-white/20 transition-all group-hover:ring-pink-500/40"
+                    class="h-48 w-48 overflow-hidden rounded-full ring-4 ring-white/20 transition-all group-hover:ring-sky-500/40"
                   >
                     <img
                       v-if="state.info.picUrl"
@@ -154,7 +154,7 @@ const tabs = computed(() => [
                     />
                     <div
                       v-else
-                      class="flex h-full w-full items-center justify-center bg-linear-to-br from-pink-400 to-purple-500"
+                      class="flex h-full w-full items-center justify-center bg-linear-to-br from-sky-400 to-blue-500"
                     >
                       <span class="icon-[mdi--account-music] h-20 w-20"></span>
                     </div>
@@ -195,7 +195,7 @@ const tabs = computed(() => [
                   <div
                     class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm"
                   >
-                    <span class="icon-[mdi--music-note] h-5 w-5 text-pink-400"></span>
+                    <span class="icon-[mdi--music-note] h-5 w-5 text-sky-400"></span>
                     <span class="text-sm"
                       >{{ state.info.musicSize }} {{ $t('artistPage.stats.songs') }}</span
                     >
@@ -203,7 +203,7 @@ const tabs = computed(() => [
                   <div
                     class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm"
                   >
-                    <span class="icon-[mdi--album] h-5 w-5 text-purple-400"></span>
+                    <span class="icon-[mdi--album] h-5 w-5 text-blue-400"></span>
                     <span class="text-sm"
                       >{{ state.info.albumSize }} {{ $t('artistPage.stats.albums') }}</span
                     >
@@ -220,7 +220,7 @@ const tabs = computed(() => [
                     v-if="state.info.fansCount"
                     class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm"
                   >
-                    <span class="icon-[mdi--account-group] h-5 w-5 text-rose-400"></span>
+                    <span class="icon-[mdi--account-group] h-5 w-5 text-blue-400"></span>
                     <span class="text-sm"
                       >{{ formatCount(state.info.fansCount) }}
                       {{ $t('artistPage.stats.fans') }}</span
@@ -236,7 +236,7 @@ const tabs = computed(() => [
                     variant="solid"
                     size="md"
                     rounded="full"
-                    class="gap-2 px-6 shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30"
+                    class="gap-2 px-6 shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/30"
                     @click="playAll"
                   >
                     <span class="icon-[mdi--play] h-5 w-5"></span>
@@ -257,7 +257,7 @@ const tabs = computed(() => [
                     size="md"
                     rounded="full"
                     class="gap-2"
-                    :class="state.followed ? 'bg-pink-500/20! text-pink-400!' : ''"
+                    :class="state.followed ? 'bg-sky-500/20! text-sky-400!' : ''"
                     @click="toggleFollow"
                   >
                     <span
@@ -275,7 +275,7 @@ const tabs = computed(() => [
         <div class="pb-8">
           <div v-if="state.info.briefDesc" class="glass-card mb-6 p-5">
             <h3 class="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <span class="icon-[mdi--information-outline] h-4 w-4 text-pink-400"></span>
+              <span class="icon-[mdi--information-outline] h-4 w-4 text-sky-400"></span>
               {{ $t('artistPage.bioTitle') }}
             </h3>
             <p class="text-primary/70 line-clamp-3 text-sm leading-relaxed">

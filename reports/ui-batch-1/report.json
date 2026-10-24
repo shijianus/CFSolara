@@ -1,0 +1,673 @@
+{
+  "seeded": true,
+  "report": [
+    {
+      "tag": "1440x900-light-perf",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n浅色模式",
+        "color": "rgb(0, 0, 0)",
+        "backgroundColor": "rgb(244, 248, 255)",
+        "boxShadow": "none",
+        "backdropFilter": "none"
+      },
+      "glassSelect": {
+        "text": "浅色模式",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "backgroundColor": "rgba(37, 99, 235, 0.06)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "22.8px"
+      }
+    },
+    {
+      "tag": "1440x900-light-perf",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "1440x900-light-perf",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "1440x900-light-perf",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "1440x900-light-perf",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "15.2px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "15.2px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "1440x900-dark",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n暗黑模式",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgba(12, 32, 60, 0.5)",
+        "boxShadow": "rgba(0, 0, 0, 0.06) 0px 6px 20px 0px, rgba(0, 0, 0, 0.03) 0px 2px 6px 0px, rgba(255, 255, 255, 0.16) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.08) 0px 0px 0px 0.5px inset",
+        "backdropFilter": "blur(28px) saturate(1.6)"
+      },
+      "glassSelect": {
+        "text": "暗黑模式",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "backgroundColor": "rgba(147, 197, 253, 0.08)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "22.8px"
+      }
+    },
+    {
+      "tag": "1440x900-dark",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "1440x900-dark",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "1440x900-dark",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "1440x900-dark",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "15.2px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "15.2px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "820x700-light-perf",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n浅色模式",
+        "color": "rgb(0, 0, 0)",
+        "backgroundColor": "rgb(244, 248, 255)",
+        "boxShadow": "none",
+        "backdropFilter": "none"
+      },
+      "glassSelect": {
+        "text": "浅色模式",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "backgroundColor": "rgba(37, 99, 235, 0.06)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "19.05px"
+      }
+    },
+    {
+      "tag": "820x700-light-perf",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "820x700-light-perf",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "820x700-light-perf",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "820x700-light-perf",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.7px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.7px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "820x700-dark",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n暗黑模式",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgba(12, 32, 60, 0.5)",
+        "boxShadow": "rgba(0, 0, 0, 0.06) 0px 6px 20px 0px, rgba(0, 0, 0, 0.03) 0px 2px 6px 0px, rgba(255, 255, 255, 0.16) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.08) 0px 0px 0px 0.5px inset",
+        "backdropFilter": "blur(28px) saturate(1.6)"
+      },
+      "glassSelect": {
+        "text": "暗黑模式",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "backgroundColor": "rgba(147, 197, 253, 0.08)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "19.05px"
+      }
+    },
+    {
+      "tag": "820x700-dark",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "820x700-dark",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "820x700-dark",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "820x700-dark",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.7px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.7px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "844x390-light-perf",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n浅色模式",
+        "color": "rgb(0, 0, 0)",
+        "backgroundColor": "rgb(244, 248, 255)",
+        "boxShadow": "none",
+        "backdropFilter": "none"
+      },
+      "glassSelect": {
+        "text": "浅色模式",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "backgroundColor": "rgba(37, 99, 235, 0.06)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "19.2px"
+      }
+    },
+    {
+      "tag": "844x390-light-perf",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "844x390-light-perf",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "844x390-light-perf",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "844x390-light-perf",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.8px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.8px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "844x390-dark",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n暗黑模式",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgba(12, 32, 60, 0.5)",
+        "boxShadow": "rgba(0, 0, 0, 0.06) 0px 6px 20px 0px, rgba(0, 0, 0, 0.03) 0px 2px 6px 0px, rgba(255, 255, 255, 0.16) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.08) 0px 0px 0px 0.5px inset",
+        "backdropFilter": "blur(28px) saturate(1.6)"
+      },
+      "glassSelect": {
+        "text": "暗黑模式",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "backgroundColor": "rgba(147, 197, 253, 0.08)",
+        "fontSize": "13px"
+      },
+      "activeOption": null,
+      "heading": {
+        "text": "设置",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "19.2px"
+      }
+    },
+    {
+      "tag": "844x390-dark",
+      "page": "search",
+      "heatValue": {
+        "text": "1280w",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "11px"
+      }
+    },
+    {
+      "tag": "844x390-dark",
+      "page": "downloads",
+      "heading": {
+        "text": "下载列表",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "22px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "15px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+        "fontSize": "13px"
+      },
+      "glassSelect": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "13px"
+      }
+    },
+    {
+      "tag": "844x390-dark",
+      "page": "home",
+      "sectionTitle": null,
+      "playlistName": null
+    },
+    {
+      "tag": "844x390-dark",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.8px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.8px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "390x844-light-perf",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n浅色模式\n暗黑模式\n跟随系统",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "boxShadow": "none",
+        "backdropFilter": "none"
+      },
+      "glassSelect": {
+        "text": "",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "backgroundColor": "rgba(37, 99, 235, 0.06)",
+        "fontSize": "12.1px"
+      },
+      "activeOption": {
+        "text": "浅色模式",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "7.5625px",
+        "opacity": "1"
+      },
+      "heading": {
+        "text": "sonic",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "12.1px"
+      }
+    },
+    {
+      "tag": "390x844-light-perf",
+      "page": "search",
+      "heatValue": null
+    },
+    {
+      "tag": "390x844-light-perf",
+      "page": "downloads",
+      "heading": {
+        "text": "sonic",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "12.1px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "10.5875px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One · 《Contrast Sessions》",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.460784)",
+        "fontSize": "9.075px"
+      },
+      "glassSelect": null
+    },
+    {
+      "tag": "390x844-light-perf",
+      "page": "home",
+      "sectionTitle": {
+        "text": "推荐歌单",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "12.1px"
+      },
+      "playlistName": {
+        "text": "浅色主题 · 午后漫游歌单",
+        "color": "rgba(9, 23, 44, 0.92)",
+        "fontSize": "11px",
+        "opacity": "0.8"
+      }
+    },
+    {
+      "tag": "390x844-light-perf",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.1px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.1px",
+        "opacity": "1"
+      }
+    },
+    {
+      "tag": "390x844-dark",
+      "page": "settings",
+      "card": {
+        "text": "主题模式\n\n选择界面主题\n\n浅色模式\n暗黑模式\n跟随系统",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "boxShadow": "none",
+        "backdropFilter": "blur(12px)"
+      },
+      "glassSelect": {
+        "text": "",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "backgroundColor": "rgba(147, 197, 253, 0.08)",
+        "fontSize": "12.1px"
+      },
+      "activeOption": {
+        "text": "暗黑模式",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "7.5625px",
+        "opacity": "1"
+      },
+      "heading": {
+        "text": "sonic",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "12.1px"
+      }
+    },
+    {
+      "tag": "390x844-dark",
+      "page": "search",
+      "heatValue": null
+    },
+    {
+      "tag": "390x844-dark",
+      "page": "downloads",
+      "heading": {
+        "text": "sonic",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "12.1px"
+      },
+      "rowTitle": {
+        "text": "光与回声",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "10.5875px"
+      },
+      "rowArtist": {
+        "text": "UI Batch One · 《Contrast Sessions》",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.470588)",
+        "fontSize": "9.075px"
+      },
+      "glassSelect": null
+    },
+    {
+      "tag": "390x844-dark",
+      "page": "home",
+      "sectionTitle": {
+        "text": "推荐歌单",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "12.1px"
+      },
+      "playlistName": {
+        "text": "浅色主题 · 午后漫游歌单",
+        "color": "rgba(239, 246, 255, 0.94)",
+        "fontSize": "11px",
+        "opacity": "0.8"
+      }
+    },
+    {
+      "tag": "390x844-dark",
+      "page": "lyrics",
+      "container": {
+        "text": "暮色落在安静的窗沿\n\n风吹过城市发亮的街\n\n我们把旋律收进口袋\n\n让每一次呼吸都有回声\n\n当夜色翻过远处的山\n\n灯光仍在为归途亮着\n\n请把这一刻轻轻记住\n\n下一",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "backgroundColor": "rgba(4, 12, 24, 0.72)"
+      },
+      "currentLine": {
+        "text": "暮色落在安静的窗沿",
+        "color": "rgba(255, 255, 255, 0.98)",
+        "fontSize": "12.1px"
+      },
+      "inactiveLine": {
+        "text": "风吹过城市发亮的街",
+        "color": "color(srgb 1 1 1 / 0.666667)",
+        "fontSize": "12.1px",
+        "opacity": "1"
+      }
+    }
+  ]
+}

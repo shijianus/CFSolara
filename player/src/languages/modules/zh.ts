@@ -272,7 +272,7 @@ export default {
       all: '全部',
       official: '官方',
       live: '现场',
-      netease: 'Sonic 甄选',
+      netease: 'sonic 甄选',
     },
     actions: {
       loadMore: '加载更多',
@@ -312,6 +312,14 @@ export default {
     },
   },
   likes: {
+    title: '我喜欢的音乐',
+    subtitle: '收藏你喜欢的歌曲、歌单与 MV',
+    tabs: {
+      all: '全部',
+      song: '单曲',
+      playlist: '歌单',
+      mv: 'MV',
+    },
     empty: '暂无喜欢的歌曲',
   },
   recent: {

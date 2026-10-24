@@ -283,14 +283,14 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
 }
 
 .play-all-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  box-shadow: 0 4px 16px rgba(56,189,248, 0.35);
   transition: all 0.3s ease;
 }
 
 .play-all-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(56,189,248, 0.3);
 }
 
 .shuffle-btn {
@@ -317,9 +317,9 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
 }
 
 .follow-btn.followed {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  border-color: rgba(236, 72, 153, 0.3);
-  color: #ec4899;
+  background: linear-gradient(135deg, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
+  border-color: rgba(56,189,248, 0.3);
+  color: #38bdf8;
 }
 
 .tabs-bar {
@@ -332,8 +332,8 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  color: #ec4899;
+  background: linear-gradient(135deg, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
+  color: #38bdf8;
   opacity: 1;
 }
 

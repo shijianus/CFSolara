@@ -20,7 +20,7 @@ const { t } = useI18n()
       <div class="mb-4 flex items-center justify-between">
         <h2 class="section-title">
           <span
-            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-pink-500 to-purple-600"
+            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600"
           >
             <span class="icon-[mdi--playlist-star] h-4 w-4 text-primary" />
           </span>
@@ -45,7 +45,7 @@ const { t } = useI18n()
       <div class="mb-3 flex items-center justify-between px-4">
         <h2 class="section-title">
           <span
-            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-amber-500 to-orange-600"
+            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-sky-500 to-blue-600"
           >
             <span class="icon-[mdi--account-music] h-4 w-4 text-primary" />
           </span>
@@ -96,7 +96,7 @@ const { t } = useI18n()
       <div class="mb-4 flex items-center justify-between">
         <h2 class="section-title">
           <span
-            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-rose-500 to-red-600"
+            class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-blue-600"
           >
             <span class="icon-[mdi--video] h-4 w-4 text-primary" />
           </span>
