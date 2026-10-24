@@ -200,9 +200,13 @@ router.onError((error, to) => {
     msg.includes('Failed to fetch dynamically imported module') ||
     msg.includes('Importing a module script failed')
   ) {
-    if (!sessionStorage.getItem('sonic_chunk_reload')) {
-      sessionStorage.setItem('sonic_chunk_reload', '1')
-      window.location.href = to.fullPath
+    try {
+      if (!sessionStorage.getItem('sonic_chunk_reload')) {
+        sessionStorage.setItem('sonic_chunk_reload', '1')
+        window.location.href = to.fullPath
+      }
+    } catch {
+      // 存储不可用时无法记录重试标记，放弃自动刷新以避免陷入循环
     }
   }
 })

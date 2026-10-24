@@ -28,6 +28,57 @@
 
   <body>
     <div id="app"></div>
+    <script>
+      // 清理本域名下遗留的 Service Worker，避免旧缓存返回过期 index.html
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (regs) {
+            regs.forEach(function (reg) {
+              reg.unregister()
+            })
+          })
+          .catch(function () {})
+      }
+    </script>
+    <script>
+      // 路由过渡卡死看门狗：内嵌 WebView 后台冻结等场景下 requestAnimationFrame
+      // 停摆，Vue 过渡永远停在 enter-from（opacity:0），页面呈空白。
+      // 检测到过渡类残留超过 1.5s（正常过渡仅 0.3s）即注入 CSS 强制内容可见。
+      ;(function () {
+        var applied = false
+        function applyOverride() {
+          if (applied) return
+          applied = true
+          document.documentElement.setAttribute('data-no-raf', '1')
+          var style = document.createElement('style')
+          style.textContent =
+            'html[data-no-raf] .fade-transform-enter-from,html[data-no-raf] .fade-transform-leave-to{opacity:1!important;transform:none!important}' +
+            'html[data-no-raf] .fade-transform-enter-active,html[data-no-raf] .fade-transform-leave-active{transition:none!important}'
+          document.head.appendChild(style)
+        }
+        function rafDead() {
+          return new Promise(function (resolve) {
+            var done = false
+            requestAnimationFrame(function () {
+              done = true
+              resolve(false)
+            })
+            setTimeout(function () {
+              if (!done) resolve(true)
+            }, 400)
+          })
+        }
+        setInterval(function () {
+          if (applied) return
+          var stuck = document.querySelector('.fade-transform-enter-active, .fade-transform-leave-active')
+          if (!stuck) return
+          rafDead().then(function (dead) {
+            if (dead) applyOverride()
+          })
+        }, 1000)
+      })()
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
