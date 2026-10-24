@@ -8,6 +8,12 @@ import { searchNexus } from '../../_lib/sonic/nexus-search';
 import { jsonResponse } from '../../_lib/http';
 import { sonicLinesToLrc, sonicLinesToTtml } from '../../_lib/sonic/utils';
 import { SONIC_UA } from '../../_lib/sonic/config';
+import {
+  checkEngineAccess,
+  evaluateGatewayRateLimit,
+  buildRateLimitErrorResponse,
+  isBlockedSsrfHost,
+} from '../../_lib/sonic/security';
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -18,6 +24,11 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
     );
   }
 
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, 'sonic-forward');
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
+
   const url = new URL(request.url);
   const type = (url.searchParams.get('type') || '').toLowerCase();
   const targetUrl = url.searchParams.get('url') || url.searchParams.get('target');
@@ -26,9 +37,12 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
   if (targetUrl) {
     try {
       const parsedTarget = new URL(targetUrl);
-      // Security safeguard: only forward http and https
-      if (parsedTarget.protocol !== 'http:' && parsedTarget.protocol !== 'https:') {
-        return sonicError('INVALID_TARGET', 'Only http/https URLs are permitted', 400, { provider: 'forward' });
+      // Security safeguard: only forward public http and https hosts
+      if (
+        (parsedTarget.protocol !== 'http:' && parsedTarget.protocol !== 'https:') ||
+        isBlockedSsrfHost(parsedTarget.hostname)
+      ) {
+        return sonicError('INVALID_TARGET', 'Only public http/https URLs are permitted', 400, { provider: 'forward' });
       }
 
       const forwardHeaders = new Headers();

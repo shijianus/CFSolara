@@ -1,6 +1,23 @@
-const API_BASE_URL = "https://music-api.gdstudio.xyz/api.php";
+import { getUniversalLyrics, searchTracks } from "./_lib/music";
+import { getSonicConfig } from "./_lib/sonic/config";
+import {
+  buildRateLimitErrorResponse,
+  checkEngineAccess,
+  evaluateGatewayRateLimit,
+} from "./_lib/sonic/security";
+import type { AppEnv } from "./_lib/types";
+
 const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
-const SAFE_RESPONSE_HEADERS = ["content-type", "cache-control", "accept-ranges", "content-length", "content-range", "etag", "last-modified", "expires"];
+const SAFE_RESPONSE_HEADERS = [
+  "content-type",
+  "cache-control",
+  "accept-ranges",
+  "content-length",
+  "content-range",
+  "etag",
+  "last-modified",
+  "expires",
+];
 
 function createCorsHeaders(init?: Headers): Headers {
   const headers = new Headers();
@@ -44,7 +61,7 @@ function normalizeKuwoUrl(rawUrl: string): URL | null {
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return null;
     }
-    parsed.protocol = "http:";
+    parsed.protocol = "https:";
     return parsed;
   } catch {
     return null;
@@ -61,7 +78,7 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
     method: request.method,
     headers: {
       "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
-      "Referer": "https://www.kuwo.cn/",
+      Referer: "https://www.kuwo.cn/",
     },
   };
 
@@ -83,95 +100,120 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
   });
 }
 
-async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
-  const apiUrl = new URL(API_BASE_URL);
-  url.searchParams.forEach((value, key) => {
-    if (key === "target" || key === "callback") {
-      return;
+async function proxyApiRequest(url: URL, request: Request, env?: AppEnv): Promise<Response> {
+  const types = (url.searchParams.get("types") || "").toLowerCase().trim();
+  if (!types) {
+    return new Response("Missing types", { status: 400, headers: createCorsHeaders() });
+  }
+
+  const headers = createCorsHeaders();
+  headers.set("Content-Type", "application/json; charset=utf-8");
+
+  const rawSource = (url.searchParams.get("source") || "netease").toLowerCase().trim();
+  const rawId = (url.searchParams.get("id") || "").replace(/^[a-z0-9_-]+:/i, "").trim();
+
+  // 1. Native local-first handlers (zero third-party free aggregation dependency)
+  if (types === "search") {
+    const keyword = (url.searchParams.get("name") || url.searchParams.get("q") || "").trim();
+    const count = Math.min(50, Math.max(1, parseInt(url.searchParams.get("count") || "20", 10) || 20));
+    const page = Math.max(1, parseInt(url.searchParams.get("pages") || url.searchParams.get("page") || "1", 10) || 1);
+    if (!keyword) {
+      return new Response(JSON.stringify([]), { status: 200, headers });
     }
+    const tracks = await searchTracks(env || {}, keyword, rawSource, count, page);
+    if (tracks.length > 0 || !getSonicConfig(env).enableGdstudio) {
+      const legacyItems = tracks.map((t) => ({
+        id: t.id,
+        name: t.name,
+        artist: [t.artist],
+        album: t.album,
+        pic_id: t.picId || t.id,
+        url_id: t.urlId || t.id,
+        lyric_id: t.lyricId || t.id,
+        source: t.source,
+      }));
+      return new Response(JSON.stringify(legacyItems), { status: 200, headers });
+    }
+  } else if (types === "url") {
+    if (!rawId) {
+      return new Response(JSON.stringify({ url: "", br: 0 }), { status: 200, headers });
+    }
+    const br = parseInt(url.searchParams.get("br") || "320", 10) || 320;
+    const quality = br >= 740 ? "flac" : br >= 320 ? "320" : br >= 192 ? "192" : "128";
+    if (!getSonicConfig(env).enableGdstudio) {
+      return new Response(
+        JSON.stringify({
+          url: `/api/music/stream?id=${encodeURIComponent(rawId)}&source=${encodeURIComponent(rawSource)}&quality=${quality}`,
+          br,
+          source: "local",
+        }),
+        { status: 200, headers },
+      );
+    }
+  } else if (types === "pic") {
+    if (!getSonicConfig(env).enableGdstudio) {
+      return new Response(
+        JSON.stringify({
+          url: rawId ? `/api/music/cover?id=${encodeURIComponent(rawId)}&source=${encodeURIComponent(rawSource)}` : "",
+        }),
+        { status: 200, headers },
+      );
+    }
+  } else if (types === "lyric") {
+    const lyr = await getUniversalLyrics(env || {}, { id: rawId, source: rawSource });
+    if (lyr.rawLyric || !getSonicConfig(env).enableGdstudio) {
+      return new Response(
+        JSON.stringify({
+          lyric: lyr.rawLyric || "",
+          tlyric: "",
+        }),
+        { status: 200, headers },
+      );
+    }
+  }
+
+  // 2. Optional third-party GDStudio fallback (ONLY when SONIC_ENABLE_GDSTUDIO=1)
+  const cfg = getSonicConfig(env);
+  if (!cfg.enableGdstudio) {
+    return new Response(
+      JSON.stringify({
+        error: "Third-party proxy disabled by default (SONIC_ENABLE_GDSTUDIO=false)",
+      }),
+      { status: 501, headers },
+    );
+  }
+
+  const apiUrl = new URL(cfg.gdstudioUrl);
+  url.searchParams.forEach((value, key) => {
+    if (key === "target" || key === "callback") return;
     apiUrl.searchParams.set(key, value);
   });
 
-  if (!apiUrl.searchParams.has("types")) {
-    return new Response("Missing types", { status: 400 });
-  }
-
-  const types = apiUrl.searchParams.get("types");
-  if (types === "url") {
-    let id = apiUrl.searchParams.get("id") || "";
-    id = id.replace(/^[a-z0-9_-]+:/i, "");
-    apiUrl.searchParams.set("id", id);
-
-    const source = apiUrl.searchParams.get("source") || "netease";
-    if (source !== "netease" && source !== "bilibili") {
-      apiUrl.searchParams.set("source", "netease");
-    }
-  }
-
-  let upstreamResponse: Response | null = null;
   try {
-    upstreamResponse = await fetch(apiUrl.toString(), {
+    const upstreamResponse = await fetch(apiUrl.toString(), {
       headers: {
         "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
-        "Accept": "application/json",
+        Accept: "application/json",
       },
     });
-  } catch (fetchErr) {
-    console.error("[Proxy Upstream Fetch Error]", fetchErr);
-  }
-
-  const headers = createCorsHeaders(upstreamResponse ? upstreamResponse.headers : undefined);
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json; charset=utf-8");
-  }
-
-  if (types === "url") {
-    const rawId = (apiUrl.searchParams.get("id") || "").replace(/^[a-z0-9_-]+:/i, "");
-    if (upstreamResponse && upstreamResponse.ok) {
-      try {
-        const bodyText = await upstreamResponse.text();
-        const parsed = JSON.parse(bodyText);
-        if (parsed && typeof parsed.url === "string" && parsed.url.length > 0) {
-          return new Response(bodyText, {
-            status: upstreamResponse.status,
-            statusText: upstreamResponse.statusText,
-            headers,
-          });
-        }
-      } catch {
-        // Fall through to stream fallback
-      }
+    const outHeaders = createCorsHeaders(upstreamResponse.headers);
+    if (!outHeaders.has("Content-Type")) {
+      outHeaders.set("Content-Type", "application/json; charset=utf-8");
     }
-
-    // Fallback: Return stream proxy if GDStudio fails or returns empty URL
-    if (rawId) {
-      const fallbackBody = JSON.stringify({
-        url: `/api/music/stream?id=${encodeURIComponent(rawId)}&source=netease`,
-        br: 320,
-        fallback: true,
-      });
-      return new Response(fallbackBody, {
-        status: 200,
-        headers,
-      });
-    }
-  }
-
-  if (!upstreamResponse) {
+    return new Response(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      statusText: upstreamResponse.statusText,
+      headers: outHeaders,
+    });
+  } catch {
     return new Response(JSON.stringify({ error: "Upstream fetch failed" }), {
       status: 502,
       headers,
     });
   }
-
-  return new Response(upstreamResponse.body, {
-    status: upstreamResponse.status,
-    statusText: upstreamResponse.statusText,
-    headers,
-  });
 }
 
-export async function onRequest({ request }: { request: Request }): Promise<Response> {
+export async function onRequest({ request, env }: { request: Request; env?: AppEnv }): Promise<Response> {
   if (request.method === "OPTIONS") {
     return handleOptions();
   }
@@ -180,6 +222,11 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
     return new Response("Method not allowed", { status: 405 });
   }
 
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, "legacy-proxy");
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
+
   const url = new URL(request.url);
   const target = url.searchParams.get("target");
 
@@ -187,5 +234,5 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
     return proxyKuwoAudio(target, request);
   }
 
-  return proxyApiRequest(url, request);
+  return proxyApiRequest(url, request, env);
 }

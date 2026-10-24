@@ -1,4 +1,6 @@
 import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
+import { checkEngineAccess, isBlockedSsrfHost } from "./_lib/sonic/security";
+import type { AppEnv } from "./_lib/types";
 
 const MAX_DIMENSION = 96;
 const TARGET_SAMPLE_COUNT = 2400;
@@ -357,17 +359,20 @@ function handleOptions(): Response {
   });
 }
 
-export async function onRequest({ request }: { request: Request }): Promise<Response> {
+export async function onRequest({ request, env }: { request: Request; env?: AppEnv }): Promise<Response> {
   if (request.method === "OPTIONS") {
     return handleOptions();
   }
 
-  if (request.method !== "GET") {
+  if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
       headers: createJsonHeaders(405),
     });
   }
+
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
 
   const url = new URL(request.url);
   const imageParam = url.searchParams.get("image") ?? url.searchParams.get("url");
@@ -389,11 +394,20 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
     });
   }
 
-  const cache = caches.default;
+  if ((target.protocol !== "http:" && target.protocol !== "https:") || isBlockedSsrfHost(target.hostname)) {
+    return new Response(JSON.stringify({ error: "Only public http/https image URLs are allowed" }), {
+      status: 400,
+      headers: createJsonHeaders(400),
+    });
+  }
+
+  const cache = typeof caches !== "undefined" ? (caches as any).default : null;
   const cacheKey = new Request(request.url, request);
-  const cachedResponse = await cache.match(cacheKey);
-  if (cachedResponse) {
-    return cachedResponse;
+  if (cache) {
+    const cachedResponse = await cache.match(cacheKey);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
   }
 
   let upstream: Response;
@@ -447,10 +461,12 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
       headers: createJsonHeaders(200),
     });
 
-    try {
-      await cache.put(cacheKey, response.clone());
-    } catch (cacheError) {
-      console.warn("Failed to cache palette response", cacheError);
+    if (cache) {
+      try {
+        await cache.put(cacheKey, response.clone());
+      } catch (cacheError) {
+        console.warn("Failed to cache palette response", cacheError);
+      }
     }
 
     return response;

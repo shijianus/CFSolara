@@ -32,6 +32,7 @@ import {
   interpolateWordTimestamps,
   getUniversalLyrics,
 } from '../music';
+import { callLocalEngineJson, type CircuitState } from './local-engine';
 
 export interface NexusLyricsResult {
   data: SonicLyricsData;
@@ -40,18 +41,35 @@ export interface NexusLyricsResult {
   provider: string;
   qualityScore: number;
   attempts: SonicAttempt[];
+  degraded?: boolean;
+  degradedReason?: string;
+  circuitState?: CircuitState;
 }
 
 export async function resolveNexusLyrics(
   params: SonicQueryParams,
   env?: AppEnv,
+  options?: { request?: Request },
 ): Promise<NexusLyricsResult> {
   const config = getSonicConfig(env);
   const attempts: SonicAttempt[] = [];
+  let degraded = false;
+  let degradedReason: string | undefined;
+  let circuitState: CircuitState | undefined;
 
-  const recordAttempt = (provider: string, ok: boolean, startMs: number, error?: string) => {
+  const defaultVia = config.runtime === 'linux-engine' ? 'local-engine' : 'cf-direct';
+  const formatProvider = (p: string) => {
+    if (config.runtime === 'linux-engine' && (p === 'netease' || p === 'qq' || p === 'kugou' || p === 'kuwo')) {
+      return `local-${p}`;
+    }
+    return p;
+  };
+
+  const recordAttempt = (provider: string, ok: boolean, startMs: number, error?: string, via = defaultVia) => {
     attempts.push({
-      provider,
+      provider: formatProvider(provider),
+      via,
+      source: via,
       ok,
       ms: Date.now() - startMs,
       error: error ? String(error).slice(0, 150) : undefined,
@@ -111,28 +129,79 @@ export async function resolveNexusLyrics(
   }
 
   let interpolatedFallback: ProviderLyricResult | null = null;
+  const finalize = (res: ProviderLyricResult): NexusLyricsResult => ({
+    ...res,
+    provider: formatProvider(String(res.provider)),
+    attempts,
+    degraded,
+    degradedReason,
+    circuitState,
+  });
 
-  // ── [Lyriva Sync Engine] Default Synchronized Lyrics Provider ──
-  // Per requirement: Use Lyriva by default, with complete and robust multi-source fallback
-  if (config.enableLyriva && (params.title || params.artist || params.platformId)) {
-    const lyrivaStart = Date.now();
-    try {
-      const lyrivaSignal = AbortSignal.timeout(config.timeoutMs);
-      const lyrivaResult = await lyrivaProvider.getLyrics(params, { env, signal: lyrivaSignal });
-      if (lyrivaResult && (lyrivaResult.data.instrumental || lyrivaResult.data.syncedLyrics.length > 0)) {
-        recordAttempt('lyriva', true, lyrivaStart);
-        if (lyrivaResult.data.instrumental || lyrivaResult.data.sourceQuality === 'real') {
-          return { ...lyrivaResult, attempts };
-        }
-        if (!interpolatedFallback) {
-          interpolatedFallback = lyrivaResult;
-        }
-      } else {
-        recordAttempt('lyriva', false, lyrivaStart, 'No synced lyrics from Lyriva');
-      }
-    } catch (err: any) {
-      recordAttempt('lyriva', false, lyrivaStart, err?.message || 'Lyriva sync error');
+  // ── ⓪ Linux VPS Local Engine Primary Hop (when running on Cloudflare Pages) ──
+  if (config.enableLocalEngine) {
+    const q = new URLSearchParams();
+    if (params.title) q.set('title', params.title);
+    if (params.artist) q.set('artist', params.artist);
+    if (params.album) q.set('album', params.album);
+    if (params.duration) q.set('duration', String(params.duration));
+    if (params.platform) q.set('platform', params.platform);
+    if (params.platformId) q.set('platformId', params.platformId);
+    if (params.ncmMusicId) q.set('ncmMusicId', params.ncmMusicId);
+    if (params.qqMusicId) q.set('qqMusicId', params.qqMusicId);
+    if (params.isrc) q.set('isrc', params.isrc);
+    if (params.prefer) q.set('prefer', params.prefer);
+    q.set('nocache', '1');
+
+    const engineRes = await callLocalEngineJson<{
+      brand?: string;
+      data?: SonicLyricsData;
+      meta?: {
+        matchLevel?: SonicMatchLevel;
+        matchScore?: number;
+        qualityScore?: number;
+        provider?: string;
+        attempts?: SonicAttempt[];
+      };
+    }>(`/api/sonic/lyrics/nexus?${q.toString()}`, env, {
+      request: options?.request,
+      timeoutMs: Math.min(config.engineTimeoutMs, config.timeoutMs),
+    });
+    circuitState = engineRes.circuitState;
+
+    if (engineRes.ok && engineRes.data?.data) {
+      const d = engineRes.data.data;
+      const m = engineRes.data.meta || {};
+      const upstreamAttempts = (m.attempts || []).map((a) => ({
+        ...a,
+        via: a.via || 'local-engine',
+        source: a.source || a.via || 'local-engine',
+      }));
+      return {
+        data: d,
+        matchLevel: m.matchLevel || 'HIGH_CONFIDENCE',
+        matchScore: typeof m.matchScore === 'number' ? m.matchScore : 90,
+        provider: String(m.provider || d.provider || 'local-engine'),
+        qualityScore: typeof m.qualityScore === 'number' ? m.qualityScore : 90,
+        attempts: [
+          { provider: 'local-engine', via: 'local-engine', source: 'local-engine', ok: true, ms: engineRes.latencyMs },
+          ...upstreamAttempts,
+        ],
+        degraded: false,
+        circuitState: 'CLOSED',
+      };
     }
+
+    degraded = true;
+    degradedReason = engineRes.error || 'local_engine_unavailable';
+    attempts.push({
+      provider: 'local-engine',
+      via: 'local-engine',
+      source: 'local-engine',
+      ok: false,
+      ms: engineRes.latencyMs,
+      error: degradedReason,
+    });
   }
 
   // Helper to build a resolved result
@@ -187,25 +256,25 @@ export async function resolveNexusLyrics(
   if (params.platform && params.platformId) {
     const pStart = Date.now();
     const platName = params.platform.toLowerCase();
-    const adapter = getProvider(platName) || getProvider('gdstudio');
+    const adapter = getProvider(platName) || (config.enableGdstudio ? getProvider('gdstudio') : undefined);
 
-    if (adapter && adapter.getLyrics) {
+    if (adapter && adapter.getLyrics && adapter.isEnabled(env)) {
       try {
         const timeoutSignal = AbortSignal.timeout(config.timeoutMs);
         const nativeResult = await adapter.getLyrics(params, { env, signal: timeoutSignal });
         if (nativeResult && nativeResult.data && (nativeResult.data.instrumental || nativeResult.data.syncedLyrics.length > 0)) {
-          recordAttempt(adapter.name, true, pStart);
+          recordAttempt(String(adapter.name), true, pStart);
           if (nativeResult.data.instrumental || nativeResult.data.sourceQuality === 'real') {
-            return { ...nativeResult, attempts };
+            return finalize(nativeResult);
           }
           if (!interpolatedFallback) {
             interpolatedFallback = nativeResult;
           }
         } else {
-          recordAttempt(adapter.name, false, pStart, 'No native lyrics returned');
+          recordAttempt(String(adapter.name), false, pStart, 'No native lyrics returned');
         }
       } catch (err: any) {
-        recordAttempt(adapter.name, false, pStart, err?.message || 'Platform native error');
+        recordAttempt(String(adapter.name), false, pStart, err?.message || 'Platform native error');
       }
     }
   }
@@ -246,7 +315,7 @@ export async function resolveNexusLyrics(
               },
             },
           );
-          if (result.data.instrumental || hasWords) return { ...result, attempts };
+          if (result.data.instrumental || hasWords) return finalize(result);
           if (!interpolatedFallback) interpolatedFallback = result;
         } else {
           recordAttempt('amll', false, aStart, 'Empty lines parsed from TTML');
@@ -295,7 +364,7 @@ export async function resolveNexusLyrics(
               },
             },
           );
-          if (result.data.instrumental || hasWords) return { ...result, attempts };
+          if (result.data.instrumental || hasWords) return finalize(result);
           if (!interpolatedFallback) interpolatedFallback = result;
         } else {
           recordAttempt('amll', false, sStart, 'Empty lines parsed from TTML search');
@@ -317,7 +386,7 @@ export async function resolveNexusLyrics(
       if (kugouResult && (kugouResult.data.instrumental || kugouResult.data.syncedLyrics.length > 0)) {
         recordAttempt('kugou', true, kStart);
         if (kugouResult.data.instrumental || kugouResult.data.sourceQuality === 'real') {
-          return { ...kugouResult, attempts };
+          return finalize(kugouResult);
         }
         if (!interpolatedFallback) {
           interpolatedFallback = kugouResult;
@@ -339,10 +408,10 @@ export async function resolveNexusLyrics(
       if (lrcResult) {
         recordAttempt('lrclib', true, lStart);
         if (lrcResult.data.instrumental) {
-          return { ...lrcResult, attempts };
+          return finalize(lrcResult);
         }
         if (lrcResult.data.sourceQuality === 'real') {
-          return { ...lrcResult, attempts };
+          return finalize(lrcResult);
         }
         if (!interpolatedFallback && lrcResult.data.syncedLyrics.length > 0) {
           interpolatedFallback = lrcResult;
@@ -355,7 +424,7 @@ export async function resolveNexusLyrics(
     }
   }
 
-  // ⑥ Other Connected Multi-sources (Musixmatch richsync / Universal Engine)
+  // ⑥ Other Connected Multi-sources (Universal Native Engine)
   if (env && (params.title || params.artist || params.platformId)) {
     const uStart = Date.now();
     try {
@@ -374,7 +443,7 @@ export async function resolveNexusLyrics(
 
       const uResult = await Promise.race([uPromise, timeoutPromise]);
 
-      if (uResult && (uResult.lines.length > 0 || isInstrumentalText(uResult.title || '') || isInstrumentalText(uResult.lyric || ''))) {
+      if (uResult && (uResult.lines.length > 0 || isInstrumentalText(uResult.title || '') || isInstrumentalText((uResult as any).lyric || ''))) {
         const sonicLines = internalLinesToSonicLines(uResult.lines);
         const isReal = uResult.syncType === 'word';
         const providerName = uResult.source || 'universal';
@@ -396,7 +465,7 @@ export async function resolveNexusLyrics(
             },
           },
         );
-        if (result.data.instrumental || isReal) return { ...result, attempts };
+        if (result.data.instrumental || isReal) return finalize(result);
         if (!interpolatedFallback) interpolatedFallback = result;
       } else {
         recordAttempt('universal', false, uStart, 'Universal engine returned empty lines');
@@ -406,9 +475,30 @@ export async function resolveNexusLyrics(
     }
   }
 
+  // ⑥b Optional Last-Resort Third-Party Lyriva Fallback (DISABLED BY DEFAULT: SONIC_ENABLE_LYRIVA=false)
+  if (config.enableLyriva && (params.title || params.artist || params.platformId)) {
+    const lyrivaStart = Date.now();
+    try {
+      const lyrivaSignal = AbortSignal.timeout(config.timeoutMs);
+      const lyrivaResult = await lyrivaProvider.getLyrics(params, { env, signal: lyrivaSignal });
+      if (lyrivaResult && (lyrivaResult.data.instrumental || lyrivaResult.data.syncedLyrics.length > 0)) {
+        recordAttempt('lyriva', true, lyrivaStart, undefined, 'third-party');
+        if (lyrivaResult.data.instrumental || lyrivaResult.data.sourceQuality === 'real') {
+          return { ...finalize(lyrivaResult), provider: 'lyriva' };
+        }
+        if (!interpolatedFallback) {
+          interpolatedFallback = lyrivaResult;
+        }
+      } else {
+        recordAttempt('lyriva', false, lyrivaStart, 'No synced lyrics from Lyriva', 'third-party');
+      }
+    } catch (err: any) {
+      recordAttempt('lyriva', false, lyrivaStart, err?.message || 'Lyriva fallback error', 'third-party');
+    }
+  }
+
   // ⑦ Return best interpolated fallback if available (words[] guaranteed populated)
   if (interpolatedFallback) {
-    // Ensure every line has words[]
     for (const line of interpolatedFallback.data.syncedLyrics) {
       if (!line.words || line.words.length === 0) {
         const words = interpolateWordTimestamps(line.text, line.startMs, line.durationMs || 3000);
@@ -432,10 +522,10 @@ export async function resolveNexusLyrics(
     }
     interpolatedFallback.data.level = 'word';
     interpolatedFallback.data.sourceQuality = 'interpolated';
-    return { ...interpolatedFallback, attempts };
+    return finalize(interpolatedFallback);
   }
 
   // ⑧ No lyrics found
   const emptyResult = buildResult('none', [], 'none', 'NONE', 0);
-  return { ...emptyResult, attempts };
+  return finalize(emptyResult);
 }

@@ -1,5 +1,6 @@
 import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
 import { getUniversalLyrics } from '../../_lib/music';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
 import type { AppEnv } from '../../_lib/types';
 
 export async function onRequest({ request, env, waitUntil }: { request: Request; env: AppEnv; waitUntil?: (promise: Promise<any>) => void }): Promise<Response> {
@@ -7,6 +8,11 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return errorResponse('Method not allowed', 405);
   }
+
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, 'music-lyric');
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
 
   const url = new URL(request.url);
   const id = url.searchParams.get('id')?.trim() || undefined;

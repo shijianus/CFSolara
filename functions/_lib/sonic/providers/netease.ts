@@ -1,5 +1,5 @@
 // Sonic Provider — NetEase Cloud Music (网易云音乐)
-// Direct YRC syllable word-level lyrics & search
+// Shared Native Encrypted Protocol (`ncm-api` on Linux + pure-TS `linuxapi` & YRC word-level lyrics)
 
 import type { AppEnv } from '../../types';
 import type {
@@ -10,8 +10,8 @@ import type {
   SonicMatchLevel,
 } from '../types';
 import type { SonicProviderAdapter, ProviderLyricResult } from './adapter';
-import { getSonicConfig, SONIC_UA } from '../config';
-import { internalLinesToSonicLines, extractPlainLyrics, computeQualityScore, normalizeArtistString } from '../utils';
+import { getSonicConfig } from '../config';
+import { internalLinesToSonicLines, extractPlainLyrics, computeQualityScore } from '../utils';
 import {
   fetchDirectNetEaseLyrics,
   parseHighPrecisionLyrics,
@@ -19,6 +19,27 @@ import {
   isValidLyric,
   searchTracks,
 } from '../../music';
+import { searchNeteaseNative } from '../native-protocols';
+
+async function fetchNeteaseLyricWithLocalFirst(songId: string, env?: AppEnv, signal?: AbortSignal): Promise<string> {
+  const cfg = getSonicConfig(env);
+  if (cfg.ncmApiUrl) {
+    try {
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (env?.NETEASE_COOKIE) headers.Cookie = String(env.NETEASE_COOKIE).trim();
+      const res = await fetch(
+        `${cfg.ncmApiUrl}/lyric/new?id=${encodeURIComponent(songId)}&realIP=${encodeURIComponent(cfg.realIp)}`,
+        { headers, signal: signal || AbortSignal.timeout(cfg.timeoutMs) },
+      );
+      if (res.ok) {
+        const json = (await res.json()) as any;
+        if (json?.yrc?.lyric && isValidLyric(json.yrc.lyric)) return json.yrc.lyric;
+        if (json?.lrc?.lyric && isValidLyric(json.lrc.lyric)) return json.lrc.lyric;
+      }
+    } catch {}
+  }
+  return fetchDirectNetEaseLyrics(songId);
+}
 
 export const neteaseProvider: SonicProviderAdapter = {
   name: 'netease',
@@ -27,24 +48,24 @@ export const neteaseProvider: SonicProviderAdapter = {
   },
 
   async getLyrics(params: SonicQueryParams, options?: { env?: AppEnv; signal?: AbortSignal }): Promise<ProviderLyricResult | null> {
-    const config = getSonicConfig(options?.env);
-    const songId = params.platformId || params.ncmMusicId;
+    const env = options?.env;
+    const songId = (params.platformId || params.ncmMusicId || '').replace(/^netease:/i, '').trim();
 
     let rawLyric = '';
-    let resolvedId = songId || '';
+    let resolvedId = songId;
 
     if (songId) {
-      rawLyric = await fetchDirectNetEaseLyrics(songId);
+      rawLyric = await fetchNeteaseLyricWithLocalFirst(songId, env, options?.signal);
     }
 
-    // Fallback: search NetEase if no explicit songId was provided
+    // Fallback: native encrypted NetEase search if no explicit songId was provided
     if (!rawLyric && !songId && (params.title || params.artist)) {
       const q = [params.title, params.artist].filter(Boolean).join(' ').trim();
       try {
-        const results = await searchTracks(options?.env || {}, q, 'netease', 3, 1);
-        if (results && results.length > 0 && results[0].id) {
-          resolvedId = String(results[0].id);
-          rawLyric = await fetchDirectNetEaseLyrics(resolvedId);
+        const nativeRes = await searchNeteaseNative(q, 3, 1, env, options?.signal);
+        if (nativeRes.tracks.length > 0 && nativeRes.tracks[0].platformId) {
+          resolvedId = nativeRes.tracks[0].platformId;
+          rawLyric = await fetchNeteaseLyricWithLocalFirst(resolvedId, env, options?.signal);
         }
       } catch {}
     }
@@ -55,7 +76,6 @@ export const neteaseProvider: SonicProviderAdapter = {
     if (lines.length === 0) return null;
 
     const isReal = syncType === 'word';
-    // Interpolate word timestamps for line-level lyrics
     for (const line of lines) {
       if (!line.words || line.words.length === 0) {
         line.words = interpolateWordTimestamps(line.text, line.time, line.duration || 3000);
@@ -104,95 +124,50 @@ export const neteaseProvider: SonicProviderAdapter = {
 
   async search(query: string, options?: SonicSearchOptions & { env?: AppEnv }): Promise<SonicSearchTrack[]> {
     const env = options?.env || {};
+    const cfg = getSonicConfig(env);
     const count = options?.count || 20;
     const page = options?.page || 1;
 
+    // 1. Primary: Native encrypted protocol (`ncm-api` on Linux VPS or pure-TS `linuxapi`)
     try {
-      // 1. First try searchTracks (GDStudio or configured base)
-      const songs = await searchTracks(env, query, 'netease', count, page);
-      if (Array.isArray(songs) && songs.length > 0) {
-        return songs.map((s) => {
-          const platformId = String(s.id);
-          const duration = typeof s.duration === 'number' ? s.duration : 0;
-          return {
-            id: `netease:${platformId}`,
-            title: s.name || '未知歌曲',
-            name: s.name || '未知歌曲',
-            artist: normalizeArtistString(s.artist),
-            album: s.album || '',
-            duration,
-            cover: s.coverUrl || '',
-            coverUrl: s.coverUrl || '',
-            platform: 'netease',
-            platformId,
-            sources: [
-              {
-                platform: 'netease',
-                platformId,
-                duration,
-              },
-            ],
-            picId: s.picId,
-            lyricId: s.lyricId || platformId,
-            urlId: s.urlId || platformId,
-            source: 'netease',
-          };
-        });
+      const native = await searchNeteaseNative(query, count, page, env, options?.signal);
+      if (native.tracks.length > 0) {
+        return native.tracks;
       }
-    } catch {}
+    } catch (err) {
+      if (options?.signal?.aborted) throw err;
+    }
 
-    // 2. Direct NetEase mobile web fallback if GDStudio is unavailable
-    try {
-      const sUrl = `https://music.163.com/api/search/get/web?s=${encodeURIComponent(query)}&type=1&offset=${(page - 1) * count}&total=true&limit=${count}`;
-      const res = await fetch(sUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          Referer: 'https://music.163.com/',
-        },
-        signal: options?.signal || AbortSignal.timeout(getSonicConfig(env).timeoutMs),
-      });
-      if (!res.ok) return [];
-      const json = (await res.json()) as any;
-      const songs = json?.result?.songs;
-      if (!Array.isArray(songs)) return [];
-
-      return songs.map((item: any) => {
-        const platformId = String(item.id);
-        const durationSec = typeof item.duration === 'number' ? Math.round(item.duration / 1000) : 0;
-        const artist = Array.isArray(item.artists) ? item.artists.map((a: any) => a.name).join(' / ') : '';
-        const album = item.album?.name || '';
-        const rawCover = item.album?.picUrl ? String(item.album.picUrl).replace('http://', 'https://') : '';
-        const rawArtistPic = item.artists?.[0]?.img1v1Url || item.artists?.[0]?.picUrl || '';
-        const artistPic = rawArtistPic ? String(rawArtistPic).replace('http://', 'https://') : '';
-        const cover = rawCover || (item.album?.picId
-          ? `/api/music/cover?id=${encodeURIComponent(item.album.picId)}&source=netease&artist=${encodeURIComponent(artist)}`
-          : (artistPic || `/api/music/cover?id=${encodeURIComponent(platformId)}&source=netease&artist=${encodeURIComponent(artist)}`));
-
-        return {
-          id: `netease:${platformId}`,
-          title: item.name || '未知歌曲',
-          name: item.name || '未知歌曲',
-          artist: artist || '未知歌手',
-          album,
-          duration: durationSec,
-          cover,
-          coverUrl: cover,
-          artistPic,
-          platform: 'netease',
-          platformId,
-          sources: [
-            {
+    // 2. Optional Last-Resort Fallback: GDStudio (ONLY when explicitly enabled via SONIC_ENABLE_GDSTUDIO=1)
+    if (cfg.enableGdstudio) {
+      try {
+        const songs = await searchTracks(env, query, 'netease', count, page);
+        if (Array.isArray(songs) && songs.length > 0) {
+          return songs.map((s) => {
+            const platformId = String(s.id);
+            const duration = typeof s.duration === 'number' ? s.duration : 0;
+            return {
+              id: `netease:${platformId}`,
+              title: s.name || '未知歌曲',
+              name: s.name || '未知歌曲',
+              artist: s.artist || '未知歌手',
+              album: s.album || '',
+              duration,
+              cover: s.coverUrl || '',
+              coverUrl: s.coverUrl || '',
               platform: 'netease',
               platformId,
-              duration: durationSec,
-            },
-          ],
-          source: 'netease',
-          lyricId: platformId,
-        };
-      });
-    } catch {
-      return [];
+              sources: [{ platform: 'netease', platformId, duration }],
+              picId: s.picId,
+              lyricId: s.lyricId || platformId,
+              urlId: s.urlId || platformId,
+              source: 'gdstudio',
+            };
+          });
+        }
+      } catch {}
     }
+
+    return [];
   },
 };

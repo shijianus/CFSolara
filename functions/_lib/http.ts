@@ -14,17 +14,27 @@ export function handleOptions(): Response {
   });
 }
 
-export function jsonResponse(payload: unknown, init?: ResponseInit): Response {
+export function jsonResponse(
+  payload: unknown,
+  initOrStatus?: ResponseInit | number,
+  extraHeaders?: HeadersInit,
+): Response {
   const headers = corsHeaders();
-  if (init?.headers) {
-    new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+  const status = typeof initOrStatus === 'number' ? initOrStatus : (initOrStatus?.status ?? 200);
+  const statusText = typeof initOrStatus === 'object' ? initOrStatus?.statusText : undefined;
+  const rawHeaders = typeof initOrStatus === 'object' ? initOrStatus?.headers : extraHeaders;
+  if (rawHeaders) {
+    new Headers(rawHeaders).forEach((value, key) => headers.set(key, value));
+  }
+  if (extraHeaders && typeof initOrStatus === 'object') {
+    new Headers(extraHeaders).forEach((value, key) => headers.set(key, value));
   }
   if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json; charset=utf-8');
   }
   return new Response(JSON.stringify(payload), {
-    status: init?.status ?? 200,
-    statusText: init?.statusText,
+    status,
+    statusText,
     headers,
   });
 }

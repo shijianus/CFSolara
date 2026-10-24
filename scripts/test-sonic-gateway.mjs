@@ -98,8 +98,8 @@ async function runTests() {
     }
   }
 
-  // Test 6: Single platform search (e.g. gdstudio)
-  console.log('\n6. Testing GET /api/sonic/search/gdstudio');
+  // Test 6: Single platform search gdstudio (disabled by default per Condition 1b)
+  console.log('\n6. Testing GET /api/sonic/search/gdstudio (disabled by default)');
   {
     const req = new Request('http://localhost/api/sonic/search/gdstudio?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA&count=3&nocache=1');
     const res = await handleSingleProviderSearchRequest('gdstudio', req, {});
@@ -108,6 +108,8 @@ async function runTests() {
     assert(res.status === 200, `Status is 200 (got ${res.status})`);
     assert(json.brand === 'Sonic', `Brand is Sonic`);
     assert(json.meta.provider === 'gdstudio', `Meta provider is gdstudio`);
+    assert(json.meta.disabled === true, `GDStudio is disabled by default (got ${json.meta.disabled})`);
+    assert(Array.isArray(json.data.tracks) && json.data.tracks.length === 0, `Disabled GDStudio returns 0 tracks`);
   }
 
   // Test 7: Timeout & Upstream isolation
@@ -134,16 +136,23 @@ async function runTests() {
     assert(json.data && Array.isArray(json.data.tracks) && json.data.tracks.length > 0, `QQ returned ${json.data?.tracks?.length} tracks`);
   }
 
-  // Test 9: GDStudio Single Provider Search returns tracks
-  console.log('\n9. Testing GET /api/sonic/search/gdstudio returns tracks');
+  // Test 9: Native NetEase & Kugou Single Provider Search + Default Third-Party Exclusion
+  console.log('\n9. Testing Native NetEase/Kugou Search & meta.attempts Provenance');
   {
-    const req = new Request('http://localhost/api/sonic/search/gdstudio?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA&count=3&nocache=1');
-    const res = await handleSingleProviderSearchRequest('gdstudio', req, {});
-    const json = await res.json();
+    const neReq = new Request('http://localhost/api/sonic/search/netease?q=%E8%B5%B7%E9%A3%8E%E4%BA%86&count=3&nocache=1');
+    const neRes = await handleSingleProviderSearchRequest('netease', neReq, {});
+    const neJson = await neRes.json();
 
-    assert(res.status === 200, `Status is 200 (got ${res.status})`);
-    assert(json.brand === 'Sonic', `Brand is Sonic`);
-    assert(json.data && Array.isArray(json.data.tracks) && json.data.tracks.length > 0, `GDStudio returned ${json.data?.tracks?.length} tracks`);
+    assert(neRes.status === 200, `NetEase Status is 200 (got ${neRes.status})`);
+    assert(neJson.brand === 'Sonic', `Brand is Sonic`);
+    assert(Array.isArray(neJson.data?.tracks) && neJson.data.tracks.length > 0, `Native NetEase returned ${neJson.data?.tracks?.length} tracks`);
+    assert(neJson.meta.attempts.every(a => a.provider !== 'gdstudio'), `NetEase did not call gdstudio`);
+
+    const nxReq = new Request('http://localhost/api/sonic/search/nexus?q=%E8%B5%B7%E9%A3%8E%E4%BA%86&count=3&nocache=1');
+    const nxRes = await handleNexusSearchRequest(nxReq, {});
+    const nxJson = await nxRes.json();
+    assert(!nxJson.meta.attempts.some(a => a.provider === 'gdstudio'), `Nexus search excludes gdstudio by default`);
+    assert(nxJson.meta.attempts.every(a => typeof a.source === 'string' && typeof a.via === 'string'), `Every attempt records truthful source & via`);
   }
 
   // Test 10: Kuwo Dynamic Search (no 404)

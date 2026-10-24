@@ -7,6 +7,7 @@ import { parseLyricsParams, sonicError, handleOptions } from '../../../_lib/soni
 import { resolveNexusLyrics } from '../../../_lib/sonic/nexus-lyrics';
 import { jsonResponse } from '../../../_lib/http';
 import { sonicLinesToLrc, sonicLinesToTtml } from '../../../_lib/sonic/utils';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../../_lib/sonic/security';
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -16,6 +17,11 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
       { status: 405 },
     );
   }
+
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, 'sonic-lyrics-sync');
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
 
   const url = new URL(request.url);
   const params = parseLyricsParams(url);
