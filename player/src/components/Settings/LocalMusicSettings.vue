@@ -16,17 +16,58 @@ const { setPlaylist, play } = useAudio()
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 
+interface ImportIssue {
+  name: string
+  reason: string
+}
+
+const importReport = reactive({
+  visible: false,
+  imported: 0,
+  skipped: [] as ImportIssue[],
+  failed: [] as ImportIssue[],
+})
+
 onMounted(() => {
   localMusicStore.loadMusics()
 })
 
+const importFiles = async (files: File[]) => {
+  importReport.visible = true
+  importReport.imported = 0
+  importReport.skipped = []
+  importReport.failed = []
+
+  for (const file of files) {
+    if (!file.type.startsWith('audio/')) {
+      importReport.skipped.push({ name: file.name, reason: t('components.settings.localMusicReasonUnsupported') })
+      continue
+    }
+
+    const baseName = file.name.replace(/\.[^/.]+$/, '')
+    const duplicate = musics.value.some(
+      music => music.name === baseName && music.file?.size === file.size
+    )
+    if (duplicate) {
+      importReport.skipped.push({ name: file.name, reason: t('components.settings.localMusicReasonDuplicate') })
+      continue
+    }
+
+    try {
+      await localMusicStore.addMusic(file)
+      importReport.imported += 1
+    } catch {
+      importReport.failed.push({ name: file.name, reason: t('components.settings.localMusicReasonReadFailed') })
+    }
+  }
+
+  if (!files.length) importReport.visible = false
+}
+
 const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
-    const files = Array.from(target.files)
-    for (const file of files) {
-      await localMusicStore.addMusic(file)
-    }
+    await importFiles(Array.from(target.files))
     // 清空 input，允许再次选择相同文件
     target.value = ''
   }
@@ -38,10 +79,7 @@ const handleDrop = async (event: DragEvent) => {
 
   const files = event.dataTransfer?.files
   if (files && files.length > 0) {
-    const audioFiles = Array.from(files).filter(file => file.type.startsWith('audio/'))
-    for (const file of audioFiles) {
-      await localMusicStore.addMusic(file)
-    }
+    await importFiles(Array.from(files))
   }
 }
 
@@ -107,7 +145,7 @@ const handlePlayOne = (music: any) => {
             {{ t('components.settings.localMusic') }}
           </h3>
           <p class="text-primary/60 text-sm">
-            {{ musics.length }} {{ t('commonUnits.songs', { count: musics.length }) }}
+            {{ t('commonUnits.songs', { count: musics.length }) }}
           </p>
         </div>
       </div>
@@ -159,6 +197,65 @@ const handlePlayOne = (music: any) => {
         </div>
         <p class="text-primary text-lg font-semibold">{{ t('components.settings.dropFiles') }}</p>
         <p class="text-primary/60 mt-2 text-sm">{{ t('components.settings.dropFilesHint') }}</p>
+      </div>
+    </div>
+
+    <!-- 导入结果：成功数量与被跳过/失败的文件及原因 -->
+    <div
+      v-if="importReport.visible"
+      class="mx-6 mt-4 rounded-xl border border-glass bg-primary/5 p-4 text-xs"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-primary text-sm font-semibold">{{ t('components.settings.localMusicImportTitle') }}</p>
+          <p class="text-primary/70 mt-1">
+            {{ t('components.settings.localMusicImportSummary', { count: importReport.imported }) }}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          rounded="full"
+          icon="icon-[mdi--close]"
+          icon-class="h-4 w-4"
+          :title="t('components.settings.localMusicImportDismiss')"
+          :aria-label="t('components.settings.localMusicImportDismiss')"
+          @click="importReport.visible = false"
+        />
+      </div>
+
+      <div v-if="importReport.skipped.length" class="mt-3">
+        <p class="text-primary/80 font-medium">
+          {{ t('components.settings.localMusicImportSkipped') }} ({{ importReport.skipped.length }})
+        </p>
+        <ul class="mt-1.5 space-y-1">
+          <li
+            v-for="issue in importReport.skipped"
+            :key="`skipped-${issue.name}`"
+            class="flex min-w-0 flex-wrap gap-x-2"
+          >
+            <span class="text-primary/80 min-w-0 break-all" :title="issue.name">{{ issue.name }}</span>
+            <span class="text-primary/50">— {{ issue.reason }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div v-if="importReport.failed.length" class="mt-3">
+        <p class="text-red-400 font-medium">
+          {{ t('components.settings.localMusicImportFailed') }} ({{ importReport.failed.length }})
+        </p>
+        <ul class="mt-1.5 space-y-1">
+          <li
+            v-for="issue in importReport.failed"
+            :key="`failed-${issue.name}`"
+            class="flex min-w-0 flex-wrap gap-x-2"
+          >
+            <span class="text-primary/80 min-w-0 break-all" :title="issue.name">{{ issue.name }}</span>
+            <span class="text-primary/50">— {{ issue.reason }}</span>
+          </li>
+        </ul>
       </div>
     </div>
 
