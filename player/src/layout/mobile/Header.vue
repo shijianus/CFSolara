@@ -15,6 +15,11 @@ const isRootRoute = computed(() => route.path === '/')
 
 const goSearch = () => router.push('/search')
 
+const canGoBack = computed(() => {
+  void route.fullPath
+  return Boolean((window.history.state as { back?: string | null } | null)?.back)
+})
+
 // 优先返回上一页；直接打开详情页等无站内历史时回首页
 const goBack = () => {
   if (window.history.state?.back) {
@@ -30,6 +35,9 @@ const themeIcon = computed(() => {
   return 'icon-[mdi--weather-sunny]'
 })
 
+const currentThemeLabel = computed(() => t(`components.settings.themeOptions.${theme.value}`))
+const themeAria = computed(() => t('layout.theme.current', { mode: currentThemeLabel.value }))
+
 const cycleTheme = () => {
   const order: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
   const idx = order.indexOf(theme.value)
@@ -43,9 +51,11 @@ const cycleTheme = () => {
       <button
         v-if="!isRootRoute"
         type="button"
-        class="text-primary/70 hover:text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        class="text-primary/70 hover:text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
         :aria-label="t('common.back')"
         :title="t('common.back')"
+        :disabled="!canGoBack"
+        :aria-disabled="!canGoBack"
         @click="goBack"
       >
         <span class="icon-[mdi--chevron-left] h-6 w-6"></span>
@@ -73,12 +83,14 @@ const cycleTheme = () => {
       </button>
       <button
         type="button"
-        class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
-        :aria-label="t('components.settings.themeMode')"
-        :title="t('components.settings.themeMode')"
+        class="text-primary/70 hover:text-primary flex h-11 items-center justify-center gap-1.5 rounded-full px-2.5 transition-colors hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        :aria-label="themeAria"
+        :title="themeAria"
+        :aria-pressed="theme === 'dark'"
         @click="cycleTheme"
       >
-        <span :class="[themeIcon, 'h-5 w-5']"></span>
+        <span :class="[themeIcon, 'h-5 w-5 shrink-0']"></span>
+        <span class="text-[11px] font-semibold">{{ currentThemeLabel }}</span>
       </button>
     </div>
   </header>
