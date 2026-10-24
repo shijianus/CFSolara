@@ -664,8 +664,8 @@ const emit = defineEmits(['show'])
             </div>
           </button>
         </div>
-        <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
-          <p :title="currentSong?.name" class="text-primary line-clamp-1 text-sm font-medium">
+        <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-center gap-0.5">
+          <p :title="currentSong?.name" class="text-primary line-clamp-2 text-sm font-medium">
             {{ currentSong ? currentSong.name : t('player.selectSongToStart') }}
           </p>
           <p v-if="currentSong" class="text-primary/80 truncate text-xs">

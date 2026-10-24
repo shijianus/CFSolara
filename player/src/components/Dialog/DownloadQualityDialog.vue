@@ -415,7 +415,7 @@ onUnmounted(() => {
                 @keydown.arrow-left.prevent="selectNext(-1)"
                 @keydown.space.prevent="selectLevel(choice.level)"
                 @keydown.enter.prevent="handleConfirm"
-                class="option-row relative h-[68px] min-h-[68px] px-4 flex items-center justify-between rounded-xl transition-colors duration-150 outline-none"
+                class="option-row relative min-h-[68px] px-4 py-2.5 flex items-center justify-between rounded-xl transition-colors duration-150 outline-none"
                 :class="[
                   !choice.isAvailable
                     ? 'disabled-option cursor-not-allowed'

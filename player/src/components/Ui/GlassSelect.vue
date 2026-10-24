@@ -173,11 +173,11 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
       :aria-expanded="open"
       :aria-controls="listboxId"
       :aria-label="selectedLabel"
-      class="glass-button text-primary flex w-full h-11 items-center justify-between overflow-hidden rounded-xl px-3 text-left text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+      class="glass-button text-primary flex w-full min-h-11 items-center justify-between rounded-xl px-3 py-2 text-left text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
       @click="toggle"
       @keydown="handleTriggerKeydown"
     >
-      <span class="truncate text-[13px] font-medium text-primary">{{ selectedLabel }}</span>
+      <span class="min-w-0 flex-1 text-[13px] font-medium text-primary">{{ selectedLabel }}</span>
       <span
         class="icon-[mdi--chevron-down] text-primary/70 h-4 w-4 shrink-0 transition"
         :class="{ 'rotate-180': open }"
