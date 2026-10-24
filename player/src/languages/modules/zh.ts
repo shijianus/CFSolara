@@ -369,6 +369,13 @@ export default {
   playlist: {
     tabs: { songs: '歌曲', comments: '评论', similar: '相似' },
     similarEmpty: '暂无相似歌单',
+    loadMore: '加载更多歌曲',
+    loadingAll: '正在加载完整歌曲列表…',
+    loadedProgress: '已加载 {loaded} / {total} 首',
+    allLoaded: '已加载全部歌曲',
+    partialPlayNotice: '完整列表加载失败，本次仅播放已加载的 {loaded} 首（共 {total} 首）',
+    retryLoad: '重试加载',
+    dismiss: '知道了',
   },
   artistPage: {
     bioTitle: '艺人简介',

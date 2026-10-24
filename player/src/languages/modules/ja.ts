@@ -378,6 +378,13 @@ export default {
   playlist: {
     tabs: { songs: '曲', comments: 'コメント', similar: '類似' },
     similarEmpty: '類似のプレイリストはありません',
+    loadMore: 'さらに曲を読み込む',
+    loadingAll: '曲リスト全体を読み込み中…',
+    loadedProgress: '{loaded} / {total} 曲を読み込み済み',
+    allLoaded: 'すべての曲を読み込みました',
+    partialPlayNotice: '完全なリストを読み込めませんでした。読み込み済みの {loaded} 曲（全 {total} 曲）のみ再生します。',
+    retryLoad: '再読み込み',
+    dismiss: '閉じる',
   },
   artistPage: {
     bioTitle: 'アーティスト紹介',

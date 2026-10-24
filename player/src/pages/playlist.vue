@@ -43,6 +43,12 @@ interface PlaylistState {
   hasMoreComments: boolean
   isLoadingMoreComments: boolean
   isCommentLoadError: boolean
+  songTotal: number
+  hasMoreSongs: boolean
+  isLoadingMoreSongs: boolean
+  isSongLoadError: boolean
+  isPreparingFullList: boolean
+  partialPlayNotice: string
 }
 
 const state = reactive<PlaylistState>({
@@ -58,6 +64,12 @@ const state = reactive<PlaylistState>({
   hasMoreComments: true,
   isLoadingMoreComments: false,
   isCommentLoadError: false,
+  songTotal: 0,
+  hasMoreSongs: false,
+  isLoadingMoreSongs: false,
+  isSongLoadError: false,
+  isPreparingFullList: false,
+  partialPlayNotice: '',
 })
 const {
   activeTab,
@@ -70,6 +82,12 @@ const {
   hasMoreComments,
   isLoadingMoreComments,
   isCommentLoadError,
+  songTotal,
+  hasMoreSongs,
+  isLoadingMoreSongs,
+  isSongLoadError,
+  isPreparingFullList,
+  partialPlayNotice,
 } = toRefs(state)
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 const { t } = useI18n()
@@ -77,11 +95,34 @@ const { t } = useI18n()
 const gradients: string[] = ['from-blue-500 to-sky-500']
 const pickGradient = (): string => gradients[Math.floor(Math.random() * gradients.length)]
 
+const SONG_PAGE_SIZE = 100
+
+/** 拉取一页歌曲；reset 为 true 时覆盖，否则按 offset 追加并去重 */
+const loadSongPage = async (id: number, offset: number, reset: boolean) => {
+  const res = await playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset })
+  const page = transformSongs(res as Record<string, unknown>)
+  if (reset) {
+    state.songs = page
+  } else {
+    const seen = new Set(state.songs.map(s => String(s.id)))
+    state.songs.push(...page.filter(s => !seen.has(String(s.id))))
+  }
+  const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+  state.hasMoreSongs = !reachedTotal && page.length === SONG_PAGE_SIZE
+  state.isSongLoadError = false
+}
+
 const loadPlaylist = async (id: number) => {
+  state.songs = []
+  state.songTotal = 0
+  state.hasMoreSongs = false
+  state.isLoadingMoreSongs = false
+  state.isSongLoadError = false
+  state.partialPlayNotice = ''
   try {
     const [detailRes, tracksRes] = await Promise.all([
       playlistDetail({ id }),
-      playlistTrackAll({ id, limit: 100 }),
+      playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset: 0 }),
     ])
 
     const detail = transformPlaylistDetail(detailRes as Record<string, unknown>, t('home.playlistFallback'))
@@ -100,14 +141,80 @@ const loadPlaylist = async (id: number) => {
         gradient: pickGradient(),
         coverImgUrl: detail.coverImgUrl,
       }
+      state.songTotal = detail.songCount
       state.isCollected = libraryStore.isPlaylistCollected(id)
     }
 
-    state.songs = transformSongs(tracksRes as Record<string, unknown>, 100)
+    state.songs = transformSongs(tracksRes as Record<string, unknown>)
+    const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+    state.hasMoreSongs = !reachedTotal && state.songs.length === SONG_PAGE_SIZE
   } catch {
+    state.isSongLoadError = true
   } finally {
     state.isPageLoading = false
   }
+}
+
+/** 追加下一页歌曲 */
+const loadMoreSongs = async () => {
+  if (state.isLoadingMoreSongs || !state.hasMoreSongs) return
+  state.isLoadingMoreSongs = true
+  try {
+    await loadSongPage(Number(route.params.id), state.songs.length, false)
+  } catch {
+    state.isSongLoadError = true
+  } finally {
+    state.isLoadingMoreSongs = false
+  }
+}
+
+/** 播放/随机前确保完整列表已入队，失败时返回 false 以便提示仅播放已加载部分 */
+const ensureAllSongsLoaded = async () => {
+  if (!state.songs.length || !state.hasMoreSongs) return true
+  state.isPreparingFullList = true
+  try {
+    while (state.hasMoreSongs) {
+      const before = state.songs.length
+      await loadSongPage(Number(route.params.id), before, false)
+      if (state.songs.length === before) break
+    }
+    return !state.hasMoreSongs
+  } catch {
+    state.isSongLoadError = true
+    return false
+  } finally {
+    state.isPreparingFullList = false
+  }
+}
+
+const handlePlayAll = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  playAllAction(state.songs)
+}
+
+const handleShufflePlay = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  shufflePlayAction(state.songs)
+}
+
+const dismissPartialPlayNotice = () => {
+  state.partialPlayNotice = ''
 }
 
 const loadComments = async (id?: number, reset = false) => {
@@ -227,9 +334,6 @@ const submitComment = () => {
   state.newComment = ''
 }
 
-const playAll = () => playAllAction(state.songs)
-
-const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
   if (!state.playlistInfo) return
@@ -268,7 +372,7 @@ const tabsWithCount = computed(() =>
     ...tab,
     count:
       tab.key === 'songs'
-        ? songs.value.length
+        ? songTotal.value || songs.value.length
         : tab.key === 'comments'
           ? comments.value.length
           : similarPlaylists.value.length,
@@ -315,7 +419,7 @@ const tabsWithCount = computed(() =>
                     variant="ghost"
                     size="none"
                     class="absolute! inset-0 flex items-center justify-center rounded-3xl opacity-0 transition-all duration-300 group-hover:opacity-100"
-                    @click="playAll"
+                    @click="handlePlayAll"
                   >
                     <div
                       class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600 text-white shadow-2xl transition-transform hover:scale-110"
@@ -396,7 +500,7 @@ const tabsWithCount = computed(() =>
                       size="md"
                       rounded="full"
                       class="px-8 py-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
-                      @click="playAll"
+                      @click="handlePlayAll"
                     >
                       <span class="icon-[mdi--play] mr-2 h-5 w-5"></span>
                       {{ $t('actions.playAll') }}
@@ -406,7 +510,7 @@ const tabsWithCount = computed(() =>
                       size="md"
                       rounded="full"
                       class="px-6 py-3"
-                      @click="shufflePlay"
+                      @click="handleShufflePlay"
                     >
                       <span class="icon-[mdi--shuffle] mr-2 h-5 w-5"></span>
                       {{ $t('actions.shufflePlay') }}
@@ -456,7 +560,50 @@ const tabsWithCount = computed(() =>
 
         <!-- 歌曲列表 -->
         <section v-show="activeTab === 'songs'" class="h-full overflow-hidden">
+          <div
+            v-if="partialPlayNotice"
+            class="mb-3 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-primary/80"
+            role="status"
+          >
+            <span class="icon-[mdi--alert-outline] mt-0.5 h-4 w-4 shrink-0 text-amber-400"></span>
+            <span class="flex-1">{{ partialPlayNotice }}</span>
+            <button
+              type="button"
+              class="min-h-11 min-w-11 shrink-0 rounded-lg px-2 text-xs font-medium text-primary/60 hover:text-primary focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="dismissPartialPlayNotice"
+            >
+              {{ $t('playlist.dismiss') }}
+            </button>
+          </div>
           <SongList :songs="songs" :show-header="true" />
+          <div class="mt-4 flex flex-col items-center gap-2 pb-4">
+            <p v-if="songTotal" class="text-primary/50 text-xs">
+              {{ $t('playlist.loadedProgress', { loaded: songs.length, total: songTotal }) }}
+            </p>
+            <Button
+              v-if="hasMoreSongs"
+              variant="soft"
+              size="sm"
+              rounded="full"
+              class="min-h-11"
+              :loading="isLoadingMoreSongs || isPreparingFullList"
+              :disabled="isLoadingMoreSongs || isPreparingFullList"
+              @click="loadMoreSongs"
+            >
+              {{ isLoadingMoreSongs || isPreparingFullList ? $t('playlist.loadingAll') : $t('playlist.loadMore') }}
+            </Button>
+            <p v-else-if="songs.length" class="text-primary/40 text-xs">
+              {{ $t('playlist.allLoaded') }}
+            </p>
+            <button
+              v-if="isSongLoadError && !isLoadingMoreSongs"
+              type="button"
+              class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="loadMoreSongs"
+            >
+              {{ $t('playlist.retryLoad') }}
+            </button>
+          </div>
         </section>
 
         <!-- 评论区 -->

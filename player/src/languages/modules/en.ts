@@ -387,6 +387,13 @@ export default {
   playlist: {
     tabs: { songs: 'Songs', comments: 'Comments', similar: 'Similar' },
     similarEmpty: 'No similar playlists',
+    loadMore: 'Load more songs',
+    loadingAll: 'Loading the full track list…',
+    loadedProgress: '{loaded} / {total} loaded',
+    allLoaded: 'All songs loaded',
+    partialPlayNotice: 'Could not load the full list. Playing only the {loaded} loaded songs out of {total}.',
+    retryLoad: 'Retry',
+    dismiss: 'Got it',
   },
   artistPage: {
     bioTitle: 'Artist Bio',
