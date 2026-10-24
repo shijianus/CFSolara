@@ -1,0 +1,1126 @@
+[
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "home",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -465,
+        "right": 311,
+        "width": 776
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -202,
+        "right": 454,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -497,
+        "right": 1226,
+        "width": 1723
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 454,
+        "width": 536
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 965,
+        "width": 540
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "search-discovery",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -446,
+        "right": 271,
+        "width": 717
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -231,
+        "right": 425,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -316,
+        "right": 1183,
+        "width": 1499
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -82,
+        "right": 452,
+        "width": 534
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 967,
+        "width": 541
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "search-results",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -456,
+        "right": 288,
+        "width": 744
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -221,
+        "right": 435,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -381,
+        "right": 1240,
+        "width": 1620
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 453,
+        "width": 535
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 966,
+        "width": 540
+      },
+      {
+        "tag": "DIV",
+        "cls": "song-col-actions song-actions relative flex min-h-11 items-center justify-center",
+        "left": 666,
+        "right": 854,
+        "width": 188
+      },
+      {
+        "tag": "DIV",
+        "cls": "song-actions-toolbar absolute inset-0 flex items-center justify-center gap-1 opa",
+        "left": 666,
+        "right": 854,
+        "width": 188
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-s",
+        "left": 810,
+        "right": 854,
+        "width": 44
+      },
+      {
+        "tag": "SPAN",
+        "cls": "icon-[mdi--tray-arrow-down] h-4 w-4",
+        "left": 824,
+        "right": 840,
+        "width": 16
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "playlist",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -462,
+        "right": 302,
+        "width": 763
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -210,
+        "right": 446,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -448,
+        "right": 1250,
+        "width": 1698
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 454,
+        "width": 535
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 966,
+        "width": 540
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full scale-150 object-cover opacity-30 blur-3xl",
+        "left": 209,
+        "right": 884,
+        "width": 675
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "settings",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -446,
+        "right": 271,
+        "width": 717
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -231,
+        "right": 425,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -316,
+        "right": 1183,
+        "width": 1499
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -82,
+        "right": 452,
+        "width": 534
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 967,
+        "width": 541
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "home",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -464,
+        "right": 308,
+        "width": 772
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -205,
+        "right": 451,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -480,
+        "right": 1238,
+        "width": 1718
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 454,
+        "width": 535
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 965,
+        "width": 540
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "search-discovery",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -454,
+        "right": 284,
+        "width": 738
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -223,
+        "right": 433,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -364,
+        "right": 1230,
+        "width": 1594
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -82,
+        "right": 452,
+        "width": 534
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 967,
+        "width": 541
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "search-results",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -462,
+        "right": 302,
+        "width": 764
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -209,
+        "right": 447,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -452,
+        "right": 1250,
+        "width": 1701
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 454,
+        "width": 535
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 966,
+        "width": 540
+      },
+      {
+        "tag": "DIV",
+        "cls": "song-col-actions song-actions relative flex min-h-11 items-center justify-center",
+        "left": 666,
+        "right": 854,
+        "width": 188
+      },
+      {
+        "tag": "DIV",
+        "cls": "song-actions-toolbar absolute inset-0 flex items-center justify-center gap-1 opa",
+        "left": 666,
+        "right": 854,
+        "width": 188
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-s",
+        "left": 810,
+        "right": 854,
+        "width": 44
+      },
+      {
+        "tag": "SPAN",
+        "cls": "icon-[mdi--tray-arrow-down] h-4 w-4",
+        "left": 824,
+        "right": 840,
+        "width": 16
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "playlist",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -465,
+        "right": 311,
+        "width": 777
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -201,
+        "right": 455,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -501,
+        "right": 1223,
+        "width": 1724
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -81,
+        "right": 455,
+        "width": 536
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 965,
+        "width": 540
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full scale-150 object-cover opacity-30 blur-3xl",
+        "left": 209,
+        "right": 884,
+        "width": 675
+      }
+    ]
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "settings",
+    "innerWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "g3",
+        "left": -447,
+        "right": 274,
+        "width": 721
+      },
+      {
+        "tag": "DIV",
+        "cls": "g4",
+        "left": -230,
+        "right": 426,
+        "width": 656
+      },
+      {
+        "tag": "DIV",
+        "cls": "g5",
+        "left": -324,
+        "right": 1192,
+        "width": 1516
+      },
+      {
+        "tag": "DIV",
+        "cls": "interactive",
+        "left": -410,
+        "right": 410,
+        "width": 820
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-",
+        "left": -82,
+        "right": 452,
+        "width": 534
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] anim",
+        "left": 426,
+        "right": 967,
+        "width": 541
+      }
+    ]
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "home",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "search-discovery",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "search-results",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide swiper-slide-next",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 848,
+        "width": 812
+      },
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 848,
+        "width": 812
+      }
+    ]
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "playlist",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full object-cover scale-110",
+        "left": -42,
+        "right": 886,
+        "width": 928
+      }
+    ]
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "settings",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "home",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "search-discovery",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "search-results",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide swiper-slide-next",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 848,
+        "width": 812
+      },
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 864,
+        "width": 844
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 848,
+        "width": 812
+      }
+    ]
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "playlist",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full object-cover scale-110",
+        "left": -42,
+        "right": 886,
+        "width": 928
+      }
+    ]
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "settings",
+    "innerWidth": 844,
+    "scrollWidth": 844,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "home",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "search-discovery",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "search-results",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide swiper-slide-next",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 394,
+        "width": 358
+      },
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 394,
+        "width": 358
+      }
+    ]
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "playlist",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full object-cover scale-110",
+        "left": -19,
+        "right": 410,
+        "width": 429
+      }
+    ]
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "settings",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "home",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "search-discovery",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "search-results",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide swiper-slide-next",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 394,
+        "width": 358
+      },
+      {
+        "tag": "DIV",
+        "cls": "swiper-slide",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6",
+        "left": 20,
+        "right": 410,
+        "width": 390
+      },
+      {
+        "tag": "DIV",
+        "cls": "empty-state flex flex-col items-center py-16",
+        "left": 36,
+        "right": 394,
+        "width": 358
+      }
+    ]
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "playlist",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": [
+      {
+        "tag": "IMG",
+        "cls": "h-full w-full object-cover scale-110",
+        "left": -19,
+        "right": 410,
+        "width": 429
+      }
+    ]
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "settings",
+    "innerWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "rootFont": "16px",
+    "bodyFont": "16px",
+    "textXs": "12px",
+    "smallTargets": [],
+    "smallTargetCount": 0,
+    "overflow": []
+  }
+]

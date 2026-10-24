@@ -1,0 +1,138 @@
+[
+  {
+    "label": "1440x900-dark-home",
+    "violations": []
+  },
+  {
+    "label": "1440x900-dark-search-results",
+    "violations": []
+  },
+  {
+    "label": "1440x900-dark-playlist",
+    "violations": []
+  },
+  {
+    "label": "1440x900-dark-settings",
+    "violations": []
+  },
+  {
+    "label": "1440x900-light-home",
+    "violations": []
+  },
+  {
+    "label": "1440x900-light-search-results",
+    "violations": []
+  },
+  {
+    "label": "1440x900-light-playlist",
+    "violations": []
+  },
+  {
+    "label": "1440x900-light-settings",
+    "violations": []
+  },
+  {
+    "label": "820x700-dark-home",
+    "violations": []
+  },
+  {
+    "label": "820x700-dark-search-results",
+    "violations": []
+  },
+  {
+    "label": "820x700-dark-playlist",
+    "violations": []
+  },
+  {
+    "label": "820x700-dark-settings",
+    "violations": []
+  },
+  {
+    "label": "820x700-light-home",
+    "violations": []
+  },
+  {
+    "label": "820x700-light-search-results",
+    "violations": []
+  },
+  {
+    "label": "820x700-light-playlist",
+    "violations": []
+  },
+  {
+    "label": "820x700-light-settings",
+    "violations": []
+  },
+  {
+    "label": "844x390-dark-home",
+    "violations": []
+  },
+  {
+    "label": "844x390-dark-search-results",
+    "violations": []
+  },
+  {
+    "label": "844x390-dark-playlist",
+    "violations": []
+  },
+  {
+    "label": "844x390-dark-settings",
+    "violations": []
+  },
+  {
+    "label": "844x390-light-home",
+    "violations": []
+  },
+  {
+    "label": "844x390-light-search-results",
+    "violations": []
+  },
+  {
+    "label": "844x390-light-playlist",
+    "violations": []
+  },
+  {
+    "label": "844x390-light-settings",
+    "violations": []
+  },
+  {
+    "label": "390x844-dark-home",
+    "violations": []
+  },
+  {
+    "label": "390x844-dark-search-results",
+    "violations": []
+  },
+  {
+    "label": "390x844-dark-playlist",
+    "violations": []
+  },
+  {
+    "label": "390x844-dark-settings",
+    "violations": []
+  },
+  {
+    "label": "390x844-light-home",
+    "violations": []
+  },
+  {
+    "label": "390x844-light-search-results",
+    "violations": []
+  },
+  {
+    "label": "390x844-light-playlist",
+    "violations": []
+  },
+  {
+    "label": "390x844-light-settings",
+    "violations": []
+  },
+  {
+    "label": "1440x900-dark-player-open",
+    "violations": []
+  },
+  {
+    "label": "390x844-dark-player-open",
+    "violations": []
+  }
+]

@@ -1,0 +1,242 @@
+[
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "home"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "search-results"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "playlist"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "dark",
+    "page": "settings"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "home"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "search-results"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "playlist"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "1440x900",
+    "theme": "light",
+    "page": "settings"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "home"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "search-results"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "playlist"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "dark",
+    "page": "settings"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "home"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "search-results"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "playlist"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "820x700",
+    "theme": "light",
+    "page": "settings"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "home"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "search-results"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "playlist"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "dark",
+    "page": "settings"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "home"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "search-results"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "playlist"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "844x390",
+    "theme": "light",
+    "page": "settings"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "home"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "search-results"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "playlist"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "dark",
+    "page": "settings"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "home"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "search-discovery"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "search-results"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "playlist"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "song-detail"
+  },
+  {
+    "viewport": "390x844",
+    "theme": "light",
+    "page": "settings"
+  }
+]

@@ -1,0 +1,275 @@
+saved 1440x900-dark-home
+saved 1440x900-dark-search-discovery
+saved 1440x900-dark-search-results
+saved 1440x900-dark-playlist
+saved 1440x900-dark-song-detail
+saved 1440x900-dark-settings
+axe 1440x900-dark-home []
+axe 1440x900-dark-search-results []
+axe 1440x900-dark-playlist []
+axe 1440x900-dark-settings []
+saved 1440x900-light-home
+saved 1440x900-light-search-discovery
+saved 1440x900-light-search-results
+saved 1440x900-light-playlist
+saved 1440x900-light-song-detail
+saved 1440x900-light-settings
+axe 1440x900-light-home []
+axe 1440x900-light-search-results []
+axe 1440x900-light-playlist []
+axe 1440x900-light-settings []
+saved 820x700-dark-home
+saved 820x700-dark-search-discovery
+saved 820x700-dark-search-results
+saved 820x700-dark-playlist
+saved 820x700-dark-song-detail
+saved 820x700-dark-settings
+axe 820x700-dark-home []
+axe 820x700-dark-search-results []
+axe 820x700-dark-playlist []
+axe 820x700-dark-settings []
+layout 820x700 dark home {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 dark search-discovery {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 dark search-results {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 dark playlist {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 dark settings {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 820x700-light-home
+saved 820x700-light-search-discovery
+saved 820x700-light-search-results
+saved 820x700-light-playlist
+saved 820x700-light-song-detail
+saved 820x700-light-settings
+axe 820x700-light-home []
+axe 820x700-light-search-results []
+axe 820x700-light-playlist []
+axe 820x700-light-settings []
+layout 820x700 light home {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 light search-discovery {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 light search-results {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 light playlist {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 820x700 light settings {"horizontalOverflow":false,"scrollWidth":820,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 844x390-dark-home
+saved 844x390-dark-search-discovery
+saved 844x390-dark-search-results
+saved 844x390-dark-playlist
+saved 844x390-dark-song-detail
+saved 844x390-dark-settings
+axe 844x390-dark-home []
+axe 844x390-dark-search-results []
+axe 844x390-dark-playlist []
+axe 844x390-dark-settings []
+layout 844x390 dark home {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 dark search-discovery {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 dark search-results {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 dark playlist {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 dark settings {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 844x390-light-home
+saved 844x390-light-search-discovery
+saved 844x390-light-search-results
+saved 844x390-light-playlist
+saved 844x390-light-song-detail
+saved 844x390-light-settings
+axe 844x390-light-home []
+axe 844x390-light-search-results []
+axe 844x390-light-playlist []
+axe 844x390-light-settings []
+layout 844x390 light home {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 light search-discovery {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 light search-results {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 light playlist {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 844x390 light settings {"horizontalOverflow":false,"scrollWidth":844,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 390x844-dark-home
+saved 390x844-dark-search-discovery
+saved 390x844-dark-search-results
+saved 390x844-dark-playlist
+saved 390x844-dark-song-detail
+saved 390x844-dark-settings
+axe 390x844-dark-home []
+axe 390x844-dark-search-results []
+axe 390x844-dark-playlist []
+axe 390x844-dark-settings []
+layout 390x844 dark home {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 dark search-discovery {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 dark search-results {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 dark playlist {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 dark settings {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 390x844-light-home
+saved 390x844-light-search-discovery
+saved 390x844-light-search-results
+saved 390x844-light-playlist
+saved 390x844-light-song-detail
+saved 390x844-light-settings
+axe 390x844-light-home []
+axe 390x844-light-search-results []
+axe 390x844-light-playlist []
+axe 390x844-light-settings []
+layout 390x844 light home {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 light search-discovery {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 light search-results {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 light playlist {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+layout 390x844 light settings {"horizontalOverflow":false,"scrollWidth":390,"smallTargetCount":0,"rootFont":"16px","textXs":"12px"}
+saved 1440x900-dark-player-open
+axe 1440x900-dark-player-open []
+saved 1440x900-dark-quality-menu
+saved 1440x900-dark-search-history-empty
+saved 390x844-dark-search-results-seeded
+saved 390x844-dark-miniplayer
+saved 390x844-dark-player-open
+axe 390x844-dark-player-open []
+saved 1440x900-dark-after-close-tabflow
+saved 1440x900-dark-quality-toast-tabflow
+FLOW [
+  {
+    "step": "start",
+    "active": {
+      "tag": "BODY",
+      "id": "",
+      "role": null,
+      "ariaLabel": null,
+      "title": null,
+      "text": "epocanvassonicSTUDIOAUDIO ENGINE↵探索首页MV排行榜歌手新碟上架搜索我的音乐我喜欢的最近",
+      "placeholder": null,
+      "inDialog": false,
+      "width": 1440,
+      "height": 900
+    }
+  },
+  {
+    "step": "tab-to-search",
+    "found": true,
+    "steps": 4,
+    "active": {
+      "tag": "INPUT",
+      "id": "",
+      "role": null,
+      "ariaLabel": null,
+      "title": null,
+      "text": "",
+      "placeholder": "搜索音乐、歌手、专辑...",
+      "inDialog": false,
+      "width": 184,
+      "height": 17
+    }
+  },
+  {
+    "step": "submit-search",
+    "hash": "#/search?q=%E6%B5%8B%E8%AF%95%E6%90%9C%E7%B4%A2"
+  },
+  {
+    "step": "tab-to-play",
+    "found": true,
+    "steps": 20,
+    "active": {
+      "tag": "BUTTON",
+      "id": "",
+      "role": null,
+      "ariaLabel": "播放",
+      "title": "播放",
+      "text": "",
+      "placeholder": null,
+      "inDialog": false,
+      "width": 56,
+      "height": 44
+    }
+  },
+  {
+    "step": "play",
+    "current": "无音质字段的搜索歌曲"
+  },
+  {
+    "step": "tab-to-player-entry",
+    "found": true,
+    "steps": 10,
+    "active": {
+      "tag": "BUTTON",
+      "id": "footer-cover",
+      "role": null,
+      "ariaLabel": "打开播放器",
+      "title": "打开播放器",
+      "text": "",
+      "placeholder": null,
+      "inDialog": false,
+      "width": 48,
+      "height": 48
+    }
+  },
+  {
+    "step": "open-player",
+    "dialog": true,
+    "active": {
+      "tag": "DIV",
+      "id": "",
+      "role": "dialog",
+      "ariaLabel": "全屏音乐播放器与歌词",
+      "title": null,
+      "text": "无音质字段的搜索歌曲测试歌手测试专辑00:0300:300测试歌词第二行歌词",
+      "placeholder": null,
+      "inDialog": true,
+      "width": 1104,
+      "height": 868
+    }
+  },
+  {
+    "step": "tab-to-close",
+    "found": true,
+    "steps": 8,
+    "active": {
+      "tag": "BUTTON",
+      "id": "",
+      "role": null,
+      "ariaLabel": "关闭",
+      "title": "关闭",
+      "text": "",
+      "placeholder": null,
+      "inDialog": true,
+      "width": 44,
+      "height": 44
+    }
+  },
+  {
+    "step": "close-player",
+    "dialogs": [],
+    "active": {
+      "tag": "BUTTON",
+      "id": "footer-cover",
+      "role": null,
+      "ariaLabel": "打开播放器",
+      "title": "打开播放器",
+      "text": "",
+      "placeholder": null,
+      "inDialog": false,
+      "width": 48,
+      "height": 48
+    }
+  },
+  {
+    "step": "tab-to-quality",
+    "found": true,
+    "steps": 5,
+    "active": {
+      "tag": "BUTTON",
+      "id": "footer-quality-btn",
+      "role": null,
+      "ariaLabel": "请求 SQ 无损,音源实际提供 WAV 229 kbps",
+      "title": "请求 SQ 无损,音源实际提供 WAV 229 kbps",
+      "text": "WAV 229k",
+      "placeholder": null,
+      "inDialog": false,
+      "width": 112,
+      "height": 44
+    }
+  },
+  {
+    "step": "switch-quality",
+    "toast": {
+      "text": "已切换至 标准音质",
+      "present": true
+    },
+    "menuOpen": false
+  },
+  {
+    "step": "close",
+    "menuOpen": false
+  }
+]
+BATCH3 DONE
