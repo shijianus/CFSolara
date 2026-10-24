@@ -207,7 +207,7 @@ onMounted(() => {
             <router-link
               v-magnetic="{ strength: 0.3, distance: 60 }"
               to="/artists"
-              class="text-primary/40 hover:text-primary/70 flex items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
+              class="text-primary/40 hover:text-primary/70 flex min-h-11 items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
             >
               {{ t('common.viewAll') }}
               <span class="icon-[mdi--chevron-right] h-4 w-4" />
@@ -241,7 +241,7 @@ onMounted(() => {
             <router-link
               v-magnetic="{ strength: 0.3, distance: 60 }"
               to="/charts"
-              class="text-primary/40 hover:text-primary/70 flex items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
+              class="text-primary/40 hover:text-primary/70 flex min-h-11 items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
             >
               {{ t('common.viewAll') }}
               <span class="icon-[mdi--chevron-right] h-4 w-4" />
@@ -276,7 +276,7 @@ onMounted(() => {
             <router-link
               v-magnetic="{ strength: 0.3, distance: 60 }"
               to="/mv-list"
-              class="text-primary/40 hover:text-primary/70 flex items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
+              class="text-primary/40 hover:text-primary/70 flex min-h-11 items-center gap-1 text-[13px] font-medium transition-all duration-200 hover:gap-1.5"
             >
               {{ t('common.viewAll') }}
               <span class="icon-[mdi--chevron-right] h-4 w-4" />

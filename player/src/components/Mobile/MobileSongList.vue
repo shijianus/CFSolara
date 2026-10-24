@@ -33,7 +33,7 @@ const isCurrent = (s: Song) => {
   return String(s.id) === String(cur.id)
 }
 
-const handleClick = (s: Song, i: number) => {
+const handleClick = (_song: Song, i: number) => {
   if (props.context === 'queue') {
     playByIndex(i)
     return
@@ -245,16 +245,16 @@ html.dark .song-cover-small {
 
 .song-artist {
   color: var(--glass-text-primary);
-  opacity: 0.5;
+  opacity: 0.66;
 }
 
 .song-duration {
   color: var(--glass-text-primary);
-  opacity: 0.3;
+  opacity: 0.65;
 }
 
 .song-index {
   color: var(--glass-text-primary);
-  opacity: 0.3;
+  opacity: 0.72;
 }
 </style>

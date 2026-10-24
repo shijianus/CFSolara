@@ -163,7 +163,7 @@ const handleMouseLeave = () => {
   <a
     ref="cardRef"
     :href="resolvedHref"
-    class="group flex cursor-pointer flex-col items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+    class="group flex min-w-11 cursor-pointer flex-col items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"

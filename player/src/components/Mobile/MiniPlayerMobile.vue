@@ -73,17 +73,17 @@ onUnmounted(() => {
   <div
     v-if="currentSong"
     ref="rootRef"
-    class="mask-glass fixed right-0 left-0 z-50 backdrop-blur-md"
+    class="miniplayer-root mask-glass fixed right-0 left-0 z-50 backdrop-blur-md"
     style="
       bottom: calc(
         env(safe-area-inset-bottom, 0px) + var(--mobile-tabbar-h, 56px) + 12px
       );
     "
   >
-    <div class="glass-card flex items-center gap-3 rounded-t-2xl rounded-tl-2xl rounded-b-none p-3">
+    <div class="miniplayer-card glass-card flex items-center gap-3 rounded-t-2xl rounded-tl-2xl rounded-b-none p-3">
       <button
         type="button"
-        class="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        class="miniplayer-cover relative h-12 w-12 shrink-0 overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
         :aria-label="$t('player.nowPlaying')"
         @click="$emit('open')"
       >
@@ -125,10 +125,10 @@ onUnmounted(() => {
             </p>
           </div>
         </div>
-        <div class="mt-2 flex items-center gap-2">
-          <span class="text-primary/60 text-[11px]">{{ formattedCurrentTime }}</span>
+        <div class="miniplayer-progress mt-2 flex items-center gap-2">
+          <span class="text-primary/75 text-[11px]">{{ formattedCurrentTime }}</span>
           <MusicProgress class="flex-1" />
-          <span class="text-primary/60 text-[11px]">{{ formattedDuration }}</span>
+          <span class="text-primary/75 text-[11px]">{{ formattedDuration }}</span>
         </div>
       </div>
       <Button
@@ -154,3 +154,21 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 横屏手机：隐藏进度行，压缩卡片高度，避免挤占内容区 */
+@media (max-height: 500px) {
+  .miniplayer-card {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .miniplayer-progress {
+    display: none;
+  }
+
+  .miniplayer-cover {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+</style>

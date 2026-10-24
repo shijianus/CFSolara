@@ -42,7 +42,7 @@ const handleTabClick = (key: T) => {
     <button
       v-for="tab in tabs"
       :key="String(tab.key)"
-      class="relative flex items-center gap-2 rounded-xl transition-all duration-300"
+      class="relative flex min-h-11 items-center gap-2 rounded-xl transition-all duration-300"
       :class="[
         size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-4 py-2.5 text-sm',
         modelValue === tab.key

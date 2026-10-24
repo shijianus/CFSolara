@@ -155,7 +155,7 @@ const variantClasses = computed(() => {
     case 'glass':
       return 'glass-button text-primary active:scale-95'
     case 'solid':
-      return 'bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600 hover:shadow-xl hover:shadow-sky-500/30'
+      return 'bg-sky-700 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-800 hover:shadow-xl hover:shadow-sky-500/30'
     case 'soft':
       return 'bg-white/10 text-primary backdrop-blur-sm hover:bg-white/20 hover:scale-110'
     case 'ghost':

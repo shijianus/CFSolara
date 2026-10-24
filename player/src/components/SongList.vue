@@ -182,6 +182,32 @@ const getQualityBadgeInfo = (song: Song) => {
   contain-intrinsic-size: auto 53px;
 }
 
+/* 窄桌面/平板：隐藏歌手、专辑、时长列，为 44px 操作按钮让出空间 */
+@media (max-width: 1100px) {
+  .song-list-header {
+    display: none;
+  }
+
+  .song-grid {
+    display: flex;
+    align-items: center;
+  }
+
+  .song-col-song {
+    flex: 1 1 auto;
+  }
+
+  .song-col-artist,
+  .song-col-album,
+  .song-col-duration {
+    display: none !important;
+  }
+
+  .song-col-actions {
+    flex: 0 0 auto;
+  }
+}
+
 /* 触屏设备没有 hover：行内播放按钮常显，序号让位 */
 @media (hover: none) {
   .song-row-play {
@@ -190,6 +216,15 @@ const getQualityBadgeInfo = (song: Song) => {
 
   .song-row-index {
     opacity: 0;
+  }
+
+  .song-actions-dots {
+    display: none;
+  }
+
+  .song-actions-toolbar {
+    position: static;
+    opacity: 1;
   }
 }
 
@@ -214,19 +249,19 @@ const getQualityBadgeInfo = (song: Song) => {
       <!-- 列表头部 -->
       <div
         v-if="showHeader"
-        class="text-primary/60 mb-2 hidden items-center border-b border-white/5 py-3 text-xs font-medium tracking-wider uppercase md:flex"
+        class="song-list-header text-primary/60 mb-2 hidden items-center border-b border-white/5 py-3 text-xs font-medium tracking-wider uppercase md:flex"
       >
         <div class="w-14 text-center">#</div>
-        <div class="grid min-w-0 flex-1 grid-cols-12 items-center gap-4 px-4">
-          <div class="col-span-4">{{ t('components.songList.headers.song') }}</div>
-          <div class="col-span-3 hidden md:block">
+        <div class="song-grid grid min-w-0 flex-1 grid-cols-12 items-center gap-4 px-4">
+          <div class="song-col-song col-span-4">{{ t('components.songList.headers.song') }}</div>
+          <div class="song-col-artist col-span-2 hidden md:block">
             {{ t('components.songList.headers.artist') }}
           </div>
-          <div class="col-span-2 hidden text-center md:block">
+          <div class="song-col-album col-span-2 hidden text-center md:block">
             {{ t('components.songList.headers.album') }}
           </div>
-          <div class="col-span-1 text-right">{{ t('components.songList.headers.duration') }}</div>
-          <div class="col-span-2 text-center">{{ t('components.songList.headers.actions') }}</div>
+          <div class="song-col-duration col-span-1 text-right">{{ t('components.songList.headers.duration') }}</div>
+          <div class="song-col-actions col-span-3 text-center">{{ t('components.songList.headers.actions') }}</div>
         </div>
       </div>
 
@@ -240,8 +275,8 @@ const getQualityBadgeInfo = (song: Song) => {
           <div class="flex w-14 shrink-0 items-center justify-center">
             <div class="h-4 w-4 animate-pulse rounded bg-white/10"></div>
           </div>
-          <div class="grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
-            <div class="col-span-4 flex items-center space-x-4">
+          <div class="song-grid grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
+            <div class="song-col-song col-span-4 flex items-center space-x-4">
               <div class="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-white/10"></div>
               <div class="min-w-0 flex-1 space-y-2">
                 <div class="h-4 w-3/4 animate-pulse rounded bg-white/10"></div>
@@ -289,7 +324,7 @@ const getQualityBadgeInfo = (song: Song) => {
             aria-hidden="true"
           ></span>
           <!-- 序号/播放状态 -->
-          <div class="relative flex w-14 shrink-0 items-center justify-center text-center select-none">
+          <div class="relative flex min-h-11 w-14 shrink-0 items-center justify-center text-center select-none">
             <!-- 未悬停且非当前播放：显示纯数字序号 -->
             <span
               v-if="!isCurrent(song)"
@@ -318,8 +353,8 @@ const getQualityBadgeInfo = (song: Song) => {
             </button>
           </div>
 
-          <div class="grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
-            <div class="col-span-4 flex items-center space-x-4">
+          <div class="song-grid grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
+            <div class="song-col-song col-span-4 flex items-center space-x-4">
               <div
                 :id="`song-cover-${song.id}`"
                 class="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg shadow-md transition-shadow group-hover:shadow-lg"
@@ -361,7 +396,7 @@ const getQualityBadgeInfo = (song: Song) => {
               </div>
             </div>
 
-            <div class="col-span-3 hidden overflow-hidden md:block">
+            <div class="song-col-artist col-span-2 hidden overflow-hidden md:block">
               <template v-if="song.artists && song.artists.length > 0">
                 <span class="text-primary/80 truncate text-sm">
                   <template v-for="(ar, idx) in song.artists" :key="ar.id">
@@ -392,7 +427,7 @@ const getQualityBadgeInfo = (song: Song) => {
               </span>
             </div>
 
-            <div class="col-span-2 hidden overflow-hidden text-center md:block">
+            <div class="song-col-album col-span-2 hidden overflow-hidden text-center md:block">
               <RouterLink
                 v-if="song.albumId"
                 :to="`/album/${song.albumId}`"
@@ -405,24 +440,25 @@ const getQualityBadgeInfo = (song: Song) => {
                 {{ song.album || '-' }}
               </span>
             </div>
-            <div class="col-span-1 flex items-center justify-end">
+            <div class="song-col-duration col-span-1 flex items-center justify-end">
               <span class="text-primary/50 hidden font-mono text-sm md:inline-block">{{
                 formatDurationOrDash(song.duration)
               }}</span>
             </div>
             <!-- 操控按钮 (常态显示低透明度的"···"，悬停显示三个 32px 按钮，间距 8px) -->
-            <div class="col-span-2 relative flex items-center justify-center min-h-[32px]">
+            <div class="song-col-actions song-actions relative flex min-h-11 items-center justify-center">
               <!-- 常态：低透明度 (0.5) 更多图标 -->
-              <div class="flex items-center justify-center text-white/50 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
+              <div class="song-actions-dots flex items-center justify-center text-white/50 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
                 <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
               </div>
 
               <!-- 悬停或键盘聚焦时：显示三个 32px 按钮，间距 8px (gap-2) -->
-              <div class="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+              <div class="song-actions-toolbar absolute inset-0 flex items-center justify-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                 <button
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('actions.play') || '播放'"
+                  :aria-label="t('actions.play')"
                   @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
                 >
                   <span class="icon-[mdi--play] h-4 w-4"></span>
@@ -430,7 +466,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <button
                   v-if="song.mvId"
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-blue-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-blue-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.playMV')"
                   @click.stop="openMV(song, index)"
                 >
@@ -439,7 +475,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 <button
                   v-else-if="song.id"
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.detail')"
                   @click.stop="router.push(`/song/${song.id}`)"
                 >
@@ -447,7 +483,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 </button>
                 <button
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-primary/70 hover:text-red-400 hover:bg-hover-glass transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg text-primary/70 hover:text-red-400 hover:bg-hover-glass transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="isLiked(song) ? t('common.unlike') : t('common.like')"
                   @click.stop="toggleLike(song)"
                 >
@@ -458,7 +494,7 @@ const getQualityBadgeInfo = (song: Song) => {
                 </button>
                 <button
                   type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:text-sky-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   :title="t('common.download')"
                   @click.stop="downloadSong(song, index)"
                 >

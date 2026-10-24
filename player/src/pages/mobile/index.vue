@@ -96,7 +96,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
 
 <template>
   <div class="flex-1 overflow-hidden">
-    <div class="h-full overflow-auto pb-4">
+    <div class="h-full overflow-auto pb-4" tabindex="0">
       <template v-if="isLoading">
         <MobileHomeSkeleton />
       </template>

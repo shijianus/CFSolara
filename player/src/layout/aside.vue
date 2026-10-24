@@ -190,14 +190,16 @@ const isActive = (path: string) => {
             <button
               @click="router.back()"
               title="Back"
-              class="flex h-6 w-6 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              aria-label="Back"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
             >
               <span class="icon-[mdi--chevron-left] h-3.5 w-3.5"></span>
             </button>
             <button
               @click="router.forward()"
               title="Forward"
-              class="flex h-6 w-6 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              aria-label="Forward"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
             >
               <span class="icon-[mdi--chevron-right] h-3.5 w-3.5"></span>
             </button>
@@ -252,7 +254,7 @@ const isActive = (path: string) => {
                   :to="item.to"
                   @mouseenter="prefetchRoute(item.to)"
                   @focus="prefetchRoute(item.to)"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
                     'hover:bg-white/5': !isActive(item.to),
@@ -280,7 +282,7 @@ const isActive = (path: string) => {
                   v-for="pl in collectedPlaylists"
                   :key="pl.id"
                   :to="`/playlist/${pl.id}`"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
                     'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
@@ -306,10 +308,11 @@ const isActive = (path: string) => {
             :key="t.val"
             @click="globalStore.setTheme(t.val)"
             :class="[
-              'flex-1 h-7 rounded-full grid place-items-center text-xs font-semibold transition-all',
+              'flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all',
               theme === t.val ? 'bg-white/15 text-primary shadow-sm' : 'text-primary/40 hover:text-primary'
             ]"
             :title="t.label"
+            :aria-label="t.label"
           >
             <span :class="[t.icon, 'h-3.5 w-3.5']"></span>
           </button>

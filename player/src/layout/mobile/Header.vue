@@ -50,13 +50,13 @@ const cycleTheme = () => {
       >
         <span class="icon-[mdi--chevron-left] h-6 w-6"></span>
       </button>
-      <router-link to="/" class="flex min-w-0 items-center gap-2.5" :aria-label="BRAND_FULL">
+      <router-link to="/" class="flex min-h-11 min-w-0 items-center gap-2.5" :aria-label="BRAND_FULL">
         <span class="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] shadow-[0_0_12px_rgba(37,99,235,0.6)]">
           <span class="h-2 w-2 rounded-full bg-white/95"></span>
           <span class="absolute inset-0 rounded-full ring-1 ring-white/50"></span>
         </span>
         <div class="flex flex-col leading-none">
-          <span class="text-[11px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+          <span class="text-[11px] font-semibold tracking-[0.16em] text-primary/70">{{ BRAND_PARENT }}</span>
           <h1 class="mt-0.5 text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</h1>
         </div>
       </router-link>

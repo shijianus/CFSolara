@@ -112,7 +112,7 @@ onUnmounted(() => {
         @touchstart.passive="prefetchMobileRoute(it.to)"
         @mouseenter="prefetchMobileRoute(it.to)"
         class="relative flex min-h-11 flex-1 flex-col items-center justify-center py-2 text-[11px] font-semibold transition-all duration-200"
-        :class="isActive(it.to) ? 'text-primary' : 'text-primary/50 hover:text-primary/80'"
+        :class="isActive(it.to) ? 'text-primary' : 'text-primary/70 hover:text-primary'"
         :aria-current="isActive(it.to) ? 'page' : undefined"
       >
         <div
