@@ -245,6 +245,7 @@ export default {
     pause: '暂停',
     loading: '加载中…',
     unknownSong: '未知歌曲',
+    selectSongToStart: '选择一首歌开始',
     unknownArtist: '未知艺术家',
     unknownAlbum: '未知专辑',
     online: '在线',

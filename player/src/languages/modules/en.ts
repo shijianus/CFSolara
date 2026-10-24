@@ -255,6 +255,7 @@ export default {
     pause: 'Pause',
     loading: 'Loading…',
     unknownSong: 'Unknown Song',
+    selectSongToStart: 'Choose a song to start',
     unknownArtist: 'Unknown Artist',
     unknownAlbum: 'Unknown Album',
     online: 'Online',

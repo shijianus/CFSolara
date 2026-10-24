@@ -22,6 +22,7 @@ const { t } = useI18n()
 const audioStore = useAudioStore()
 const downloadStore = useDownloadStore()
 const toastStore = useToastStore()
+const hasQueue = computed(() => playlist.value.length > 0)
 
 // 使用音频播放器组合式API
 const {
@@ -30,6 +31,7 @@ const {
   isPlaying,
   isLoading,
   currentTime,
+  playlist,
   formattedCurrentTime,
   formattedDuration,
   playModeIcon,
@@ -666,10 +668,10 @@ const emit = defineEmits(['show'])
         </div>
         <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
           <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
-            {{ formatSongTitle(currentSong?.name) || t('player.unknownSong') }}
+            {{ currentSong ? formatSongTitle(currentSong.name) : t('player.selectSongToStart') }}
           </p>
-          <p class="text-primary/80 truncate text-xs">
-            {{ currentSong?.artist || t('player.unknownArtist') }}
+          <p v-if="currentSong" class="text-primary/80 truncate text-xs">
+            {{ currentSong.artist || t('player.unknownArtist') }}
           </p>
         </div>
         <div
@@ -695,6 +697,8 @@ const emit = defineEmits(['show'])
         <Button
           variant="text"
           size="none"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
           @click="previous"
           icon="icon-[mdi--skip-previous]"
           icon-class="size-6"
@@ -704,6 +708,8 @@ const emit = defineEmits(['show'])
           size="icon-lg"
           rounded="full"
           class="play-btn-glow"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
           @click="togglePlay"
           :title="isPlaying ? t('player.pause') : t('player.play')"
           :loading="isLoading"
@@ -719,6 +725,8 @@ const emit = defineEmits(['show'])
         <Button
           variant="text"
           size="none"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
           @click="next"
           icon="icon-[mdi--skip-next]"
           icon-class="size-6"

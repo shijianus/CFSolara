@@ -253,6 +253,7 @@ export default {
     pause: '一時停止',
     loading: '読み込み中…',
     unknownSong: '不明な曲',
+    selectSongToStart: '曲を選んで再生を開始',
     unknownArtist: '不明なアーティスト',
     unknownAlbum: '不明なアルバム',
     online: 'オンライン',
