@@ -247,6 +247,8 @@ export default {
     loading: '加载中…',
     unknownSong: '未知歌曲',
     selectSongToStart: '选择一首歌开始',
+    progress: '播放进度',
+    volume: '音量',
     unknownArtist: '未知艺术家',
     unknownAlbum: '未知专辑',
     online: '在线',
