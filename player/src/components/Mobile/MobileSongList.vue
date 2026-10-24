@@ -76,11 +76,13 @@ const getQualityBadgeInfo = (song: Song) => {
 
 <template>
   <div v-if="variant === 'card'" class="space-y-2">
-    <div
+    <button
       v-for="(song, index) in songs"
       :key="song.id + '-' + index"
-      class="group flex items-center gap-3 rounded-2xl p-3 transition-all duration-300"
+      type="button"
+      class="group flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-all duration-300"
       :class="isCurrent(song) ? 'song-item-active' : ''"
+      :aria-label="`${song.name} - ${song.artist}`"
       @click="handleClick(song, index)"
     >
       <div class="song-cover relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
@@ -112,7 +114,7 @@ const getQualityBadgeInfo = (song: Song) => {
           <span
             v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
             :title="getQualityBadgeInfo(song).title"
-            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold leading-none select-none"
+            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[11px] font-bold leading-none select-none"
             :class="getQualityBadgeInfo(song).badgeClass"
           >
             {{ getQualityBadgeInfo(song).label }}
@@ -130,15 +132,17 @@ const getQualityBadgeInfo = (song: Song) => {
           <span class="bar" :class="{ animate: isPlaying }"></span>
         </div>
       </div>
-    </div>
+    </button>
   </div>
 
   <div v-else class="overflow-hidden py-2">
-    <div
+    <button
       v-for="(song, index) in songs"
       :key="song.id"
-      class="song-item-compact group flex items-center gap-3 rounded-xl p-2.5 transition-all duration-200"
+      type="button"
+      class="song-item-compact group flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition-all duration-200"
       :class="isCurrent(song) ? 'song-item-active' : ''"
+      :aria-label="`${song.name} - ${song.artist}`"
       @click="handleClick(song, index)"
     >
       <div v-if="showIndex" class="w-6 shrink-0 text-center">
@@ -174,7 +178,7 @@ const getQualityBadgeInfo = (song: Song) => {
           <span
             v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
             :title="getQualityBadgeInfo(song).title"
-            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold leading-none select-none"
+            class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[11px] font-bold leading-none select-none"
             :class="getQualityBadgeInfo(song).badgeClass"
           >
             {{ getQualityBadgeInfo(song).label }}
@@ -185,7 +189,7 @@ const getQualityBadgeInfo = (song: Song) => {
         </p>
       </div>
       <span class="song-duration shrink-0 text-xs">{{ formatDurationOrDash(song.duration) }}</span>
-    </div>
+    </button>
   </div>
 </template>
 

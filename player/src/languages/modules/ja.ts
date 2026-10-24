@@ -268,6 +268,7 @@ export default {
     singleLoop: '単曲ループ',
     randomPlay: 'シャッフル',
     playlist: 'プレイリスト',
+    playMode: '再生モード',
     history: '再生履歴',
     nowPlaying: '再生中',
     bgToggle: '背景',

@@ -95,7 +95,7 @@ watch(
           <div class="flex-1 space-y-1">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-primary/70">{{ comment.user.nickname }}</span>
-              <span class="text-[10px] text-primary/40">{{ formatDate(comment.time) }}</span>
+              <span class="text-[11px] text-primary/40">{{ formatDate(comment.time) }}</span>
             </div>
             
             <p class="text-sm leading-relaxed text-primary/90 break-all whitespace-pre-wrap">{{ comment.content }}</p>

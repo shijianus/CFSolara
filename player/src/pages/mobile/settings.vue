@@ -338,7 +338,7 @@ onMounted(() => {
 }
 
 .card-desc {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   color: var(--glass-text-primary);
   opacity: 0.5;
   margin-top: 0.125rem;
@@ -379,7 +379,7 @@ onMounted(() => {
 }
 
 .option-label {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   color: var(--glass-text-primary);
   opacity: 0.7;
 }

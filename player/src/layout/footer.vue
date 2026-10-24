@@ -697,6 +697,7 @@ const emit = defineEmits(['show'])
         <Button
           variant="text"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
           :disabled="!hasQueue"
           :aria-disabled="!hasQueue"
           @click="previous"
@@ -725,6 +726,7 @@ const emit = defineEmits(['show'])
         <Button
           variant="text"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
           :disabled="!hasQueue"
           :aria-disabled="!hasQueue"
           @click="next"
@@ -736,8 +738,10 @@ const emit = defineEmits(['show'])
           :icon="playModeIcon"
           icon-class="size-6"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
           @click="togglePlayMode"
           :title="playModeText"
+          :aria-label="playModeText"
         />
       </div>
 
@@ -754,7 +758,7 @@ const emit = defineEmits(['show'])
             aria-haspopup="true"
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
-            class="footer-quality-pill group flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
+            class="footer-quality-pill group flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
           >
             <span
@@ -815,7 +819,7 @@ const emit = defineEmits(['show'])
                   @click.stop="q.isAvailable && selectQuality(q.level)"
                   @keydown.enter.prevent.stop="q.isAvailable && selectQuality(q.level)"
                   @keydown.space.prevent.stop="q.isAvailable && selectQuality(q.level)"
-                  class="w-full min-h-[36px] py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
+                  class="w-full min-h-11 py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
                   :class="[
                     !q.isAvailable
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
@@ -839,7 +843,7 @@ const emit = defineEmits(['show'])
                     <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
                     <span
                       v-if="effectiveQualityLevel === q.level && q.isAvailable"
-                      class="text-[10px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
+                      class="text-[11px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
                     >
                       当前
                     </span>
@@ -870,7 +874,7 @@ const emit = defineEmits(['show'])
           size="none"
           icon="icon-[mdi--tray-arrow-down]"
           icon-class="size-5"
-          class="text-primary/70 hover:text-sky-400 flex items-center transition-colors cursor-pointer"
+          class="text-primary/70 hover:text-sky-400 flex h-11 w-11 items-center justify-center transition-colors cursor-pointer"
           :title="t('common.download') + '当前歌曲'"
           @click.stop="downloadCurrentSong"
         />
@@ -885,7 +889,7 @@ const emit = defineEmits(['show'])
               size="none"
               icon="icon-[mdi--playlist-music]"
               icon-class="size-6"
-              class="text-primary/70 hover:text-primary flex items-center transition-colors"
+              class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center transition-colors"
             >
             </Button>
           </template>

@@ -212,7 +212,7 @@ const toggleCollect = () => {
                 imgClass="cover-image h-32 w-32 rounded-2xl object-cover"
               />
               <div
-                class="play-count-badge absolute -right-1 -bottom-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-accent"
+                class="play-count-badge absolute -right-1 -bottom-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-accent"
               >
                 <span class="icon-[mdi--play] h-3 w-3"></span>
                 {{ state.info.playCount }}
@@ -259,7 +259,7 @@ const toggleCollect = () => {
             >
               {{ state.info.description }}
             </p>
-            <span class="mt-1 inline-flex items-center text-[10px] text-accent/60">
+            <span class="mt-1 inline-flex items-center text-[11px] text-accent/60">
               {{ state.showFullDesc ? $t('common.collapse') : $t('common.expand') }}
               <span
                 :class="state.showFullDesc ? 'icon-[mdi--chevron-up]' : 'icon-[mdi--chevron-down]'"

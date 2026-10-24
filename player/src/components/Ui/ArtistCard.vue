@@ -175,7 +175,7 @@ const handleMouseLeave = () => {
         img-class="h-full w-full object-cover"
       />
       <div
-        class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/40 group-hover:opacity-100"
+        class="artist-hover-play absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/40 group-hover:opacity-100"
       >
         <span
           class="icon-[mdi--play] h-6 w-6 scale-50 text-white transition-transform group-hover:scale-100"
@@ -193,5 +193,11 @@ const handleMouseLeave = () => {
 <style scoped>
 .artist-avatar-clone {
   transition: box-shadow 0.3s ease;
+}
+
+@media (hover: none) {
+  .artist-hover-play {
+    opacity: 1;
+  }
 }
 </style>

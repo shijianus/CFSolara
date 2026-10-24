@@ -212,7 +212,7 @@ const handleMouseLeave = () => {
         img-class="h-full w-full object-cover"
       />
       <div
-        class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"
+        class="songcard-hover-play absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"
       >
         <span class="icon-[mdi--play] h-5 w-5 text-white" />
       </div>
@@ -236,5 +236,11 @@ const handleMouseLeave = () => {
 <style scoped>
 .song-card {
   will-change: transform;
+}
+
+@media (hover: none) {
+  .songcard-hover-play {
+    opacity: 1;
+  }
 }
 </style>

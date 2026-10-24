@@ -270,6 +270,7 @@ export default {
     singleLoop: 'Single Loop',
     randomPlay: 'Shuffle',
     playlist: 'Playlist',
+    playMode: 'Play mode',
     history: 'History',
     nowPlaying: 'Now Playing',
     bgToggle: 'Background',

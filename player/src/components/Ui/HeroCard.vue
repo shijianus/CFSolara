@@ -305,7 +305,7 @@ const handleMouseLeave = () => {
       <!-- 播放量标签 -->
       <div
         v-if="playCount"
-        class="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[10px] text-white backdrop-blur-sm"
+        class="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[11px] text-white backdrop-blur-sm"
       >
         <span class="icon-[mdi--headphones] h-3 w-3" />
         {{ formatCount(playCount) }}
@@ -316,7 +316,7 @@ const handleMouseLeave = () => {
         <p class="line-clamp-2 text-xs leading-tight font-medium text-white">
           {{ title }}
         </p>
-        <div v-if="trackCount" class="mt-1.5 flex items-center gap-1.5 text-[10px] text-white/70">
+        <div v-if="trackCount" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-white/70">
           <span class="icon-[mdi--music-note] h-3 w-3" />
           <span>{{ trackCount }}首</span>
         </div>
@@ -324,7 +324,7 @@ const handleMouseLeave = () => {
 
       <!-- 悬停播放按钮 -->
       <div
-        class="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100"
+        class="hero-hover-play absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100"
       >
         <div
           class="flex h-12 w-12 scale-75 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] text-white shadow-[0_10px_30px_rgba(37,99,235,0.6)] transition-transform duration-300 group-hover:scale-100 ring-1 ring-white/40"
@@ -345,5 +345,11 @@ const handleMouseLeave = () => {
 
 .hero-card-inner {
   transform-style: preserve-3d;
+}
+
+@media (hover: none) {
+  .hero-hover-play {
+    opacity: 1;
+  }
 }
 </style>

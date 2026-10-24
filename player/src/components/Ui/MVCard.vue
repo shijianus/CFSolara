@@ -336,7 +336,7 @@ const handleClick = async () => {
       <!-- 播放量 -->
       <div
         v-if="playCount"
-        class="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] text-white backdrop-blur-sm"
+        class="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[11px] text-white backdrop-blur-sm"
       >
         <span class="icon-[mdi--play] h-3 w-3" />
         {{ formatCount(playCount) }}
@@ -383,5 +383,12 @@ const handleClick = async () => {
 
 .mv-card-inner {
   transform-style: preserve-3d;
+}
+
+@media (hover: none) {
+  .play-button {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
 }
 </style>

@@ -176,12 +176,12 @@ const isActive = (path: string) => {
               </span>
             </span>
             <div class="flex flex-col leading-none">
-              <span class="text-[9px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+              <span class="text-[11px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
               <div class="mt-0.5 flex items-center gap-1.5">
                 <span class="text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</span>
-                <span class="rounded bg-linear-to-r from-[#2563eb]/30 to-[#38bdf8]/30 px-1 py-0.2 text-[8px] font-bold text-white/90 border border-white/20">{{ BRAND_STUDIO }}</span>
+                <span class="rounded bg-linear-to-r from-[#2563eb]/30 to-[#38bdf8]/30 px-1 py-0.2 text-[11px] font-bold text-white/90 border border-white/20">{{ BRAND_STUDIO }}</span>
               </div>
-              <span class="mt-0.5 text-[9px] text-primary/40 font-semibold tracking-wider">{{ BRAND_TAGLINE }}</span>
+              <span class="mt-0.5 text-[11px] text-primary/40 font-semibold tracking-wider">{{ BRAND_TAGLINE }}</span>
             </div>
           </router-link>
 
@@ -226,7 +226,7 @@ const isActive = (path: string) => {
             </button>
             <span
               v-else
-              class="rounded bg-white/10 px-1 py-0.2 text-[8px] font-semibold text-primary/40"
+              class="rounded bg-white/10 px-1 py-0.2 text-[11px] font-semibold text-primary/40"
             >↵</span>
           </div>
         </div>
@@ -242,7 +242,7 @@ const isActive = (path: string) => {
 
           <div ref="navContainerRef">
             <div v-for="sec in sections" :key="sec.titleKey" class="mb-4">
-              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[11px] font-bold tracking-[.18em] uppercase">
                 {{ $t(sec.titleKey) }}
               </h3>
               <nav class="relative space-y-0.5">
@@ -272,7 +272,7 @@ const isActive = (path: string) => {
 
             <!-- 收藏的歌单（本地持久化） -->
             <div v-if="collectedPlaylists.length" class="mb-4">
-              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[11px] font-bold tracking-[.18em] uppercase">
                 {{ $t('layout.aside.collectedPlaylists') }}
               </h3>
               <nav class="relative space-y-0.5">

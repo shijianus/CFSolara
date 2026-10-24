@@ -56,21 +56,25 @@ const cycleTheme = () => {
           <span class="absolute inset-0 rounded-full ring-1 ring-white/50"></span>
         </span>
         <div class="flex flex-col leading-none">
-          <span class="text-[8px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+          <span class="text-[11px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
           <h1 class="mt-0.5 text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</h1>
         </div>
       </router-link>
     </div>
     <div class="flex items-center gap-1.5">
       <button
-        class="text-primary/70 hover:text-primary rounded-full p-2 transition-colors hover:bg-white/10"
+        type="button"
+        class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        :aria-label="t('common.search.label')"
         :title="t('common.search.label')"
         @click="goSearch"
       >
         <span class="icon-[mdi--magnify] h-5 w-5"></span>
       </button>
       <button
-        class="text-primary/70 hover:text-primary rounded-full p-2 transition-colors hover:bg-white/10"
+        type="button"
+        class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        :aria-label="t('components.settings.themeMode')"
         :title="t('components.settings.themeMode')"
         @click="cycleTheme"
       >

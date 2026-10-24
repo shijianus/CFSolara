@@ -81,7 +81,12 @@ onUnmounted(() => {
     "
   >
     <div class="glass-card flex items-center gap-3 rounded-t-2xl rounded-tl-2xl rounded-b-none p-3">
-      <div class="w-12 h-12 overflow-hidden rounded-lg shrink-0 relative" @click="$emit('open')">
+      <button
+        type="button"
+        class="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
+        :aria-label="$t('player.nowPlaying')"
+        @click="$emit('open')"
+      >
         <img
           v-if="currentSong.cover"
           :src="formatCoverUrl(currentSong.cover, { size: 200, artist: currentSong.artist })"
@@ -98,7 +103,7 @@ onUnmounted(() => {
         <div v-else class="glass-button flex h-full w-full items-center justify-center rounded-lg">
           🎵
         </div>
-      </div>
+      </button>
       <div class="min-w-0 flex-1">
         <div class="flex items-start gap-3">
           <div class="min-w-0">

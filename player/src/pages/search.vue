@@ -417,11 +417,11 @@ const maxScore = computed(() => {
               <!-- 标签 -->
               <span
                 v-if="item.iconType === 1"
-                class="shrink-0 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-blue-400"
+                class="shrink-0 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[11px] font-bold leading-none text-blue-400"
               >HOT</span>
               <span
                 v-else-if="item.iconType === 5"
-                class="shrink-0 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-emerald-400"
+                class="shrink-0 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-bold leading-none text-emerald-400"
               >NEW</span>
 
               <!-- 热度值 -->

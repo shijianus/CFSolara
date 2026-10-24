@@ -476,7 +476,7 @@ watch(
             v-if="q"
             variant="ghost"
             size="none"
-            class="clear-btn flex h-7 w-7 items-center justify-center rounded-full transition-all"
+            class="clear-btn flex h-11 w-11 items-center justify-center rounded-full transition-all"
             icon="icon-[mdi--close-circle]"
             icon-class="h-4 w-4"
             :title="$t('common.clear')"
@@ -485,7 +485,7 @@ watch(
           <Button
             variant="gradient"
             size="none"
-            class="search-btn text-white flex h-8 items-center gap-1.5 rounded-full px-4 text-xs font-medium transition-all active:scale-95"
+            class="search-btn flex h-11 items-center gap-1.5 rounded-full px-4 text-xs font-medium text-white transition-all active:scale-95"
             icon="icon-[mdi--magnify]"
             icon-class="h-4 w-4"
             @click="handleSearchClick"
@@ -499,7 +499,7 @@ watch(
             v-if="suggestVisible && suggest.length"
             class="suggest-dropdown absolute top-full right-0 left-0 z-20 mt-2 rounded-2xl p-3"
           >
-            <p class="suggest-title mb-2 px-1 text-[10px] font-medium tracking-wider uppercase">
+            <p class="suggest-title mb-2 px-1 text-[11px] font-medium tracking-wider uppercase">
               {{ $t('common.search.suggest') }}
             </p>
             <div class="flex flex-wrap gap-2">
@@ -524,7 +524,7 @@ watch(
           :key="tabItem.key"
           variant="ghost"
           size="none"
-          class="tab-button flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-300"
+          class="tab-button flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium transition-all duration-300"
           :class="tab === tabItem.key ? 'tab-button-active' : ''"
           :icon="tabItem.icon"
           icon-class="h-4 w-4"
@@ -606,7 +606,7 @@ watch(
             </span>
             <span
               v-if="item.iconType === 1"
-              class="text-primary/70 shrink-0 rounded bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-bold"
+              class="text-primary/70 shrink-0 rounded bg-sky-500/10 px-1.5 py-0.5 text-[11px] font-bold"
             >
               HOT
             </span>
@@ -980,6 +980,13 @@ html.dark .playlist-cover {
 .playlist-card:active .playlist-play-btn {
   opacity: 1;
   transform: scale(1);
+}
+
+@media (hover: none) {
+  .playlist-play-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .playlist-name {

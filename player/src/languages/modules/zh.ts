@@ -260,6 +260,7 @@ export default {
     singleLoop: '单曲循环',
     randomPlay: '随机播放',
     playlist: '播放列表',
+    playMode: '播放模式',
     history: '历史播放',
     nowPlaying: '正在播放',
     bgToggle: '背景',

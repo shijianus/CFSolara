@@ -192,7 +192,7 @@ onUnmounted(() => {
       >
         <span class="icon-[mdi--refresh] h-4 w-4 transition-transform duration-500 group-hover:rotate-180 text-sky-400"></span>
         <span>{{ resolvedRetryText }}</span>
-        <span class="inline-flex items-center rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[10px] text-sky-300 group-hover:text-primary">
+        <span class="inline-flex items-center rounded-md bg-sky-500/20 px-1.5 py-0.5 text-[11px] text-sky-300 group-hover:text-primary">
           {{ t('common.retry') }}
         </span>
       </button>
