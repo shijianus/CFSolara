@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cloudSearch, searchSuggest, searchDefault, searchHotDetail } from '@/api'
+import { cloudSearch, searchSuggest, searchDefault, searchHotDetail, playlistTrackAll } from '@/api'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Pagination from '@/components/Ui/Pagination.vue'
 import { Song } from '@/stores/interface'
@@ -429,6 +429,27 @@ const playAllSongs = () => {
   play(list[0], 0)
 }
 
+// 歌单卡片播放按钮:拉取歌单曲目并直接起播(UI-033,不再是纯装饰)
+const playingPlaylistId = ref<string | number | null>(null)
+const playPlaylistCard = async (p: PlaylistData) => {
+  if (!p?.id || playingPlaylistId.value) return
+  playingPlaylistId.value = p.id
+  try {
+    const res: any = await playlistTrackAll({ id: p.id, limit: 100 })
+    const list: Song[] = (res?.songs || []).map(mapToStoreSong)
+    if (!list.length) {
+      useToastStore().show({ message: t('common.loadFailedRetry'), type: 'error' })
+      return
+    }
+    setPlaylist(list, 0)
+    play(list[0], 0)
+  } catch {
+    useToastStore().show({ message: t('common.loadFailedRetry'), type: 'error' })
+  } finally {
+    playingPlaylistId.value = null
+  }
+}
+
 const tabs = computed(() => [
   { key: 'song' as const, icon: 'icon-[mdi--music-circle]', label: t('search.tabs.song') },
   {
@@ -731,8 +752,14 @@ watch(
                   </div>
                   <div
                     class="playlist-play-btn absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-300"
+                    role="button"
+                    :aria-label="t('actions.play') + ': ' + p.name"
+                    @click.stop.prevent="playPlaylistCard(p)"
                   >
-                    <span class="icon-[mdi--play] text-primary h-5 w-5"></span>
+                    <span
+                      class="text-primary h-5 w-5"
+                      :class="playingPlaylistId === p.id ? 'icon-[mdi--loading] animate-spin' : 'icon-[mdi--play]'"
+                    ></span>
                   </div>
                 </div>
                 <p class="playlist-name line-clamp-2 px-1 text-[13px] leading-snug font-medium">
