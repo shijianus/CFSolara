@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { gsap } from 'gsap'
 import LazyImage from '@/components/Ui/LazyImage.vue'
-import { formatDuration } from '@/utils/time'
+import { formatDurationOrDash } from '@/utils/time'
 import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import type { Song as StoreSong } from '@/stores/interface'
@@ -228,7 +228,7 @@ const handleMouseLeave = () => {
 
     <!-- 时长 -->
     <span class="text-primary/30 shrink-0 text-xs font-mono">
-      {{ formatDuration(song.duration) }}
+      {{ formatDurationOrDash(song.duration) }}
     </span>
   </div>
 </template>

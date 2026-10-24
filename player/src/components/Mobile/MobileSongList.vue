@@ -2,6 +2,7 @@
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import { useAudio } from '@/composables/useAudio'
 import type { Song } from '@/stores/interface'
+import { formatDurationOrDash } from '@/utils/time'
 import { formatCoverUrl } from '@/utils/imageUrl'
 
 type ListVariant = 'compact' | 'card'
@@ -30,13 +31,6 @@ const isCurrent = (s: Song) => {
   const cur = currentSong.value
   if (!cur) return false
   return String(s.id) === String(cur.id)
-}
-
-const formatDuration = (ms: number) => {
-  const total = Math.floor(ms / 1000)
-  const m = Math.floor(total / 60)
-  const sec = total % 60
-  return `${m}:${sec.toString().padStart(2, '0')}`
 }
 
 const handleClick = (s: Song, i: number) => {
@@ -128,7 +122,7 @@ const getQualityBadgeInfo = (song: Song) => {
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
-        <span class="song-duration text-xs">{{ formatDuration(song.duration) }}</span>
+        <span class="song-duration text-xs">{{ formatDurationOrDash(song.duration) }}</span>
         <div v-if="isCurrent(song)" class="playing-icon">
           <span class="bar" :class="{ animate: isPlaying }"></span>
           <span class="bar" :class="{ animate: isPlaying }"></span>
@@ -189,7 +183,7 @@ const getQualityBadgeInfo = (song: Song) => {
           {{ song.artist }}<template v-if="song.album"> - 《{{ song.album }}》</template>
         </p>
       </div>
-      <span class="song-duration shrink-0 text-xs">{{ formatDuration(song.duration) }}</span>
+      <span class="song-duration shrink-0 text-xs">{{ formatDurationOrDash(song.duration) }}</span>
     </div>
   </div>
 </template>

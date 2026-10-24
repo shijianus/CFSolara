@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cloudSearch } from '@/api'
 import { useAudio } from '@/composables/useAudio'
-import { transformSearchSongs, type SongData } from '@/utils/transformers'
+import { transformSearchSongs, normalizeDurationMs, type SongData } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
 
 interface Props {
@@ -60,11 +60,11 @@ const fetchSongs = async () => {
           album: t.album || '',
           albumId: 0,
           cover: formatCoverUrl(t.cover || t.coverUrl || t.artistPic || '', { size: 300, artist: t.artist }),
-          duration: (t.duration || 200) * 1000,
-          dt: (t.duration || 200) * 1000,
+          duration: normalizeDurationMs(t.duration),
+          dt: normalizeDurationMs(t.duration),
           url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
           sha: t.sha || '',
-          qualityBadge: t.qualityBadge || 'SQ',
+          qualityBadge: t.qualityBadge || undefined,
           qualities: t.qualities || [],
           liked: false,
         }))

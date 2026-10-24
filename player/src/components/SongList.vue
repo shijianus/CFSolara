@@ -2,7 +2,7 @@
 import { useAudio } from '@/composables/useAudio'
 import { useSharedElement } from '@/composables/useSharedElement'
 import type { Song } from '@/stores/interface'
-import { formatDuration } from '@/utils/time'
+import { formatDurationOrDash } from '@/utils/time'
 import { RouterLink, useRouter } from 'vue-router'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
@@ -128,6 +128,10 @@ const isPredominantlyLossless = computed(() => {
 })
 
 const getQualityBadgeInfo = (song: Song) => {
+  // 无任何音质数据时不渲染徽章，避免伪造档位
+  if (!song.qualityBadge && !(song.qualities && song.qualities.length > 0)) {
+    return null
+  }
   const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
   const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
   const hasMultiple = Boolean(song.qualities && song.qualities.length > 1)
@@ -384,7 +388,7 @@ const getQualityBadgeInfo = (song: Song) => {
             </div>
             <div class="col-span-1 flex items-center justify-end">
               <span class="text-primary/50 hidden font-mono text-sm md:inline-block">{{
-                formatDuration(song.duration)
+                formatDurationOrDash(song.duration)
               }}</span>
             </div>
             <!-- 操控按钮 (常态显示低透明度的"···"，悬停显示三个 32px 按钮，间距 8px) -->
