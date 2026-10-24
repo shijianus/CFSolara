@@ -304,6 +304,7 @@ onMounted(async () => {
   const initial = String(route.query.q || '').trim()
   if (initial) {
     state.q = initial
+    state.hasSearched = true
     globalStore.addSearchHistory(initial)
     await searchAll()
   } else {
