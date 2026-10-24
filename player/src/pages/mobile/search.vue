@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { cloudSearch, searchSuggest, searchDefault } from '@/api'
+import { cloudSearch, searchSuggest, searchDefault, searchHotDetail } from '@/api'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Pagination from '@/components/Ui/Pagination.vue'
 import { Song } from '@/stores/interface'
 import { useAudio } from '@/composables/useAudio'
+import { useGlobalStore } from '@/stores/modules/global'
+import { storeToRefs } from 'pinia'
+import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
@@ -37,6 +40,10 @@ type SearchTab = 'song' | 'playlist' | 'mv'
 
 const { t } = useI18n()
 const { setPlaylist, play, currentSong } = useAudio()
+const route = useRoute()
+const router = useRouter()
+const globalStore = useGlobalStore()
+const { searchHistory } = storeToRefs(globalStore)
 
 interface MobileSearchState {
   q: string
@@ -45,6 +52,9 @@ interface MobileSearchState {
   suggest: string[]
   loading: boolean
   suggestVisible: boolean
+  hasSearched: boolean
+  hotSearches: Array<{ searchWord: string; score?: number; iconType?: number }>
+  loadingHot: boolean
   songs: SongData[]
   songPage: number
   songPageSize: number
@@ -65,6 +75,9 @@ const state = reactive<MobileSearchState>({
   suggest: [],
   loading: false,
   suggestVisible: false,
+  hasSearched: false,
+  hotSearches: [],
+  loadingHot: false,
   songs: [],
   songPage: 1,
   songPageSize: 20,
@@ -85,6 +98,9 @@ const {
   suggest,
   loading,
   suggestVisible,
+  hasSearched,
+  hotSearches,
+  loadingHot,
   songs,
   songPage,
   songPageSize,
@@ -105,11 +121,78 @@ const fetchDefault = async () => {
   state.placeholder = def || ''
 }
 
+const fetchHot = async () => {
+  if (state.loadingHot || state.hotSearches.length) return
+  state.loadingHot = true
+  try {
+    const res: any = await searchHotDetail()
+    state.hotSearches = Array.isArray(res?.data) ? res.data.slice(0, 10) : []
+  } catch {
+    state.hotSearches = []
+  } finally {
+    state.loadingHot = false
+  }
+}
+
+// 搜索建议：300ms 防抖，并用 AbortController 丢弃过期请求
+let suggestAbort: AbortController | null = null
 const fetchSuggest = async () => {
-  if (!state.q.trim()) return (state.suggest = [])
-  const res = await searchSuggest({ keywords: state.q, type: 'mobile' })
-  const list = (res as any)?.result?.allMatch || []
-  state.suggest = list.map((i: any) => i.keyword).slice(0, 8)
+  const term = state.q.trim()
+  suggestAbort?.abort()
+  if (!term) {
+    state.suggest = []
+    return
+  }
+  const controller = new AbortController()
+  suggestAbort = controller
+  try {
+    const res = await searchSuggest({ keywords: term, type: 'mobile' }, controller.signal)
+    if (controller.signal.aborted) return
+    const list = (res as any)?.result?.allMatch || []
+    state.suggest = list.map((i: any) => i.keyword).slice(0, 8)
+  } catch {
+    if (!controller.signal.aborted) state.suggest = []
+  }
+}
+const debouncedFetchSuggest = useDebounceFn(fetchSuggest, 300)
+
+const syncQueryToUrl = (term: string) => {
+  const current = String(route.query.q || '').trim()
+  if (current === term) return
+  const query = { ...route.query } as Record<string, any>
+  if (term) query.q = term
+  else delete query.q
+  router.replace({ path: '/search', query })
+}
+
+let suppressPagingFetch = false
+const resetResults = () => {
+  suppressPagingFetch = true
+  state.songs = []
+  state.playlists = []
+  state.mvs = []
+  state.songTotal = 0
+  state.playlistTotal = 0
+  state.mvTotal = 0
+  state.songPage = 1
+  state.playlistPage = 1
+  state.mvPage = 1
+  nextTick(() => {
+    suppressPagingFetch = false
+  })
+}
+
+const runSearch = async (keyword: string) => {
+  const term = keyword.trim()
+  if (!term) return
+  suggestAbort?.abort()
+  state.q = term
+  state.hasSearched = true
+  state.suggestVisible = false
+  globalStore.addSearchHistory(term)
+  syncQueryToUrl(term)
+  resetResults()
+  await searchAll()
 }
 
 const fetchSongs = async () => {
@@ -171,32 +254,43 @@ const fetchSongs = async () => {
 
 const fetchPlaylists = async () => {
   if (!state.q.trim()) return
-  const res = await cloudSearch({
-    keywords: state.q,
-    type: 1000,
-    limit: state.playlistPageSize,
-    offset: (state.playlistPage - 1) * state.playlistPageSize,
-  })
-  const { playlists, total } = transformSearchPlaylists(res as Record<string, unknown>)
-  state.playlists = playlists
-  state.playlistTotal = total
+  try {
+    const res = await cloudSearch({
+      keywords: state.q,
+      type: 1000,
+      limit: state.playlistPageSize,
+      offset: (state.playlistPage - 1) * state.playlistPageSize,
+    })
+    const { playlists, total } = transformSearchPlaylists(res as Record<string, unknown>)
+    state.playlists = playlists
+    state.playlistTotal = total
+  } catch {
+    state.playlists = []
+    state.playlistTotal = 0
+  }
 }
 
 const fetchMVs = async () => {
   if (!state.q.trim()) return
-  const res = await cloudSearch({
-    keywords: state.q,
-    type: 1004,
-    limit: state.mvPageSize,
-    offset: (state.mvPage - 1) * state.mvPageSize,
-  })
-  const { mvs, total } = transformSearchMVs(res as Record<string, unknown>)
-  state.mvs = mvs
-  state.mvTotal = total
+  try {
+    const res = await cloudSearch({
+      keywords: state.q,
+      type: 1004,
+      limit: state.mvPageSize,
+      offset: (state.mvPage - 1) * state.mvPageSize,
+    })
+    const { mvs, total } = transformSearchMVs(res as Record<string, unknown>)
+    state.mvs = mvs
+    state.mvTotal = total
+  } catch {
+    state.mvs = []
+    state.mvTotal = 0
+  }
 }
 
 const searchAll = async () => {
   if (!state.q.trim()) return
+  state.hasSearched = true
   state.loading = true
   try {
     await Promise.all([fetchSongs(), fetchPlaylists(), fetchMVs()])
@@ -207,52 +301,87 @@ const searchAll = async () => {
 
 onMounted(async () => {
   await fetchDefault()
-  await searchAll()
+  const initial = String(route.query.q || '').trim()
+  if (initial) {
+    state.q = initial
+    globalStore.addSearchHistory(initial)
+    await searchAll()
+  } else {
+    fetchHot()
+  }
   document.addEventListener('click', handleDocClick)
 })
 
-watch(() => state.q, fetchSuggest)
+watch(
+  () => state.q,
+  value => {
+    if (!value.trim()) {
+      suggestAbort?.abort()
+      state.suggest = []
+      return
+    }
+    debouncedFetchSuggest()
+  }
+)
+
+// 地址栏/浏览器前后退改变关键词时保持页面同步
+watch(
+  () => route.query.q,
+  async raw => {
+    const next = String(raw || '').trim()
+    if (next === state.q.trim()) return
+    state.suggestVisible = false
+    resetResults()
+    if (next) {
+      state.q = next
+      state.hasSearched = true
+      await searchAll()
+    } else {
+      state.q = ''
+      state.hasSearched = false
+      fetchHot()
+    }
+  }
+)
+
 watch(
   () => state.songPage,
   () => {
-    fetchSongs()
+    if (state.hasSearched && !suppressPagingFetch) fetchSongs()
   }
 )
 watch(
   () => state.playlistPage,
   () => {
-    fetchPlaylists()
+    if (state.hasSearched && !suppressPagingFetch) fetchPlaylists()
   }
 )
 watch(
   () => state.mvPage,
   () => {
-    fetchMVs()
+    if (state.hasSearched && !suppressPagingFetch) fetchMVs()
   }
 )
 
 const handleSuggestClick = (s: string) => {
-  state.q = s
-  state.songPage = 1
-  state.playlistPage = 1
-  state.mvPage = 1
-  state.suggestVisible = false
-  searchAll()
+  runSearch(s)
 }
 
 const clearQuery = () => {
   state.q = ''
   state.suggest = []
   state.suggestVisible = false
+  state.hasSearched = false
+  resetResults()
+  syncQueryToUrl('')
+  fetchHot()
 }
 
 const inputRef = useTemplateRef('inputRef')
 const handleSearchClick = () => {
-  if (!state.q.trim()) state.q = state.placeholder || ''
-  state.songPage = 1
-  state.playlistPage = 1
-  state.mvPage = 1
-  searchAll()
+  const term = state.q.trim() || state.placeholder.trim()
+  if (!term) return
+  runSearch(term)
   state.suggestVisible = false
   inputRef.value?.blur()
 }
@@ -267,6 +396,7 @@ const handleDocClick = (e: MouseEvent) => {
   if (el && target && !el.contains(target)) state.suggestVisible = false
 }
 onUnmounted(() => {
+  suggestAbort?.abort()
   document.removeEventListener('click', handleDocClick)
 })
 
@@ -388,7 +518,7 @@ watch(
         </Transition>
       </div>
 
-      <div class="glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
+      <div v-if="hasSearched" class="glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
         <Button
           v-for="tabItem in tabs"
           :key="tabItem.key"
@@ -405,7 +535,91 @@ watch(
       </div>
     </div>
 
-    <div class="flex-1 overflow-hidden">
+    <!-- 未搜索：热门搜索 + 搜索历史 -->
+    <div v-if="!hasSearched" class="flex-1 overflow-y-auto px-4 pb-6">
+      <section v-if="searchHistory.length" class="mb-6">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="icon-[mdi--history] h-4 w-4 text-primary/40"></span>
+            <h2 class="text-primary/60 text-xs font-bold tracking-wider uppercase">
+              {{ $t('search.recentSearches') }}
+            </h2>
+          </div>
+          <button
+            type="button"
+            class="text-primary/40 hover:text-primary/70 min-h-11 px-2 text-xs font-medium transition-colors"
+            @click="globalStore.clearSearchHistory()"
+          >
+            {{ $t('common.clear') }}
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="keyword in searchHistory"
+            :key="keyword"
+            type="button"
+            class="history-chip flex min-h-11 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 text-xs font-medium transition-colors active:bg-white/10"
+            @click="runSearch(keyword)"
+          >
+            <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
+            <span class="text-primary/80">{{ keyword }}</span>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <div class="mb-3 flex items-center gap-2">
+          <span class="icon-[mdi--fire] h-4 w-4 text-orange-500/60"></span>
+          <h2 class="text-primary/40 text-xs font-medium">{{ $t('search.hotSearches') }}</h2>
+        </div>
+
+        <div v-if="loadingHot" class="space-y-2">
+          <div
+            v-for="i in 8"
+            :key="i"
+            class="flex min-h-11 items-center gap-3 rounded-xl px-3"
+          >
+            <div class="h-5 w-5 animate-pulse rounded bg-white/[0.05]"></div>
+            <div
+              class="h-3 animate-pulse rounded bg-white/[0.05]"
+              :style="{ width: `${30 + Math.random() * 35}%` }"
+            ></div>
+          </div>
+        </div>
+
+        <div v-else class="space-y-1">
+          <button
+            v-for="(item, index) in hotSearches"
+            :key="item.searchWord"
+            type="button"
+            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors active:bg-white/[0.04]"
+            @click="runSearch(item.searchWord)"
+          >
+            <span
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold"
+              :class="index < 3 ? 'bg-sky-500/15 text-sky-400' : 'text-primary/30'"
+            >
+              {{ index + 1 }}
+            </span>
+            <span class="text-primary/75 min-w-0 flex-1 truncate text-sm">
+              {{ item.searchWord }}
+            </span>
+            <span
+              v-if="item.iconType === 1"
+              class="text-primary/70 shrink-0 rounded bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-bold"
+            >
+              HOT
+            </span>
+          </button>
+        </div>
+
+        <p v-if="!loadingHot && !hotSearches.length" class="text-primary/40 py-8 text-center text-sm">
+          {{ $t('search.enterKeyword') }}
+        </p>
+      </section>
+    </div>
+
+    <div v-else class="flex-1 overflow-hidden">
       <div v-if="loading" class="h-full overflow-auto px-4 py-6">
         <PageSkeleton :sections="['list']" :list-count="10" />
       </div>
@@ -440,7 +654,10 @@ watch(
               </Button>
             </div>
 
-            <div v-if="songs.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && songs.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--music-note-off] h-10 w-10 opacity-40" />
               </div>
@@ -467,7 +684,10 @@ watch(
               </p>
             </div>
 
-            <div v-if="playlists.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && playlists.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--playlist-remove] h-10 w-10 opacity-40" />
               </div>
@@ -524,7 +744,10 @@ watch(
               </p>
             </div>
 
-            <div v-if="mvs.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && mvs.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--video-off] h-10 w-10 opacity-40" />
               </div>

@@ -50,8 +50,12 @@ instance.interceptors.response.use(
 )
 
 /** GET 请求 */
-export const httpGet = <T>(url: string, params?: object): Promise<T> =>
-    instance.get(url, { params })
+export const httpGet = <T>(
+    url: string,
+    params?: object,
+    config?: { signal?: AbortSignal }
+): Promise<T> =>
+    instance.get(url, { params, ...config })
 
 /** POST 请求 */
 export const httpPost = <T>(
