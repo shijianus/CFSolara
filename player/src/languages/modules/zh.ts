@@ -87,6 +87,7 @@ export default {
       prev: '上一页',
       next: '下一页',
     queueCleared: '播放队列已清空',
+    localFileMissing: '本地文件已不可用，已清除当前歌曲',
       status: '第 {page} / {totalPages} 页 · 共 {total} 条',
     },
     songList: {

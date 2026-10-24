@@ -8,6 +8,7 @@ import { Song, PlayMode, AudioStoreState } from '../interface'
 import { useSettingsStore } from './settings'
 import { useToastStore } from './toast'
 import i18n from '@/languages'
+import { downloadedMusicDB, localMusicDB } from '@/utils/indexedDB'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -48,6 +49,8 @@ let lastPlaybackToastKey = ''
 let lastPlaybackToastAt = 0
 /** 音质切换期间由 switchQuality 自行处理错误，避免误触发全局播放错误 */
 let switchingQuality = false
+/** 本次页面会话内已重新生成的 Blob URL，避免重复读取 IndexedDB */
+const restoredBlobUrls = new Set<string>()
 
 /** 获取 Audio 单例（懒初始化） */
 const getAudioSingleton = (): HTMLAudioElement => {
@@ -180,11 +183,100 @@ export const useAudioStore = defineStore('audio', {
               : 0
           this.audio.currentIndex = index
           this.audio.currentSong = this.audio.playlist[index]
-          this.audio.audio.src = (this.audio.currentSong && this.audio.currentSong.url) || ''
-          this.audio.audio.load()
+          if (this._isStaleBlobUrl(this.audio.currentSong)) {
+            // 页面刷新后 blob: URL 失效，异步从 IndexedDB 重建，避免先加载坏源
+            this.restoreCurrentSongSource()
+          } else {
+            this.audio.audio.src = (this.audio.currentSong && this.audio.currentSong.url) || ''
+            this.audio.audio.load()
+          }
         }
-        //
       }
+    },
+
+    /** blob: URL 仅在创建它的页面会话内有效；未重建过的视为失效 */
+    _isStaleBlobUrl(song?: Song | null): boolean {
+      return Boolean(
+        song?.url?.startsWith('blob:') && !restoredBlobUrls.has(song.url)
+      )
+    },
+
+    /** 按歌曲 id 从下载库/本地音乐库取回原始 Blob */
+    async _findBlobForSong(song: Song): Promise<Blob | null> {
+      if (typeof indexedDB === 'undefined') return null
+      const id = String(song.id)
+      try {
+        const downloaded = await downloadedMusicDB.getAll()
+        const match = downloaded.find(item => String(item.id) === id)
+        if (match?.file) return match.file
+      } catch {}
+      try {
+        const local = await localMusicDB.getAll()
+        const match = local.find(item => String(item.id) === id)
+        if (match?.file) return match.file
+      } catch {}
+      return null
+    },
+
+    /** 为失效的本地/下载歌曲重新创建 Blob URL；失败时清理当前歌曲并提示 */
+    async _restoreBlobUrlForSong(song: Song): Promise<boolean> {
+      if (!this._isStaleBlobUrl(song)) return true
+      const blob = await this._findBlobForSong(song)
+      if (!blob) {
+        this._handleMissingLocalFile(song)
+        return false
+      }
+      const newUrl = URL.createObjectURL(blob)
+      song.url = newUrl
+      const idx = this.audio.playlist.findIndex((item: Song) => String(item.id) === String(song.id))
+      if (idx !== -1) {
+        this.audio.playlist[idx].url = newUrl
+        this.audio.playlist[idx].isLocal = true
+      }
+      if (this.audio.currentSong && String(this.audio.currentSong.id) === String(song.id)) {
+        this.audio.currentSong.url = newUrl
+      }
+      restoredBlobUrls.add(newUrl)
+      return true
+    },
+
+    /** 恢复持久化的当前歌曲；blob 源失效时重建，取不到则清除 */
+    async restoreCurrentSongSource() {
+      const song = this.audio.currentSong
+      if (!song || !song.url?.startsWith('blob:')) return
+      const restored = await this._restoreBlobUrlForSong(song)
+      if (!restored) return
+      if (this.audio.audio && this.audio.currentSong && this.audio.currentSong.url) {
+        this.audio.audio.src = this.audio.currentSong.url
+        this.audio.audio.load()
+      }
+    },
+
+    /** 本地/下载文件已被删除或 IndexedDB 不可用 */
+    _handleMissingLocalFile(song: Song) {
+      this.audio.isPlaying = false
+      this.audio.isLoading = false
+      if (this.audio.audio) {
+        this.audio.audio.pause()
+        this.audio.audio.removeAttribute('src')
+        this.audio.audio.load()
+      }
+      const idx = this.audio.playlist.findIndex((item: Song) => String(item.id) === String(song.id))
+      if (idx !== -1) {
+        this.audio.playlist.splice(idx, 1)
+        if (idx < this.audio.currentIndex) {
+          this.audio.currentIndex -= 1
+        }
+      }
+      if (this.audio.currentSong && String(this.audio.currentSong.id) === String(song.id)) {
+        this.audio.currentSong = null
+        this.audio.currentIndex = -1
+      }
+      useToastStore().show({
+        message: i18n.global.t('player.localFileMissing'),
+        type: 'warning',
+        duration: 6000,
+      })
     },
 
     // 设置音频事件监听
@@ -288,6 +380,12 @@ export const useAudioStore = defineStore('audio', {
     /** 播放歌曲（自动获取缺失的播放地址） */
     async playSong(song?: Song, index?: number, force = false) {
       this.initAudio()
+
+      const targetSong = song || this.audio.currentSong
+      if (targetSong && targetSong.url?.startsWith('blob:')) {
+        const restored = await this._restoreBlobUrlForSong(targetSong)
+        if (!restored) return
+      }
 
       const prevSong = this.audio.currentSong
       const prevIndex = this.audio.currentIndex

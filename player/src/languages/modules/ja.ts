@@ -91,6 +91,7 @@ export default {
       prev: '前へ',
       next: '次へ',
     queueCleared: '再生キューをクリアしました',
+    localFileMissing: 'ローカルファイルが利用できません。現在の曲をクリアしました。',
       status: '{page} / {totalPages} ページ · 全 {total} 件',
     },
     songList: {

@@ -91,6 +91,7 @@ export default {
       prev: 'Prev',
       next: 'Next',
     queueCleared: 'Playback queue cleared',
+    localFileMissing: 'The local file is no longer available. The current track was cleared.',
       status: 'Page {page} / {totalPages} · Total {total}',
     },
     songList: {
