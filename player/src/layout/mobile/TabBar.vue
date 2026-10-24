@@ -10,6 +10,7 @@ const items = [
   { to: '/settings', icon: 'icon-[mdi--cog-outline]', labelKey: 'layout.aside.menu.settings' },
 ]
 
+const props = withDefaults(defineProps<{ inert?: boolean }>(), { inert: false })
 const emit = defineEmits(['show-player'])
 const route = useRoute()
 
@@ -95,10 +96,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <MiniPlayerMobile @open="emit('show-player')" />
+  <MiniPlayerMobile :inert="props.inert || undefined" @open="emit('show-player')" />
 
   <nav
     ref="tabbarRef"
+    :inert="props.inert || undefined"
     class="glass-container-strong fixed right-3 left-3 z-50 rounded-[26px] border border-white/15 px-2 py-1 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]"
     style="bottom: calc(env(safe-area-inset-bottom, 0px) + 12px)"
   >

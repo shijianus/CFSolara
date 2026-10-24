@@ -17,10 +17,12 @@ const openPlayerDrawer = () => {
   <!-- 纯色背景容器：移动端更简洁、更聚焦内容 -->
   <div class="text-primary flex h-dvh w-full flex-col">
     <!-- 顶部导航（含搜索/登录入口） -->
-    <MobileHeader />
+    <MobileHeader :inert="isDrawerOpen || undefined" :aria-hidden="isDrawerOpen || undefined" />
 
     <!-- 内容区域：页面组件渲染 -->
     <main
+      :inert="isDrawerOpen || undefined"
+      :aria-hidden="isDrawerOpen || undefined"
       class="flex flex-1 flex-col pt-3"
       style="
         padding-bottom: calc(
@@ -34,10 +36,16 @@ const openPlayerDrawer = () => {
           <component :is="Component" :key="route.path" />
         </keep-alive>
       </router-view>
-      <PlayerDrawerMobile v-model="isDrawerOpen" />
     </main>
 
     <!-- 底部标签栏：主要导航入口，适配拇指操作 -->
-    <MobileTabBar @show-player="openPlayerDrawer" />
+    <MobileTabBar
+      :inert="isDrawerOpen || undefined"
+      :aria-hidden="isDrawerOpen || undefined"
+      @show-player="openPlayerDrawer"
+    />
+
+    <!-- 播放器抽屉放在背景层之外，打开时背景统一 inert -->
+    <PlayerDrawerMobile v-model="isDrawerOpen" />
   </div>
 </template>

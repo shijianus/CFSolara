@@ -17,6 +17,7 @@ export default {
     loading: 'Loading',
     noData: 'No Data',
     back: 'Back',
+    dialog: 'Dialog',
     close: 'Close',
     undo: 'Undo',
     retry: 'Retry',

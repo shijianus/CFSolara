@@ -17,6 +17,7 @@ export default {
     loading: '加载中',
     noData: '暂无数据',
     back: '返回',
+    dialog: '对话框',
     close: '关闭',
     undo: '撤销',
     retry: '重试',
