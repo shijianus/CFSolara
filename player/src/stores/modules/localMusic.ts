@@ -126,7 +126,8 @@ export const useLocalMusicStore = defineStore('localMusic', {
         album: music.album,
         cover: music.cover,
         url: URL.createObjectURL(music.file), // 创建 Blob URL
-        duration: music.duration,
+        // 元数据解析出的时长单位为秒，Store 层 Song.duration 统一为毫秒
+        duration: Math.round((music.duration || 0) * 1000),
         // 其他字段
         mvId: 0,
         publishTime: music.createTime,

@@ -18,6 +18,14 @@ export const formatDuration = (ms: number) => {
 }
 
 /**
+ * 格式化歌曲时长（毫秒 → m:ss），时长缺失时返回占位符 "--:--"
+ */
+export const formatDurationOrDash = (ms?: number) => {
+  if (!ms || ms <= 0 || !Number.isFinite(ms)) return '--:--'
+  return formatDuration(ms)
+}
+
+/**
  * 格式化播放次数等大数字（自动转为 万/亿 单位）
  * @param count - 数字或字符串
  * @returns 格式化后的字符串，如 "3.2万"、"1.5亿"

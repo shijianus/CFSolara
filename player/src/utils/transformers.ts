@@ -127,6 +127,17 @@ export function extractArray<T = unknown>(
 // ============ 转换器 ============
 
 /**
+ * 将时长统一归一化为毫秒
+ * 部分接口（如搜索 nexus 网关）返回秒级时长；小于 1 小时毫秒数（3,600,000ms）的值
+ * 不可能是真实曲目，按秒级输入换算为毫秒，保证 formatDuration 等调用点单位一致
+ */
+export function normalizeDurationMs(value: unknown): number {
+  const n = typeof value === 'number' && Number.isFinite(value) ? value : 0
+  if (n > 0 && n < 3600) return Math.round(n * 1000)
+  return n
+}
+
+/**
  * 转换 Banner 数据
  * 严格屏蔽纯外部商业活动，并将单曲/专辑等引导至站内闭环播放与浏览
  */
@@ -294,7 +305,9 @@ export function transformSong(item: Record<string, unknown>): SongData {
     album: (albumData?.name as string) || '',
     albumId: (albumData?.id as number | string) || 0,
     cover,
-    duration: (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0,
+    duration: normalizeDurationMs(
+      (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0
+    ),
     liked: false,
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
     sha: (item?.sha as string) || (song?.sha as string) || '',
