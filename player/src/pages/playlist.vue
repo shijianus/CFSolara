@@ -6,7 +6,7 @@ import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
 import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
-import { formatCount } from '@/utils/time'
+import { formatCount, formatDateTime } from '@/utils/time'
 import { useI18n } from 'vue-i18n'
 import {
   transformPlaylistDetail,
@@ -18,6 +18,7 @@ import { formatCoverUrl } from '@/utils/imageUrl'
 import { useLibraryStore } from '@/stores/modules/library'
 
 const route = useRoute()
+const router = useRouter()
 const playlistId = route.params.id
 const libraryStore = useLibraryStore()
 
@@ -257,7 +258,7 @@ const loadComments = async (id?: number, reset = false) => {
       const mapped = list.map((c: any, i: number) => ({
         username: c?.user?.nickname || t('comments.user'),
         avatarGradient: gradients[(state.comments.length + i) % gradients.length],
-        time: c?.time ? new Date(c.time).toLocaleString() : '',
+        time: c?.time ? formatDateTime(c.time) : '',
         content: c?.content || '',
         likes: c?.likedCount || 0,
         avatarUrl: c?.user?.avatarUrl || '',
@@ -362,7 +363,8 @@ const toggleCollect = () => {
 }
 
 const sharePlaylist = async () => {
-  const url = location.origin + location.pathname + `#/playlist/${playlistId}`
+  const resolved = router.resolve({ name: 'playlist', params: { id: String(playlistId) } }).href
+  const url = new URL(resolved, location.origin).href
   const title = String((state.playlistInfo as any)?.name || t('home.playlistFallback'))
   const text = String((state.playlistInfo as any)?.description || '')
   try {
@@ -492,7 +494,7 @@ const tabsWithCount = computed(() =>
                     <div class="flex items-center gap-2">
                       <span class="icon-[mdi--music-note] text-primary/60 h-5 w-5"></span>
                       <span class="text-primary font-medium">
-                        {{ $t('commonUnits.songsShort', playlistInfo.songCount) }}
+                        {{ $t('commonUnits.songsShort', { count: playlistInfo.songCount }) }}
                       </span>
                     </div>
                     <div class="flex items-center gap-2">

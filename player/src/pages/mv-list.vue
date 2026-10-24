@@ -6,7 +6,10 @@ import TabGroup from '@/components/Ui/TabGroup.vue'
 import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useLibraryStore } from '@/stores/modules/library'
+import { useToastStore } from '@/stores/modules/toast'
 const { t } = useI18n()
+const router = useRouter()
+const toastStore = useToastStore()
 const libraryStore = useLibraryStore()
 
 const state = reactive({
@@ -72,8 +75,19 @@ const toggleLike = (mv: any) => {
   })
 }
 
-const shareMV = (mv: any) => {
-  console.log(`${t('mvList.log.sharePrefix')}${mv.title}`)
+const shareMV = async (mv: any) => {
+  const resolved = router.resolve({ name: 'mv-player', params: { id: String(mv.id) } }).href
+  const url = new URL(resolved, location.origin).href
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: mv.title, url })
+    } else {
+      await navigator.clipboard.writeText(url)
+      toastStore.show({ message: t('common.linkCopied'), type: 'success' })
+    }
+  } catch {
+    // 用户取消分享时不做提示
+  }
 }
 
 const formatSec = (seconds: number) =>
@@ -205,7 +219,10 @@ onMounted(() => {
               </h3>
               <p class="text-primary/50 mb-3 truncate text-sm">{{ mv.artist }}</p>
               <div class="flex items-center justify-between">
-                <span class="glass-card text-primary/60 rounded-full px-3 py-1 text-xs font-medium">
+                <span
+                  v-if="mv.categoryKey !== 'all'"
+                  class="glass-card text-primary/60 rounded-full px-3 py-1 text-xs font-medium"
+                >
                   {{ t('mvList.categories.' + mv.categoryKey) }}
                 </span>
                 <div

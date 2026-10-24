@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { mvDetail, mvUrl, simiMv, commentNew } from '@/api'
 import { MVInfo, RelatedMV, MVComment } from '@/typings'
-import { formatCount } from '@/utils/time'
+import { formatCount, formatDateTime } from '@/utils/time'
 import Button from '@/components/Ui/Button.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useLibraryStore } from '@/stores/modules/library'
@@ -58,7 +58,7 @@ const loadMV = async (id: number) => {
       playCount: String(d?.playCount || d?.playCountTxt || ''),
       likes: String(d?.likedCount || ''),
       publishDate: d?.publishTime || d?.publishDate || '',
-      category: d?.subed ? '已订阅' : 'sonic MV',
+      category: d?.subed ? t('mv.subscribed') : t('mv.categoryFallback'),
       emoji: '🎬',
       gradient: 'from-blue-500 to-primary-600',
       liked: !!d?.liked,
@@ -109,7 +109,7 @@ const loadComments = async (id: number) => {
     state.comments = list.map(c => ({
       username: c?.user?.nickname || t('mvPlayer.comments.user'),
       avatarUrl: c?.user?.avatarUrl || '',
-      time: c?.time ? new Date(c.time).toLocaleString() : '',
+      time: c?.time ? formatDateTime(c.time) : '',
       content: c?.content || '',
       likes: c?.likedCount || 0,
     }))
@@ -128,7 +128,11 @@ const toggleLike = () => {
 }
 
 const shareMV = async () => {
-  const url = location.origin + location.pathname + `#/mv-player/${state.currentMV.id}`
+  const resolved = router.resolve({
+    name: 'mv-player',
+    params: { id: String(state.currentMV.id) },
+  }).href
+  const url = new URL(resolved, location.origin).href
   try {
     if (navigator.share) {
       await navigator.share({ title: state.currentMV.title, url })
