@@ -2,15 +2,26 @@
 import { useSettingsStore } from '@/stores/modules/settings'
 import { storeToRefs } from 'pinia'
 import { useGlobalStore } from '@/stores/modules/global'
+import { useToastStore } from '@/stores/modules/toast'
 import { useI18n } from 'vue-i18n'
-import { getBackgroundOptions, getThemeOptions, getLangOptions, getAudioQualityOptions } from '@/config/settingsOptions'
+import {
+  getBackgroundOptions,
+  getThemeOptions,
+  getLangOptions,
+  getAudioQualityOptions,
+  getShowHideOptions,
+  getVisualizerTypeOptions,
+} from '@/config/settingsOptions'
 import I18n from '@/languages'
 import Button from '@/components/Ui/Button.vue'
+import GlassSelect from '@/components/Ui/GlassSelect.vue'
+import PrivacyDataSection from '@/components/Settings/PrivacyDataSection.vue'
 import { BRAND_FULL } from '@/config/brand'
 
 const settings = useSettingsStore()
-const { footerLyrics, backgroundType, audioQuality } = storeToRefs(settings)
+const { footerLyrics, backgroundType, audioQuality, audioVisualizer } = storeToRefs(settings)
 const globalStore = useGlobalStore()
+const toastStore = useToastStore()
 const { theme, lang } = storeToRefs(globalStore)
 const { t } = useI18n()
 
@@ -21,8 +32,10 @@ const footerEnabled = computed({
 
 const bgOptions = computed(() => getBackgroundOptions(t))
 const themeOptions = computed(() => getThemeOptions(t))
-const langOptions = computed(() => getLangOptions(t))
+const langOptions = computed(() => getLangOptions())
 const qualityOptions = computed(() => getAudioQualityOptions(t))
+const showHideOptions = computed(() => getShowHideOptions(t))
+const visualizerTypeOptions = computed(() => getVisualizerTypeOptions(t))
 const initialLocale = (() => {
   const cur = I18n.global.locale
   return typeof cur === 'object' && 'value' in cur ? (cur as any).value : (cur as any)
@@ -37,13 +50,20 @@ watch(lang, v => {
 const toggleMode = (mode: 'original' | 'trans' | 'roma', checked: boolean) => {
   const modes = new Set(footerLyrics.value.modes)
   if (checked) {
+    if (modes.size >= 2 && !modes.has(mode)) {
+      toastStore.show({ message: t('components.settings.footerLyricsLimit'), type: 'warning' })
+      return
+    }
     modes.add(mode)
-    const arr = Array.from(modes).slice(0, 2)
-    settings.setFooterLyricsModes(arr as Array<'original' | 'trans' | 'roma'>)
+    settings.setFooterLyricsModes(Array.from(modes) as Array<'original' | 'trans' | 'roma'>)
   } else {
+    if (modes.size <= 1) {
+      settings.setFooterLyricsEnabled(false)
+      toastStore.show({ message: t('components.settings.footerLyricsAtLeastOne'), type: 'warning' })
+      return
+    }
     modes.delete(mode)
-    const arr = Array.from(modes)
-    settings.setFooterLyricsModes(arr as Array<'original' | 'trans' | 'roma'>)
+    settings.setFooterLyricsModes(Array.from(modes) as Array<'original' | 'trans' | 'roma'>)
   }
 }
 
@@ -139,7 +159,7 @@ onMounted(() => {
           </p>
         </div>
       </div>
-      <div class="mt-3 grid grid-cols-3 gap-2">
+      <div class="mt-3 grid grid-cols-2 gap-2">
         <Button
           v-for="opt in bgOptions"
           :key="String(opt.value)"
@@ -214,6 +234,32 @@ onMounted(() => {
       </div>
     </section>
 
+    <section class="settings-card mb-4">
+      <div class="card-header">
+        <div class="icon-wrapper bg-linear-to-br from-cyan-500 to-blue-600">
+          <span class="icon-[mdi--waveform] h-4 w-4 text-primary"></span>
+        </div>
+        <div>
+          <h2 class="card-title">{{ t('components.settings.audioVisualizer.title') }}</h2>
+          <p class="card-desc">{{ t('components.settings.audioVisualizer.desc') }}</p>
+        </div>
+      </div>
+      <div class="mt-3 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-primary/75 text-xs">{{ t('components.settings.audioVisualizer.footer') }}</span>
+          <GlassSelect v-model="audioVisualizer.enabledInFooter" :options="showHideOptions" class="w-28" />
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-primary/75 text-xs">{{ t('components.settings.audioVisualizer.drawer') }}</span>
+          <GlassSelect v-model="audioVisualizer.enabledInDrawer" :options="showHideOptions" class="w-28" />
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-primary/75 text-xs">{{ t('components.settings.audioVisualizer.type') }}</span>
+          <GlassSelect v-model="audioVisualizer.visualizerType" :options="visualizerTypeOptions" class="w-28" />
+        </div>
+      </div>
+    </section>
+
     <!-- 性能优先模式 -->
     <section class="settings-card mb-4">
       <div class="card-header">
@@ -221,9 +267,9 @@ onMounted(() => {
           <span class="icon-[mdi--speedometer] h-4 w-4 text-primary"></span>
         </div>
         <div class="flex-1">
-          <h2 class="card-title">性能优先模式</h2>
+          <h2 class="card-title">{{ t('components.settings.performanceMode') }}</h2>
           <p class="card-desc">
-            关闭毛玻璃高斯模糊与背景流光特效，降低低配设备 CPU/GPU 负载
+            {{ t('components.settings.performanceModeDesc') }}
           </p>
         </div>
         <Button
@@ -305,6 +351,8 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <PrivacyDataSection class="mb-4" />
 
     <div class="mt-8 text-center">
       <p class="text-primary/70 text-xs">{{ BRAND_FULL }}</p>
