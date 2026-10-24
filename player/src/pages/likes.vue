@@ -57,12 +57,12 @@ const playSongAt = (id: string | number) => {
     <div class="h-full overflow-auto p-6">
       <div class="mb-8">
         <div class="glass-container relative overflow-hidden rounded-3xl p-6">
-          <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 class="text-3xl font-bold text-primary">{{ t('likes.title') }}</h1>
               <p class="mt-1 text-sm text-primary/70">{{ t('likes.subtitle') }}</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <Button
                 v-if="likedSongs.length"
                 variant="solid"
