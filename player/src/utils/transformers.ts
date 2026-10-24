@@ -288,7 +288,7 @@ export function transformSong(item: Record<string, unknown>): SongData {
     (item?.coverUrl as string) ||
     (song?.cover as string) ||
     (song?.coverUrl as string) ||
-    ((item?.artistPic || item?.artists?.[0]?.img1v1Url || albumData?.artist?.img1v1Url) as string) ||
+    ((item?.artistPic || (item?.artists as any[])?.[0]?.img1v1Url || (albumData?.artist as any)?.img1v1Url) as string) ||
     ''
 
   const cover = formatCoverUrl(rawCover, {
@@ -311,34 +311,9 @@ export function transformSong(item: Record<string, unknown>): SongData {
     liked: false,
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
     sha: (item?.sha as string) || (song?.sha as string) || '',
-    qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || 'SQ',
-    // 音质档位基础元数据（音质弹窗与规格展示已完全接入 qualityProbe.ts 真实网络探测，不包含 estimatedSize 估算字段）
-    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [
-      {
-        level: 'lossless',
-        label: 'SQ 无损',
-        bitrate: 'FLAC',
-        format: 'flac',
-        desc: '超清无损音质 (FLAC)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=lossless`,
-      },
-      {
-        level: 'exhigh',
-        label: 'HQ 极高',
-        bitrate: '320kbps',
-        format: 'mp3',
-        desc: '极高品质 (MP3 320k)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=320`,
-      },
-      {
-        level: 'standard',
-        label: '标准',
-        bitrate: '128kbps',
-        format: 'mp3',
-        desc: '标准流畅音质 (128kbps 快速省流)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=128`,
-      },
-    ],
+    // 缺失音质数据时保持为空，由展示层隐藏徽章；真实档位由 qualityProbe 网络探测补齐
+    qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || undefined,
+    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || undefined,
     url: (item?.streamUrl as string) || (item?.url as string) || (song?.url as string) || '',
   }
 }
@@ -495,7 +470,7 @@ export function transformPlaylistDetail(
       ? new Date(detail.createTime as number).toLocaleDateString()
       : '',
     songCount: (detail?.trackCount as number) || 0,
-    playCount: detail?.playCount || 0,
+    playCount: (detail?.playCount as string | number) || 0,
     likes: (detail?.subscribedCount as number) || (detail?.bookedCount as number) || 0,
     category: tags?.[0] || fallbackCategory,
     coverImgUrl: (detail?.coverImgUrl as string) || '',

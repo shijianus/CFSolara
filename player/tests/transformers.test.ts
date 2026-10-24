@@ -45,4 +45,10 @@ describe('transformSong 时长单位', () => {
     expect(song.duration).toBe(0)
     expect(formatDurationOrDash(song.duration)).toBe('--:--')
   })
+
+  it('缺失音质数据时不伪造 SQ 徽章与音质档位', () => {
+    const song = transformSong({ id: 5, name: 'E' })
+    expect(song.qualityBadge).toBeUndefined()
+    expect(song.qualities).toBeUndefined()
+  })
 })

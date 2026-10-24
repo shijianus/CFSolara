@@ -617,7 +617,7 @@ export async function handleUpstreamEndpoint(
         name: t.title || t.name,
         ar: [{ id: 0, name: t.artist }],
         al: { id: 0, name: t.album, picUrl: t.cover || t.coverUrl },
-        dt: (t.duration || 200) * 1000,
+        dt: t.duration ? Math.round(Number(t.duration) * 1000) : 0,
         mv: 0,
         sha: t.sha,
         qualityBadge: t.qualityBadge,
