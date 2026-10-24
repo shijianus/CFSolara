@@ -83,11 +83,17 @@ export default {
     official: '官方榜单',
   },
   components: {
+    infiniteScroll: {
+      error: '加载失败，请稍后重试',
+      timeout: '网络响应延迟，可点击强制刷新',
+      empty: '暂无结果',
+      reset: '重置筛选',
+      retry: '重新加载',
+      noMore: '已加载全部精彩内容',
+    },
     pagination: {
       prev: '上一页',
       next: '下一页',
-    queueCleared: '播放队列已清空',
-    localFileMissing: '本地文件已不可用，已清除当前歌曲',
       status: '第 {page} / {totalPages} 页 · 共 {total} 条',
     },
     songList: {
@@ -225,6 +231,8 @@ export default {
     },
   },
   player: {
+    queueCleared: '播放队列已清空',
+    localFileMissing: '本地文件已不可用，已清除当前歌曲',
     next: '下一首',
     qualitySwitchFailed: '音质切换失败，已恢复原音质',
     playbackError: {

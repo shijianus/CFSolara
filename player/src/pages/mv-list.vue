@@ -112,11 +112,8 @@ const fetchList = async (reset = false) => {
     state.hasMore = mapped.length === limit
     if (mapped.length) state.page += 1
   } catch {
-    if (!reset) {
-      state.isLoadError = true
-    } else {
-      state.hasMore = false
-    }
+    state.isLoadError = true
+    state.hasMore = false
   } finally {
     if (reset) state.isPageLoading = false
     state.isLoadingMore = false
@@ -125,6 +122,10 @@ const fetchList = async (reset = false) => {
 
 const loadMore = () => {
   fetchList(false)
+}
+
+const resetFilters = () => {
+  selectCategory('all')
 }
 
 onMounted(() => {
@@ -249,8 +250,10 @@ onMounted(() => {
           :empty="!mvList.length"
           :loading-text="t('common.loading')"
           :retry-text="t('mvList.actions.loadMore')"
+          :reset-text="$t('components.infiniteScroll.reset')"
           @load="loadMore"
           @retry="loadMore"
+          @reset="resetFilters"
         />
       </div>
     </template>

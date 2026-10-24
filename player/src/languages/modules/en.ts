@@ -87,11 +87,17 @@ export default {
     official: 'Official Charts',
   },
   components: {
+    infiniteScroll: {
+      error: 'Failed to load. Please try again.',
+      timeout: 'Slow response. Tap to retry.',
+      empty: 'No results',
+      reset: 'Reset filters',
+      retry: 'Reload',
+      noMore: 'You have reached the end',
+    },
     pagination: {
       prev: 'Prev',
       next: 'Next',
-    queueCleared: 'Playback queue cleared',
-    localFileMissing: 'The local file is no longer available. The current track was cleared.',
       status: 'Page {page} / {totalPages} · Total {total}',
     },
     songList: {
@@ -235,6 +241,8 @@ export default {
     },
   },
   player: {
+    queueCleared: 'Playback queue cleared',
+    localFileMissing: 'The local file is no longer available. The current track was cleared.',
     next: 'Next track',
     qualitySwitchFailed: 'Failed to switch quality. The previous quality was restored.',
     playbackError: {

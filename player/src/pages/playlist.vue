@@ -694,10 +694,11 @@ const tabsWithCount = computed(() =>
 
             <!-- 评论流式自动触底加载与超时重试 -->
             <InfiniteScroll
+              v-if="comments.length || isLoadingMoreComments || isCommentLoadError"
               :loading="isLoadingMoreComments"
               :has-more="hasMoreComments"
               :error="isCommentLoadError"
-              :empty="!comments.length"
+              :empty="false"
               :loading-text="$t('comments.loadMore')"
               :retry-text="$t('comments.loadMore')"
               @load="loadComments(undefined, false)"

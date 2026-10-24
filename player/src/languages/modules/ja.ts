@@ -87,11 +87,17 @@ export default {
     official: '公式ランキング',
   },
   components: {
+    infiniteScroll: {
+      error: '読み込みに失敗しました。再試行してください。',
+      timeout: '応答が遅れています。タップして再試行してください。',
+      empty: '結果がありません',
+      reset: 'フィルターをリセット',
+      retry: '再読み込み',
+      noMore: 'すべて読み込みました',
+    },
     pagination: {
       prev: '前へ',
       next: '次へ',
-    queueCleared: '再生キューをクリアしました',
-    localFileMissing: 'ローカルファイルが利用できません。現在の曲をクリアしました。',
       status: '{page} / {totalPages} ページ · 全 {total} 件',
     },
     songList: {
@@ -233,6 +239,8 @@ export default {
     },
   },
   player: {
+    queueCleared: '再生キューをクリアしました',
+    localFileMissing: 'ローカルファイルが利用できません。現在の曲をクリアしました。',
     next: '次の曲',
     qualitySwitchFailed: '音質の切り替えに失敗しました。元の音質に戻しました。',
     playbackError: {

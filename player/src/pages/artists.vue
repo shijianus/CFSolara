@@ -7,7 +7,7 @@ import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 
 const { t } = useI18n()
 
-interface ArtistItem extends ArtistData {
+interface ArtistItem extends Omit<ArtistData, 'alias'> {
   alias?: string
 }
 
@@ -81,15 +81,23 @@ const loadArtists = async (reset = false) => {
     state.hasMore = artists.length === state.limit
     state.offset += state.limit
   } catch {
-    if (!reset) {
-      state.isLoadError = true
-    } else {
-      state.hasMore = false
-    }
+    state.isLoadError = true
+    state.hasMore = false
   } finally {
     if (reset) state.isPageLoading = false
     state.isLoadingMore = false
   }
+}
+
+const resetFilters = () => {
+  const changed = state.type !== -1 || state.area !== -1 || state.initial !== ''
+  if (!changed) {
+    loadArtists(true)
+    return
+  }
+  state.type = -1
+  state.area = -1
+  state.initial = ''
 }
 
 watch([type, area, initial], () => loadArtists(true))
@@ -180,8 +188,10 @@ onMounted(() => loadArtists(true))
         :empty="!state.artists.length"
         :loading-text="t('common.loading')"
         :retry-text="t('artists.loadMore')"
+        :reset-text="$t('components.infiniteScroll.reset')"
         @load="loadArtists(false)"
         @retry="loadArtists(false)"
+        @reset="resetFilters"
       />
     </div>
   </div>

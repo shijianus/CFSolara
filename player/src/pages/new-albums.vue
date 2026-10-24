@@ -62,11 +62,8 @@ const loadAlbums = async (reset = false) => {
     state.hasMore = albums.length === state.limit
     state.offset += state.limit
   } catch {
-    if (!reset) {
-      state.isLoadError = true
-    } else {
-      state.hasMore = false
-    }
+    state.isLoadError = true
+    state.hasMore = false
   } finally {
     if (reset) state.isPageLoading = false
     state.isLoadingMore = false
@@ -76,6 +73,14 @@ const loadAlbums = async (reset = false) => {
 const formatDate = (timestamp: string) => {
   if (!timestamp) return ''
   return timestamp
+}
+
+const resetFilters = () => {
+  if (state.area === 'ALL') {
+    loadAlbums(true)
+    return
+  }
+  state.area = 'ALL'
 }
 
 watch(area, () => loadAlbums(true))
@@ -130,7 +135,7 @@ onMounted(() => loadAlbums(true))
             >
               {{ album.artist }}
             </router-link>
-            <p class="text-primary/40 mt-1 text-xs">{{ formatDate(album.publishTime) }}</p>
+            <p class="text-primary/40 mt-1 text-xs">{{ formatDate(album.publishTime || '') }}</p>
           </div>
         </router-link>
       </div>
@@ -143,8 +148,10 @@ onMounted(() => loadAlbums(true))
         :empty="!state.albums.length"
         :loading-text="t('common.loading')"
         :retry-text="t('newAlbums.loadMore')"
+        :reset-text="$t('components.infiniteScroll.reset')"
         @load="loadAlbums(false)"
         @retry="loadAlbums(false)"
+        @reset="resetFilters"
       />
     </div>
   </div>
