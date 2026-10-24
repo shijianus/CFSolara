@@ -2,6 +2,7 @@
 import { songDetail, lyric } from '@/api'
 import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { normalizeDurationMs } from '@/utils/transformers'
 
 const route = useRoute()
 
@@ -38,7 +39,7 @@ const load = async (id: string) => {
           ? song.artists.map((a: any) => a.name).join(' / ')
           : ''
       state.album = song?.al?.name || song?.album?.name || ''
-      state.duration = song?.dt ?? song?.duration ?? 0
+      state.duration = normalizeDurationMs(song?.dt ?? song?.duration ?? 0)
       state.cover = song?.al?.picUrl || song?.album?.picUrl || ''
       if (route.query.autoplay === '1') {
         playCurrent()
@@ -64,7 +65,8 @@ const playCurrent = () => {
     name: state.name,
     artist: state.artist,
     album: state.album,
-    duration: Math.floor((state.duration || 0) / 1000),
+    // Song.duration 统一毫秒
+    duration: state.duration,
     cover: state.cover,
     liked: state.liked,
   }
