@@ -343,12 +343,14 @@ const getQualityBadgeInfo = (song: Song) => {
                 <span class="text-primary/80 truncate text-sm">
                   <template v-for="(ar, idx) in song.artists" :key="ar.id">
                     <RouterLink
+                      v-if="ar.id"
                       :to="`/artist/${ar.id}`"
                       :title="ar.name"
                       class="transition-colors hover:text-sky-400"
                     >
                       {{ ar.name }}
                     </RouterLink>
+                    <span v-else :title="ar.name">{{ ar.name }}</span>
                     <span v-if="idx < song.artists.length - 1" class="text-primary/50"> / </span>
                   </template>
                 </span>
