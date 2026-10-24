@@ -1,8 +1,8 @@
-# 🎶 Sonic 多源聚合音乐云平台 & 网关 (v2.1.0 稳定发行版)
+# 🎶 Sonic 多源聚合音乐云平台 & 网关 (v2.2.0 Linux 本地引擎版)
 
-> 🌐 基于 Cloudflare Pages Functions 打造的现代化网页音乐播放器与 **Sonic 多源聚合网关**。具备品牌化路由、并行多上游检索去重、多语言毫秒级真逐字歌词（中/英/日/粤/韩）与自适应插值兜底。
+> 🌐 采用 **Linux VPS 本地协议解析引擎为主 + Cloudflare Pages Functions 边缘缓存与优雅降级为辅** 的双层架构，配套现代化网页音乐播放器与 **Sonic 多源聚合网关**。具备本地原生加密协议解析（网易云 `linuxapi`/`eapi`/`ncm-api`、QQ `musicu.fcg`、酷狗 `KRC`、酷我原生检索）、三级熔断降级状态机与多语言毫秒级真逐字歌词。
 > 
-> 🟢 **当前状态：v2.1.0 正式稳定发行版 (Stable Release)** —— 通过全量多语种动态时序自动化端到端测试。
+> 🟢 **当前线上主域名：[https://sonic.epocanvas.tech](https://sonic.epocanvas.tech)**（备用域：`https://sonic.epocanvas.com`）。
 
 ---
 
@@ -45,23 +45,29 @@ Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式�
 | `GET` | `/api/sonic/lyrics/lrclib` | LRCLIB 全球同步歌词 | 权威纯音乐预检与高质量行级同步 |
 | `GET` | `/api/sonic/lyrics/apple` | Apple Music（可选适配） | 未配置密钥返回 `501 Not Implemented` + disabled |
 | `GET` | `/api/sonic/lyrics/ytmusic` | YouTube Music（可选适配） | 未配置密钥返回 `501 Not Implemented` + disabled |
+| `GET` | `/api/sonic/lyrics/lyriva` | Lyriva 第三方兜底（默认关闭） | 默认返回 `meta.disabled: true`；需显式开启 `SONIC_ENABLE_LYRIVA=1` |
+| `GET` | `/api/sonic/lyrics/sync` | 外部组件多格式同步歌词 | 支持 `format=sonic\|lrc\|ttml\|json` |
 | `GET` | `/api/sonic/lyrics` | **向后兼容端点** | 内部透明代理至 `/api/sonic/lyrics/nexus` |
 
-### 2. 搜索网关 (`/api/sonic/search/*`)
+### 2. 搜索、流解析与引擎网关 (`/api/sonic/*`)
 
 | 方法 | 路径 | 说明 | 行为 |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/sonic/search/nexus` | **全网多源并行搜索（前端默认）** | `Promise.allSettled` 并行检索，单源超时隔离，归一化去重合并多 `platformId` |
-| `GET` | `/api/sonic/search/netease` | 网易云单源搜索 | 返回统一 Track 结构 |
-| `GET` | `/api/sonic/search/qq` | QQ音乐单源搜索 | 返回统一 Track 结构 |
-| `GET` | `/api/sonic/search/kugou` | 酷狗音乐单源搜索 | 返回统一 Track 结构 |
-| `GET` | `/api/sonic/search/gdstudio` | GDStudio / Meting 单源搜索 | 支持网易云/酷我/JOOX多源切换 |
+| `GET` | `/api/sonic/search/nexus` | **全网多源并行搜索（前端默认）** | 优先调用 Linux 本地引擎；降级时 `Promise.allSettled` 边缘直连，归一化合并 `sources[]` |
+| `GET` | `/api/sonic/search/netease` | 网易云单源搜索 | 原生 `ncm-api` / `linuxapi` 检索，返回统一 Track 结构 |
+| `GET` | `/api/sonic/search/qq` | QQ音乐单源搜索 | 原生 `u.y.qq.com` 检索，返回统一 Track 结构 |
+| `GET` | `/api/sonic/search/kugou` | 酷狗音乐单源搜索 | 原生检索，返回统一 Track 结构 |
+| `GET` | `/api/sonic/search/kuwo` | 酷我音乐单源搜索 | 原生检索（含 181KB 版权提示音假流过滤） |
+| `GET` | `/api/sonic/search/gdstudio` | GDStudio 第三方兜底（默认关闭） | 默认返回 `meta.disabled: true`；仅当 `SONIC_ENABLE_GDSTUDIO=1` 时启用 |
 | `GET` | `/api/sonic/search/{platform}` | 动态单源搜索 | 支持任意已接入音源 |
+| `GET` | `/api/sonic/forward` | 统一聚合与防盗链资源转发 | 支持搜索、歌词与受 SSRF 保护的媒体资源代理 |
+| `GET` | `/api/sonic/resolve/stream` | 本地引擎流直链解析（内部鉴权） | 强制校验 `X-Sonic-Engine-Key`，供边缘网关缓存直链元数据 |
+| `GET` | `/api/sonic/engine/health` | 本地引擎健康与熔断诊断（内部鉴权） | 强制校验 `X-Sonic-Engine-Key`，匿名访问返回 `401` |
 
-#### 统一 Track 契约
+#### 统一 Track 契约（`/api/sonic/search/nexus` 聚合响应）
 ```json
 {
-  "id": "netease:1357375695",
+  "id": "1357375695",
   "title": "海阔天空",
   "name": "海阔天空",
   "artist": "Beyond",
@@ -69,45 +75,50 @@ Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式�
   "duration": 324,
   "cover": "https://...",
   "coverUrl": "https://...",
-  "platform": "netease",
+  "platform": "sonic",
   "platformId": "1357375695",
   "sources": [
     { "platform": "netease", "platformId": "1357375695", "duration": 324 },
+    { "platform": "qq", "platformId": "001yS0N33yPm1B", "duration": 324 },
     { "platform": "kugou", "platformId": "c41e80a18d1448fa47086372999c7f43", "duration": 324 }
   ]
 }
 ```
+> 注：单平台路由（如 `/api/sonic/search/netease`）返回的顶层 `platform` 为对应源名（如 `"netease"`）；聚合路由 `/api/sonic/search/nexus` 顶层 `platform` 统一为 `"sonic"`，并在 `sources[]` 中如实保留各平台原始 `platform` 与 `platformId`。
 
 ---
 
-## ⚙️ 环境变量配置 (`wrangler.toml` / Cloudflare Pages)
+## ⚙️ 环境变量配置 (`.env.example` / Cloudflare Pages)
 
-所有 Sonic 开关与外链均使用 `SONIC_` 前缀，支持故障熔断与单源开关：
+所有 Sonic 开关与外链均使用 `SONIC_` 前缀，第三方免费聚合上游与 VIP 解灰**默认全部关闭**：
 
-```toml
-[vars]
-# 上游外链地址配置（支持自建镜像与代理）
-SONIC_UPSTREAM_GDSTUDIO = "https://music-api.gdstudio.xyz/api.php"
-SONIC_UPSTREAM_AMLL = "https://api.amll.dev"
-SONIC_UPSTREAM_LRCLIB = "https://lrclib.net"
-# SONIC_UPSTREAM_METING = "https://your-meting-instance.example.com"
+```ini
+# 服务间通信与鉴权（Cloudflare Pages -> Linux VPS 本地引擎）
+SONIC_LOCAL_ENGINE_URL="https://engine-sonic.epocanvas.tech"
+SONIC_ENGINE_SECRET="<your_strong_random_secret>"
 
-# 音源启用开关（1/true 启用，0/false 禁用）
-SONIC_ENABLE_NETEASE = "1"
-SONIC_ENABLE_QQ = "1"
-SONIC_ENABLE_KUGOU = "1"
-SONIC_ENABLE_AMLL = "1"
-SONIC_ENABLE_LRCLIB = "1"
-SONIC_ENABLE_GDSTUDIO = "1"
+# 本地原生音源启用开关（1/true 启用，0/false 禁用）
+SONIC_ENABLE_NETEASE="1"
+SONIC_ENABLE_QQ="1"
+SONIC_ENABLE_KUGOU="1"
+SONIC_ENABLE_KUWO="1"
+SONIC_ENABLE_AMLL="1"
+SONIC_ENABLE_LRCLIB="1"
 
-# 可选服务（默认未配置则返回 501 disabled）
-SONIC_ENABLE_APPLE = "0"
-SONIC_ENABLE_YTMUSIC = "0"
-# SONIC_APPLE_MUSIC_TOKEN = "your_token_here"
-# SONIC_YOUTUBE_API_KEY = "your_key_here"
+# 第三方免费聚合上游与 VIP 解灰（默认严格关闭）
+SONIC_ENABLE_GDSTUDIO="0"
+SONIC_ENABLE_LYRIVA="0"
+SONIC_ENABLE_UNBLOCK="0"
 
-# 单源超时阈值（毫秒，默认 3500ms，杜绝任何外部单点阻塞整体响应）
-SONIC_TIMEOUT_MS = "3500"
+# 可选商业流媒体歌词适配（未配置密钥则返回 501 disabled）
+SONIC_ENABLE_APPLE="0"
+SONIC_ENABLE_YTMUSIC="0"
+
+# 超时与熔断配置（毫秒，默认单源 8000ms，Pages->Engine 4500ms，熔断冷却 30000ms）
+SONIC_TIMEOUT_MS="8000"
+SONIC_ENGINE_TIMEOUT_MS="4500"
+SONIC_CB_FAILURE_THRESHOLD="3"
+SONIC_CB_COOLDOWN_MS="30000"
 ```
 
 ---

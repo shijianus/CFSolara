@@ -12,15 +12,19 @@
    - 授权端点：`GET /api/auth/login` （自动重定向至 Epomail 官方授权中心）
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
-2. **专案连结 API Key**：
-   - 登录 Epomail 后即可自动获得专案 API Key（格式如 `solara_live_...`）。
-   - 在第三方专案发起请求时，只需在 HTTP 请求头添加：
+2. **专案连结 API Key 与分级限流**：
+   - 登录 Epomail 后即可自动获得专案 API Key（当前签发格式为 `sonic_live_...`，同时 100% 向后兼容历史 `solara_live_...` 密钥）。
+   - 在第三方专案发起请求时，支持以下任一方式传递凭证：
      ```http
+     X-Sonic-Key: sonic_live_xxxxxxxx
+     # 或向后兼容历史请求头 / Bearer / 查询参数：
      X-CFSolara-Key: solara_live_xxxxxxxx
-     # 或
-     Authorization: Bearer solara_live_xxxxxxxx
+     Authorization: Bearer sonic_live_xxxxxxxx
      ```
-   - 拥有 API Key 的专案可享受高频配额（120 次/分钟）与无损 FLAC / 320Kbps 音频流直传。
+   - 网关内置滑动窗口分级限流（响应头携带 `X-RateLimit-Tier`、`X-RateLimit-Limit`、`X-RateLimit-Remaining`）：
+     - 匿名前端访客（`anonymous`）：默认 `240` 次/分钟（可通过 `SONIC_REQUIRE_AUTH=1` 关闭匿名访问）；
+     - 持有效 API Key 专案（`api-key`）：默认 `600` 次/分钟高配额；
+     - 内部引擎入口（`engine-sonic.epocanvas.tech`）：**强制要求 `X-Sonic-Engine-Key` 服务间密钥头**，匿名访问一律返回 `401 ENGINE_UNAUTHORIZED`。
 
 ---
 
@@ -91,13 +95,13 @@
 - **验证与调用 Curl 示例**：
   ```bash
   # 方式 1: 通过歌名与歌手全网实时爬取 (如中文热歌)
-  curl -s "https://solara.epocanvas.com/api/lyric?title=晴天&artist=周杰伦"
+  curl -s "https://sonic.epocanvas.tech/api/lyric?title=晴天&artist=周杰伦"
 
   # 方式 2: 通过综合关键词全网爬取 (如国际外文歌曲)
-  curl -s "https://solara.epocanvas.com/api/lyric?q=Shape%20of%20You%20Ed%20Sheeran"
+  curl -s "https://sonic.epocanvas.tech/api/lyric?q=Shape%20of%20You%20Ed%20Sheeran"
 
   # 方式 3: 通过歌曲 ID 精确获取逐字歌词
-  curl -s "https://solara.epocanvas.com/api/lyric?id=26289183&source=netease"
+  curl -s "https://sonic.epocanvas.tech/api/lyric?id=26289183&source=netease"
   ```
 - **响应示例 (逐字模式 Word-Level Sync)**：
   ```json
@@ -181,8 +185,8 @@
 
 ```typescript
 // 外部专案客户端示例
-const API_BASE = 'https://solara.epocanvas.com/api'; // 或自建 CFSolara 域名
-const API_KEY = 'solara_live_xxxxxxxx';
+const API_BASE = 'https://sonic.epocanvas.tech/api'; // 线上主域名（备用域 https://sonic.epocanvas.com/api）
+const API_KEY = 'sonic_live_xxxxxxxx'; // 亦兼容历史 solara_live_xxxxxxxx
 
 // 1. 点歌搜索
 async function searchSong(keyword: string) {
