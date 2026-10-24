@@ -28,6 +28,8 @@ const SCAN_EXTENSIONS = new Set([
 const EXCLUDE_PREFIXES = [
   '.zcode/',
   '.git/',
+  '.deploy/',
+  '.wrangler/',
   'node_modules/',
   'player/node_modules/',
   'dist/',

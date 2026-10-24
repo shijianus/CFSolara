@@ -1,0 +1,244 @@
+=== Running Sonic Gateway Test Suite ===
+
+1. Testing GET /api/sonic/lyrics/nexus (with platformId)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic (got Sonic)
+  ✓ Data object exists
+  ✓ Meta object exists
+  ✓ Meta.attempts is an array
+  ✓ LatencyMs is number (715ms)
+  ✓ Netease attempt recorded
+
+2. Testing GET /api/sonic/lyrics/nexus (title only)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta.attempts recorded (1 attempts)
+
+3. Testing GET /api/sonic/lyrics/apple & ytmusic (disabled without keys)
+  ✓ Apple returns 501 Not Implemented (got 501)
+  ✓ Apple error code is PROVIDER_DISABLED
+  ✓ Brand is Sonic
+  ✓ YouTube Music returns 501 Not Implemented (got 501)
+  ✓ YouTube Music error code is PROVIDER_DISABLED
+
+4. Testing GET /api/sonic/lyrics/netease
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Provider is netease
+  ✓ Attempts logged
+
+5. Testing GET /api/sonic/search/nexus
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Tracks array returned (8 tracks)
+  ✓ Meta.attempts logged (3 attempts)
+  ✓ Track has title: "海阔天空"
+  ✓ Track has artist: "Beyond"
+  ✓ Track has platform: "sonic"
+  ✓ Track has platformId: "347230"
+  ✓ Track has sources[]: [{"platform":"netease","platformId":"1357375695","duration":240},{"platform":"netease","platformId":"1357374736","duration":240},{"platform":"netease","platformId":"347230","duration":326},{"platform":"qq","platformId":"001yS0N33yPm1B","duration":324},{"platform":"kugou","platformId":"c41e80a18d1448fa47086372999c7f43","duration":324},{"platform":"kugou","platformId":"e5c40a31c3c16ba461f650035734c123","duration":239}]
+
+6. Testing GET /api/sonic/search/gdstudio (disabled by default)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta provider is gdstudio
+  ✓ GDStudio is disabled by default (got true)
+  ✓ Disabled GDStudio returns 0 tracks
+
+7. Testing Upstream Timeout Isolation (1ms timeout)
+  ✓ Search returns 200 despite timeouts (got 200)
+  ✓ Brand is Sonic
+  ✓ Attempts logged with timeout errors
+
+8. Testing GET /api/sonic/search/qq (u.y.qq.com modern API)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ QQ returned 3 tracks
+
+9. Testing Native NetEase/Kugou Search & meta.attempts Provenance
+  ✓ NetEase Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Native NetEase returned 3 tracks
+  ✓ NetEase did not call gdstudio
+  ✓ Nexus search excludes gdstudio by default
+  ✓ Every attempt records truthful source & via
+
+10. Testing GET /api/sonic/search/kuwo (registered provider)
+  ✓ Status is 200, NOT 404 (got 200)
+  ✓ Brand is Sonic
+
+11. Testing Random String Lyrics (Must NOT return false-positive song)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Level is 'none' for gibberish (got 'none')
+  ✓ No false-positive lyrics returned (length=0)
+
+========================================
+Test Results: 51 passed, 0 failed
+========================================
+
+=== Running Sonic & Solara Auth Compatibility Test Suite ===
+
+1. Testing OAuth Config & Authorize URL Generation
+  ✓ Base URL parsed
+  ✓ Client ID matched
+  ✓ Redirect URI matched
+  ✓ Authorize pathname is correct
+  ✓ Authorize client_id parameter matches
+  ✓ Custom state preserved
+
+2. Testing Session Creation & sonic_live_ API Key Generation
+  ✓ User ID preserved
+  ✓ User email preserved
+  ✓ API key has sonic_live_ prefix (got sonic_live_ZGV2ZWxvcGVyQGVwb2NhbnZhcy5jb20_db56c33b361adf5fca5e92b6fd404585)
+  ✓ API key contains encodedEmail and signature
+  ✓ Encoded email decodes back to original (developer@epocanvas.com)
+
+3. Testing Secret Priority & Fallback
+  ✓ Key generated using SOLARA_SECRET fallback has sonic_live_ prefix
+  ✓ Key generated with both secrets present
+
+4. Testing Credential Extraction (Headers & Query Params)
+  ✓ Extracted from X-Sonic-Key header
+  ✓ Extracted from legacy X-CFSolara-Key header
+  ✓ Extracted from X-Api-Key header
+  ✓ Extracted sonic_live_ from Bearer token
+  ✓ Bearer token string preserved
+  ✓ Extracted legacy solara_live_ from Bearer token
+  ✓ Extracted from query param api_key
+  ✓ Extracted from query param key
+  ✓ Header key takes precedence over query key
+
+5. Testing In-Memory Session Verification
+  ✓ Session authenticated successfully via in-memory cache
+  ✓ Session user email matches
+  ✓ Session user apiKey matches
+
+6. Testing Cross-Header Verification for sonic_live_ Key
+  ✓ New sonic_live_ key authenticated via legacy X-CFSolara-Key header
+  ✓ User email matched
+  ✓ New sonic_live_ key authenticated via Bearer token
+  ✓ New sonic_live_ key authenticated via query param
+
+7. Testing Backward Compatibility for solara_live_ Keys (Stateless verification)
+  ✓ Legacy solara_live_ key authenticated via X-CFSolara-Key
+  ✓ Stateless session recovered email accurately
+  ✓ Stateless session preserves original legacy apiKey
+  ✓ Legacy solara_live_ key authenticated via X-Sonic-Key header
+  ✓ Legacy solara_live_ key authenticated via Bearer token
+
+8. Testing Stateless Verification of Uncached sonic_live_ Key
+  ✓ Uncached sonic_live_ key authenticated via stateless fallback
+  ✓ Stateless fallback recovered user email
+
+9. Testing Negative & Edge Cases
+  ✓ Request with no auth is rejected
+  ✓ Invalid key prefix is rejected
+  ✓ Malformed base64 email is rejected gracefully
+  ✓ Base64 string without @ is rejected
+  ✓ Key with missing signature part is rejected
+
+========================================
+Auth Compatibility Test Results: 41 passed, 0 failed
+========================================
+
+=== Running Cover Gateway Test Suite ===
+
+1. Testing GET /api/music/cover with no params
+  ✓ Status is 200 (got 200)
+  ✓ Returns SVG fallback
+  ✓ Contains valid SVG vector graphic
+
+2. Testing NetEase Song ID Cover Resolution
+  ✓ Status is 200 (got 200)
+  ✓ Content type is valid (image/jpg)
+  ✓ CORS Allow-Origin header is *
+
+3. Testing QQ Music Mid Cover Resolution
+  ✓ Status is 200 (got 200)
+  ✓ Returns valid image format (image/svg+xml;charset=utf-8)
+
+4. Testing Artist Avatar Search Fallback
+  ✓ Status is 200 (got 200)
+  ✓ Returns artist image (image/jpg)
+
+5. Testing Direct URL Proxy Mode
+  ✓ Status is 200 (got 200)
+  ✓ CORS Allow-Origin header is present on proxy
+  ✓ Image content type is preserved (len=unknown)
+
+6. Testing Invalid Target URL Fallback
+  ✓ Status is 200 (got 200)
+  ✓ Fails over to SVG fallback instead of 404
+
+========================================
+Cover Gateway Test Results: 15 passed, 0 failed
+========================================
+
+=== Running Sonic Local Engine, Security & Degradation Test Suite ===
+
+1. Testing Pure-TS MD5 & AES-128-ECB Crypto Parity
+  ✓ MD5 matches node:crypto for ""
+  ✓ MD5 matches node:crypto for "abc"
+  ✓ MD5 matches node:crypto for "nobody/api/song/enhance/"
+  ✓ MD5 matches node:crypto for "起风了 - 买辣椒也用券"
+  ✓ AES-128-ECB matches node:crypto byte-for-byte
+  ✓ buildNeteaseLinuxApiParams matches
+  ✓ buildNeteaseEapiParams generates encrypted hex
+
+2. Testing Condition 1b (Third-Party & VIP Unblock Disabled by Default + Honest Provenance)
+  ✓ SONIC_ENABLE_GDSTUDIO defaults to false
+  ✓ SONIC_ENABLE_LYRIVA defaults to false
+  ✓ SONIC_ENABLE_UNBLOCK defaults to false
+  ✓ Single gdstudio search reports meta.disabled=true
+  ✓ gdstudio attempt honestly marked via=third-party, ok=false
+  ✓ Single lyriva lyrics reports meta.disabled=true
+  ✓ lyriva attempt honestly marked via=third-party, ok=false
+
+3. Testing Condition 2c (Mandatory X-Sonic-Engine-Key on engine-sonic.*)
+  ✓ Anonymous access to engine-sonic returns 401 (got 401)
+  ✓ Error code is ENGINE_UNAUTHORIZED
+  ✓ Wrong engine key returns 401 (got 401)
+  ✓ Unconfigured secret on engine host fails closed with 503
+  ✓ Valid X-Sonic-Engine-Key returns 200 (got 200)
+  ✓ Engine health payload ok=true & runtime=linux-engine
+  ✓ SSRF blocks 127.0.0.1
+  ✓ SSRF blocks cloud metadata IP 169.254.169.254
+  ✓ SSRF blocks Docker internal bridge 172.18.0.2
+  ✓ SSRF blocks engine-sonic loop
+  ✓ SSRF allows public music CDN
+  ✓ Forwarding to 127.0.0.1 rejected with 400 (got 400)
+
+4. Testing Tiered Rate Limiter (Anonymous vs API Key)
+  ✓ Anonymous burst > limit is rate-limited (got allowed=false, tier=anonymous, limit=10)
+  ✓ Valid sonic_live_ API Key upgrades to api-key tier
+
+5. Testing Degradation State Machine (CLOSED -> 530 OPEN -> Fast-Fail -> HALF_OPEN -> CLOSED)
+  ✓ Healthy engine search returns 200
+  ✓ Healthy response has no X-Sonic-Degraded header
+  ✓ Primary attempt is local-engine ok=true
+  ✓ Engine sub-attempt preserves local-netease provenance
+  ✓ 530 Tunnel error trips circuit breaker immediately to OPEN
+  ✓ Outage response sets X-Sonic-Degraded: 1
+  ✓ Outage response sets meta.degraded=true
+  ✓ OPEN circuit fast-fails without hitting dead tunnel
+  ✓ Fast-fail recorded in meta.attempts
+  ✓ Cached search result served immediately during outage
+  ✓ Degraded unresolvable stream returns 503 (got 503)
+  ✓ Degraded 503 stream sets X-Sonic-Degraded: 1
+  ✓ Degraded stream returns machine-readable STREAM_UNAVAILABLE_DEGRADED
+  ✓ Circuit recovers HALF_OPEN -> CLOSED after healthy probe
+  ✓ Recovered response clears degraded=false
+
+6. Testing GET /api Empty-Path Index & login/status Compatibility
+  ✓ GET /api returns 200 Sonic index
+  ✓ GET /api/login/status returns clean guest session
+
+7. Testing Linux Node 22 HTTP Server (createSonicServer)
+  ✓ Anonymous root request on engine-sonic returns 401 (got 401)
+  ✓ Authenticated engine health over HTTP returns 200
+
+========================================
+Local Engine & Degradation Test Results: 47 passed, 0 failed
+========================================
+
