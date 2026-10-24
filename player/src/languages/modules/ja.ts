@@ -16,6 +16,7 @@ export default {
     clear: 'クリア',
     loading: '読み込み中',
     noData: 'データなし',
+    back: '戻る',
     close: '閉じる',
     undo: '元に戻す',
     retry: '再試行',

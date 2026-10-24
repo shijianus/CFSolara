@@ -11,6 +11,42 @@ const items = [
 ]
 
 const emit = defineEmits(['show-player'])
+const route = useRoute()
+
+const normalizePath = (path?: string) => {
+  const raw = String(path || '').split('?')[0].split('#')[0]
+  return raw || '/'
+}
+
+const tabForPath = (path: string) => {
+  const target = normalizePath(path)
+  const matched = items.find(it =>
+    it.to === '/' ? target === '/' : target === it.to || target.startsWith(`${it.to}/`)
+  )
+  return matched?.to || ''
+}
+
+// 详情页没有独立 Tab：先看来源 query，再看浏览器返回目标，
+// 最后按业务归属回退（我的音乐下的详情归“我的”，其余详情归首页）。
+const activeTab = computed(() => {
+  const current = normalizePath(route.path)
+  const direct = tabForPath(current)
+  if (direct) return direct
+
+  const from = typeof route.query.from === 'string' ? route.query.from : ''
+  if (from && tabForPath(from)) return tabForPath(from)
+
+  const back = normalizePath((window.history.state as { back?: string } | null)?.back)
+  if (back && tabForPath(back)) return tabForPath(back)
+
+  if (/^\/(recent|my-music|likes|downloads|local-music)(\/|$)/.test(current)) return '/recent'
+  if (/^\/(playlist|song|album|artist|mv-list|mv-player|charts|artists|new-albums)(\/|$)/.test(current)) {
+    return '/'
+  }
+  return ''
+})
+
+const isActive = (to: string) => activeTab.value === to
 
 const tabbarRef = useTemplateRef('tabbarRef')
 let ro: ResizeObserver | null = null
@@ -69,11 +105,12 @@ onUnmounted(() => {
         :to="it.to"
         @touchstart.passive="prefetchMobileRoute(it.to)"
         @mouseenter="prefetchMobileRoute(it.to)"
-        class="relative flex flex-1 flex-col items-center justify-center py-2 text-[11px] font-semibold transition-all duration-200"
-        :class="$route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/') ? 'text-primary' : 'text-primary/50 hover:text-primary/80'"
+        class="relative flex min-h-11 flex-1 flex-col items-center justify-center py-2 text-[11px] font-semibold transition-all duration-200"
+        :class="isActive(it.to) ? 'text-primary' : 'text-primary/50 hover:text-primary/80'"
+        :aria-current="isActive(it.to) ? 'page' : undefined"
       >
         <div
-          v-if="$route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/')"
+          v-if="isActive(it.to)"
           class="absolute inset-0 rounded-2xl bg-white/10 border border-white/10"
         ></div>
         <component
@@ -81,7 +118,7 @@ onUnmounted(() => {
           :class="[
             it.icon,
             'relative mb-1 h-5 w-5 transition-transform',
-            ($route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/')) && 'text-[#2563eb] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110'
+            isActive(it.to) && 'text-[#2563eb] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110'
           ]"
         />
         <span class="relative">{{ t(it.labelKey) }}</span>
