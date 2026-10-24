@@ -136,8 +136,8 @@ const handleVolumeKeydown = (event: KeyboardEvent) => {
       rounded="full"
       @click="toggleMute"
       class="text-primary/70 hover:text-primary flex items-center transition-colors"
-      :title="t('player.volume')"
-      :aria-label="t('player.volume')"
+      :title="isMuted ? t('player.unmute') : t('player.mute')"
+      :aria-label="isMuted ? t('player.unmute') : t('player.mute')"
       :icon="volumeIcon"
       icon-class="h-6 w-6"
     >

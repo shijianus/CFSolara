@@ -580,6 +580,7 @@ onUnmounted(() => {
             size="icon-sm"
             rounded="lg"
             :title="t('player.fontDec')"
+            :aria-label="t('player.fontDec')"
             @click="decreaseScale()"
             icon="icon-[mdi--format-font-size-decrease]"
             icon-class="h-4 w-4"
@@ -589,6 +590,7 @@ onUnmounted(() => {
             size="icon-sm"
             rounded="lg"
             :title="t('player.fontInc')"
+            :aria-label="t('player.fontInc')"
             @click="increaseScale()"
             icon="icon-[mdi--format-font-size-increase]"
             icon-class="h-4 w-4"
@@ -600,6 +602,7 @@ onUnmounted(() => {
             rounded="lg"
             :class="{ 'text-primary bg-white/12 ring-1 ring-white/15': autoScroll }"
             :title="t('player.autoCenter')"
+            :aria-label="t('player.autoCenter')"
             @click="toggleAutoScroll"
           >
             <span
@@ -647,6 +650,8 @@ onUnmounted(() => {
             size="icon-sm"
             rounded="lg"
             class="lg:hidden"
+            :aria-label="showMobileLyrics ? t('common.hide') : t('common.show')"
+            :title="showMobileLyrics ? t('common.hide') : t('common.show')"
             @click="showMobileLyrics = !showMobileLyrics"
             :icon="showMobileLyrics ? 'icon-[mdi--album]' : 'icon-[mdi--text-box-outline]'"
             icon-class="h-4 w-4"
@@ -659,6 +664,7 @@ onUnmounted(() => {
             :class="{ 'bg-white/12 text-yellow-300/80': !useCoverBg }"
             @click="useCoverBg = !useCoverBg"
             :title="t('player.toggleBg')"
+            :aria-label="t('player.toggleBg')"
           >
             <span
               :class="[
@@ -675,7 +681,8 @@ onUnmounted(() => {
             rounded="lg"
             :class="{ 'bg-white/12 text-cyan-300/80': audioVisualizer.enabledInDrawer }"
             @click="settingsStore.setAudioVisualizerDrawer(!audioVisualizer.enabledInDrawer)"
-            title="切换频谱显示"
+            :title="t('player.visualizer')"
+            :aria-label="t('player.visualizer')"
             icon="icon-[mdi--waveform]"
             icon-class="h-4 w-4"
           />
@@ -686,7 +693,8 @@ onUnmounted(() => {
             size="icon-sm"
             rounded="lg"
             @click="cycleVisualizerType"
-            title="切换频谱模式"
+            :title="t('player.visualizerMode')"
+            :aria-label="t('player.visualizerMode')"
           >
             <span :class="[visualizerTypeIcon, 'h-4 w-4']"></span>
           </Button>
@@ -697,6 +705,7 @@ onUnmounted(() => {
             rounded="lg"
             @click="cycleTheme"
             :title="t('components.settings.themeMode')"
+            :aria-label="t('components.settings.themeMode')"
           >
             <span :class="[themeIcon, 'h-4 w-4']"></span>
           </Button>
@@ -710,8 +719,8 @@ onUnmounted(() => {
             @click="handleUserClose"
             icon="icon-[mdi--chevron-down]"
             icon-class="h-5 w-5"
-            title="关闭播放器 (Esc)"
-            aria-label="关闭播放器"
+            :title="t('common.close')"
+            :aria-label="t('common.close')"
             class="min-h-[40px] min-w-[40px]"
           />
         </div>
@@ -811,8 +820,10 @@ onUnmounted(() => {
           variant="ghost"
           rounded="full"
           size="none"
-          class="ctrl-btn h-10 w-10 justify-center"
+          class="ctrl-btn h-11 w-11 justify-center"
           :class="{ 'bg-sky-500/15 text-sky-400!': playMode !== 'list' }"
+          :aria-label="t('player.playMode')"
+          :title="t('player.playMode')"
           @click="togglePlayMode"
         >
           <span :class="playModeIconClass" class="h-5 w-5" />
@@ -823,6 +834,8 @@ onUnmounted(() => {
           rounded="full"
           size="none"
           class="ctrl-btn h-12 w-12 justify-center"
+          :aria-label="t('player.previous')"
+          :title="t('player.previous')"
           @click="previous"
           icon="icon-[mdi--skip-previous]"
           icon-class="h-6 w-6"
@@ -836,6 +849,8 @@ onUnmounted(() => {
           :loading="isLoading"
           :pulse="true"
           :press3d="true"
+          :aria-label="isPlaying ? t('player.pause') : t('player.play')"
+          :title="isPlaying ? t('player.pause') : t('player.play')"
           @click="togglePlay"
         >
           <span
@@ -850,6 +865,8 @@ onUnmounted(() => {
           rounded="full"
           size="none"
           class="ctrl-btn h-12 w-12 justify-center"
+          :aria-label="t('player.next')"
+          :title="t('player.next')"
           @click="next"
           icon="icon-[mdi--skip-next]"
           icon-class="h-6 w-6"
@@ -866,9 +883,11 @@ onUnmounted(() => {
               variant="ghost"
               rounded="full"
               size="none"
-              class="ctrl-btn h-10 w-10 justify-center"
+              class="ctrl-btn h-11 w-11 justify-center"
               icon="icon-[mdi--playlist-music]"
               icon-class="h-5 w-5"
+              :aria-label="t('player.playlist')"
+              :title="t('player.playlist')"
             />
           </template>
         </PlaylistBubble>
@@ -880,6 +899,7 @@ onUnmounted(() => {
           size="sm"
           rounded="2xl"
           class="gap-1.5 px-3.5 py-1.5 text-xs"
+          :aria-label="t('player.comments')"
           @click="isCommentsOpen = true"
         >
           <span class="icon-[mdi--comment-outline] h-4 w-4"></span>

@@ -138,6 +138,7 @@ onUnmounted(() => {
         :loading="isLoading"
         icon-class="h-5 w-5"
         :title="isPlaying ? $t('player.pause') : $t('player.play')"
+        :aria-label="isPlaying ? $t('player.pause') : $t('player.play')"
         @click="togglePlay"
       />
       <Button
@@ -146,7 +147,8 @@ onUnmounted(() => {
         icon="icon-[mdi--skip-next]"
         icon-class="h-5 w-5"
         class="ml-1"
-        :title="$t('playlistBubble.actions.queueNext')"
+        :title="$t('player.next')"
+        :aria-label="$t('player.next')"
         @click="next"
       />
     </div>

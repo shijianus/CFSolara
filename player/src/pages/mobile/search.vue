@@ -480,6 +480,7 @@ watch(
             icon="icon-[mdi--close-circle]"
             icon-class="h-4 w-4"
             :title="$t('common.clear')"
+            :aria-label="$t('common.clear')"
             @click="clearQuery"
           />
           <Button

@@ -211,6 +211,7 @@ const maxScore = computed(() => {
                     page > 1 ? 'text-primary hover:bg-white/10' : 'text-primary/30 cursor-not-allowed'
                   "
                   :disabled="page <= 1"
+                  :aria-label="$t('components.pagination.prev')"
                   @click="page > 1 && page--"
                 >
                   <span class="icon-[mdi--chevron-left] h-5 w-5" />
@@ -226,6 +227,7 @@ const maxScore = computed(() => {
                       : 'text-primary/30 cursor-not-allowed'
                   "
                   :disabled="page >= Math.ceil(total / pageSize)"
+                  :aria-label="$t('components.pagination.next')"
                   @click="page < Math.ceil(total / pageSize) && page++"
                 >
                   <span class="icon-[mdi--chevron-right] h-5 w-5" />
@@ -306,7 +308,9 @@ const maxScore = computed(() => {
               <Transition name="fade-scale">
                 <button
                   v-if="searchInput"
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary/40 transition-colors hover:bg-white/10 hover:text-white"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-primary/40 transition-colors hover:bg-white/10 hover:text-white"
+                  :aria-label="$t('common.clear')"
+                  :title="$t('common.clear')"
                   @click="searchInput = ''"
                 >
                   <span class="icon-[mdi--close] h-3.5 w-3.5" />

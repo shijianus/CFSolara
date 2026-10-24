@@ -104,9 +104,11 @@ const handleClear = () => {
     <Button
       variant="ghost"
       size="none"
-      class="group p-2"
+      class="group flex min-h-11 min-w-11 items-center justify-center p-2"
       icon="icon-[mdi--playlist-music-outline]"
       icon-class="text-primary/70 group-hover:text-primary h-7 w-7 transition-colors"
+      :aria-label="t('player.playlist')"
+      :title="t('player.playlist')"
       @click.stop="isDrawerOpen = true"
     />
 

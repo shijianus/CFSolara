@@ -700,6 +700,8 @@ const emit = defineEmits(['show'])
           class="flex h-11 w-11 items-center justify-center"
           :disabled="!hasQueue"
           :aria-disabled="!hasQueue"
+          :aria-label="t('player.previous')"
+          :title="t('player.previous')"
           @click="previous"
           icon="icon-[mdi--skip-previous]"
           icon-class="size-6"
@@ -713,6 +715,7 @@ const emit = defineEmits(['show'])
           :aria-disabled="!hasQueue"
           @click="togglePlay"
           :title="isPlaying ? t('player.pause') : t('player.play')"
+          :aria-label="isPlaying ? t('player.pause') : t('player.play')"
           :loading="isLoading"
           :pulse="true"
           :press3d="true"
@@ -729,6 +732,8 @@ const emit = defineEmits(['show'])
           class="flex h-11 w-11 items-center justify-center"
           :disabled="!hasQueue"
           :aria-disabled="!hasQueue"
+          :aria-label="t('player.next')"
+          :title="t('player.next')"
           @click="next"
           icon="icon-[mdi--skip-next]"
           icon-class="size-6"
@@ -760,6 +765,7 @@ const emit = defineEmits(['show'])
             aria-controls="quality-menu-panel"
             class="footer-quality-pill group flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
+            :aria-label="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
@@ -876,6 +882,7 @@ const emit = defineEmits(['show'])
           icon-class="size-5"
           class="text-primary/70 hover:text-sky-400 flex h-11 w-11 items-center justify-center transition-colors cursor-pointer"
           :title="t('common.download') + '当前歌曲'"
+          :aria-label="t('common.download')"
           @click.stop="downloadCurrentSong"
         />
 
@@ -890,6 +897,8 @@ const emit = defineEmits(['show'])
               icon="icon-[mdi--playlist-music]"
               icon-class="size-6"
               class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center transition-colors"
+              :aria-label="t('player.playlist')"
+              :title="t('player.playlist')"
             >
             </Button>
           </template>
@@ -910,6 +919,9 @@ const emit = defineEmits(['show'])
     <Transition name="fade">
       <div
         v-if="qualityToastMsg"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
         class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-sky-500/30 bg-neutral-900/90 px-4 py-1.5 text-xs font-semibold text-sky-300 shadow-xl backdrop-blur-xl"
       >
         <span class="icon-[mdi--check-circle] h-4 w-4 text-sky-400"></span>

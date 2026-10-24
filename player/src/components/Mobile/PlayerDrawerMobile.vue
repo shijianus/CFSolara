@@ -490,6 +490,8 @@ const playModeIcon = computed(() => {
         rounded="full"
         icon="icon-[mdi--dots-horizontal]"
         icon-class="h-6 w-6 text-primary/90"
+        :aria-label="t('common.more')"
+        :title="t('common.more')"
         @click="showToolbar = !showToolbar"
       />
     </div>
@@ -683,6 +685,8 @@ const playModeIcon = computed(() => {
             class="group flex min-h-11 min-w-11 items-center justify-center p-2"
             icon="icon-[mdi--message-processing-outline]"
             icon-class="h-6 w-6 text-primary/70 group-hover:text-primary transition-colors"
+            :aria-label="t('player.comments')"
+            :title="t('player.comments')"
             @click.stop="isCommentsOpen = true"
           />
           <span
@@ -732,6 +736,8 @@ const playModeIcon = computed(() => {
           class="control-btn"
           :icon="playModeIcon"
           icon-class="text-primary/70 h-7 w-7"
+          :aria-label="t('player.playMode')"
+          :title="t('player.playMode')"
           @click="togglePlayMode"
         />
 
@@ -742,6 +748,8 @@ const playModeIcon = computed(() => {
           class="control-btn"
           :disabled="!currentSong"
           :aria-disabled="!currentSong"
+          :aria-label="t('player.previous')"
+          :title="t('player.previous')"
           icon="icon-[mdi--skip-previous]"
           icon-class="text-primary h-8 w-8"
           @click="previous"
@@ -758,6 +766,8 @@ const playModeIcon = computed(() => {
           :aria-disabled="isLoading || !currentSong"
           :icon="isPlaying ? 'mdi--pause' : 'mdi--play'"
           icon-class="h-8 w-8"
+          :aria-label="isPlaying ? t('player.pause') : t('player.play')"
+          :title="isPlaying ? t('player.pause') : t('player.play')"
           @click="handleTogglePlay"
         />
 
@@ -768,6 +778,8 @@ const playModeIcon = computed(() => {
           class="control-btn"
           :disabled="!currentSong"
           :aria-disabled="!currentSong"
+          :aria-label="t('player.next')"
+          :title="t('player.next')"
           icon="icon-[mdi--skip-next]"
           icon-class="text-primary h-8 w-8"
           @click="next"
