@@ -1,6 +1,7 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Directive, DirectiveBinding } from 'vue'
+import { prefersReducedMotion } from '@/utils/motion'
 
 // 注册 ScrollTrigger 插件
 gsap.registerPlugin(ScrollTrigger)
@@ -34,6 +35,7 @@ interface StaggerOptions {
  */
 export const vStaggerIn: Directive<HTMLElement, StaggerOptions> = {
   mounted(el: HTMLElement, binding: DirectiveBinding<StaggerOptions>) {
+    if (prefersReducedMotion()) return
     const options = binding.value || {}
     const {
       delay = 0,
@@ -76,6 +78,10 @@ export const vStaggerIn: Directive<HTMLElement, StaggerOptions> = {
  */
 export const vFadeIn: Directive<HTMLElement, { delay?: number; duration?: number }> = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) {
+      gsap.set(el, { opacity: 1, y: 0 })
+      return
+    }
     const { delay = 0, duration = 0.5 } = binding.value || {}
 
     gsap.fromTo(
@@ -92,6 +98,10 @@ export const vFadeIn: Directive<HTMLElement, { delay?: number; duration?: number
  */
 export const vScaleIn: Directive<HTMLElement, { delay?: number; duration?: number }> = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) {
+      gsap.set(el, { opacity: 1, scale: 1 })
+      return
+    }
     const { delay = 0, duration = 0.4 } = binding.value || {}
 
     gsap.fromTo(
@@ -111,6 +121,10 @@ export const vSlideIn: Directive<
   { direction?: 'left' | 'right' | 'up' | 'down'; delay?: number; duration?: number }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) {
+      gsap.set(el, { opacity: 1, x: 0, y: 0 })
+      return
+    }
     const { direction = 'up', delay = 0, duration = 0.5 } = binding.value || {}
 
     const fromVars: gsap.TweenVars = { opacity: 0 }
@@ -147,6 +161,7 @@ export const vSlideIn: Directive<
  */
 export const vHoverLift: Directive<HTMLElement, { y?: number; scale?: number }> = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const { y = -8, scale = 1.02 } = binding.value || {}
 
     const handleEnter = () => {
@@ -187,6 +202,7 @@ export const vHoverLift: Directive<HTMLElement, { y?: number; scale?: number }> 
  */
 export const vParallax: Directive<HTMLElement, { speed?: number }> = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const { speed = 0.5 } = binding.value || {}
 
     const handleScroll = () => {
@@ -234,6 +250,12 @@ export const vScrollIn: Directive<
   }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) {
+      gsap.set(el, { opacity: 1, x: 0, y: 0 })
+      const items = el.querySelectorAll('.stagger-item')
+      if (items.length) gsap.set(items, { opacity: 1, x: 0, y: 0 })
+      return
+    }
     const {
       direction = 'up',
       delay = 0,
@@ -314,8 +336,20 @@ export const vScrollIn: Directive<
 
     observer.observe(el)
 
+    // 兜底：即使 IntersectionObserver/GSAP 未触发，2 秒后也强制显示内容
+    const fallbackTimer = setTimeout(() => {
+      if (stagger) {
+        const items = el.querySelectorAll('.stagger-item')
+        gsap.set(items.length ? items : el, { opacity: 1, x: 0, y: 0 })
+      } else {
+        gsap.set(el, { opacity: 1, x: 0, y: 0 })
+      }
+      observer.disconnect()
+    }, 2000)
+
     // 存储清理函数
     ;(el as any)._scrollInCleanup = () => {
+      clearTimeout(fallbackTimer)
       observer.disconnect()
     }
   },
@@ -343,6 +377,7 @@ export const vTilt: Directive<
   }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const {
       max = 10,
       scale = 1.02,
@@ -448,6 +483,7 @@ export const vMagnetic: Directive<
   }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const { strength = 0.4, distance = 80 } = binding.value || {}
 
     // 保存原始位置
@@ -520,6 +556,7 @@ export const vSpotlight: Directive<
   }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const {
       color = 'rgba(255, 255, 255, 0.08)',
       size = 250,
@@ -591,6 +628,7 @@ export const vCardSpotlight: Directive<
   }
 > = {
   mounted(el: HTMLElement, binding) {
+    if (prefersReducedMotion()) return
     const {
       color = 'rgba(56,189,248, 0.5)',
       borderRadius = 'inherit',

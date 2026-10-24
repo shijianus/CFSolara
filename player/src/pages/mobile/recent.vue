@@ -6,6 +6,7 @@ import type { Song as StoreSong } from '@/stores/interface'
 import MobileSongList from '@/components/Mobile/MobileSongList.vue'
 import { useLibraryStore } from '@/stores/modules/library'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
 import 'swiper/css'
@@ -24,6 +25,8 @@ const creativeEffect = {
 }
 
 const { t } = useI18n()
+const reducedMotion = usePreferredReducedMotion()
+const prefersReduced = computed(() => reducedMotion.value === 'reduce')
 const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
 const libraryStore = useLibraryStore()
 const likedCount = computed(() => libraryStore.likedSongCount)
@@ -128,7 +131,7 @@ const tabs = computed(() => [
         :modules="[EffectCreative]"
         effect="creative"
         :creative-effect="creativeEffect"
-        :speed="300"
+        :speed="prefersReduced ? 0 : 300"
         @swiper="onSwiper"
         @slideChange="onSlideChange"
       >

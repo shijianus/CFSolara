@@ -1,4 +1,5 @@
 import { gsap } from 'gsap'
+import { prefersReducedMotion } from '@/utils/motion'
 
 export interface SharedElementOptions {
   duration?: number
@@ -25,6 +26,12 @@ export function useSharedElement() {
   ): Promise<void> => {
     return new Promise(resolve => {
       if (!sourceEl || !targetEl) {
+        resolve()
+        return
+      }
+      if (prefersReducedMotion()) {
+        options.onStart?.()
+        options.onComplete?.()
         resolve()
         return
       }
@@ -301,6 +308,7 @@ export function useSharedElement() {
     container: HTMLElement,
     color: string = 'rgba(255, 255, 255, 0.3)'
   ) => {
+    if (prefersReducedMotion()) return
     const rect = container.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
