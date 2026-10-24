@@ -35,7 +35,6 @@ interface PlaylistState {
   playlistInfo: PlaylistInfo
   isCollected: boolean
   songs: SongData[]
-  newComment: string
   comments: CommentItem[]
   isPageLoading: boolean
   similarPlaylists: SimilarPlaylist[]
@@ -57,7 +56,6 @@ const state = reactive<PlaylistState>({
   playlistInfo: {} as PlaylistInfo,
   isCollected: false,
   songs: [],
-  newComment: '',
   comments: [],
   isPageLoading: true,
   similarPlaylists: [],
@@ -77,7 +75,6 @@ const {
   activeTab,
   playlistInfo,
   songs,
-  newComment,
   comments,
   isPageLoading,
   similarPlaylists,
@@ -349,22 +346,6 @@ watch(
     if (name) loadSimilarPlaylists(name)
   }
 )
-
-const submitComment = () => {
-  if (!state.newComment.trim()) return
-  const comment = {
-    username: t('common.me'),
-    avatar: t('common.me'),
-    avatarGradient: 'from-sky-400 to-blue-500',
-    time: t('common.justNow'),
-    content: state.newComment,
-    likes: 0,
-    avatarUrl: '',
-    replies: [],
-  }
-  state.comments.unshift(comment)
-  state.newComment = ''
-}
 
 
 const toggleCollect = () => {
@@ -641,38 +622,7 @@ const tabsWithCount = computed(() =>
         <!-- 评论区 -->
         <section v-show="activeTab === 'comments'" class="animate-fade-in">
           <div class="glass-card overflow-hidden">
-            <!-- 发表评论 -->
-            <div class="border-b border-glass p-6">
-              <div class="flex gap-4">
-                <div
-                  class="accent-gradient flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-md"
-                >
-                  {{ $t('common.me') }}
-                </div>
-                <div class="flex-1">
-                  <textarea
-                    v-model="newComment"
-                    :placeholder="$t('comments.placeholder')"
-                    class="text-primary glass-card placeholder-glass-50 w-full resize-none rounded-xl border border-glass p-4 text-sm transition-all focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/20 focus:outline-none"
-                    rows="3"
-                  ></textarea>
-                  <div class="mt-3 flex items-center justify-end">
-                    <Button
-                      variant="gradient"
-                      size="md"
-                      rounded="full"
-                      class="px-6 py-2.5 shadow-lg transition-all hover:shadow-xl"
-                      :disabled="!newComment.trim()"
-                      @click="submitComment"
-                    >
-                      {{ $t('comments.publish') }}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 评论列表 -->
+            <!-- 评论列表（只读，无后端写接口） -->
             <div v-if="comments.length" class="divide-y divide-glass">
               <div
                 v-for="(comment, index) in comments"
@@ -704,25 +654,9 @@ const tabsWithCount = computed(() =>
                       {{ comment.content }}
                     </p>
 
-                    <div class="flex items-center gap-5 text-xs">
-                      <Button
-                        variant="ghost"
-                        size="none"
-                        class="text-primary/60 hover:text-primary flex items-center gap-1.5 transition-colors"
-                        icon="icon-[mdi--thumb-up-outline]"
-                        icon-class="h-4 w-4"
-                      >
-                        <span class="font-medium">{{ comment.likes || '' }}</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="none"
-                        class="text-primary/60 hover:text-primary flex items-center gap-1.5 transition-colors"
-                        icon="icon-[mdi--reply]"
-                        icon-class="h-4 w-4"
-                      >
-                        <span class="font-medium">{{ $t('comments.reply') }}</span>
-                      </Button>
+                    <div class="flex items-center gap-1.5 text-xs text-primary/50">
+                      <span class="icon-[mdi--thumb-up-outline] h-4 w-4"></span>
+                      <span class="font-medium">{{ comment.likes || 0 }}</span>
                     </div>
 
                     <!-- 回复列表 -->

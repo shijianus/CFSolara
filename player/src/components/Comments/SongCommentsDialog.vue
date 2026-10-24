@@ -197,7 +197,7 @@ const formatTime = (t: number | string) => {
                   </span>
                 </div>
 
-                <div class="like-btn flex shrink-0 items-center gap-1.5">
+                <div class="like-count flex shrink-0 items-center gap-1.5">
                   <span class="icon-[mdi--thumb-up-outline] h-5 w-5" />
                   <span class="text-xs font-medium">{{ c.likedCount || 0 }}</span>
                 </div>
@@ -331,14 +331,8 @@ const formatTime = (t: number | string) => {
   color: var(--glass-text-primary);
 }
 
-.like-btn {
+.like-count {
   color: var(--glass-text-muted);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.like-btn:hover {
-  color: #38bdf8;
 }
 
 /* ═══ Reply ═══ */

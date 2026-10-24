@@ -243,25 +243,9 @@ watch(
                         <span class="text-primary/40 text-xs">{{ c.time }}</span>
                       </div>
                       <p class="text-primary/80 text-sm leading-relaxed">{{ c.content }}</p>
-                      <div class="mt-3 flex items-center gap-4">
-                        <Button
-                          variant="ghost"
-                          size="none"
-                          class="text-primary/40 flex items-center gap-1.5 text-xs transition-colors hover:text-sky-400"
-                          icon="icon-[mdi--thumb-up-outline]"
-                          icon-class="h-4 w-4"
-                        >
-                          {{ c.likes || '' }}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="none"
-                          class="text-primary/40 hover:text-primary flex items-center gap-1.5 text-xs transition-colors"
-                          icon="icon-[mdi--reply]"
-                          icon-class="h-4 w-4"
-                        >
-                          {{ t('mvPlayer.comments.reply') }}
-                        </Button>
+                      <div class="mt-3 flex items-center gap-1.5 text-xs text-primary/40">
+                        <span class="icon-[mdi--thumb-up-outline] h-4 w-4"></span>
+                        <span>{{ c.likes || 0 }}</span>
                       </div>
                     </div>
                   </div>

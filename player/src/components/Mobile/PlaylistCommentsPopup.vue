@@ -106,11 +106,9 @@ watch(
                {{ comment.beReplied[0].content }}
             </div>
 
-            <div class="flex items-center gap-4 pt-1">
-               <button class="flex items-center gap-1 text-xs text-primary/40 transition-colors hover:text-primary">
-                 <span class="icon-[mdi--thumb-up-outline] h-3.5 w-3.5"></span>
-                 <span v-if="comment.likedCount">{{ comment.likedCount }}</span>
-               </button>
+            <div class="flex items-center gap-1 pt-1 text-xs text-primary/40">
+              <span class="icon-[mdi--thumb-up-outline] h-3.5 w-3.5"></span>
+              <span>{{ comment.likedCount || 0 }}</span>
             </div>
           </div>
         </div>
