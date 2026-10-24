@@ -12,6 +12,8 @@ import {
 } from '@/config/brand'
 
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useAudio } from '@/composables/useAudio'
 
 const router = useRouter()
 const route = useRoute()
@@ -71,6 +73,26 @@ const sections = [
 // 收藏歌单（本地 library store，持久化）
 const libraryStore = useLibraryStore()
 const collectedPlaylists = computed(() => libraryStore.collectedPlaylists)
+
+// 我的歌单（本地新建歌单,点击直接入队播放）
+const { t } = useI18n()
+const toastStore = useToastStore()
+const { setPlaylist, play: playSong } = useAudio()
+const userPlaylists = computed(() => libraryStore.userPlaylists)
+
+const playUserPlaylist = (playlistId: string) => {
+  const songs = libraryStore.toPlayableSongsForUserPlaylist(playlistId)
+  if (!songs.length) {
+    toastStore.show({ message: t('player.emptyUserPlaylistSongs'), type: 'info' })
+    return
+  }
+  setPlaylist(songs, 0)
+  playSong()
+}
+
+const deleteUserPlaylist = (playlistId: string) => {
+  libraryStore.removeUserPlaylist(playlistId)
+}
 
 // 活动指示器相关
 const indicatorRef = ref<HTMLElement | null>(null)
@@ -316,6 +338,41 @@ onUnmounted(() => window.removeEventListener('popstate', syncHistoryState))
                   ></span>
                   <span class="truncate">{{ pl.name }}</span>
                 </router-link>
+              </nav>
+            </div>
+
+            <!-- 我的歌单（本地新建,点击入队播放） -->
+            <div v-if="userPlaylists.length" class="mb-4">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[11px] font-bold tracking-[.18em] uppercase">
+                {{ $t('layout.aside.userPlaylists') }}
+              </h3>
+              <nav class="relative space-y-0.5">
+                <div
+                  v-for="pl in userPlaylists"
+                  :key="pl.id"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-within:ring-2 focus-within:ring-sky-400/60"
+                >
+                  <button
+                    type="button"
+                    class="flex min-w-0 flex-1 items-center space-x-2.5 text-left outline-none"
+                    :title="$t('player.playUserPlaylist')"
+                    :aria-label="`${$t('player.playUserPlaylist')}: ${pl.name}`"
+                    @click="playUserPlaylist(pl.id)"
+                  >
+                    <span class="icon-[mdi--playlist-star] h-4.5 w-4.5 shrink-0 text-[#38bdf8]"></span>
+                    <span class="truncate">{{ pl.name }}</span>
+                    <span class="text-primary/40 shrink-0 text-[10px]">{{ pl.songs.length }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="text-primary/40 hover:text-red-400 shrink-0 rounded-lg p-1 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                    :title="$t('player.deleteUserPlaylist')"
+                    :aria-label="`${$t('player.deleteUserPlaylist')}: ${pl.name}`"
+                    @click.stop="deleteUserPlaylist(pl.id)"
+                  >
+                    <span class="icon-[mdi--delete-outline] h-3.5 w-3.5"></span>
+                  </button>
+                </div>
               </nav>
             </div>
           </div>

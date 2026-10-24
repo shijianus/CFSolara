@@ -15,10 +15,37 @@ import Button from '@/components/Ui/Button.vue'
 import VinylDisc from '@/components/Player/VinylDisc.vue'
 import { syncWordElements } from '@/utils/lyricsWordSync'
 import { useAudioStore } from '@/stores/modules/audio'
+import AddToPlaylistDialog from '@/components/Dialog/AddToPlaylistDialog.vue'
+import { useLibraryStore } from '@/stores/modules/library'
+import { useDownloadStore } from '@/stores/modules/download'
+import { useToastStore } from '@/stores/modules/toast'
 
 // 国际化文本函数
 const { t } = useI18n()
 const audioStore = useAudioStore()
+const libraryStore = useLibraryStore()
+const downloadStore = useDownloadStore()
+const toastStore = useToastStore()
+
+// ═══ 当前歌曲操作(喜欢 / 下载 / 加入歌单,移动端同样提供下载入口)═══
+const isAddToPlaylistOpen = ref(false)
+const isCurrentLiked = computed(() =>
+  currentSong.value ? libraryStore.isSongLiked(currentSong.value.id) : false
+)
+
+const toggleLikeCurrent = () => {
+  if (!currentSong.value) return
+  const liked = libraryStore.toggleLikeSong(currentSong.value)
+  toastStore.show({
+    message: liked ? t('player.likedToast') : t('player.unlikedToast'),
+    type: 'success',
+  })
+}
+
+const downloadCurrent = () => {
+  if (!currentSong.value) return
+  downloadStore.openDownloadDialog(currentSong.value)
+}
 // 抽屉开关（父组件通过 v-model 控制）
 const isOpen = defineModel<boolean>()
 
@@ -720,6 +747,47 @@ const playModeIcon = computed(() => {
           @click.stop="toggleRomaBtn"
         />
       </div>
+
+      <!-- 当前歌曲操作:喜欢 / 下载 / 加入歌单 -->
+      <div class="mx-auto mb-3 flex w-full max-w-xs items-center justify-center gap-10 px-4">
+        <Button
+          variant="ghost"
+          size="none"
+          rounded="full"
+          class="flex min-h-11 min-w-11 items-center justify-center p-2"
+          :disabled="!currentSong"
+          :icon="isCurrentLiked ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
+          :icon-class="isCurrentLiked ? 'h-6 w-6 text-red-400' : 'h-6 w-6 text-primary/70'"
+          :aria-label="isCurrentLiked ? t('common.unlike') : t('common.like')"
+          :title="isCurrentLiked ? t('common.unlike') : t('common.like')"
+          @click.stop="toggleLikeCurrent"
+        />
+        <Button
+          variant="ghost"
+          size="none"
+          rounded="full"
+          class="flex min-h-11 min-w-11 items-center justify-center p-2"
+          :disabled="!currentSong"
+          icon="icon-[mdi--tray-arrow-down]"
+          icon-class="h-6 w-6 text-primary/70"
+          :aria-label="t('common.download')"
+          :title="t('common.download')"
+          @click.stop="downloadCurrent"
+        />
+        <Button
+          variant="ghost"
+          size="none"
+          rounded="full"
+          class="flex min-h-11 min-w-11 items-center justify-center p-2"
+          :disabled="!currentSong"
+          icon="icon-[mdi--playlist-plus]"
+          icon-class="h-6 w-6 text-primary/70"
+          :aria-label="t('player.addToPlaylist')"
+          :title="t('player.addToPlaylist')"
+          @click.stop="isAddToPlaylistOpen = true"
+        />
+      </div>
+
       <div v-if="currentSong" class="mb-4">
         <MusicProgress />
         <div class="text-primary/50 mt-2 flex justify-between text-xs">
@@ -790,6 +858,8 @@ const playModeIcon = computed(() => {
   </div>
   <!-- 评论弹窗 -->
   <PlaylistCommentsPopup v-model:show="isCommentsOpen" :id="currentSong?.id ?? null" />
+  <!-- 加入歌单弹窗 -->
+  <AddToPlaylistDialog v-model:show="isAddToPlaylistOpen" />
 </template>
 
 <style scoped>

@@ -53,12 +53,21 @@ export interface LikedMvItem {
   likedAt: number
 }
 
+/** 本地歌单(无后端写接口,歌曲与歌单关系全部落 localStorage) */
+export interface UserPlaylistItem {
+  id: string
+  name: string
+  createdAt: number
+  songs: LikedSongItem[]
+}
+
 interface LibraryState {
   likedSongs: LikedSongItem[]
   collectedPlaylists: CollectedPlaylistItem[]
   followedArtists: FollowedArtistItem[]
   likedMvs: LikedMvItem[]
   collectedAlbums: CollectedAlbumItem[]
+  userPlaylists: UserPlaylistItem[]
 }
 
 const sameId = (a: string | number | undefined, b: string | number | undefined) =>
@@ -71,6 +80,7 @@ export const useLibraryStore = defineStore('library', {
     followedArtists: [],
     likedMvs: [],
     collectedAlbums: [],
+    userPlaylists: [],
   }),
 
   getters: {
@@ -240,6 +250,77 @@ export const useLibraryStore = defineStore('library', {
     removeCollectedAlbum(id: string | number) {
       this.collectedAlbums = this.collectedAlbums.filter((a: CollectedAlbumItem) => !sameId(a.id, id))
     },
+
+    // ---------- 本地歌单 ----------
+    createUserPlaylist(name: string): UserPlaylistItem | null {
+      const trimmed = name.trim()
+      if (!trimmed) return null
+      const item: UserPlaylistItem = {
+        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: trimmed,
+        createdAt: Date.now(),
+        songs: [],
+      }
+      this.userPlaylists.unshift(item)
+      return item
+    },
+
+    removeUserPlaylist(id: string) {
+      this.userPlaylists = this.userPlaylists.filter((p: UserPlaylistItem) => p.id !== id)
+    },
+
+    renameUserPlaylist(id: string, name: string) {
+      const trimmed = name.trim()
+      const pl = this.userPlaylists.find((p: UserPlaylistItem) => p.id === id)
+      if (pl && trimmed) pl.name = trimmed
+    },
+
+    isSongInUserPlaylist(playlistId: string, songId: string | number | undefined): boolean {
+      const pl = this.userPlaylists.find((p: UserPlaylistItem) => p.id === playlistId)
+      return Boolean(pl?.songs.some((s: LikedSongItem) => sameId(s.id, songId)))
+    },
+
+    /** 加入本地歌单;返回是否真正写入(已存在时为 false) */
+    addSongToUserPlaylist(
+      playlistId: string,
+      song: Partial<Song> & { id: string | number }
+    ): boolean {
+      const pl = this.userPlaylists.find((p: UserPlaylistItem) => p.id === playlistId)
+      if (!pl) return false
+      if (pl.songs.some((s: LikedSongItem) => sameId(s.id, song.id))) return false
+      pl.songs.unshift({
+        id: song.id,
+        name: song.name || '',
+        artist: song.artist || '',
+        album: song.album,
+        cover: song.cover,
+        duration: song.duration,
+        mvId: song.mvId,
+        likedAt: Date.now(),
+      })
+      return true
+    },
+
+    removeSongFromUserPlaylist(playlistId: string, songId: string | number) {
+      const pl = this.userPlaylists.find((p: UserPlaylistItem) => p.id === playlistId)
+      if (!pl) return
+      pl.songs = pl.songs.filter((s: LikedSongItem) => !sameId(s.id, songId))
+    },
+
+    /** 本地歌单映射为 Store 层 Song,可直接入队播放 */
+    toPlayableSongsForUserPlaylist(playlistId: string): Song[] {
+      const pl = this.userPlaylists.find((p: UserPlaylistItem) => p.id === playlistId)
+      if (!pl) return []
+      return pl.songs.map((s: LikedSongItem) => ({
+        id: s.id,
+        name: s.name,
+        artist: s.artist,
+        album: s.album,
+        cover: s.cover,
+        duration: s.duration || 0,
+        mvId: s.mvId,
+      }))
+    },
   },
 
   persist: piniaPersistConfig<LibraryState>('library', [
@@ -248,5 +329,6 @@ export const useLibraryStore = defineStore('library', {
     'followedArtists',
     'likedMvs',
     'collectedAlbums',
+    'userPlaylists',
   ]),
 })
