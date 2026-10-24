@@ -9,6 +9,7 @@ import LazyImage from '@/components/Ui/LazyImage.vue'
 import {
   transformSearchSongs,
   transformSearchPlaylists,
+  normalizeDurationMs,
   type SongData,
   type PlaylistData,
 } from '@/utils/transformers'
@@ -42,7 +43,7 @@ const artistName = computed(() => {
 
 const albumName = computed(() => state.info?.al?.name || state.info?.album?.name || '')
 const albumCover = computed(() => state.info?.al?.picUrl || state.info?.album?.picUrl || '')
-const duration = computed(() => state.info?.dt || state.info?.duration || 0)
+const duration = computed(() => normalizeDurationMs(state.info?.dt ?? state.info?.duration ?? 0))
 
 const playCurrent = () => {
   if (!state.info) return

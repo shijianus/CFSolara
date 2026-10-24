@@ -8,6 +8,7 @@ import { usePlayActions } from '@/composables/usePlayActions'
 import {
   transformAlbumDetail,
   extractArray,
+  normalizeDurationMs,
   type SongData,
   type AlbumData,
 } from '@/utils/transformers'
@@ -42,7 +43,7 @@ const load = async () => {
           : '',
       album: s?.al?.name || s?.album?.name || album?.name || '',
       albumId: s?.al?.id ?? s?.album?.id ?? album?.id,
-      duration: s?.dt ?? s?.duration ?? 0,
+      duration: normalizeDurationMs(s?.dt ?? s?.duration ?? 0),
       cover: s?.al?.picUrl || s?.album?.picUrl || album?.picUrl || '',
       liked: false,
     }))

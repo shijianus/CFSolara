@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n'
 import {
   transformAlbumDetail,
   extractArray,
+  normalizeDurationMs,
   type SongData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
@@ -73,7 +74,7 @@ const load = async (id: number) => {
             : state.info.artist,
         album: state.info.name,
         albumId: id,
-        duration: s?.dt ?? s?.duration ?? 0,
+        duration: normalizeDurationMs(s?.dt ?? s?.duration ?? 0),
         cover: state.info.coverImgUrl,
         liked: false,
       }))
