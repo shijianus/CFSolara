@@ -11,6 +11,8 @@ import {
   type SongProbeResult,
   type QualityLevel,
   QUALITY_LEVELS,
+  qualityLabel,
+  qualityReason,
 } from '@/utils/qualityProbe'
 
 const { t } = useI18n()
@@ -124,7 +126,7 @@ watch(
 const choices = computed(() => {
   const p = probeResult.value
 
-  return QUALITY_LEVELS.map(({ level, label, nominalFormat, nominalBitrate }) => {
+  return QUALITY_LEVELS.map(({ level, nominalFormat, nominalBitrate }) => {
     const item = p ? p[level] : null
     const isAvailable = item ? item.isAvailable : true
     const unavailableReason = item?.unavailableReason
@@ -134,12 +136,13 @@ const choices = computed(() => {
 
     return {
       level,
-      label,
+      label: qualityLabel(level),
       format: formatLabel.toLowerCase(),
       formatLabel,
       bitrateLabel,
       isAvailable,
       unavailableReason,
+      unavailableReasonText: qualityReason(unavailableReason),
       sizeFormatted,
       isItemProbing: isProbing.value && !item,
     }
@@ -223,13 +226,6 @@ const transferredText = computed(() => {
   if (!loaded) return ''
   if (!downloadStore.totalBytes) return formatBytes(loaded)
   return `${formatBytes(loaded)} / ${formatBytes(downloadStore.totalBytes)}`
-})
-
-// 歌名展示
-const displayTitle = computed(() => {
-  const title = downloadStore.currentDownloadSong?.name || ''
-  const MAX_LEN = 28
-  return title.length > MAX_LEN ? title.slice(0, MAX_LEN) + '...' : title
 })
 
 // ════════════ 可访问性、键盘导航与焦点管理 ════════════
@@ -344,19 +340,19 @@ onUnmounted(() => {
             class="download-dialog-panel relative overflow-hidden p-6 rounded-[20px] select-none"
           >
             <!-- 头部：标题 18px/600 + 关闭按钮，下方 1px 分隔线 -->
-            <div class="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
+            <div class="flex items-center justify-between pb-3.5 border-b border-glass">
               <h3
                 id="download-dialog-title"
-                class="text-[18px] font-semibold text-white/95 leading-tight tracking-tight"
+                class="text-[18px] font-semibold text-primary leading-tight tracking-tight"
               >
-                选择下载音质
+                {{ t('downloadDialog.title') }}
               </h3>
               <button
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-sky-200/60 hover:text-sky-100 hover:bg-sky-200/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
-                title="关闭"
-                aria-label="关闭弹窗"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-hover-glass transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
+                :title="t('common.close')"
+                :aria-label="t('downloadDialog.closeAria')"
               >
                 <span class="icon-[mdi--close] h-4 w-4"></span>
               </button>
@@ -368,18 +364,18 @@ onUnmounted(() => {
               class="my-4 flex items-center gap-3.5"
             >
               <div
-                class="relative shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-white/5"
+                class="relative shrink-0 overflow-hidden rounded-[10px] border border-glass bg-primary/5"
                 style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;"
               >
                 <img
                   v-if="dialogCoverUrl && !coverLoadFailed"
                   :src="dialogCoverUrl"
-                  alt="cover"
+                  :alt="t('downloadDialog.coverAlt')"
                   class="h-full w-full object-cover"
                   style="width: 48px; height: 48px;"
                   @error="coverLoadFailed = true"
                 />
-                <div v-else class="h-full w-full flex items-center justify-center bg-white/5 text-white/40" style="width: 48px; height: 48px;">
+                <div v-else class="h-full w-full flex items-center justify-center bg-primary/5 text-primary/40" style="width: 48px; height: 48px;">
                   <span class="icon-[mdi--music] h-6 w-6"></span>
                 </div>
               </div>
@@ -387,12 +383,12 @@ onUnmounted(() => {
               <div class="min-w-0 flex-1">
                 <h4
                   :title="downloadStore.currentDownloadSong.name"
-                  class="truncate text-[15px] font-semibold text-white/95"
+                  class="line-clamp-1 text-[15px] font-semibold text-primary"
                 >
-                  {{ displayTitle }}
+                  {{ downloadStore.currentDownloadSong.name }}
                 </h4>
-                <p class="mt-0.5 truncate text-[13px] text-white/70 font-medium">
-                  {{ downloadStore.currentDownloadSong.artist || '未知歌手' }}
+                <p class="mt-0.5 truncate text-[13px] text-primary/70 font-medium">
+                  {{ downloadStore.currentDownloadSong.artist || t('downloadDialog.unknownArtist') }}
                   <span v-if="downloadStore.currentDownloadSong.album"> · 《{{ downloadStore.currentDownloadSong.album }}》</span>
                 </p>
               </div>
@@ -430,22 +426,22 @@ onUnmounted(() => {
               >
                 <!-- 左侧：第一行名称 15px/600，第二行格式·码率 13px (格式只出现一次，去掉重复小标签) -->
                 <div class="flex flex-col justify-center min-w-0 pr-2">
-                  <div class="text-[15px] font-semibold text-white/95 leading-snug">
+                  <div class="text-[15px] font-semibold text-primary leading-snug">
                     {{ choice.label }}
                   </div>
                   <!-- 第二行：可用时显示格式·码率，不可用时显示中性灰原因与信息图标，探测中显示骨架 -->
                   <div class="mt-1 flex items-center gap-1.5 min-w-0">
                     <template v-if="choice.isItemProbing">
-                      <span class="inline-block h-3 w-28 rounded bg-white/10 animate-pulse"></span>
+                      <span class="inline-block h-3 w-28 rounded bg-primary/10 animate-pulse"></span>
                     </template>
                     <template v-else-if="!choice.isAvailable">
-                      <span class="icon-[mdi--information-outline] h-3.5 w-3.5 shrink-0 text-white/55"></span>
-                      <span class="text-[13px] font-normal text-white/55 truncate">
-                        {{ choice.unavailableReason || '当前音源不可用' }}
+                      <span class="icon-[mdi--information-outline] h-3.5 w-3.5 shrink-0 text-primary/55"></span>
+                      <span class="text-[13px] font-normal text-primary/55 truncate">
+                        {{ choice.unavailableReasonText || t('downloadDialog.unavailable') }}
                       </span>
                     </template>
                     <template v-else>
-                      <span class="text-[13px] font-medium text-white/60 truncate">
+                      <span class="text-[13px] font-medium text-primary/60 truncate">
                         {{ choice.bitrateLabel }}
                       </span>
                     </template>
@@ -455,15 +451,15 @@ onUnmounted(() => {
                 <!-- 右侧：真实大小 (14px/500 等宽数字) + 强调色勾选圆标 (不可用档位显示"—"，不再保留空的单选圆圈) -->
                 <div class="flex items-center gap-3 shrink-0">
                   <template v-if="choice.isItemProbing">
-                    <span class="inline-block h-4 w-12 rounded bg-white/10 animate-pulse"></span>
+                    <span class="inline-block h-4 w-12 rounded bg-primary/10 animate-pulse"></span>
                   </template>
                   <template v-else-if="choice.isAvailable">
-                    <span class="text-[14px] font-medium font-mono text-white/80 tabular-nums">
+                    <span class="text-[14px] font-medium font-mono text-primary/80 tabular-nums">
                       {{ choice.sizeFormatted }}
                     </span>
                   </template>
                   <template v-else>
-                    <span class="text-[14px] font-medium font-mono text-white/40 tabular-nums">
+                    <span class="text-[14px] font-medium font-mono text-primary/40 tabular-nums">
                       —
                     </span>
                   </template>
@@ -475,7 +471,7 @@ onUnmounted(() => {
                     :class="[
                       selectedLevel === choice.level
                         ? 'border-sky-400 bg-sky-500/20 text-sky-300'
-                        : 'border-white/20 bg-transparent'
+                        : 'border-primary/20 bg-transparent'
                     ]"
                   >
                     <span
@@ -488,8 +484,8 @@ onUnmounted(() => {
             </div>
 
             <!-- 底部提示：列表下方一行 13px (60% 白) 居左文字，去掉独立方框 -->
-            <p class="mt-3.5 mb-4 text-[13px] text-white/60 font-medium text-left">
-              保存到离线库，并同时导出到本地文件
+            <p class="mt-3.5 mb-4 text-[13px] text-primary/60 font-medium text-left">
+              {{ t('downloadDialog.saveHint') }}
             </p>
 
             <!-- 重复下载确认 -->
@@ -505,7 +501,7 @@ onUnmounted(() => {
               <div class="mt-2.5 flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  class="min-h-11 rounded-lg px-3 text-[13px] font-medium text-sky-200/70 hover:bg-sky-200/10 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  class="min-h-11 rounded-lg px-3 text-[13px] font-medium text-primary/70 hover:bg-hover-glass focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   @click="cancelOverwrite"
                 >
                   {{ t('download.cancelOverwrite') }}
@@ -522,17 +518,17 @@ onUnmounted(() => {
 
             <!-- 下载进度 -->
             <div v-if="downloadStore.isDownloading" class="mb-3" aria-live="polite">
-              <div class="flex items-center justify-between text-[13px] text-sky-200/80">
+              <div class="flex items-center justify-between text-[13px] text-primary/80">
                 <span>{{ t('download.downloading') }}</span>
                 <span class="font-mono tabular-nums">{{ downloadStore.downloadProgress }}%</span>
               </div>
-              <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-sky-200/10">
+              <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-primary/10">
                 <div
                   class="h-full rounded-full bg-sky-400 transition-[width] duration-200"
                   :style="{ width: `${downloadStore.downloadProgress}%` }"
                 ></div>
               </div>
-              <p v-if="transferredText" class="mt-1 text-[11px] text-sky-200/50">
+              <p v-if="transferredText" class="mt-1 text-[11px] text-primary/50">
                 {{ transferredText }}
               </p>
             </div>
@@ -550,7 +546,7 @@ onUnmounted(() => {
             <div class="flex items-center justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="min-h-11 px-4 text-[14px] font-semibold text-sky-200/70 hover:text-sky-100 hover:bg-sky-200/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
+                class="min-h-11 px-4 text-[14px] font-semibold text-sky-200/70 hover:text-sky-100 hover:bg-primary/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
@@ -568,7 +564,7 @@ onUnmounted(() => {
               <button
                 v-else
                 type="button"
-                class="download-btn-gradient min-h-11 px-5 rounded-xl text-[14px] font-semibold text-white shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                class="download-btn-gradient min-h-11 px-5 rounded-xl text-[14px] font-semibold text-[var(--glass-text-accent)] shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 :class="[
                   !hasAnyAvailable ||
                   !currentChoice.isAvailable ||
@@ -590,7 +586,7 @@ onUnmounted(() => {
                     ? t('download.checking')
                     : !currentChoice.isAvailable
                       ? t('download.unavailable')
-                      : `下载 (${currentChoice.label})`
+                      : t('downloadDialog.downloadWithQuality', { quality: currentChoice.label })
                 }}
               </button>
             </div>
@@ -604,8 +600,8 @@ onUnmounted(() => {
 <style scoped>
 /* 弹窗面板：深紫玻璃底色、1px 白描边、无外发光 */
 .download-dialog-panel {
-  background-color: rgba(10,31,61, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: var(--glass-bg-overlay);
+  border: 1px solid var(--glass-border-default);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
 }
 
@@ -618,28 +614,28 @@ onUnmounted(() => {
 
 /* 唯一的渐变主按钮 */
 .download-btn-gradient {
-  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+  background: var(--glass-accent-gradient);
 }
 
 /* 选项卡片状态样式 */
 .option-row.unselected-option {
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border-subtle);
 }
 
 .option-row.unselected-option:hover {
-  background-color: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--glass-interactive-hover-muted);
+  border-color: var(--glass-border-strong);
 }
 
 .option-row.selected-option {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background-color: var(--glass-interactive-active);
+  border: 1px solid var(--glass-accent-border);
 }
 
 .option-row.disabled-option {
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border-subtle);
   opacity: 0.45;
 }
 

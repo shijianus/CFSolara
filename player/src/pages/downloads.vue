@@ -10,7 +10,10 @@ import LazyImage from '@/components/Ui/LazyImage.vue'
 import type { Song } from '@/stores/interface'
 import type { DownloadedSong } from '@/utils/indexedDB'
 import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/blobMetadataParser'
+import { useI18n } from 'vue-i18n'
+import { formatNumber } from '@/utils/time'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const downloadStore = useDownloadStore()
 const { currentSong, isPlaying, setPlaylist, play } = useAudio()
@@ -20,11 +23,11 @@ const searchQuery = ref('')
 const selectedQualityFilter = ref<'all' | 'lossless' | 'exhigh' | 'standard'>('all')
 const sortBy = ref<'time' | 'name' | 'size'>('time')
 
-const sortOptions = [
-  { label: '最新下载', value: 'time' },
-  { label: '歌曲名称', value: 'name' },
-  { label: '文件大小', value: 'size' },
-]
+const sortOptions = computed(() => [
+  { label: t('downloads.sortLatest'), value: 'time' },
+  { label: t('downloads.sortName'), value: 'name' },
+  { label: t('downloads.sortSize'), value: 'size' },
+])
 
 // 页面可见性（页面隐藏或离开时停止动效）
 const isPageVisible = ref(typeof document !== 'undefined' ? !document.hidden : true)
@@ -123,10 +126,10 @@ const standardCount = computed(() =>
 
 // 分段控件配置
 const qualityOptions = computed(() => [
-  { value: 'all', label: '全部', count: downloads.value.length },
-  { value: 'lossless', label: 'SQ 无损', count: sqCount.value },
-  { value: 'exhigh', label: 'HQ 极高', count: hqCount.value },
-  { value: 'standard', label: '标准', count: standardCount.value },
+  { value: 'all', label: t('downloads.filterAll'), count: formatNumber(downloads.value.length) },
+  { value: 'lossless', label: t('downloads.filterLossless'), count: formatNumber(sqCount.value) },
+  { value: 'exhigh', label: t('downloads.filterExhigh'), count: formatNumber(hqCount.value) },
+  { value: 'standard', label: t('downloads.filterStandard'), count: formatNumber(standardCount.value) },
 ])
 
 // 真实总占用体积
@@ -204,7 +207,7 @@ const filteredDownloads = computed(() => {
       return (b.downloadTime || 0) - (a.downloadTime || 0)
     }
     if (sortBy.value === 'name') {
-      return (a.name || '').localeCompare(b.name || '', 'zh-CN')
+      return (a.name || '').localeCompare(b.name || '', locale.value)
     }
     if (sortBy.value === 'size') {
       const sizeA = a.file?.size || a.fileSize || 0
@@ -221,7 +224,7 @@ const filteredDownloads = computed(() => {
 const toSongList = (items: typeof downloads.value): Song[] => {
   return items.map((d) => {
     const meta = getParsedMeta(d)
-    const badge = meta.isLossless ? 'SQ' : meta.displayTag.includes('320') ? 'HQ' : '标准'
+    const badge = meta.isLossless ? 'SQ' : meta.displayTag.includes('320') ? 'HQ' : t('quality.standard')
     return {
       id: d.id,
       name: d.name,
@@ -262,7 +265,7 @@ const shufflePlay = () => {
 }
 
 // 播放单曲
-const playSingle = (item: DownloadedSong, index: number) => {
+const playSingle = (_item: DownloadedSong, index: number) => {
   const songList = toSongList(filteredDownloads.value)
   setPlaylist(songList, index)
   play(songList[index], index)
@@ -292,8 +295,8 @@ const handleExport = (item: DownloadedSong) => {
   const blobUrl = URL.createObjectURL(item.file)
   const a = document.createElement('a')
   a.href = blobUrl
-  const safeArtist = (item.artist || '未知歌手').replace(/[\\/:*?"<>|]/g, '_')
-  const safeTitle = (item.name || '未知歌曲').replace(/[\\/:*?"<>|]/g, '_')
+  const safeArtist = (item.artist || t('player.unknownArtist')).replace(/[\\/:*?"<>|]/g, '_')
+  const safeTitle = (item.name || t('player.unknownSong')).replace(/[\\/:*?"<>|]/g, '_')
   const meta = getParsedMeta(item)
   const ext = meta.isLossless ? 'flac' : 'mp3'
   const badge = meta.displayTag ? ` [${meta.displayTag}]` : ''
@@ -350,9 +353,9 @@ const formatSize = (bytes?: number) => {
       <!-- 扁平 Header (P3.4 标题 22px/600，清空按钮基线严格对齐) -->
       <header class="flex items-center justify-between pb-3.5 border-b border-glass select-none shrink-0 min-h-[44px]">
         <div id="downloads-header-title-box" class="flex items-baseline gap-3">
-          <h1 id="downloads-title-heading" class="text-[22px] font-semibold tracking-tight text-primary leading-none">下载列表</h1>
+          <h1 id="downloads-title-heading" class="text-[22px] font-semibold tracking-tight text-primary leading-none">{{ t('downloads.title') }}</h1>
           <p v-if="downloads.length > 0" class="text-[13px] text-primary/70 font-medium leading-none">
-            {{ downloads.length }} 首 · {{ totalSizeFormatted }} · 离线可用
+            {{ t('downloads.summary', { count: formatNumber(downloads.length), size: totalSizeFormatted }) }}
           </p>
         </div>
 
@@ -361,11 +364,11 @@ const formatSize = (bytes?: number) => {
             id="downloads-clear-all-btn"
             class="group inline-flex items-center gap-1.5 text-[13px] font-medium text-primary/70 hover:text-red-500 dark:hover:text-red-400 px-2.5 py-1.5 rounded-lg border border-glass bg-button-glass hover:border-red-500/30 hover:bg-red-500/10 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 leading-none"
             @click="openClearAllConfirm"
-            title="清空离线音乐库"
-            aria-label="清空离线音乐库"
+            :title="t('downloads.clearAllAria')"
+            :aria-label="t('downloads.clearAllAria')"
           >
             <span class="icon-[mdi--delete-sweep-outline] h-3.5 w-3.5 text-primary/60 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors"></span>
-            <span>清空</span>
+            <span>{{ t('downloads.clear') }}</span>
           </button>
         </div>
       </header>
@@ -373,7 +376,7 @@ const formatSize = (bytes?: number) => {
       <!-- 操作栏 (P3.4 统一样式高 36px，分段控件淡强调色填充) -->
       <section
         v-if="downloads.length > 0"
-        aria-label="下载列表操作栏"
+        :aria-label="t('downloads.operationBar')"
         class="my-3 flex flex-wrap items-center justify-between gap-4 shrink-0"
       >
         <!-- 左侧：播放全部 / 随机播放 -->
@@ -385,10 +388,10 @@ const formatSize = (bytes?: number) => {
             class="h-[36px] px-4 text-[13px] font-semibold shadow-md shadow-sky-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="filteredDownloads.length === 0"
             @click="playAll"
-            aria-label="播放全部"
+            :aria-label="t('actions.playAll')"
           >
             <span class="icon-[mdi--play] mr-1.5 h-4 w-4"></span>
-            播放全部
+            {{ t('actions.playAll') }}
           </Button>
           <Button
             variant="soft"
@@ -397,17 +400,17 @@ const formatSize = (bytes?: number) => {
             class="h-[36px] px-3.5 text-[13px] font-medium text-primary bg-button-glass hover:bg-hover-button-glass disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="filteredDownloads.length === 0"
             @click="shufflePlay"
-            aria-label="随机播放"
+            :aria-label="t('actions.shufflePlay')"
           >
             <span class="icon-[mdi--shuffle] mr-1.5 h-4 w-4"></span>
-            随机播放
+            {{ t('actions.shufflePlay') }}
           </Button>
         </div>
 
         <!-- 中间：分段控件 (P3.4 选中态使用淡强调色填充，不要实心粉) -->
         <div
           role="radiogroup"
-          aria-label="按音质筛选"
+          :aria-label="t('downloads.filterAria')"
           class="flex items-center h-[36px] rounded-xl bg-button-glass p-1 border border-glass select-none gap-1"
           @keydown="handleQualityKeydown"
         >
@@ -434,13 +437,13 @@ const formatSize = (bytes?: number) => {
         <!-- 右侧：搜索框与 GlassSelect 排序 -->
         <div class="flex items-center gap-2">
           <div class="relative w-48 sm:w-56 h-[36px]">
-            <label for="download-search-input" class="sr-only">搜索歌名、歌手、专辑</label>
+            <label for="download-search-input" class="sr-only">{{ t('downloads.searchLabel') }}</label>
             <input
               id="download-search-input"
               v-model="searchQuery"
               type="text"
-              placeholder="搜索歌名、歌手、专辑..."
-              aria-label="搜索歌名、歌手、专辑"
+              :placeholder="t('downloads.searchPlaceholder')"
+              :aria-label="t('downloads.searchLabel')"
               class="w-full h-[36px] rounded-xl border border-glass bg-button-glass py-0 pr-8 pl-8 text-[13px] font-medium text-primary placeholder:text-primary/60 focus:border-sky-500/50 focus:outline-none transition-all"
             />
             <span class="icon-[mdi--magnify] absolute top-1/2 left-2.5 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none"></span>
@@ -449,7 +452,7 @@ const formatSize = (bytes?: number) => {
               type="button"
               @click="searchQuery = ''"
               class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-primary/60 hover:text-primary focus:outline-none cursor-pointer"
-              aria-label="清空搜索内容"
+              :aria-label="t('downloads.clearSearch')"
             >
               <span class="icon-[mdi--close-circle] h-4 w-4"></span>
             </button>
@@ -470,20 +473,20 @@ const formatSize = (bytes?: number) => {
         <div
           v-if="filteredDownloads.length > 0"
           role="table"
-          aria-label="离线下载音乐列表"
+          :aria-label="t('downloads.tableAria')"
           class="space-y-1 pb-4"
         >
           <!-- 表头 (桌面端：13px/500，严格对齐数据列) -->
           <div
             role="row"
-            class="text-primary/70 mb-1 hidden items-center border-b border-primary/10 py-2.5 px-2.5 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
+            class="text-primary/70 mb-1 hidden items-center border border-transparent border-b-primary/10 py-2.5 px-2.5 text-[13px] font-medium tracking-wider select-none md:grid md:grid-cols-12 md:gap-3"
           >
             <div role="columnheader" class="col-span-1 text-center font-mono text-[13px] font-medium text-primary/70">#</div>
-            <div role="columnheader" class="col-span-5 text-[13px] font-medium text-primary/70">歌曲</div>
-            <div role="columnheader" class="col-span-2 text-[13px] font-medium text-primary/70">专辑</div>
-            <div role="columnheader" class="col-span-1 text-center text-[13px] font-medium text-primary/70">音质规格</div>
-            <div role="columnheader" class="col-span-1 text-right font-mono text-[13px] font-medium text-primary/70">大小</div>
-            <div role="columnheader" class="col-span-2 text-center text-[13px] font-medium text-primary/70">操作</div>
+            <div role="columnheader" class="col-span-4 text-[13px] font-medium text-primary/70">{{ t('downloads.colSong') }}</div>
+            <div role="columnheader" class="col-span-2 text-[13px] font-medium text-primary/70">{{ t('downloads.colAlbum') }}</div>
+            <div role="columnheader" class="col-span-2 text-center text-[13px] font-medium text-primary/70">{{ t('downloads.colQuality') }}</div>
+            <div role="columnheader" class="col-span-1 whitespace-nowrap text-right font-mono text-[13px] font-medium text-primary/70">{{ t('downloads.colSize') }}</div>
+            <div role="columnheader" class="col-span-2 text-center text-[13px] font-medium text-primary/70">{{ t('downloads.colActions') }}</div>
           </div>
 
           <!-- 歌曲行容器 (role="rowgroup") -->
@@ -527,7 +530,7 @@ const formatSize = (bytes?: number) => {
                 <div
                   v-if="isCurrentPlaying(item)"
                   class="playing-icon flex items-center justify-center gap-0.5"
-                  aria-label="正在播放"
+                  :aria-label="t('downloads.nowPlaying')"
                 >
                   <span class="bar" :class="{ animate: isPageVisible }"></span>
                   <span class="bar" :class="{ animate: isPageVisible }"></span>
@@ -538,8 +541,8 @@ const formatSize = (bytes?: number) => {
                 <div
                   v-else-if="isCurrentPaused(item)"
                   class="flex items-center justify-center text-primary"
-                  aria-label="已暂停"
-                  title="已暂停"
+                  :aria-label="t('downloads.paused')"
+                  :title="t('downloads.paused')"
                 >
                   <span class="icon-[mdi--pause] h-4 w-4"></span>
                 </div>
@@ -554,8 +557,8 @@ const formatSize = (bytes?: number) => {
                   <button
                     type="button"
                     class="row-hover-show absolute inset-0 flex items-center justify-center text-primary/80 hover:text-primary active:scale-95 cursor-pointer focus:outline-none"
-                    aria-label="播放"
-                    title="播放"
+                    :aria-label="t('downloads.play')"
+                    :title="t('downloads.play')"
                     @click.stop="playSingle(item, index)"
                   >
                     <span class="icon-[mdi--play] h-4 w-4"></span>
@@ -563,8 +566,8 @@ const formatSize = (bytes?: number) => {
                 </template>
               </div>
 
-              <!-- 封面与歌曲标题 + 歌手 (Col 2: 5 cols) -->
-              <div role="cell" class="col-span-5 flex min-w-0 items-center gap-3">
+              <!-- 封面与歌曲标题 + 歌手 (Col 2: 4 cols) -->
+              <div role="cell" class="col-span-4 flex min-w-0 items-center gap-3">
                 <div class="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg shadow-sm border border-primary/10 bg-primary/5">
                   <LazyImage
                     :src="formatCoverUrl(item.cover, { size: 80, artist: item.artist })"
@@ -580,12 +583,12 @@ const formatSize = (bytes?: number) => {
                 <div class="min-w-0 flex-1">
                   <h3
                     :title="item.name"
-                    class="truncate text-[15px] font-semibold text-primary transition-colors"
+                    class="line-clamp-1 text-[15px] font-semibold text-primary transition-colors"
                   >
                     {{ item.name }}
                   </h3>
                   <p :title="item.artist" class="mt-0.5 truncate text-[13px] text-primary/70 font-medium">
-                    {{ item.artist || '未知歌手' }}
+                    {{ item.artist || t('player.unknownArtist') }}
                   </p>
                 </div>
               </div>
@@ -597,10 +600,10 @@ const formatSize = (bytes?: number) => {
                 </span>
               </div>
 
-              <!-- 音质规格徽章 (Col 4: 1 col, P1.4 真实格式与警示图标) -->
-              <div role="cell" class="col-span-1 text-center hidden md:flex items-center justify-center gap-1.5">
+              <!-- 音质规格徽章 (Col 4: 2 cols, P1.4 真实格式与警示图标) -->
+              <div role="cell" class="col-span-2 text-center hidden md:flex items-center justify-center gap-1">
                 <span
-                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium select-none whitespace-nowrap"
+                  class="inline-flex items-center px-1 py-0.5 rounded text-[11px] font-mono font-medium select-none whitespace-nowrap"
                   :class="[
                     getParsedMeta(item).isLossless
                       ? 'bg-transparent text-primary border border-sky-500/70'
@@ -617,11 +620,11 @@ const formatSize = (bytes?: number) => {
                   v-if="getParsedMeta(item).mismatchWarning"
                   class="relative group/warn inline-flex items-center cursor-help text-amber-400 shrink-0"
                   :title="getParsedMeta(item).mismatchWarning!"
-                  aria-label="音质规格与请求不符警示"
+                  :aria-label="t('downloads.qualityMismatch')"
                 >
                   <span class="icon-[mdi--alert-circle-outline] h-3.5 w-3.5"></span>
                   <span
-                    class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/warn:flex whitespace-nowrap z-30 rounded-lg bg-neutral-900/95 border border-amber-500/40 px-2 py-1 text-[11px] font-medium text-amber-200 shadow-xl backdrop-blur-md"
+                    class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/warn:flex whitespace-nowrap z-30 rounded-lg bg-[var(--glass-bg-overlay)] border border-amber-500/40 px-2 py-1 text-[11px] font-medium text-amber-200 shadow-xl backdrop-blur-md"
                   >
                     {{ getParsedMeta(item).mismatchWarning }}
                   </span>
@@ -629,7 +632,7 @@ const formatSize = (bytes?: number) => {
               </div>
 
               <!-- 大小 (Col 5: 1 col, 严格使用实际 blob.size) -->
-              <div role="cell" class="col-span-1 text-right font-mono text-[13px] text-primary/70 font-medium hidden md:block">
+              <div role="cell" class="col-span-1 whitespace-nowrap text-right font-mono text-[13px] text-primary/70 font-medium hidden md:block">
                 {{ formatSize(item.file?.size || item.fileSize) }}
               </div>
 
@@ -650,8 +653,8 @@ const formatSize = (bytes?: number) => {
                   <button
                     type="button"
                     class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
-                    aria-label="播放歌曲"
-                    title="播放"
+                    :aria-label="t('downloads.playSong')"
+                    :title="t('downloads.play')"
                     @click.stop="playSingle(item, index)"
                   >
                     <span class="icon-[mdi--play] h-4 w-4"></span>
@@ -659,8 +662,8 @@ const formatSize = (bytes?: number) => {
                   <button
                     type="button"
                     class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
-                    aria-label="导出音频文件"
-                    title="重新导出"
+                    :aria-label="t('downloads.exportAudio')"
+                    :title="t('downloads.reexport')"
                     @click.stop="handleExport(item)"
                   >
                     <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
@@ -668,8 +671,8 @@ const formatSize = (bytes?: number) => {
                   <button
                     type="button"
                     class="flex h-[32px] w-[32px] items-center justify-center rounded-lg text-primary/70 hover:text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
-                    aria-label="从离线库删除"
-                    title="删除"
+                    :aria-label="t('downloads.deleteFromOffline')"
+                    :title="t('common.delete')"
                     @click.stop="openDeleteConfirm(item)"
                   >
                     <span class="icon-[mdi--trash-can-outline] h-4 w-4"></span>
@@ -688,17 +691,17 @@ const formatSize = (bytes?: number) => {
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.04] border border-primary/10">
             <span class="icon-[mdi--text-search] h-7 w-7 text-primary/50"></span>
           </div>
-          <h2 class="text-sm font-semibold text-primary">未找到匹配的音乐</h2>
-          <p class="mt-1 text-xs text-primary/60 font-medium">请尝试更换检索关键词或音质筛选条件</p>
+          <h2 class="text-sm font-semibold text-primary">{{ t('downloads.searchEmptyTitle') }}</h2>
+          <p class="mt-1 text-xs text-primary/60 font-medium">{{ t('downloads.searchEmptyHint') }}</p>
           <Button
             variant="soft"
             size="sm"
             rounded="full"
             class="mt-4 px-4 py-1.5 text-xs font-medium text-primary/80 hover:text-primary"
             @click="resetFilters"
-            aria-label="重置筛选条件"
+            :aria-label="t('downloads.resetFilters')"
           >
-            重置筛选条件
+            {{ t('downloads.resetFilters') }}
           </Button>
         </div>
 
@@ -710,9 +713,9 @@ const formatSize = (bytes?: number) => {
           <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/[0.04] border border-primary/10 shadow-inner">
             <span class="icon-[mdi--tray-arrow-down] h-8 w-8 text-primary/50"></span>
           </div>
-          <h2 class="text-base font-semibold text-primary">暂无离线下载音乐</h2>
+          <h2 class="text-base font-semibold text-primary">{{ t('downloads.emptyTitle') }}</h2>
           <p class="mt-1.5 max-w-xs text-xs text-primary/70 font-medium leading-relaxed">
-            在歌曲列表或播放控制栏点击「下载」，歌曲将持久化保存在本地，离线断网亦可随时收听。
+            {{ t('downloads.emptyHint') }}
           </p>
           <Button
             variant="gradient"
@@ -720,10 +723,10 @@ const formatSize = (bytes?: number) => {
             rounded="full"
             class="mt-6 px-5 py-2.5 text-xs font-semibold shadow-md shadow-sky-500/20"
             @click="router.push('/search')"
-            aria-label="去发现音乐"
+            :aria-label="t('downloads.discover')"
           >
             <span class="icon-[mdi--compass-outline] mr-1.5 h-4 w-4"></span>
-            去发现音乐
+            {{ t('downloads.discover') }}
           </Button>
         </div>
       </div>
@@ -742,7 +745,7 @@ const formatSize = (bytes?: number) => {
         >
           <div
             id="delete-confirm-dialog"
-            class="w-full max-w-sm rounded-2xl border border-white/20 bg-neutral-900 text-accent p-6 shadow-2xl backdrop-blur-md"
+            class="w-full max-w-sm rounded-2xl border border-glass bg-[var(--glass-bg-overlay)] text-primary p-6 shadow-[var(--glass-shadow-xl)] backdrop-blur-md"
             @click.stop
           >
             <div class="flex items-center gap-3">
@@ -750,11 +753,11 @@ const formatSize = (bytes?: number) => {
                 <span class="icon-[mdi--alert-circle-outline] h-5 w-5"></span>
               </div>
               <div>
-                <h3 id="confirm-dialog-title" class="text-base font-semibold text-accent">
-                  {{ isClearAllConfirm ? '清空所有下载？' : '确认删除歌曲？' }}
+                <h3 id="confirm-dialog-title" class="text-base font-semibold text-primary">
+                  {{ isClearAllConfirm ? t('downloads.clearAllTitle') : t('downloads.deleteTitle') }}
                 </h3>
-                <p class="text-xs text-zinc-300 mt-1 font-medium">
-                  {{ isClearAllConfirm ? '此操作将释放所有离线存储空间，无法撤销。' : `将从离线库移除「${itemToDelete?.name || ''}」` }}
+                <p class="text-xs text-primary/70 mt-1 font-medium">
+                  {{ isClearAllConfirm ? t('downloads.clearAllDesc') : t('downloads.deleteDesc', { name: itemToDelete?.name || '' }) }}
                 </p>
               </div>
             </div>
@@ -764,11 +767,11 @@ const formatSize = (bytes?: number) => {
                 variant="soft"
                 size="sm"
                 rounded="xl"
-                class="px-4 py-2 text-xs font-medium text-zinc-300 hover:text-accent hover:bg-white/10"
+                class="px-4 py-2 text-xs font-medium text-primary/70 hover:text-primary hover:bg-hover-glass"
                 @click="closeDeleteModal"
-                aria-label="取消"
+                :aria-label="t('common.cancel')"
               >
-                取消
+                {{ t('common.cancel') }}
               </Button>
               <Button
                 id="confirm-delete-btn"
@@ -777,9 +780,9 @@ const formatSize = (bytes?: number) => {
                 rounded="xl"
                 class="bg-red-500/30 text-red-200 hover:bg-red-500/40 border border-red-500/40 px-4 py-2 text-xs font-semibold"
                 @click="confirmDeleteAction"
-                aria-label="确认删除"
+                :aria-label="t('downloads.confirmDelete')"
               >
-                确认删除
+                {{ t('downloads.confirmDelete') }}
               </Button>
             </div>
           </div>
