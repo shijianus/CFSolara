@@ -470,7 +470,7 @@ watch(
             @focus="handleInputFocus"
             type="text"
             :placeholder="placeholder || $t('common.search.placeholder')"
-            class="search-input min-w-0 flex-1 bg-transparent text-sm outline-none"
+            class="search-input min-h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
           />
           <Button
             v-if="q"

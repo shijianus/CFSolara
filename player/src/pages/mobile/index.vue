@@ -371,6 +371,8 @@ watch(prefersReduced, syncAutoplay)
 .view-more-link {
   display: flex;
   align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
   gap: 0.125rem;
   font-size: 0.75rem;
   color: var(--glass-text-primary);

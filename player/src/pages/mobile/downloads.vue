@@ -199,7 +199,7 @@ const confirmDelete = async () => {
         <button
           v-if="downloads.length > 0"
           @click="playAll"
-          class="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-[var(--glass-text-accent)] shadow-md shadow-sky-500/30 active:scale-95 transition-all"
+          class="flex min-h-11 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-[var(--glass-text-accent)] shadow-md shadow-sky-500/30 active:scale-95 transition-all"
         >
           <span class="icon-[mdi--play] h-4 w-4"></span>
           {{ t('actions.playAll') }}
@@ -212,7 +212,7 @@ const confirmDelete = async () => {
           v-model="searchQuery"
           type="text"
           :placeholder="t('downloads.mobileSearchPlaceholder')"
-          class="w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder:text-primary/40 focus:outline-none focus:border-sky-500/50"
+          class="min-h-11 w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder:text-primary/40 focus:outline-none focus:border-sky-500/50"
         />
         <span class="icon-[mdi--magnify] absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary/40"></span>
       </div>
@@ -221,28 +221,28 @@ const confirmDelete = async () => {
       <div v-if="downloads.length > 0" class="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         <button
           @click="selectedQuality = 'all'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
           :class="selectedQuality === 'all' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
           {{ t('downloads.filterAll') }}
         </button>
         <button
           @click="selectedQuality = 'lossless'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
           :class="selectedQuality === 'lossless' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
           {{ t('downloads.filterLossless') }}
         </button>
         <button
           @click="selectedQuality = 'exhigh'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
           :class="selectedQuality === 'exhigh' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
           {{ t('downloads.filterExhigh') }}
         </button>
         <button
           @click="selectedQuality = 'standard'"
-          class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
+          class="min-h-11 rounded-lg px-3 py-0.5 text-[11px] font-medium transition-all shrink-0"
           :class="selectedQuality === 'standard' ? 'bg-sky-500 text-[var(--glass-text-accent)] font-bold' : 'bg-white/5 text-primary/60'"
         >
           {{ t('downloads.filterStandard') }}
@@ -318,14 +318,14 @@ const confirmDelete = async () => {
           </span>
           <button
             @click.stop="handleExport(item)"
-            class="p-1.5 text-primary/45 hover:text-primary active:scale-90 transition-all"
+            class="flex h-11 w-11 items-center justify-center text-primary/45 hover:text-primary active:scale-90 transition-all"
             :title="t('downloads.exportAudio')"
           >
             <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
           </button>
           <button
             @click.stop="openDeleteConfirm(item)"
-            class="p-1.5 text-primary/40 hover:text-red-400 active:scale-90 transition-all"
+            class="flex h-11 w-11 items-center justify-center text-primary/40 hover:text-red-400 active:scale-90 transition-all"
             :title="t('common.delete')"
           >
             <span class="icon-[mdi--trash-can-outline] h-4 w-4"></span>

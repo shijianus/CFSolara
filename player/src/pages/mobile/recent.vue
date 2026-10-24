@@ -146,7 +146,7 @@ const tabs = computed(() => [
                 {{ t('mobile.recent.nowPlaying') }}
               </p>
               <button
-                class="clear-button flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200"
+                class="clear-button flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200"
                 @click="handleClearQueue"
               >
                 <span class="icon-[mdi--delete-outline] h-4 w-4" />
@@ -189,7 +189,7 @@ const tabs = computed(() => [
                 {{ t('mobile.recent.recentlyPlayed') }}
               </p>
               <button
-                class="play-all-button flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-primary shadow-lg transition-all duration-200 active:scale-95"
+                class="play-all-button flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-primary shadow-lg transition-all duration-200 active:scale-95"
                 @click="playAllRecent"
               >
                 <span class="icon-[mdi--play] h-4 w-4" />
