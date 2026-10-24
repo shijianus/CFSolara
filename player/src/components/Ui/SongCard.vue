@@ -184,9 +184,10 @@ const handleMouseLeave = () => {
 </script>
 
 <template>
-  <div
+  <button
     ref="cardRef"
-    class="song-card group flex cursor-pointer items-center gap-4 rounded-2xl p-3.5 transition-all duration-200 hover:bg-white/10"
+    type="button"
+    class="song-card group flex w-full cursor-pointer items-center gap-4 rounded-2xl p-3.5 text-left transition-all duration-200 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -230,7 +231,7 @@ const handleMouseLeave = () => {
     <span class="text-primary/30 shrink-0 text-xs font-mono">
       {{ formatDurationOrDash(song.duration) }}
     </span>
-  </div>
+  </button>
 </template>
 
 <style scoped>

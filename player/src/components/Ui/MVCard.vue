@@ -23,6 +23,7 @@ const cardRef = ref<HTMLElement | null>(null)
 const overlayRef = ref<HTMLElement | null>(null)
 const isHovering = ref(false)
 const isAnimating = ref(false)
+const resolvedHref = computed(() => router.resolve(props.to).href)
 
 // Tilt 效果配置
 const tiltConfig = {
@@ -176,7 +177,9 @@ const handleMouseLeave = () => {
 }
 
 // 点击动画
-const handleClick = async () => {
+const handleClick = async (event: MouseEvent) => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+  event.preventDefault()
   if (isAnimating.value || !cardRef.value) {
     router.push(props.to)
     return
@@ -313,9 +316,10 @@ const handleClick = async () => {
 </script>
 
 <template>
-  <div
+  <a
     ref="cardRef"
-    class="mv-card group cursor-pointer"
+    :href="resolvedHref"
+    class="mv-card group block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mousemove="handleMouseMove"
     @mouseenter="handleMouseEnter"
@@ -371,7 +375,7 @@ const handleClick = async () => {
         "
       />
     </div>
-  </div>
+  </a>
 </template>
 
 <style scoped>

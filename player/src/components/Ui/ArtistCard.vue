@@ -15,9 +15,12 @@ const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
 const imageRef = ref<HTMLElement | null>(null)
 const isAnimating = ref(false)
+const resolvedHref = computed(() => router.resolve(props.to).href)
 
 // 共享元素飞行动画
-const handleClick = async () => {
+const handleClick = async (event: MouseEvent) => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+  event.preventDefault()
   if (isAnimating.value || !cardRef.value || !imageRef.value) {
     router.push(props.to)
     return
@@ -157,9 +160,10 @@ const handleMouseLeave = () => {
 </script>
 
 <template>
-  <div
+  <a
     ref="cardRef"
-    class="group flex cursor-pointer flex-col items-center"
+    :href="resolvedHref"
+    class="group flex cursor-pointer flex-col items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -187,7 +191,7 @@ const handleMouseLeave = () => {
     >
       {{ name }}
     </span>
-  </div>
+  </a>
 </template>
 
 <style scoped>

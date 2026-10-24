@@ -24,6 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
 const isAnimating = ref(false)
+const resolvedHref = computed(() => router.resolve(props.to).href)
 
 // Tilt 效果相关
 const tiltConfig = {
@@ -70,7 +71,10 @@ onUnmounted(() => {
 })
 
 // Hero 展开动画
-const handleClick = async (_event: MouseEvent) => {
+const handleClick = async (event: MouseEvent) => {
+  // 保留 Ctrl/Cmd/中键在新标签页打开的原生行为
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+  event.preventDefault()
   if (isAnimating.value || !cardRef.value) {
     router.push(props.to)
     return
@@ -280,9 +284,10 @@ const handleMouseLeave = () => {
 </script>
 
 <template>
-  <div
+  <a
     ref="cardRef"
-    class="hero-card group cursor-pointer"
+    :href="resolvedHref"
+    class="hero-card group block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mousemove="handleMouseMove"
     @mouseenter="handleMouseEnter"
@@ -333,7 +338,7 @@ const handleMouseLeave = () => {
         </div>
       </div>
     </div>
-  </div>
+  </a>
 </template>
 
 <style scoped>
