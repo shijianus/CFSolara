@@ -23,7 +23,7 @@ const openPlayerDrawer = () => {
     <main
       :inert="isDrawerOpen || undefined"
       :aria-hidden="isDrawerOpen || undefined"
-      class="flex flex-1 flex-col pt-3"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden pt-3"
       style="
         padding-bottom: calc(
           var(--mobile-tabbar-h, 56px) + 12px + var(--mobile-miniplayer-h, 0px) +
