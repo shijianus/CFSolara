@@ -206,7 +206,7 @@ const maxScore = computed(() => {
             <div v-if="total > 0" class="flex items-center gap-2">
               <div class="flex items-center gap-1 rounded-xl bg-white/5 p-1">
                 <button
-                  class="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg transition-all"
                   :class="
                     page > 1 ? 'text-primary hover:bg-white/10' : 'text-primary/30 cursor-not-allowed'
                   "
@@ -220,7 +220,7 @@ const maxScore = computed(() => {
                   {{ page }} / {{ Math.ceil(total / pageSize) || 1 }}
                 </span>
                 <button
-                  class="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg transition-all"
                   :class="
                     page < Math.ceil(total / pageSize)
                       ? 'text-primary hover:bg-white/10'
@@ -318,7 +318,7 @@ const maxScore = computed(() => {
               </Transition>
               <!-- 搜索按钮 -->
               <button
-                class="search-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full px-5 text-xs font-semibold text-white transition-all duration-300 active:scale-95"
+                class="search-btn flex h-11 shrink-0 items-center gap-1.5 rounded-full px-5 text-xs font-semibold text-white transition-all duration-300 active:scale-95"
                 @click="handleSubmit"
               >
                 <span class="icon-[mdi--magnify] h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ const maxScore = computed(() => {
               <span class="text-primary/60 text-xs font-bold uppercase tracking-wider">{{ $t('search.recentSearches') }}</span>
             </div>
             <button
-              class="text-primary/40 hover:text-primary/70 text-xs font-medium transition-colors"
+              class="text-primary/40 hover:text-primary/70 flex min-h-11 min-w-11 items-center justify-center px-1 text-xs font-medium transition-colors"
               @click="clearHistory"
             >
               {{ $t('common.clear') }}

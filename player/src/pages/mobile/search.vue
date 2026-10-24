@@ -458,8 +458,8 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col overflow-hidden">
-    <div class="shrink-0 px-4 pb-3">
+  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div class="mobile-search-top shrink-0 px-4 pb-3">
       <div ref="searchBoxRef" class="relative">
         <div class="glass-card flex items-center gap-2 px-3 py-2.5">
           <span class="icon-[mdi--magnify] search-icon h-5 w-5 shrink-0"></span>
@@ -476,7 +476,7 @@ watch(
             v-if="q"
             variant="ghost"
             size="none"
-            class="clear-btn flex h-11 w-11 items-center justify-center rounded-full transition-all"
+            class="clear-btn flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all"
             icon="icon-[mdi--close-circle]"
             icon-class="h-4 w-4"
             :title="$t('common.clear')"
@@ -519,7 +519,7 @@ watch(
         </Transition>
       </div>
 
-      <div v-if="hasSearched" class="glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
+      <div v-if="hasSearched" class="mobile-search-tabs glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
         <Button
           v-for="tabItem in tabs"
           :key="tabItem.key"
@@ -548,7 +548,7 @@ watch(
           </div>
           <button
             type="button"
-            class="text-primary/40 hover:text-primary/70 min-h-11 px-2 text-xs font-medium transition-colors"
+            class="text-primary/40 hover:text-primary/70 flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-medium transition-colors"
             @click="globalStore.clearSearchHistory()"
           >
             {{ $t('common.clear') }}
@@ -558,11 +558,11 @@ watch(
           <div
             v-for="keyword in searchHistory"
             :key="keyword"
-            class="history-chip flex min-h-11 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-colors"
+            class="history-chip flex min-h-12 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-colors"
           >
             <button
               type="button"
-              class="flex min-h-11 min-w-0 items-center gap-1.5 pr-1 pl-3.5 text-xs font-medium"
+              class="flex min-h-12 min-w-0 items-center gap-1.5 pr-1 pl-3.5 text-xs font-medium"
               @click="runSearch(keyword)"
             >
               <span class="icon-[mdi--history] size-3.5 shrink-0 text-primary/40"></span>
@@ -570,7 +570,7 @@ watch(
             </button>
             <button
               type="button"
-              class="text-primary/40 hover:text-primary/80 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors"
+              class="text-primary/40 hover:text-primary/80 flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors"
               :aria-label="$t('search.removeHistory', { keyword })"
               :title="$t('common.delete')"
               @click="globalStore.removeSearchHistory(keyword)"
@@ -651,15 +651,15 @@ watch(
       >
         <!-- Songs Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
-            <div v-if="songs.length > 0" class="flex items-center justify-between py-2">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
+            <div v-if="songs.length > 0" class="search-results-summary flex items-center justify-between py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: songTotal }) }}
               </p>
               <Button
                 variant="gradient"
                 size="none"
-                class="play-all-button text-white flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium shadow-lg transition-all duration-200 active:scale-95"
+                class="play-all-button flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-white shadow-lg transition-all duration-200 active:scale-95"
                 icon="icon-[mdi--play]"
                 icon-class="h-4 w-4"
                 @click="playAllSongs"
@@ -691,7 +691,7 @@ watch(
 
         <!-- Playlists Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
             <div v-if="playlists.length > 0" class="py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: playlistTotal }) }}
@@ -751,7 +751,7 @@ watch(
 
         <!-- MVs Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
             <div v-if="mvs.length > 0" class="py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: mvTotal }) }}
@@ -815,6 +815,36 @@ watch(
 </template>
 
 <style scoped>
+/* 横屏手机高度有限：搜索框与结果 Tab 同排，给结果区保留可滚动高度 */
+@media (max-height: 500px) {
+  .mobile-search-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .mobile-search-top > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-search-tabs {
+    width: auto;
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+
+  .mobile-search-tabs .tab-button {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .search-results-summary {
+    display: none;
+  }
+}
+
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;
@@ -865,7 +895,7 @@ watch(
 
 .suggest-title {
   color: var(--glass-text-primary);
-  opacity: 0.4;
+  opacity: 0.7;
 }
 
 .suggest-tag {
@@ -881,7 +911,7 @@ watch(
 
 .tab-button {
   color: var(--glass-text-primary);
-  opacity: 0.6;
+  opacity: 0.78;
 }
 
 .tab-button-active {
@@ -893,7 +923,7 @@ watch(
 
 .info-text {
   color: var(--glass-text-primary);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .play-all-button {
