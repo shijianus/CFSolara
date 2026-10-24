@@ -405,6 +405,8 @@ const tabsWithCount = computed(() =>
             <img
               :src="formatCoverUrl(playlistInfo.coverImgUrl, { size: 100 })"
               class="h-full w-full scale-150 object-cover opacity-30 blur-3xl"
+              alt=""
+              aria-hidden="true"
               referrerpolicy="no-referrer"
             />
             <div
@@ -432,6 +434,8 @@ const tabsWithCount = computed(() =>
                     variant="ghost"
                     size="none"
                     class="absolute! inset-0 flex items-center justify-center rounded-3xl opacity-0 transition-all duration-300 group-hover:opacity-100"
+                    :aria-label="$t('actions.playAll')"
+                    :title="$t('actions.playAll')"
                     @click="handlePlayAll"
                   >
                     <div
@@ -457,6 +461,7 @@ const tabsWithCount = computed(() =>
                       v-if="playlistInfo.creatorAvatar"
                       :src="formatCoverUrl(playlistInfo.creatorAvatar, { size: 80 })"
                       class="h-8 w-8 rounded-full ring-2 ring-glass"
+                      :alt="playlistInfo.creator"
                       referrerpolicy="no-referrer"
                     />
                     <span class="text-primary font-medium">{{ playlistInfo.creator }}</span>

@@ -250,8 +250,12 @@ const toggleCollect = () => {
 
           <div
             v-if="state.info.description"
-            class="desc-section mt-4"
+            class="desc-section mt-4 min-h-11"
+            role="button"
+            tabindex="0"
             @click="state.showFullDesc = !state.showFullDesc"
+            @keydown.enter.prevent="state.showFullDesc = !state.showFullDesc"
+            @keydown.space.prevent="state.showFullDesc = !state.showFullDesc"
           >
             <p
               class="text-xs leading-relaxed text-accent/60"
@@ -301,6 +305,8 @@ const toggleCollect = () => {
           :class="state.collected ? 'collected' : ''"
           :icon="state.collected ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
           icon-class="h-5 w-5"
+          :aria-label="state.collected ? t('common.uncollect') : t('common.collect')"
+          :title="state.collected ? t('common.uncollect') : t('common.collect')"
           @click="toggleCollect"
         />
         <Button
@@ -310,6 +316,8 @@ const toggleCollect = () => {
           class="comment-btn"
           icon="icon-[mdi--message-processing-outline]"
           icon-class="h-5 w-5"
+          :aria-label="t('player.comments')"
+          :title="t('player.comments')"
           @click="state.showComments = true"
         />
         <PlaylistCommentsPopup
@@ -338,7 +346,7 @@ const toggleCollect = () => {
           </div>
           <MobileSongList :songs="state.songs" :show-index="true" />
           <div class="mt-3 flex flex-col items-center gap-2 pb-2">
-            <p v-if="state.songTotal" class="text-[11px] text-primary/50">
+            <p v-if="state.songTotal" class="text-[11px] text-primary/70">
               {{ t('playlist.loadedProgress', { loaded: state.songs.length, total: state.songTotal }) }}
             </p>
             <Button

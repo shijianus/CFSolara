@@ -110,12 +110,12 @@ const previewStyle = computed(() => {
           <label class="mb-2 block text-sm text-primary/80">{{ t('components.background.ultimate.background') }}</label>
           <div class="grid grid-cols-2 gap-3">
             <div class="space-y-2">
-              <input v-model="bg1" type="color" class="h-9 w-full rounded" />
-              <input v-model="bg1" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="bg1" type="color" :aria-label="t('components.background.ultimate.background1')" class="h-9 w-full rounded" />
+              <input v-model="bg1" type="text" :aria-label="t('components.background.ultimate.background1')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="bg2" type="color" class="h-9 w-full rounded" />
-              <input v-model="bg2" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="bg2" type="color" :aria-label="t('components.background.ultimate.background2')" class="h-9 w-full rounded" />
+              <input v-model="bg2" type="text" :aria-label="t('components.background.ultimate.background2')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
           </div>
         </div>
@@ -124,28 +124,28 @@ const previewStyle = computed(() => {
           <label class="mb-2 block text-sm text-primary/80">{{ t('components.background.ultimate.colors') }}</label>
           <div class="grid grid-cols-3 gap-3">
             <div class="space-y-2">
-              <input v-model="color1" type="color" class="h-9 w-full rounded" />
-              <input v-model="color1" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="color1" type="color" :aria-label="t('components.background.common.color1')" class="h-9 w-full rounded" />
+              <input v-model="color1" type="text" :aria-label="t('components.background.common.color1')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="color2" type="color" class="h-9 w-full rounded" />
-              <input v-model="color2" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="color2" type="color" :aria-label="t('components.background.common.color2')" class="h-9 w-full rounded" />
+              <input v-model="color2" type="text" :aria-label="t('components.background.common.color2')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="color3" type="color" class="h-9 w-full rounded" />
-              <input v-model="color3" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="color3" type="color" :aria-label="t('components.background.common.color3')" class="h-9 w-full rounded" />
+              <input v-model="color3" type="text" :aria-label="t('components.background.common.color3')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="color4" type="color" class="h-9 w-full rounded" />
-              <input v-model="color4" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="color4" type="color" :aria-label="t('components.background.ultimate.color4')" class="h-9 w-full rounded" />
+              <input v-model="color4" type="text" :aria-label="t('components.background.ultimate.color4')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="color5" type="color" class="h-9 w-full rounded" />
-              <input v-model="color5" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="color5" type="color" :aria-label="t('components.background.ultimate.color5')" class="h-9 w-full rounded" />
+              <input v-model="color5" type="text" :aria-label="t('components.background.ultimate.color5')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="space-y-2">
-              <input v-model="interactiveColor" type="color" class="h-9 w-full rounded" />
-              <input v-model="interactiveColor" type="text" class="w-full rounded bg-white/10 p-2 text-primary" />
+              <input v-model="interactiveColor" type="color" :aria-label="t('components.background.ultimate.interactiveColor')" class="h-9 w-full rounded" />
+              <input v-model="interactiveColor" type="text" :aria-label="t('components.background.ultimate.interactiveColor')" class="w-full rounded bg-white/10 p-2 text-primary" />
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@ const previewStyle = computed(() => {
           <div class="space-y-3">
             <div class="flex items-center gap-3">
               <span class="w-24 text-xs text-primary/70">{{ t('components.background.ultimate.circleSize') }}</span>
-              <input v-model="circleSize" type="text" class="w-24 rounded bg-white/10 p-2 text-primary" />
+              <input v-model="circleSize" type="text" :aria-label="t('components.background.ultimate.circleSize')" class="w-24 rounded bg-white/10 p-2 text-primary" />
             </div>
             <div class="flex items-center gap-3">
               <span class="w-24 text-xs text-primary/70">{{ t('components.background.ultimate.blending') }}</span>
