@@ -14,8 +14,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-TUNNEL_BACKUP="${REPO_ROOT}/rollback-backups/rollback-sonic-tunnel-config.json"
-DNS_BACKUP="${REPO_ROOT}/rollback-backups/rollback-epocanvas-tech-dns.json"
+BACKUP_DIR="${REPO_ROOT}/rollback-backups"
+TUNNEL_BACKUP="${TUNNEL_BACKUP:-$(ls "${BACKUP_DIR}"/*tunnel*.json 2>/dev/null | head -n 1 || true)}"
+DNS_BACKUP="${DNS_BACKUP:-$(ls "${BACKUP_DIR}"/*dns*.json 2>/dev/null | head -n 1 || true)}"
 
 MODE="dry-run"
 if [[ "${1:-}" == "--execute" ]]; then
