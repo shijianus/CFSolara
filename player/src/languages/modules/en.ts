@@ -27,6 +27,8 @@ export default {
     share: 'Share',
     collect: 'Favorite',
     uncollect: 'Unfavorite',
+    like: 'Like',
+    unlike: 'Unlike',
     me: 'Me',
     justNow: 'Just now',
     minutesAgo: 'm ago',
@@ -193,6 +195,7 @@ export default {
       myMusic: 'My Music',
       system: 'System',
       playlists: { created: 'Created Playlists' },
+      collectedPlaylists: 'Collected Playlists',
       menu: {
         home: 'Home',
         mv: 'MV',
@@ -332,6 +335,9 @@ export default {
       mv: 'MVs',
     },
     empty: 'No liked songs yet',
+    emptyAll: 'Nothing here yet. Like songs, collect playlists or MVs to see them here',
+    emptyPlaylist: 'No collected playlists yet',
+    emptyMv: 'No liked MVs yet',
   },
   recent: {
     title: 'Recently Played',

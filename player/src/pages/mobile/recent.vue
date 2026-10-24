@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useAudio } from '@/composables/useAudio'
 import type { Song as StoreSong } from '@/stores/interface'
 import MobileSongList from '@/components/Mobile/MobileSongList.vue'
+import { useLibraryStore } from '@/stores/modules/library'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
@@ -24,6 +25,8 @@ const creativeEffect = {
 
 const { t } = useI18n()
 const { setPlaylist, play, playlist, clearPlaylist } = useAudio()
+const libraryStore = useLibraryStore()
+const likedCount = computed(() => libraryStore.likedSongCount)
 
 const state = reactive({
   activeTab: 0,
@@ -77,6 +80,25 @@ const tabs = computed(() => [
 
 <template>
   <div class="flex flex-1 flex-col overflow-hidden">
+    <!-- 我喜欢的音乐入口 -->
+    <div class="shrink-0 px-4 pt-1 pb-2">
+      <router-link
+        to="/likes"
+        class="glass-card flex min-h-[52px] w-full items-center gap-3 px-4 py-2 transition-all duration-200 active:scale-[0.98]"
+      >
+        <span
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600"
+        >
+          <span class="icon-[mdi--heart] text-glass-contrast h-5 w-5"></span>
+        </span>
+        <span class="text-primary flex-1 text-left text-sm font-medium">
+          {{ t('likes.title') }}
+        </span>
+        <span v-if="likedCount > 0" class="text-primary/60 text-xs">{{ likedCount }}</span>
+        <span class="icon-[mdi--chevron-right] text-primary/40 h-5 w-5"></span>
+      </router-link>
+    </div>
+
     <div class="shrink-0 px-4 pb-3">
       <div class="glass-card inline-flex w-full gap-1.5 p-1.5">
         <button

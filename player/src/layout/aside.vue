@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/modules/user'
 import { useGlobalStore } from '@/stores/modules/global'
+import { useLibraryStore } from '@/stores/modules/library'
 import { storeToRefs } from 'pinia'
 import { gsap } from 'gsap'
 import {
@@ -48,6 +48,7 @@ const sections = [
   {
     titleKey: 'layout.aside.myMusic',
     items: [
+      { to: '/likes', labelKey: 'layout.aside.menu.likes', icon: 'mdi--heart-outline' },
       { to: '/my-music', labelKey: 'layout.aside.menu.recent', icon: 'mdi--music-box-multiple' },
       {
         to: '/downloads',
@@ -67,17 +68,9 @@ const sections = [
   },
 ]
 
-const state = reactive({
-  // 用户创建的歌单列表
-  userPlaylists: [
-    { id: 1, name: '我喜欢的音乐' },
-    { id: 2, name: '华语流行' },
-    { id: 3, name: '二次元音乐' },
-    { id: 4, name: '轻音乐' },
-  ],
-})
-const { userPlaylists } = toRefs(state)
-const userStore = useUserStore()
+// 收藏歌单（本地 library store，持久化）
+const libraryStore = useLibraryStore()
+const collectedPlaylists = computed(() => libraryStore.collectedPlaylists)
 
 // 活动指示器相关
 const indicatorRef = ref<HTMLElement | null>(null)
@@ -118,6 +111,7 @@ const routeChunkLoaders: Record<string, () => Promise<any>> = {
   '/new-albums': () => import('@/pages/new-albums.vue'),
   '/search': () => import('@/pages/search.vue'),
   '/my-music': () => import('@/pages/my-music.vue'),
+  '/likes': () => import('@/pages/likes.vue'),
   '/downloads': () => import('@/pages/downloads.vue'),
   '/local-music': () => import('@/pages/local-music.vue'),
   '/settings': () => import('@/pages/settings.vue'),
@@ -272,6 +266,31 @@ const isActive = (path: string) => {
                     ]"
                   ></span>
                   <span>{{ $t(item.labelKey) }}</span>
+                </router-link>
+              </nav>
+            </div>
+
+            <!-- 收藏的歌单（本地持久化） -->
+            <div v-if="collectedPlaylists.length" class="mb-4">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+                {{ $t('layout.aside.collectedPlaylists') }}
+              </h3>
+              <nav class="relative space-y-0.5">
+                <router-link
+                  v-for="pl in collectedPlaylists"
+                  :key="pl.id"
+                  :to="`/playlist/${pl.id}`"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  :class="{
+                    'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
+                    'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
+                  }"
+                >
+                  <span
+                    class="h-4.5 w-4.5 shrink-0 text-[#2563eb]"
+                    :class="isActive(`/playlist/${pl.id}`) ? 'icon-[mdi--playlist-music] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110' : 'icon-[mdi--playlist-music]'"
+                  ></span>
+                  <span class="truncate">{{ pl.name }}</span>
                 </router-link>
               </nav>
             </div>

@@ -7,16 +7,17 @@ import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 import {
   transformAlbumDetail,
-  transformSongs,
   extractArray,
   type SongData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const albumId = computed(() => Number(route.params.id))
+const libraryStore = useLibraryStore()
 
 type AlbumInfo = {
   name: string
@@ -58,6 +59,7 @@ const load = async (id: number) => {
         songCount: album.size || songs.length || 0,
         coverImgUrl: album.picUrl,
       }
+      state.collected = libraryStore.isAlbumCollected(id)
     }
 
     if (Array.isArray(songs) && songs.length) {
@@ -99,7 +101,15 @@ const playAll = () => playAllAction(state.songs)
 const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
-  state.collected = !state.collected
+  if (!albumId.value) return
+  state.collected = libraryStore.toggleCollectAlbum({
+    id: albumId.value,
+    name: state.info.name,
+    picUrl: state.info.coverImgUrl,
+    artist: state.info.artist,
+    artistId: state.info.artistId,
+    trackCount: state.info.songCount,
+  })
 }
 
 const goToArtist = () => {

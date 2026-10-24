@@ -27,6 +27,8 @@ export default {
     share: 'シェア',
     collect: 'お気に入り',
     uncollect: 'お気に入り解除',
+    like: 'いいね',
+    unlike: 'いいね解除',
     me: '私',
     justNow: 'たった今',
     minutesAgo: '分前',
@@ -191,6 +193,7 @@ export default {
       myMusic: 'マイミュージック',
       system: 'システム',
       playlists: { created: '作成したプレイリスト' },
+      collectedPlaylists: 'コレクションしたプレイリスト',
       menu: {
         home: 'ホーム',
         mv: 'MV',
@@ -330,6 +333,9 @@ export default {
       mv: 'MV',
     },
     empty: 'お気に入りの曲はまだありません',
+    emptyAll: 'まだ何もありません。曲・プレイリスト・MVをいいねするとここに表示されます',
+    emptyPlaylist: 'コレクションしたプレイリストはまだありません',
+    emptyMv: 'いいねしたMVはまだありません',
   },
   recent: {
     title: '最近の再生',

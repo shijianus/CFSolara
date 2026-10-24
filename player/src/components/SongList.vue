@@ -5,10 +5,10 @@ import type { Song } from '@/stores/interface'
 import { formatDurationOrDash } from '@/utils/time'
 import { RouterLink, useRouter } from 'vue-router'
 import LazyImage from '@/components/Ui/LazyImage.vue'
-import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useDownloadStore } from '@/stores/modules/download'
+import { useLibraryStore } from '@/stores/modules/library'
 
 interface Props {
   songs: Song[]
@@ -84,13 +84,6 @@ const playSongWithAnimation = async (song: Song, index: number, event?: MouseEve
   } catch {}
 }
 
-const playSong = async (song: Song, index: number) => {
-  await playSongWithAnimation(song, index)
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _playSong = playSong // 保留以备将来使用
-
 const isCurrent = (s: Song) => {
   const cur = currentSong.value
   if (!cur) return false
@@ -107,6 +100,13 @@ const openMV = (song: Song, index: number) => {
 }
 
 const downloadStore = useDownloadStore()
+const libraryStore = useLibraryStore()
+
+const isLiked = (song: Song) => libraryStore.isSongLiked(song.id)
+
+const toggleLike = (song: Song) => {
+  libraryStore.toggleLikeSong(song)
+}
 
 const downloadSong = (song: Song, index: number) => {
   emit('download', song, index)
@@ -425,6 +425,17 @@ const getQualityBadgeInfo = (song: Song) => {
                   @click.stop="router.push(`/song/${song.id}`)"
                 >
                   <span class="icon-[mdi--information-outline] h-4 w-4"></span>
+                </button>
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-primary/70 hover:text-red-400 hover:bg-hover-glass transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  :title="isLiked(song) ? t('common.unlike') : t('common.like')"
+                  @click.stop="toggleLike(song)"
+                >
+                  <span
+                    :class="isLiked(song) ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
+                    class="h-4 w-4"
+                  ></span>
                 </button>
                 <button
                   type="button"

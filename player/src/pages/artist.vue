@@ -12,10 +12,12 @@ import {
   type AlbumData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const route = useRoute()
 const router = useRouter()
 const artistId = computed(() => Number(route.params.id))
+const libraryStore = useLibraryStore()
 
 type ArtistInfo = {
   id: number
@@ -67,7 +69,7 @@ const load = async (id: number) => {
         followed: raw?.followed || false,
         fansCount: raw?.fansCnt || 0,
       }
-      state.followed = state.info.followed
+      state.followed = libraryStore.isArtistFollowed(artist.id) || state.info.followed
     }
 
     state.songs = transformSongs(songsRes as Record<string, unknown>, 50)
@@ -92,7 +94,12 @@ const playAll = () => playAllAction(state.songs)
 const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleFollow = () => {
-  state.followed = !state.followed
+  if (!state.info.id) return
+  state.followed = libraryStore.toggleFollowArtist({
+    id: state.info.id,
+    name: state.info.name,
+    picUrl: state.info.picUrl,
+  })
 }
 
 const tabs = computed(() => [
@@ -318,7 +325,7 @@ const tabs = computed(() => [
                 </div>
                 <p class="truncate text-sm font-medium">{{ al.name }}</p>
                 <p class="text-primary/50 mt-1 truncate text-xs">
-                  {{ al.publishTime }} · {{ $t('commonUnits.songsShort', al.size) }}
+                  {{ al.publishTime }} · {{ $t('commonUnits.songsShort', { count: al.size || 0 }) }}
                 </p>
               </div>
             </div>

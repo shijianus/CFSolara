@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { playlistDetail, playlistTrackAll, commentNew, search } from '@/api'
 import { usePlayActions } from '@/composables/usePlayActions'
-import { PlaylistInfo, PlaylistSong, CommentItem } from '@/typings'
+import { PlaylistInfo, CommentItem } from '@/typings'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
@@ -13,12 +13,13 @@ import {
   transformSongs,
   transformSearchPlaylists,
   type SongData,
-  type PlaylistData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const route = useRoute()
 const playlistId = route.params.id
+const libraryStore = useLibraryStore()
 
 interface SimilarPlaylist {
   id: number | string
@@ -74,8 +75,6 @@ const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayAction
 const { t } = useI18n()
 
 const gradients: string[] = ['from-blue-500 to-sky-500']
-const emojis: string[] = ['🎵', '🎶', '♪', '♫', '🎼']
-
 const pickGradient = (): string => gradients[Math.floor(Math.random() * gradients.length)]
 
 const loadPlaylist = async (id: number) => {
@@ -101,6 +100,7 @@ const loadPlaylist = async (id: number) => {
         gradient: pickGradient(),
         coverImgUrl: detail.coverImgUrl,
       }
+      state.isCollected = libraryStore.isPlaylistCollected(id)
     }
 
     state.songs = transformSongs(tracksRes as Record<string, unknown>, 100)
@@ -232,7 +232,16 @@ const playAll = () => playAllAction(state.songs)
 const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
-  state.isCollected = !state.isCollected
+  if (!state.playlistInfo) return
+  const collected = libraryStore.toggleCollectPlaylist({
+    id: Number(playlistId),
+    name: state.playlistInfo.name,
+    coverImgUrl: state.playlistInfo.coverImgUrl,
+    trackCount: state.playlistInfo.songCount,
+    creator: state.playlistInfo.creator,
+    playCount: state.playlistInfo.playCount,
+  })
+  state.isCollected = collected
 }
 
 const sharePlaylist = async () => {
@@ -630,7 +639,7 @@ const tabsWithCount = computed(() =>
                     {{ pl.name }}
                   </p>
                   <p class="text-primary/60 text-xs">
-                    {{ $t('commonUnits.songsShort', pl.trackCount) }}
+                    {{ $t('commonUnits.songsShort', { count: pl.trackCount || 0 }) }}
                     <span v-if="pl.creator"> • {{ pl.creator.nickname }}</span>
                   </p>
                 </div>

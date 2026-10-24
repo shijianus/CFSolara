@@ -2,9 +2,11 @@
 import { songDetail, lyric } from '@/api'
 import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 import { normalizeDurationMs } from '@/utils/transformers'
 
 const route = useRoute()
+const libraryStore = useLibraryStore()
 
 const state = reactive({
   id: String(route.params.id || ''),
@@ -15,7 +17,6 @@ const state = reactive({
   cover: '',
   lrc: [] as Array<{ time: number; text: string }>,
   loading: true,
-  liked: false,
 })
 
 const { play, setPlaylist, currentSong, isPlaying } = useAudio()
@@ -68,7 +69,7 @@ const playCurrent = () => {
     // Song.duration 统一毫秒
     duration: state.duration,
     cover: state.cover,
-    liked: state.liked,
+    liked: libraryStore.isSongLiked(state.id),
   }
   if (currentSong.value && String(currentSong.value.id) === String(state.id) && isPlaying.value) {
     return
@@ -77,8 +78,17 @@ const playCurrent = () => {
   play(s, 0)
 }
 
+const isLiked = computed(() => libraryStore.isSongLiked(state.id))
+
 const toggleLike = () => {
-  state.liked = !state.liked
+  libraryStore.toggleLikeSong({
+    id: state.id,
+    name: state.name,
+    artist: state.artist,
+    album: state.album,
+    duration: state.duration,
+    cover: state.cover,
+  })
 }
 </script>
 
@@ -122,7 +132,7 @@ const toggleLike = () => {
               @click="toggleLike"
             >
               <span
-                :class="state.liked ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
+                :class="isLiked ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
                 class="h-4 w-4"
               ></span>
             </button>

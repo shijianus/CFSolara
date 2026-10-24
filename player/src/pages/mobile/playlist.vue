@@ -12,8 +12,10 @@ import {
   type SongData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const { t } = useI18n()
+const libraryStore = useLibraryStore()
 
 type PlaylistInfo = {
   name: string
@@ -59,6 +61,7 @@ const load = async (id: number) => {
         playCount: formatCount(detail.playCount as number),
         likes: formatCount(detail.likes as number),
       }
+      state.collected = libraryStore.isPlaylistCollected(id)
     }
 
     state.songs = transformSongs(tracksRes as Record<string, unknown>)
@@ -84,7 +87,15 @@ const playAll = () => playAllAction(state.songs)
 const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
-  state.collected = !state.collected
+  if (!playlistId.value) return
+  state.collected = libraryStore.toggleCollectPlaylist({
+    id: playlistId.value,
+    name: state.info.name,
+    coverImgUrl: state.info.coverImgUrl,
+    trackCount: state.info.songCount,
+    creator: state.info.creator,
+    playCount: state.info.playCount,
+  })
 }
 </script>
 

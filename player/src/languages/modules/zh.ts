@@ -23,6 +23,8 @@ export default {
     share: '分享',
     collect: '收藏',
     uncollect: '取消收藏',
+    like: '喜欢',
+    unlike: '取消喜欢',
     me: '我',
     justNow: '刚刚',
     minutesAgo: '分钟前',
@@ -183,6 +185,7 @@ export default {
       myMusic: '我的音乐',
       system: '系统',
       playlists: { created: '创建的歌单' },
+      collectedPlaylists: '收藏的歌单',
       menu: {
         home: '首页',
         mv: 'MV',
@@ -321,6 +324,9 @@ export default {
       mv: 'MV',
     },
     empty: '暂无喜欢的歌曲',
+    emptyAll: '还没有喜欢的内容，喜欢歌曲、收藏歌单或点赞 MV 后会显示在这里',
+    emptyPlaylist: '暂无收藏的歌单',
+    emptyMv: '暂无喜欢的 MV',
   },
   recent: {
     title: '最近播放',
