@@ -132,6 +132,11 @@ const DISPLAY_BRAND_ALLOWLIST = [
   'functions/_lib/sonic/index.ts',
   'functions/_lib/sonic/utils.ts',
   'functions/_lib/sonic/upstream.ts',
+  'functions/_lib/sonic/cache.ts',
+  'functions/_lib/sonic/crypto.ts',
+  'functions/_lib/sonic/local-engine.ts',
+  'functions/_lib/sonic/native-protocols.ts',
+  'functions/_lib/sonic/security.ts',
   'functions/_lib/auth.ts',
   'functions/_lib/http.ts',
   'functions/_lib/types.ts',
@@ -141,6 +146,8 @@ const DISPLAY_BRAND_ALLOWLIST = [
   'functions/api/index.ts',
   'functions/api/auth/key.ts',
   'functions/api/auth/callback.ts',
+  'server/index.ts',
+  'reports/',
   'scripts/',
 ]
 
