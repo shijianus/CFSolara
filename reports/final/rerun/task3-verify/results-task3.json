@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-10-24T17:43:54.668Z",
+  "results": [
+    {
+      "id": "UI-028",
+      "result": "通过",
+      "detail": "抽屉打开=true;喜欢写入=true;加入歌单(新建+写入)=true/true;下载弹窗打开=true",
+      "shots": [
+        "ui028-drawer-like.png",
+        "ui028-add-to-playlist-dialog.png",
+        "ui028-added-to-playlist.png",
+        "ui028-drawer-download-dialog.png"
+      ]
+    },
+    {
+      "id": "UI-033",
+      "result": "通过",
+      "detail": "点击播放图标发起歌单曲目请求=true;队列 100 首(mock limit=100);audio.src 已设置=true",
+      "shots": [
+        "ui033-playlist-card-playing.png"
+      ]
+    },
+    {
+      "id": "UI-065",
+      "result": "通过",
+      "detail": "GlassSelect 裁切=false;页脚歌名裁切=false;下载选项行 3 个、裁切 0 个",
+      "shots": [
+        "ui065-glassselect-200.png",
+        "ui065-footer-200.png",
+        "ui065-download-options-200.png"
+      ]
+    }
+  ]
+}

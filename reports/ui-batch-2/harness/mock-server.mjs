@@ -376,8 +376,17 @@ const server = http.createServer((req, res) => {
     if (type === 1000) {
       ok(res, {
         result: {
-          playlists: [],
-          playlistCount: 0,
+          playlists: [
+            {
+              id: 1,
+              name: '补验歌单搜索结果',
+              coverImgUrl: '/media/cover.svg',
+              trackCount: 130,
+              playCount: 8888,
+              creator: { nickname: 'Sonic 测试' },
+            },
+          ],
+          playlistCount: 1,
         },
       })
       return

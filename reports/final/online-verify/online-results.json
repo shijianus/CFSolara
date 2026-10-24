@@ -1,0 +1,234 @@
+{
+  "timestamp": "2026-10-24T17:58:56.177Z",
+  "axe": [
+    {
+      "route": "/",
+      "serious": 0,
+      "critical": 1,
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "nodes": 3,
+          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
+        },
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "nodes": 1,
+          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+        }
+      ]
+    },
+    {
+      "route": "/playlist/1",
+      "serious": 0,
+      "critical": 1,
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "nodes": 3,
+          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
+        },
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "nodes": 1,
+          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+        }
+      ]
+    },
+    {
+      "route": "/settings",
+      "serious": 0,
+      "critical": 1,
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "nodes": 3,
+          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
+        },
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "nodes": 1,
+          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+        }
+      ]
+    }
+  ],
+  "dom": [
+    {
+      "viewport": "1440x900",
+      "route": "/",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "1440x900",
+      "route": "/playlist/1",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "1440x900",
+      "route": "/search?q=test",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "1440x900",
+      "route": "/artists",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "1440x900",
+      "route": "/settings",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "820x700",
+      "route": "/",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "820x700",
+      "route": "/playlist/1",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "820x700",
+      "route": "/search?q=test",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "820x700",
+      "route": "/artists",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "820x700",
+      "route": "/settings",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "844x390",
+      "route": "/",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "844x390",
+      "route": "/playlist/1",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "844x390",
+      "route": "/search?q=test",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "844x390",
+      "route": "/artists",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "844x390",
+      "route": "/settings",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "390x844",
+      "route": "/",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "390x844",
+      "route": "/playlist/1",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "390x844",
+      "route": "/search?q=test",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "390x844",
+      "route": "/artists",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    },
+    {
+      "viewport": "390x844",
+      "route": "/settings",
+      "rendered": true,
+      "hOverflow": false,
+      "interactiveRows": 0,
+      "consoleErrors": []
+    }
+  ],
+  "privacy": {
+    "appLen": 0,
+    "bodyText": "",
+    "hasFatalText": false,
+    "songRows": 0,
+    "canInteract": false,
+    "consoleErrors": [
+      "SecurityError: Access is denied for this document."
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-24T17:23:02.710Z",
+  "results": [
+    {
+      "id": "UI-009",
+      "method": "mock 曲目 999999:HQ 极高(320)档必 403,底栏切音质",
+      "result": "通过",
+      "detail": "toast=\"音质切换失败，已恢复原音质\";src 仍 br=128=true;菜单保持打开=true",
+      "shots": [
+        "ui009-quality-rollback.png"
+      ]
+    },
+    {
+      "id": "UI-011",
+      "method": "真实点击 收藏/关注/喜欢 后刷新",
+      "result": "通过",
+      "detail": "收藏点击=true;刷新后 library:喜欢 1 首、收藏歌单 1 个、关注歌手 1 位;关注态生效=true;行内喜欢按钮态=\"取消喜欢\"",
+      "shots": [
+        "ui011-likes-after-reload.png"
+      ]
+    }
+  ]
+}

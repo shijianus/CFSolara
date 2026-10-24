@@ -1,0 +1,166 @@
+{
+  "timestamp": "2026-10-24T17:15:47.635Z",
+  "results": [
+    {
+      "id": "UI-005",
+      "method": "mock 歌单 130 首:加载更多 + 播放全部",
+      "result": "通过",
+      "detail": "初始 100 首 → 加载后 130 首 (130 / 130);播放全部后队列 130",
+      "shots": [
+        "ui005-playlist-loaded130.png",
+        "ui005-playall-queue130.png"
+      ]
+    },
+    {
+      "id": "UI-006",
+      "method": "mock 搜索(两首均无 artistId):刷新进入搜索页",
+      "result": "通过",
+      "detail": "伪造 /artist/0 链接 0 个;页面歌手为纯文本",
+      "shots": [
+        "ui006-010-021-search.png"
+      ]
+    },
+    {
+      "id": "UI-010",
+      "method": "mock 搜索时长 185s/221s",
+      "result": "通过",
+      "detail": "页面包含 3:05 与 3:41:true/true",
+      "shots": [
+        "ui006-010-021-search.png"
+      ]
+    },
+    {
+      "id": "UI-021",
+      "method": "mock 搜索:无音质字段 vs 带 HQ 字段",
+      "result": "通过",
+      "detail": "7002 显示 HQ 徽章=true;伪造 “SQ 无损” 出现 0 次",
+      "shots": [
+        "ui006-010-021-search.png"
+      ]
+    },
+    {
+      "id": "UI-008",
+      "method": "mock 曲目 999998(403 无音源)单击播放",
+      "result": "通过",
+      "detail": "toast=\"音源不可用，换一首试试\n\n重试\n下一首\";重试=true 下一首=true",
+      "shots": [
+        "ui008-source-error-toast.png"
+      ]
+    },
+    {
+      "id": "UI-009",
+      "method": "mock 曲目 999999 在无损档必 403:底栏切音质",
+      "result": "失败",
+      "detail": "toast=\"\";src 仍 br=128=true(实际 http://127.0.0.1:5090/api/music/stream?id=999999&br=128)",
+      "shots": [
+        "ui009-quality-rollback.png"
+      ]
+    },
+    {
+      "id": "UI-011",
+      "method": "真实点击 收藏/关注/喜欢 后刷新",
+      "result": "失败",
+      "detail": "刷新后 library:喜欢 1 首、收藏歌单 1 个、关注歌手 0 位;喜欢页渲染歌曲=true",
+      "shots": [
+        "ui011-likes-after-reload.png"
+      ]
+    },
+    {
+      "id": "UI-012",
+      "method": "mock 评论(42 条,分页 20):进入评论 Tab",
+      "result": "通过",
+      "detail": "textarea=0;发布/回复按钮=false;点赞按钮=0",
+      "shots": [
+        "ui012-041-comments-readonly.png"
+      ]
+    },
+    {
+      "id": "UI-041",
+      "method": "同场景:评论 Tab 计数取接口 total",
+      "result": "通过",
+      "detail": "页面出现 42(接口 total)=true",
+      "shots": [
+        "ui012-041-comments-readonly.png"
+      ]
+    },
+    {
+      "id": "UI-013",
+      "method": "歌曲详情页点击 播放 → 暂停",
+      "result": "通过",
+      "detail": "播放后 paused=false;暂停后 paused=true",
+      "shots": [
+        "ui013-song-playing.png",
+        "ui013-song-paused.png"
+      ]
+    },
+    {
+      "id": "UI-019",
+      "method": "我的音乐 → 清空 → 撤销",
+      "result": "失败",
+      "detail": "清空前队列 100;撤销 toast=\"播放队列已清空\n\n撤销\";撤销后队列 100",
+      "shots": [
+        "ui019-queue-undo-toast.png",
+        "ui019-queue-restored.png"
+      ]
+    },
+    {
+      "id": "UI-029",
+      "method": "mock 歌手 130 首/15 专辑:头部统计 + 加载更多",
+      "result": "通过",
+      "detail": "头部含 130 歌曲=true;无 MV 120 泄漏=true;歌曲加载后 130 首",
+      "shots": [
+        "ui029-artist-loaded.png"
+      ]
+    },
+    {
+      "id": "UI-031",
+      "method": "行内下载 → 进度 → 二次下载覆盖确认 → 取消",
+      "result": "失败",
+      "detail": "进度峰值 0%;覆盖确认出现=false;取消后 toast=\"\"",
+      "shots": [
+        "ui031-download-dialog.png",
+        "ui031-download-progress.png",
+        "ui031-download-overwrite.png",
+        "ui031-download-cancelled.png"
+      ]
+    },
+    {
+      "id": "UI-042",
+      "method": "mock MV(url 为空):进入详情 + 点击重试",
+      "result": "通过",
+      "detail": "初始错误态=true/true;重试后仍为明确错误态=true/true",
+      "shots": [
+        "ui042-mv-error.png",
+        "ui042-mv-after-retry.png"
+      ]
+    },
+    {
+      "id": "UI-058",
+      "method": "mock:首字母 Z 空结果 / 韩国(area=16) 500",
+      "result": "失败",
+      "detail": "空态+重置=true/true;失败态+重新加载=true/false",
+      "shots": [
+        "ui058-artists-empty.png",
+        "ui058-artists-error.png"
+      ]
+    },
+    {
+      "id": "UI-061a",
+      "method": "seed 失效 blob + 无库记录 → 刷新",
+      "result": "通过",
+      "detail": "currentSong 已清空=true;toast=\"本地文件已不可用，已清除当前歌曲\"",
+      "shots": [
+        "ui061-blob-missing-cleanup.png"
+      ]
+    },
+    {
+      "id": "UI-061b",
+      "method": "seed 失效 blob + 下载库同 id 记录 → 刷新",
+      "result": "通过",
+      "detail": "currentSong 保留=restore-1;audio.src 已重建为 blob=true",
+      "shots": [
+        "ui061-blob-restored.png"
+      ]
+    }
+  ]
+}
