@@ -1,0 +1,794 @@
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Comments\SongCommentsDialog.vue
+   99:22  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  101:66  warning  '@click' should be on a new line                                              vue/max-attributes-per-line
+  135:58  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+  135:84  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  161:37  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  162:48  warning  ':list-count' should be on a new line                                         vue/max-attributes-per-line
+  166:50  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  167:53  warning  ':key' should be on a new line                                                vue/max-attributes-per-line
+  167:64  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  177:19  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+  191:57  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  229:23  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+  241:77  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  241:93  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  248:23  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  252:55  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  252:81  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  257:47  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Dialog\DownloadQualityDialog.vue
+  331:31   warning  'appear' should be on a new line                              vue/max-attributes-per-line
+  340:33   warning  'appear' should be on a new line                              vue/max-attributes-per-line
+  357:17   warning  Attribute "class" should go before "@click"                   vue/attributes-order
+  358:17   warning  Attribute "title" should go before "@click"                   vue/attributes-order
+  359:17   warning  Attribute "aria-label" should go before "@click"              vue/attributes-order
+  361:57   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  381:17   warning  Disallow self-closing on HTML void elements (<img/>)          vue/html-self-closing
+  382:29   warning  'class' should be on a new line                               vue/max-attributes-per-line
+  382:109  warning  'style' should be on a new line                               vue/max-attributes-per-line
+  383:59   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  422:17   warning  Attribute "class" should go before "@keydown.enter.prevent"   vue/attributes-order
+  423:17   warning  Attribute ":class" should go before "@keydown.enter.prevent"  vue/attributes-order
+  439:93   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  442:104  warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  458:91   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  484:22   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  524:53   warning  'class' should be on a new line                               vue/max-attributes-per-line
+  524:66   warning  'aria-live' should be on a new line                           vue/max-attributes-per-line
+  533:18   warning  Require self-closing on HTML elements (<div>)                 vue/html-self-closing
+  535:41   warning  'class' should be on a new line                               vue/max-attributes-per-line
+  545:71   warning  Require self-closing on HTML elements (<span>)                vue/html-self-closing
+  574:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+  575:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+  576:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+  582:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+  583:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+  584:1    warning  Expected indentation of 20 spaces but found 18 spaces         vue/html-indent
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Mobile\MobileSongList.vue
+   77:34  warning  'class' should be on a new line                                                     vue/max-attributes-per-line
+   90:11  warning  Attribute 'imgClass' must be hyphenated                                             vue/attribute-hyphenation
+  121:56  warning  Expected 1 line break after opening tag (`<template>`), but no line breaks found    vue/singleline-html-element-content-newline
+  121:77  warning  Expected 1 line break before closing tag (`</template>`), but no line breaks found  vue/singleline-html-element-content-newline
+  126:37  warning  'class' should be on a new line                                                     vue/max-attributes-per-line
+  127:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  127:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  128:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  128:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  129:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  129:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  135:15  warning  'class' should be on a new line                                                     vue/max-attributes-per-line
+  143:29  warning  'class' should be on a new line                                                     vue/max-attributes-per-line
+  144:37  warning  'class' should be on a new line                                                     vue/max-attributes-per-line
+  145:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  145:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  146:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  146:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  147:29  warning  ':class' should be on a new line                                                    vue/max-attributes-per-line
+  147:61  warning  Require self-closing on HTML elements (<span>)                                      vue/html-self-closing
+  153:1   warning  Expected indentation of 8 spaces but found 10 spaces                                vue/html-indent
+  153:33  warning  Expected no line breaks before closing bracket, but 1 line break found              vue/html-closing-bracket-newline
+  161:11  warning  Attribute 'imgClass' must be hyphenated                                             vue/attribute-hyphenation
+  183:56  warning  Expected 1 line break after opening tag (`<template>`), but no line breaks found    vue/singleline-html-element-content-newline
+  183:77  warning  Expected 1 line break before closing tag (`</template>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Mobile\PlaylistCommentsPopup.vue
+   75:39   warning  ':title' should be on a new line                                             vue/max-attributes-per-line
+   77:33   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+   78:44   warning  ':list-count' should be on a new line                                        vue/max-attributes-per-line
+   80:52   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+   81:70   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+   82:28   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+   82:52   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+   84:19   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+   85:48   warning  ':key' should be on a new line                                               vue/max-attributes-per-line
+   85:73   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  101:94   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  101:115  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  104:51   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  105:1    warning  Expected indentation of 14 spaces but found 15 spaces                        vue/html-indent
+  106:1    warning  Expected indentation of 14 spaces but found 15 spaces                        vue/html-indent
+  110:70   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  117:1    warning  Expected indentation of 10 spaces but found 12 spaces                        vue/html-indent
+  118:1    warning  Expected indentation of 10 spaces but found 12 spaces                        vue/html-indent
+  119:1    warning  Expected indentation of 10 spaces but found 12 spaces                        vue/html-indent
+  120:1    warning  Expected indentation of 10 spaces but found 12 spaces                        vue/html-indent
+  121:1    warning  Expected indentation of 10 spaces but found 12 spaces                        vue/html-indent
+  122:1    warning  Expected indentation of 8 spaces but found 10 spaces                         vue/html-indent
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Mobile\PlaylistDrawerMobile.vue
+  142:43  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  142:75  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  166:11  warning  v-on event '@slideChange' must be hyphenated                                 vue/v-on-event-hyphenation
+  170:45  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  182:20  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  183:32  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  219:71  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  220:34  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  220:58  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  226:48  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  236:77  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  261:64  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  262:34  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  262:58  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Search\SearchSongs.vue
+  123:7  warning  Attribute ':showHeader' must be hyphenated    vue/attribute-hyphenation
+  124:7  warning  Attribute ':showControls' must be hyphenated  vue/attribute-hyphenation
+  125:7  warning  Attribute ':emptyMessage' must be hyphenated  vue/attribute-hyphenation
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Settings\LocalMusicSettings.vue
+  121:11  warning  Attribute ":disabled" should go before "@click"                              vue/attributes-order
+  142:7   warning  Attribute "ref" should go before "type"                                      vue/attributes-order
+  147:5   warning  Disallow self-closing on HTML void elements (<input/>)                       vue/html-self-closing
+  157:77  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  160:55  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  160:95  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  161:49  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  161:93  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  168:29  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  169:69  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  179:78  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  181:61  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  181:85  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  182:49  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  182:95  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  183:32  warning  'size' should be on a new line                                               vue/max-attributes-per-line
+  183:42  warning  'rounded' should be on a new line                                            vue/max-attributes-per-line
+  183:55  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  183:69  warning  '@click' should be on a new line                                             vue/max-attributes-per-line
+  190:19  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  203:55  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  206:75  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  206:91  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  209:71  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  213:70  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  225:13  warning  Attribute ":title" should go before "@click"                                 vue/attributes-order
+  226:13  warning  Attribute "icon" should go before "@click"                                   vue/attributes-order
+  227:13  warning  Attribute "icon-class" should go before "@click"                             vue/attributes-order
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\SongList.vue
+  193:1   warning  '<template>' should be above '<style scoped>' on line 170                      vue/block-order
+  201:39  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  201:40  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  203:35  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  203:78  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  210:46  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  210:93  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  211:47  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  211:93  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  216:27  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  223:68  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  227:84  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  229:74  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  230:84  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  234:72  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  237:80  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  240:71  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  243:75  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  244:75  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  272:12  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  284:25  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  285:33  warning  ':class' should be on a new line                                               vue/max-attributes-per-line
+  285:65  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  286:33  warning  ':class' should be on a new line                                               vue/max-attributes-per-line
+  286:65  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  287:33  warning  ':class' should be on a new line                                               vue/max-attributes-per-line
+  287:65  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  298:54  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  314:19  warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  315:19  warning  Attribute 'wrapperClass' must be hyphenated                                    vue/attribute-hyphenation
+  319:18  warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  348:63  warning  ':key' should be on a new line                                                 vue/max-attributes-per-line
+  357:34  warning  ':title' should be on a new line                                               vue/max-attributes-per-line
+  358:64  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  371:28  warning  ':title' should be on a new line                                               vue/max-attributes-per-line
+  371:49  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  385:28  warning  ':title' should be on a new line                                               vue/max-attributes-per-line
+  385:55  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  398:67  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  409:58  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  418:69  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  427:73  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  438:20  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  446:69  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  460:78  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Ui\GlobalToast.vue
+  49:37  warning  'tag' should be on a new line                                                vue/max-attributes-per-line
+  49:47  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  62:12  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  63:74  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  63:93  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  82:55  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Ui\InfiniteScroll.vue
+  175:106  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  176:101  warning  Require self-closing on HTML elements (<div>)                                vue/html-self-closing
+  193:121  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  209:75   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  210:54   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  210:77   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  226:87   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  228:58   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  230:59   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  232:87   warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Ui\PlaylistBubble.vue
+  176:25  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  177:31  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  177:31  warning  Attribute "class" should go before "@click.stop"                              vue/attributes-order
+  178:28  warning  Require self-closing on HTML elements (<slot>)                                vue/html-self-closing
+  189:19  warning  Require self-closing on HTML elements (<slot>)                                vue/html-self-closing
+  192:93  warning  Expected 1 line break after opening tag (`<div>`), but 2 line breaks found    vue/multiline-html-element-content-newline
+  198:81  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  224:40  warning  '@click' should be on a new line                                              vue/max-attributes-per-line
+  225:79  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  234:67  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  243:68  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  245:50  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  247:37  warning  Require self-closing on HTML elements (<div>)                                 vue/html-self-closing
+  253:66  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  281:66  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  291:19  warning  Disallow self-closing on HTML void elements (<input/>)                        vue/html-self-closing
+  301:21  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+  302:33  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  303:82  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  309:45  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  310:43  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  311:43  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  312:43  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  313:43  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  315:36  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  315:81  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  327:66  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  327:80  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  341:73  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  348:74  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  356:27  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  358:78  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  366:21  warning  Expected 1 line break before closing tag (`</div>`), but 2 line breaks found  vue/multiline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\components\Ui\SongCard.vue
+  207:25  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  226:58  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  226:75  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\layout\aside.vue
+  172:31   warning  'class' should be on a new line                           vue/max-attributes-per-line
+  172:71   warning  ':aria-label' should be on a new line                     vue/max-attributes-per-line
+  175:114  warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  192:15   warning  Attribute "title" should go before "@click"               vue/attributes-order
+  193:15   warning  Attribute "class" should go before "@click"               vue/attributes-order
+  195:66   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  199:15   warning  Attribute "title" should go before "@click"               vue/attributes-order
+  200:15   warning  Attribute "class" should go before "@click"               vue/attributes-order
+  202:67   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  212:84   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  216:15   warning  Attribute "type" should go before "@keyup.enter"          vue/attributes-order
+  217:15   warning  Attribute ":placeholder" should go before "@keyup.enter"  vue/attributes-order
+  218:15   warning  Attribute "class" should go before "@keyup.enter"         vue/attributes-order
+  219:13   warning  Disallow self-closing on HTML void elements (<input/>)    vue/html-self-closing
+  223:15   warning  Attribute "class" should go before "@click"               vue/attributes-order
+  225:55   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  241:12   warning  Require self-closing on HTML elements (<div>)             vue/html-self-closing
+  244:42   warning  ':key' should be on a new line                            vue/max-attributes-per-line
+  244:62   warning  'class' should be on a new line                           vue/max-attributes-per-line
+  255:19   warning  Attribute "class" should go before "@focus"               vue/attributes-order
+  256:19   warning  Attribute ":class" should go before "@focus"              vue/attributes-order
+  267:20   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  274:51   warning  'class' should be on a new line                           vue/max-attributes-per-line
+  292:20   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  308:13   warning  Attribute ":class" should go before "@click"              vue/attributes-order
+  312:13   warning  Attribute ":title" should go before "@click"              vue/attributes-order
+  314:52   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  319:48   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  320:49   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  321:54   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  322:55   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  323:62   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  324:57   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  325:47   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  326:57   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  327:57   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  328:49   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  329:67   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+  330:64   warning  Require self-closing on HTML elements (<span>)            vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\layout\footer.vue
+  641:38  warning  'style' should be on a new line                                    vue/max-attributes-per-line
+  644:13  warning  Attribute "id" should go before "ref"                              vue/attributes-order
+  646:13  warning  Attribute "class" should go before "@click"                        vue/attributes-order
+  647:13  warning  Attribute ":class" should go before "@click"                       vue/attributes-order
+  648:13  warning  Attribute ":style" should go before "@click"                       vue/attributes-order
+  660:77  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  661:77  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  662:77  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  667:36  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  668:41  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  679:56  warning  ':key' should be on a new line                                     vue/max-attributes-per-line
+  680:43  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  683:45  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  686:44  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  699:11  warning  Attribute "icon" should go before "@click"                         vue/attributes-order
+  700:11  warning  Attribute "icon-class" should go before "@click"                   vue/attributes-order
+  708:11  warning  Attribute ":title" should go before "@click"                       vue/attributes-order
+  709:11  warning  Attribute ":loading" should go before "@click"                     vue/attributes-order
+  710:11  warning  Attribute ":pulse" should go before "@click"                       vue/attributes-order
+  711:11  warning  Attribute ":press3d" should go before "@click"                     vue/attributes-order
+  717:12  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  723:11  warning  Attribute "icon" should go before "@click"                         vue/attributes-order
+  724:11  warning  Attribute "icon-class" should go before "@click"                   vue/attributes-order
+  732:11  warning  Attribute ":title" should go before "@click"                       vue/attributes-order
+  739:33  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  746:13  warning  Attribute "aria-haspopup" should go before "@keydown.up.prevent"   vue/attributes-order
+  747:13  warning  Attribute ":aria-expanded" should go before "@keydown.up.prevent"  vue/attributes-order
+  748:13  warning  Attribute "aria-controls" should go before "@keydown.up.prevent"   vue/attributes-order
+  749:13  warning  Attribute "class" should go before "@keydown.up.prevent"           vue/attributes-order
+  750:13  warning  Attribute ":title" should go before "@keydown.up.prevent"          vue/attributes-order
+  755:14  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  760:14  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  788:79  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  789:49  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  810:19  warning  Attribute "class" should go before "@keydown.space.prevent.stop"   vue/attributes-order
+  811:19  warning  Attribute ":class" should go before "@keydown.space.prevent.stop"  vue/attributes-order
+  824:22  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+  871:50  warning  'placement' should be on a new line                                vue/max-attributes-per-line
+  871:72  warning  ':offset-y' should be on a new line                                vue/max-attributes-per-line
+  880:13  warning  Require self-closing on Vue.js custom components (<Button>)        vue/html-self-closing
+  887:29  warning  'class' should be on a new line                                    vue/max-attributes-per-line
+  901:69  warning  Require self-closing on HTML elements (<span>)                     vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\album.vue
+   72:11  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+   73:23  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+   73:92  warning  Require self-closing on HTML elements (<div>)                                 vue/html-self-closing
+   84:15  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+   89:57  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+   97:53  warning  Expected no line breaks before closing bracket, but 1 line break found        vue/html-closing-bracket-newline
+   98:1   warning  Expected indentation of 16 spaces but found 18 spaces                         vue/html-indent
+  103:27  warning  Expected no line breaks before closing bracket, but 1 line break found        vue/html-closing-bracket-newline
+  105:49  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  108:53  warning  Expected no line breaks before closing bracket, but 1 line break found        vue/html-closing-bracket-newline
+  109:1   warning  Expected indentation of 16 spaces but found 18 spaces                         vue/html-indent
+  110:79  warning  Expected no line breaks before closing bracket, but 1 line break found        vue/html-closing-bracket-newline
+  123:54  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  133:57  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  141:45  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  142:50  warning  Expected 1 line break after opening tag (`<h3>`), but no line breaks found    vue/singleline-html-element-content-newline
+  142:81  warning  Expected 1 line break before closing tag (`</h3>`), but no line breaks found  vue/singleline-html-element-content-newline
+  143:31  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  143:68  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  143:96  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  144:21  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  144:45  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  144:73  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  153:48  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+  153:79  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  154:44  warning  ':sections' should be on a new line                                           vue/max-attributes-per-line
+  154:65  warning  ':list-count' should be on a new line                                         vue/max-attributes-per-line
+  157:11  warning  Attribute "v-else" should go before "class"                                   vue/attributes-order
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\artist.vue
+  198:42  warning  ':sections' should be on a new line                                          vue/max-attributes-per-line
+  198:71  warning  ':list-count' should be on a new line                                        vue/max-attributes-per-line
+  207:13  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  211:14  warning  Require self-closing on HTML elements (<div>)                                vue/html-self-closing
+  216:35  warning  ':key' should be on a new line                                               vue/max-attributes-per-line
+  216:44  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  216:57  warning  ':style' should be on a new line                                             vue/max-attributes-per-line
+  235:21  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  240:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  253:23  warning  Attribute "class" should go before "@click"                                  vue/attributes-order
+  255:21  warning  Require self-closing on Vue.js custom components (<Button>)                  vue/html-self-closing
+  279:79  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  280:42  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  281:1   warning  Expected indentation of 20 spaces but found 22 spaces                        vue/html-indent
+  281:91  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  287:75  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  288:42  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  289:1   warning  Expected indentation of 20 spaces but found 22 spaces                        vue/html-indent
+  289:92  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  296:83  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  297:42  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  298:1   warning  Expected indentation of 20 spaces but found 22 spaces                        vue/html-indent
+  299:62  warning  Expected no line breaks before closing bracket, but 1 line break found       vue/html-closing-bracket-newline
+  315:60  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  325:63  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  339:22  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  349:44  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  351:82  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  368:53  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  369:44  warning  ':current-playing-index' should be on a new line                             vue/max-attributes-per-line
+  369:72  warning  ':show-header' should be on a new line                                       vue/max-attributes-per-line
+  371:41  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  397:54  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  410:19  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  414:80  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  417:57  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  417:70  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  424:42  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\artists.vue
+  158:73  warning  ':sections' should be on a new line                                          vue/max-attributes-per-line
+  159:19  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  174:66  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  174:83  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  175:36  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  175:77  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  175:95  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\likes.vue
+   53:54  warning  Require self-closing on HTML elements (<div>)                                 vue/html-self-closing
+   54:59  warning  Require self-closing on HTML elements (<div>)                                 vue/html-self-closing
+   62:59  warning  Expected 1 line break after opening tag (`<h1>`), but no line breaks found    vue/singleline-html-element-content-newline
+   62:81  warning  Expected 1 line break before closing tag (`</h1>`), but no line breaks found  vue/singleline-html-element-content-newline
+   63:55  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+   63:80  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+   90:27  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+   91:80  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+   92:56  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+   92:81  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  101:39  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  105:41  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  115:19  warning  Attribute 'imgClass' must be hyphenated                                       vue/attribute-hyphenation
+  116:19  warning  Attribute 'wrapperClass' must be hyphenated                                   vue/attribute-hyphenation
+  123:61  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  123:78  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  137:58  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  147:71  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  152:44  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  162:39  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  183:21  warning  Attribute 'imgClass' must be hyphenated                                       vue/attribute-hyphenation
+  184:21  warning  Attribute 'wrapperClass' must be hyphenated                                   vue/attribute-hyphenation
+  199:48  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  206:39  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  210:39  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  221:19  warning  Attribute 'imgClass' must be hyphenated                                       vue/attribute-hyphenation
+  222:19  warning  Attribute 'wrapperClass' must be hyphenated                                   vue/attribute-hyphenation
+  229:61  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  229:76  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  233:42  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\album.vue
+  125:31  warning  'class' should be on a new line                 vue/max-attributes-per-line
+  126:50  warning  ':list-count' should be on a new line           vue/max-attributes-per-line
+  135:13  warning  Attribute 'imgClass' must be hyphenated         vue/attribute-hyphenation
+  137:56  warning  Require self-closing on HTML elements (<div>)   vue/html-self-closing
+  147:17  warning  Attribute 'imgClass' must be hyphenated         vue/attribute-hyphenation
+  156:66  warning  '@click' should be on a new line                vue/max-attributes-per-line
+  158:82  warning  Require self-closing on HTML elements (<span>)  vue/html-self-closing
+  163:68  warning  Require self-closing on HTML elements (<span>)  vue/html-self-closing
+  166:53  warning  'class' should be on a new line                 vue/max-attributes-per-line
+  167:66  warning  Require self-closing on HTML elements (<span>)  vue/html-self-closing
+  170:49  warning  'class' should be on a new line                 vue/max-attributes-per-line
+  171:64  warning  Require self-closing on HTML elements (<span>)  vue/html-self-closing
+  194:16  warning  Require self-closing on HTML elements (<span>)  vue/html-self-closing
+  237:48  warning  ':show-index' should be on a new line           vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\artist.vue
+  191:31   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  192:50   warning  ':list-count' should be on a new line                                          vue/max-attributes-per-line
+  201:13   warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  203:56   warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  213:17   warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  217:60   warning  Expected 1 line break after opening tag (`<h1>`), but no line breaks found     vue/singleline-html-element-content-newline
+  217:81   warning  Expected 1 line break before closing tag (`</h1>`), but no line breaks found   vue/singleline-html-element-content-newline
+  218:48   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  231:48   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  301:48   warning  ':show-index' should be on a new line                                          vue/max-attributes-per-line
+  303:39   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  329:52   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  341:19   warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  343:91   warning  Require self-closing on HTML elements (<div>)                                  vue/html-self-closing
+  345:72   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  345:88   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  353:44   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  353:81   warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  353:115  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  355:40   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\likes.vue
+  26:54  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  26:77  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  28:17  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  40:13  warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  42:23  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  47:64  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  47:76  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  48:55  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  48:69  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  49:59  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  49:86  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  56:63  warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\mv-player.vue
+   69:31   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+   69:44   warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+   69:86   warning  ':list-count' should be on a new line                                          vue/max-attributes-per-line
+   69:104  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+   84:81   warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+   93:57   warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  100:65   warning  Expected 1 line break after opening tag (`<h1>`), but no line breaks found     vue/singleline-html-element-content-newline
+  100:81   warning  Expected 1 line break before closing tag (`</h1>`), but no line breaks found   vue/singleline-html-element-content-newline
+  101:57   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  101:75   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  114:14   warning  Require self-closing on HTML elements (<span>)                                 vue/html-self-closing
+  120:61   warning  Expected 1 line break after opening tag (`<h3>`), but no line breaks found     vue/singleline-html-element-content-newline
+  120:83   warning  Expected 1 line break before closing tag (`</h3>`), but no line breaks found   vue/singleline-html-element-content-newline
+  122:49   warning  ':key' should be on a new line                                                 vue/max-attributes-per-line
+  122:61   warning  ':to' should be on a new line                                                  vue/max-attributes-per-line
+  122:88   warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  125:1    warning  Expected indentation of 16 spaces but found 12 spaces                          vue/html-indent
+  125:39   warning  'alt' should be on a new line                                                  vue/max-attributes-per-line
+  125:51   warning  'imgClass' should be on a new line                                             vue/max-attributes-per-line
+  125:51   warning  Attribute 'imgClass' must be hyphenated                                        vue/attribute-hyphenation
+  127:69   warning  Expected 1 line break after opening tag (`<h3>`), but no line breaks found     vue/singleline-html-element-content-newline
+  127:81   warning  Expected 1 line break before closing tag (`</h3>`), but no line breaks found   vue/singleline-html-element-content-newline
+  128:63   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found      vue/singleline-html-element-content-newline
+  128:77   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found    vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\my-music.vue
+  16:58  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found     vue/singleline-html-element-content-newline
+  16:96  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found   vue/singleline-html-element-content-newline
+  29:43  warning  'class' should be on a new line                                                vue/max-attributes-per-line
+  30:53  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  30:90  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  31:48  warning  Expected 1 line break after opening tag (`<div>`), but no line breaks found    vue/singleline-html-element-content-newline
+  31:84  warning  Expected 1 line break before closing tag (`</div>`), but no line breaks found  vue/singleline-html-element-content-newline
+  34:45  warning  'context' should be on a new line                                              vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\playlist.vue
+  190:31  warning  'class' should be on a new line                       vue/max-attributes-per-line
+  191:50  warning  ':list-count' should be on a new line                 vue/max-attributes-per-line
+  200:13  warning  Attribute 'imgClass' must be hyphenated               vue/attribute-hyphenation
+  202:56  warning  Require self-closing on HTML elements (<div>)         vue/html-self-closing
+  212:17  warning  Attribute 'imgClass' must be hyphenated               vue/attribute-hyphenation
+  217:56  warning  Require self-closing on HTML elements (<span>)        vue/html-self-closing
+  234:19  warning  Disallow self-closing on HTML void elements (<img/>)  vue/html-self-closing
+  240:68  warning  Require self-closing on HTML elements (<span>)        vue/html-self-closing
+  244:63  warning  Require self-closing on HTML elements (<span>)        vue/html-self-closing
+  267:16  warning  Require self-closing on HTML elements (<span>)        vue/html-self-closing
+  317:11  warning  Attribute ":id" should go before "v-model:show"       vue/attributes-order
+  329:92  warning  Require self-closing on HTML elements (<span>)        vue/html-self-closing
+  339:48  warning  ':show-index' should be on a new line                 vue/max-attributes-per-line
+  341:39  warning  'class' should be on a new line                       vue/max-attributes-per-line
+  356:47  warning  'class' should be on a new line                       vue/max-attributes-per-line
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\recent.vue
+   92:71  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+   97:37  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+   98:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  111:35  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  133:9   warning  v-on event '@slideChange' must be hyphenated                                 vue/v-on-event-hyphenation
+  165:47  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  165:82  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  205:65  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  205:88  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\search.vue
+  333:31  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  335:74  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  341:13  warning  Attribute "type" should go before "@focus"                                   vue/attributes-order
+  342:13  warning  Attribute ":placeholder" should go before "@focus"                           vue/attributes-order
+  343:13  warning  Attribute "class" should go before "@focus"                                  vue/attributes-order
+  344:11  warning  Disallow self-closing on HTML void elements (<input/>)                       vue/html-self-closing
+  409:27  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  410:44  warning  ':list-count' should be on a new line                                        vue/max-attributes-per-line
+  422:9   warning  v-on event '@slideChange' must be hyphenated                                 vue/v-on-event-hyphenation
+  427:42  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  443:44  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  447:58  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  447:81  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  450:36  warning  ':songs' should be on a new line                                             vue/max-attributes-per-line
+  450:51  warning  'variant' should be on a new line                                            vue/max-attributes-per-line
+  450:69  warning  ':show-index' should be on a new line                                        vue/max-attributes-per-line
+  464:46  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  470:48  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  474:58  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  474:81  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  477:25  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  488:21  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  490:72  warning  Require self-closing on HTML elements (<div>)                                vue/html-self-closing
+  494:66  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  500:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  521:40  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  527:42  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  531:58  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  531:81  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  534:25  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  545:21  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  547:66  warning  Require self-closing on HTML elements (<div>)                                vue/html-self-closing
+  551:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  554:85  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  554:97  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  555:82  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  555:96  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  560:61  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mobile\song.vue
+  107:31  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  108:50  warning  ':list-count' should be on a new line                                         vue/max-attributes-per-line
+  120:13  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+  129:65  warning  Expected 1 line break after opening tag (`<h1>`), but no line breaks found    vue/singleline-html-element-content-newline
+  129:81  warning  Expected 1 line break before closing tag (`</h1>`), but no line breaks found  vue/singleline-html-element-content-newline
+  130:55  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  130:73  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  131:59  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  131:76  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  143:16  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  154:16  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  161:61  warning  Expected 1 line break after opening tag (`<h3>`), but no line breaks found    vue/singleline-html-element-content-newline
+  161:84  warning  Expected 1 line break before closing tag (`</h3>`), but no line breaks found  vue/singleline-html-element-content-newline
+  163:42  warning  ':key' should be on a new line                                                vue/max-attributes-per-line
+  163:51  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  166:39  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  166:71  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  166:96  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mv-list.vue
+  139:40  warning  ':sections' should be on a new line                                          vue/max-attributes-per-line
+  139:69  warning  ':grid-count' should be on a new line                                        vue/max-attributes-per-line
+  147:53  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  147:79  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  172:17  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  173:17  warning  Attribute 'wrapperClass' must be hyphenated                                  vue/attribute-hyphenation
+  184:58  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  195:75  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  206:64  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  206:79  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  230:22  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  237:77  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\mv-player.vue
+  158:42  warning  ':sections' should be on a new line                                          vue/max-attributes-per-line
+  180:91  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  195:72  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  223:75  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  227:72  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  260:51  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  261:70  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  261:97  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  268:48  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  273:45  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  284:21  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  296:74  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  296:89  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  298:76  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  305:29  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  308:20  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  309:54  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  309:88  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  330:25  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  331:25  warning  Attribute 'wrapperClass' must be hyphenated                                  vue/attribute-hyphenation
+  336:75  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  350:72  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  350:87  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\my-music.vue
+   60:43   warning  ':tabs' should be on a new line                                              vue/max-attributes-per-line
+   60:56   warning  'variant' should be on a new line                                            vue/max-attributes-per-line
+   60:75   warning  'size' should be on a new line                                               vue/max-attributes-per-line
+  102:37   warning  'mode' should be on a new line                                               vue/max-attributes-per-line
+  104:46   warning  'key' should be on a new line                                                vue/max-attributes-per-line
+  104:61   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  105:45   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  109:69   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  109:105  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  110:48   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  110:83   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  122:21   warning  'key' should be on a new line                                                vue/max-attributes-per-line
+  122:35   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  123:48   warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  127:69   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  127:92   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  128:48   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  128:83   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\new-albums.vue
+   95:52  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+   95:78  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  111:72  warning  ':sections' should be on a new line                                           vue/max-attributes-per-line
+  112:19  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  130:66  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  130:82  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  138:53  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  138:94  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\playlist.vue
+  398:40  warning  ':sections' should be on a new line                                          vue/max-attributes-per-line
+  398:69  warning  ':list-count' should be on a new line                                        vue/max-attributes-per-line
+  409:13  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  412:14  warning  Require self-closing on HTML elements (<div>)                                vue/html-self-closing
+  427:23  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  428:23  warning  Attribute 'wrapperClass' must be hyphenated                                  vue/attribute-hyphenation
+  440:64  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  461:21  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  488:84  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  494:93  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  501:76  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  518:67  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  528:70  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  541:25  warning  Attribute ":title" should go before "@click"                                 vue/attributes-order
+  548:26  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  556:25  warning  Attribute ":title" should go before "@click"                                 vue/attributes-order
+  558:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  571:41  warning  ':tabs' should be on a new line                                              vue/max-attributes-per-line
+  571:63  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  571:78  warning  'size' should be on a new line                                               vue/max-attributes-per-line
+  575:49  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  581:92  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  591:36  warning  ':show-header' should be on a new line                                       vue/max-attributes-per-line
+  593:33  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  608:41  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  623:52  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  626:41  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  638:19  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  658:74  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  667:67  warning  ':key' should be on a new line                                               vue/max-attributes-per-line
+  667:77  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  673:25  warning  Disallow self-closing on HTML void elements (<img/>)                         vue/html-self-closing
+  690:25  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  691:92  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  692:62  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  692:88  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+  711:51  warning  'class' should be on a new line                                              vue/max-attributes-per-line
+  729:21  warning  Attribute 'imgClass' must be hyphenated                                      vue/attribute-hyphenation
+  730:21  warning  Attribute 'wrapperClass' must be hyphenated                                  vue/attribute-hyphenation
+  738:73  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  745:64  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  767:86  warning  Require self-closing on HTML elements (<span>)                               vue/html-self-closing
+  768:62  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found    vue/singleline-html-element-content-newline
+  768:95  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player\src\pages\song.vue
+  119:32  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  124:15  warning  Attribute 'imgClass' must be hyphenated                                       vue/attribute-hyphenation
+  125:15  warning  Attribute 'wrapperClass' must be hyphenated                                   vue/attribute-hyphenation
+  136:53  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  136:87  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  137:30  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  137:63  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  143:63  warning  Expected 1 line break after opening tag (`<h1>`), but no line breaks found    vue/singleline-html-element-content-newline
+  143:84  warning  Expected 1 line break before closing tag (`</h1>`), but no line breaks found  vue/singleline-html-element-content-newline
+  154:65  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  162:57  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  174:53  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  174:87  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  175:30  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  175:63  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  182:67  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  193:51  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+  193:53  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  196:48  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  202:71  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  202:82  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  203:38  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  203:75  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  203:87  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  204:38  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  204:82  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  204:94  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  207:29  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  210:20  warning  Require self-closing on HTML elements (<span>)                                vue/html-self-closing
+  211:46  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  211:50  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  218:51  warning  'class' should be on a new line                                               vue/max-attributes-per-line
+  220:51  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+  220:55  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  234:65  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  234:82  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  246:51  warning  Expected 1 line break after opening tag (`<h2>`), but no line breaks found    vue/singleline-html-element-content-newline
+  246:55  warning  Expected 1 line break before closing tag (`</h2>`), but no line breaks found  vue/singleline-html-element-content-newline
+  260:21  warning  Disallow self-closing on HTML void elements (<img/>)                          vue/html-self-closing
+  263:22  warning  Require self-closing on HTML elements (<div>)                                 vue/html-self-closing
+  270:63  warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found     vue/singleline-html-element-content-newline
+  270:84  warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found   vue/singleline-html-element-content-newline
+  278:53  warning  ':song-id' should be on a new line                                            vue/max-attributes-per-line
+
+✖ 724 problems (0 errors, 724 warnings)
+  0 errors and 691 warnings potentially fixable with the `--fix` option.
+
