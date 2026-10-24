@@ -19,7 +19,7 @@ const state = reactive({
   loading: true,
 })
 
-const { play, setPlaylist, currentSong, isPlaying } = useAudio()
+const { play, pause, resume, setPlaylist, currentSong, isPlaying } = useAudio()
 
 import { parseAnyLrc } from '@/composables/useLyrics'
 
@@ -60,6 +60,10 @@ onMounted(() => {
   }
 })
 
+const isCurrentPlaying = computed(
+  () => String(currentSong.value?.id ?? '') === String(state.id) && isPlaying.value
+)
+
 const playCurrent = () => {
   const s = {
     id: state.id,
@@ -71,7 +75,13 @@ const playCurrent = () => {
     cover: state.cover,
     liked: libraryStore.isSongLiked(state.id),
   }
-  if (currentSong.value && String(currentSong.value.id) === String(state.id) && isPlaying.value) {
+  const isSameSong = String(currentSong.value?.id ?? '') === String(state.id)
+  if (isSameSong) {
+    if (isPlaying.value) {
+      pause()
+    } else {
+      resume()
+    }
     return
   }
   setPlaylist([s], 0)
@@ -122,13 +132,20 @@ const toggleLike = () => {
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="glass-button text-primary rounded-full bg-linear-to-r from-sky-500 to-blue-600 px-3 py-2 text-sm"
+              type="button"
+              class="glass-button text-primary flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600"
+              :aria-label="isCurrentPlaying ? $t('player.pause') : $t('player.play')"
               @click="playCurrent"
             >
-              <span class="icon-[mdi--play] h-4 w-4"></span>
+              <span
+                :class="isCurrentPlaying ? 'icon-[mdi--pause]' : 'icon-[mdi--play]'"
+                class="h-4 w-4"
+              ></span>
             </button>
             <button
-              class="glass-button text-primary rounded-full px-3 py-2 text-sm"
+              type="button"
+              class="glass-button text-primary flex h-11 w-11 items-center justify-center rounded-full"
+              :aria-label="isLiked ? $t('common.unlike') : $t('common.like')"
               @click="toggleLike"
             >
               <span

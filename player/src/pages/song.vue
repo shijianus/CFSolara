@@ -19,7 +19,7 @@ const route = useRoute()
 const router = useRouter()
 const songId = computed(() => route.params.id as string | number)
 const { mergedLines, fetchLyrics } = useLyrics()
-const { play, setPlaylist, currentSong, isPlaying } = useAudio()
+const { play, pause, resume, setPlaylist, currentSong, isPlaying } = useAudio()
 const showComments = ref(false)
 
 const state = reactive({
@@ -55,8 +55,13 @@ const playCurrent = () => {
     duration: duration.value,
     cover: albumCover.value,
   }
-  // 若当前正在播放此歌曲且未暂停，不重复打断加载
-  if (currentSong.value && String(currentSong.value.id) === String(state.info.id) && isPlaying.value) {
+  const isSameSong = String(currentSong.value?.id ?? '') === String(state.info.id)
+  if (isSameSong) {
+    if (isPlaying.value) {
+      pause()
+    } else {
+      resume()
+    }
     return
   }
   setPlaylist([song], 0)
@@ -123,7 +128,9 @@ watch(songId, () => loadInfo())
               class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             >
               <button
-                class="flex h-16 w-16 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-lg transition-transform hover:scale-110"
+                type="button"
+                class="flex h-16 w-16 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-lg transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                :aria-label="isCurrent && isPlaying ? $t('player.pause') : $t('player.play')"
                 @click="playCurrent"
               >
                 <span v-if="isCurrent && isPlaying" class="icon-[mdi--pause] h-8 w-8"></span>
@@ -160,12 +167,13 @@ watch(songId, () => loadInfo())
 
             <div class="flex items-center gap-3">
               <button
-                class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:bg-sky-600 hover:shadow-xl"
+                type="button"
+                class="inline-flex min-h-11 items-center gap-2 rounded-full bg-sky-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:bg-sky-600 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 @click="playCurrent"
               >
                 <span v-if="isCurrent && isPlaying" class="icon-[mdi--pause] h-5 w-5"></span>
                 <span v-else class="icon-[mdi--play] h-5 w-5"></span>
-                {{ isCurrent && isPlaying ? '暂停' : '播放' }}
+                {{ isCurrent && isPlaying ? $t('player.pause') : $t('player.play') }}
               </button>
               <button
                 class="glass-button inline-flex items-center gap-2 px-5 py-3 transition-colors hover:bg-white/20"
