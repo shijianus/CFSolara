@@ -307,7 +307,7 @@ onUnmounted(() => window.removeEventListener('popstate', syncHistoryState))
                   class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
-                    'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
+                    'hover:bg-hover-glass': !isActive(`/playlist/${pl.id}`),
                   }"
                 >
                   <span
