@@ -43,6 +43,7 @@ interface PlaylistState {
   hasMoreComments: boolean
   isLoadingMoreComments: boolean
   isCommentLoadError: boolean
+  commentTotal: number
   songTotal: number
   hasMoreSongs: boolean
   isLoadingMoreSongs: boolean
@@ -64,6 +65,7 @@ const state = reactive<PlaylistState>({
   hasMoreComments: true,
   isLoadingMoreComments: false,
   isCommentLoadError: false,
+  commentTotal: 0,
   songTotal: 0,
   hasMoreSongs: false,
   isLoadingMoreSongs: false,
@@ -82,6 +84,7 @@ const {
   hasMoreComments,
   isLoadingMoreComments,
   isCommentLoadError,
+  commentTotal,
   songTotal,
   hasMoreSongs,
   isLoadingMoreSongs,
@@ -217,19 +220,30 @@ const dismissPartialPlayNotice = () => {
   state.partialPlayNotice = ''
 }
 
+let commentRequestSeq = 0
+
+const resetCommentState = () => {
+  commentRequestSeq += 1
+  state.comments = []
+  state.commentPage = 1
+  state.hasMoreComments = true
+  state.isLoadingMoreComments = false
+  state.isCommentLoadError = false
+  state.commentTotal = 0
+}
+
 const loadComments = async (id?: number, reset = false) => {
   const targetId = id || Number(playlistId)
   if (!targetId) return
-  if (state.isLoadingMoreComments) return
-  if (!reset && !state.hasMoreComments) return
+  if (!reset && (state.isLoadingMoreComments || !state.hasMoreComments)) return
 
   if (reset) {
-    state.commentPage = 1
-    state.comments = []
-    state.hasMoreComments = true
+    resetCommentState()
   } else {
     state.isLoadingMoreComments = true
   }
+  const requestSeq = commentRequestSeq
+  const pageNo = state.commentPage
   state.isCommentLoadError = false
 
   try {
@@ -237,9 +251,10 @@ const loadComments = async (id?: number, reset = false) => {
       id: targetId,
       type: 2,
       sortType: 1,
-      pageNo: state.commentPage,
+      pageNo,
       pageSize: 20,
     })
+    if (requestSeq !== commentRequestSeq) return
     const list = (res as any)?.data?.comments || (res as any)?.comments || []
     if (Array.isArray(list)) {
       const mapped = list.map((c: any, i: number) => ({
@@ -260,18 +275,33 @@ const loadComments = async (id?: number, reset = false) => {
 
       state.comments = reset ? mapped : [...state.comments, ...mapped]
       state.hasMoreComments = list.length === 20
+      const total = Number(
+        (res as any)?.data?.total ??
+          (res as any)?.total ??
+          (res as any)?.data?.totalCount ??
+          (res as any)?.totalCount
+      )
+      if (Number.isFinite(total)) {
+        state.commentTotal = total
+      } else if (reset) {
+        state.commentTotal = mapped.length
+      }
       if (mapped.length) state.commentPage += 1
     } else {
       state.hasMoreComments = false
+      if (reset) state.commentTotal = 0
     }
   } catch {
+    if (requestSeq !== commentRequestSeq) return
     if (!reset) {
       state.isCommentLoadError = true
     } else {
       state.hasMoreComments = false
     }
   } finally {
-    state.isLoadingMoreComments = false
+    if (requestSeq === commentRequestSeq) {
+      state.isLoadingMoreComments = false
+    }
   }
 }
 
@@ -294,8 +324,9 @@ onMounted(() => {
   const idNum = Number(playlistId)
   if (!Number.isNaN(idNum) && idNum > 0) {
     state.isPageLoading = true
+    resetCommentState()
     loadPlaylist(idNum)
-    loadComments(idNum)
+    loadComments(idNum, true)
   }
 })
 
@@ -305,8 +336,9 @@ watch(
   idNum => {
     if (!Number.isNaN(idNum) && idNum > 0) {
       state.isPageLoading = true
+      resetCommentState()
       loadPlaylist(idNum)
-      loadComments(idNum)
+      loadComments(idNum, true)
     }
   }
 )
@@ -374,7 +406,7 @@ const tabsWithCount = computed(() =>
       tab.key === 'songs'
         ? songTotal.value || songs.value.length
         : tab.key === 'comments'
-          ? comments.value.length
+          ? commentTotal.value || comments.value.length
           : similarPlaylists.value.length,
   }))
 )
