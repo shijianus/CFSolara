@@ -93,6 +93,15 @@ export const useLocalMusicStore = defineStore('localMusic', {
       this.musics = this.musics.filter(m => m.id !== id)
     },
 
+    /** 撤销删除：把文件写回 IndexedDB 并恢复到原位置 */
+    async restoreMusic(music: LocalMusic, index?: number) {
+      await localMusicDB.add(music)
+      if (!this.musics.some(m => m.id === music.id)) {
+        const target = Math.max(0, Math.min(index ?? this.musics.length, this.musics.length))
+        this.musics.splice(target, 0, music)
+      }
+    },
+
     getAudioDuration(file: File): Promise<number> {
       return new Promise((resolve, reject) => {
         const audio = new Audio()

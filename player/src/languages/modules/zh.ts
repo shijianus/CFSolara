@@ -69,6 +69,7 @@ export default {
     pagination: {
       prev: '上一页',
       next: '下一页',
+    queueCleared: '播放队列已清空',
       status: '第 {page} / {totalPages} 页 · 共 {total} 条',
     },
     songList: {
@@ -124,6 +125,7 @@ export default {
       dropFilesHint: '支持拖拽音频文件到此区域上传',
       localMusicEmpty: '暂无本地音乐，点击下方按钮添加',
       addMusic: '添加音乐',
+    localMusicDeleted: '已删除本地音乐「{name}」',
     },
     background: {
       common: {

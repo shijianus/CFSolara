@@ -943,6 +943,40 @@ export const useAudioStore = defineStore('audio', {
       }
     },
 
+    /** 清空队列前保存快照，供撤销恢复 */
+    createQueueSnapshot() {
+      return {
+        playlist: [...this.audio.playlist],
+        originalPlaylist: [...this.audio.originalPlaylist],
+        currentSong: this.audio.currentSong,
+        currentIndex: this.audio.currentIndex,
+        currentTime: this.audio.currentTime,
+        wasPlaying: this.audio.isPlaying,
+      }
+    },
+
+    /** 恢复清空前的队列与当前歌曲；此前正在播放的会继续播放 */
+    async restoreQueueSnapshot(snapshot: {
+      playlist: Song[]
+      originalPlaylist: Song[]
+      currentSong: Song | null
+      currentIndex: number
+      currentTime: number
+      wasPlaying: boolean
+    }) {
+      this.audio.playlist = [...snapshot.playlist]
+      this.audio.originalPlaylist = [...snapshot.originalPlaylist]
+      this.audio.currentSong = snapshot.currentSong
+      this.audio.currentIndex = snapshot.currentIndex
+      this.audio.currentTime = snapshot.currentTime
+      if (snapshot.wasPlaying && snapshot.currentSong) {
+        await this.playSong(snapshot.currentSong, snapshot.currentIndex, true)
+        try {
+          if (this.audio.audio) this.audio.audio.currentTime = snapshot.currentTime
+        } catch {}
+      }
+    },
+
     // 清空播放列表
     clearPlaylist() {
       this.stop()

@@ -108,7 +108,7 @@ const {
   queueNext,
   removeSong,
   removeSongs,
-  clearPlaylist,
+  clearPlaylistWithUndo,
   currentSong,
   isPlaying,
 } = useAudio()
@@ -161,7 +161,7 @@ const doDeleteSelected = () => {
 }
 
 const doClearAll = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
   Object.keys(selected).forEach(k => (selected[k as any] = false))
 }
 

@@ -5,6 +5,8 @@
  */
 import { Song, PlayMode } from '@/stores/interface'
 import { formatTime } from '@/utils/audioUtils'
+import { useToastStore } from '@/stores/modules/toast'
+import i18n from '@/languages'
 
 export const useAudio = () => {
   const audioStore = useAudioStore()
@@ -135,6 +137,17 @@ export const useAudio = () => {
 
   const clearPlaylist = () => {
     audioStore.clearPlaylist()
+  }
+
+  /** 清空队列并提供 5 秒撤销 */
+  const clearPlaylistWithUndo = () => {
+    const snapshot = audioStore.createQueueSnapshot()
+    if (!snapshot.playlist.length) return
+    audioStore.clearPlaylist()
+    useToastStore().showUndo(
+      i18n.global.t('player.queueCleared'),
+      () => audioStore.restoreQueueSnapshot(snapshot)
+    )
   }
 
   const moveSong = (fromIndex: number, toIndex: number) => {
@@ -299,6 +312,7 @@ export const useAudio = () => {
     addSongs,
     removeSong,
     clearPlaylist,
+    clearPlaylistWithUndo,
     moveSong,
     queueNext,
     removeSongs,

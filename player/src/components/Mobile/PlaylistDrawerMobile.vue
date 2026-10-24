@@ -29,7 +29,7 @@ const {
   togglePlayMode,
   play,
   removeSong,
-  clearPlaylist,
+  clearPlaylistWithUndo,
   clearHistory,
   addSong,
 } = useAudio()
@@ -91,7 +91,7 @@ const handleHistoryPlay = (song: any) => {
 // 清空当前列表（播放列表或历史记录）
 const handleClear = () => {
   if (activeTab.value === 'playlist') {
-    clearPlaylist()
+    clearPlaylistWithUndo()
   } else {
     clearHistory()
   }

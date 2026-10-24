@@ -8,7 +8,7 @@ import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const { setPlaylist, play, playlist, clearPlaylist } = useAudio()
+const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
 
 const state = reactive({
   activeTab: 'playlist' as 'playlist' | 'history',
@@ -33,7 +33,7 @@ const playAllQueue = () => {
 }
 
 const handleClearQueue = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
 }
 
 const tabs = computed(() => [

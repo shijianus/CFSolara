@@ -73,6 +73,7 @@ export default {
     pagination: {
       prev: 'Prev',
       next: 'Next',
+    queueCleared: 'Playback queue cleared',
       status: 'Page {page} / {totalPages} · Total {total}',
     },
     songList: {
@@ -134,6 +135,7 @@ export default {
       dropFilesHint: 'Drag and drop audio files here to upload',
       localMusicEmpty: 'No local music yet, click the button below to add',
       addMusic: 'Add Music',
+    localMusicDeleted: 'Local track “{name}” deleted',
     },
     background: {
       common: {

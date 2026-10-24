@@ -5,9 +5,11 @@ import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { formatTime } from '@/utils/audioUtils'
 import Button from '@/components/Ui/Button.vue'
+import { useToastStore } from '@/stores/modules/toast'
 
 const { t } = useI18n()
 const localMusicStore = useLocalMusicStore()
+const toastStore = useToastStore()
 const { musics, isLoading } = storeToRefs(localMusicStore)
 const { setPlaylist, play } = useAudio()
 
@@ -57,7 +59,14 @@ const triggerFileInput = () => {
 }
 
 const handleDelete = async (id: string) => {
+  const index = musics.value.findIndex(m => m.id === id)
+  const music = musics.value[index]
+  if (!music) return
   await localMusicStore.deleteMusic(id)
+  toastStore.showUndo(
+    t('components.settings.localMusicDeleted', { name: music.name }),
+    () => localMusicStore.restoreMusic(music, index)
+  )
 }
 
 const handlePlayAll = () => {

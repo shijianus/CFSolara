@@ -73,6 +73,7 @@ export default {
     pagination: {
       prev: '前へ',
       next: '次へ',
+    queueCleared: '再生キューをクリアしました',
       status: '{page} / {totalPages} ページ · 全 {total} 件',
     },
     songList: {
@@ -138,6 +139,7 @@ export default {
       dropFilesHint: '音声ファイルをここにドラッグ＆ドロップしてアップロード',
       localMusicEmpty: 'ローカル音楽がありません。下のボタンをクリックして追加してください',
       addMusic: '音楽を追加',
+    localMusicDeleted: 'ローカル曲「{name}」を削除しました',
     },
     background: {
       common: {

@@ -24,7 +24,7 @@ const creativeEffect = {
 }
 
 const { t } = useI18n()
-const { setPlaylist, play, playlist, clearPlaylist } = useAudio()
+const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
 const libraryStore = useLibraryStore()
 const likedCount = computed(() => libraryStore.likedSongCount)
 
@@ -61,7 +61,7 @@ const playAllRecent = () => {
 }
 
 const handleClearQueue = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
 }
 
 const tabs = computed(() => [
