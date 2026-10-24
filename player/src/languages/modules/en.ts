@@ -30,6 +30,7 @@ export default {
     all: 'All',
     undo: 'Undo',
     retry: 'Retry',
+    loadFailed: 'Load failed, please try again later',
     linkCopied: 'Link copied',
     unknownPlaylist: 'Unknown playlist',
     search: {

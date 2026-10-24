@@ -30,6 +30,7 @@ export default {
     all: '全部',
     undo: '撤销',
     retry: '重试',
+    loadFailed: '加载失败，请稍后重试',
     linkCopied: '链接已复制',
     unknownPlaylist: '未知歌单',
     search: { placeholder: '搜索音乐、歌手、专辑...', label: '搜索', suggest: '搜索建议' },

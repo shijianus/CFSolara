@@ -30,6 +30,7 @@ export default {
     all: 'すべて',
     undo: '元に戻す',
     retry: '再試行',
+    loadFailed: '読み込みに失敗しました。後でもう一度お試しください',
     linkCopied: 'リンクをコピーしました',
     unknownPlaylist: '不明なプレイリスト',
     search: {

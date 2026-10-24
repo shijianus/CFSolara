@@ -438,13 +438,13 @@ const playPlaylistCard = async (p: PlaylistData) => {
     const res: any = await playlistTrackAll({ id: p.id, limit: 100 })
     const list: Song[] = (res?.songs || []).map(mapToStoreSong)
     if (!list.length) {
-      useToastStore().show({ message: t('common.loadFailedRetry'), type: 'error' })
+      useToastStore().show({ message: t('common.loadFailed'), type: 'error' })
       return
     }
     setPlaylist(list, 0)
     play(list[0], 0)
   } catch {
-    useToastStore().show({ message: t('common.loadFailedRetry'), type: 'error' })
+    useToastStore().show({ message: t('common.loadFailed'), type: 'error' })
   } finally {
     playingPlaylistId.value = null
   }
