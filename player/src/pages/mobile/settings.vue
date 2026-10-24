@@ -87,7 +87,7 @@ onMounted(() => {
   <div class="h-full flex-1 overflow-auto px-4 pb-8">
     <div class="mb-6 pt-2">
       <h1 class="text-primary text-xl font-bold">{{ t('components.settings.title') }}</h1>
-      <p class="text-primary/50 mt-1 text-xs">
+      <p class="text-primary/70 mt-1 text-xs">
         {{ t('components.settings.desc') }}
       </p>
     </div>
@@ -229,8 +229,11 @@ onMounted(() => {
         <Button
           variant="ghost"
           size="none"
+          role="switch"
           class="toggle-switch"
           :class="{ active: isPerformanceMode }"
+          :aria-checked="isPerformanceMode"
+          :aria-label="t('components.settings.performanceMode')"
           @click="togglePerformanceMode"
         >
           <span class="toggle-dot"></span>
@@ -252,8 +255,11 @@ onMounted(() => {
         <Button
           variant="ghost"
           size="none"
+          role="switch"
           class="toggle-switch"
           :class="{ active: footerEnabled }"
+          :aria-checked="footerEnabled"
+          :aria-label="t('components.settings.footerLyricsTitle')"
           @click="footerEnabled = !footerEnabled"
         >
           <span class="toggle-dot"></span>
@@ -261,7 +267,7 @@ onMounted(() => {
       </div>
 
       <div v-if="footerEnabled" class="mt-4 border-t border-white/10 pt-4">
-        <p class="text-primary/60 mb-3 text-xs">{{ t('components.settings.footerLyricsModes') }}</p>
+        <p class="text-primary/75 mb-3 text-xs">{{ t('components.settings.footerLyricsModes') }}</p>
         <div class="flex flex-wrap gap-2">
           <Button
             variant="ghost"
@@ -301,7 +307,7 @@ onMounted(() => {
     </section>
 
     <div class="mt-8 text-center">
-      <p class="text-primary/30 text-xs">{{ BRAND_FULL }}</p>
+      <p class="text-primary/70 text-xs">{{ BRAND_FULL }}</p>
     </div>
   </div>
 </template>
@@ -338,14 +344,15 @@ onMounted(() => {
 }
 
 .card-desc {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   color: var(--glass-text-primary);
-  opacity: 0.5;
+  opacity: 0.72;
   margin-top: 0.125rem;
 }
 
 .theme-option {
   display: flex;
+  min-height: 44px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -379,7 +386,7 @@ onMounted(() => {
 }
 
 .option-label {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   color: var(--glass-text-primary);
   opacity: 0.7;
 }
@@ -391,21 +398,35 @@ onMounted(() => {
 .toggle-switch {
   position: relative;
   width: 2.75rem;
-  height: 1.5rem;
-  border-radius: 0.75rem;
-  background: var(--glass-interactive-hover-muted);
-  border: 1px solid var(--glass-border-default);
+  height: 2.75rem;
+  border: 0;
+  background: transparent;
   transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
-.toggle-switch.active {
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1.5rem;
+  transform: translateY(-50%);
+  border-radius: 0.75rem;
+  background: var(--glass-interactive-hover-muted);
+  border: 1px solid var(--glass-border-default);
+  transition: all 0.3s ease;
+}
+
+.toggle-switch.active::before {
   background: linear-gradient(135deg, rgb(56, 189, 248), rgb(37, 99, 235));
   border-color: transparent;
 }
 
 .toggle-dot {
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 0.25rem;
   transform: translateY(-50%);
@@ -423,6 +444,7 @@ onMounted(() => {
 
 .mode-chip {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 0.875rem;

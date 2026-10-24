@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useAudio } from '@/composables/useAudio'
 import { useEventListener } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   color: {
@@ -19,7 +22,7 @@ const gradientStyle = computed(() => {
   return `linear-gradient(90deg, ${props.color.join(', ')})`
 })
 
-const { currentSong, duration, progress, setProgress } = useAudio()
+const { currentSong, currentTime, duration, progress, setProgress, setCurrentTime } = useAudio()
 
 const progressBarRef = useTemplateRef('progressBarRef')
 
@@ -35,6 +38,37 @@ const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+}
+
+const totalSeconds = computed(() => {
+  let total = duration.value
+  if (!total && currentSong.value?.duration) {
+    total = currentSong.value.duration
+    if (total > 10000) total = total / 1000
+  }
+  return Math.max(0, total || 0)
+})
+
+const currentSeconds = computed(() =>
+  Math.max(0, Math.min(totalSeconds.value, currentTime.value))
+)
+
+const progressValueText = computed(
+  () => `${formatTime(currentSeconds.value)} / ${formatTime(totalSeconds.value)}`
+)
+
+const handleProgressKeydown = (event: KeyboardEvent) => {
+  if (!currentSong.value) return
+  const total = totalSeconds.value
+  if (!total) return
+  let next: number | null = null
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = currentTime.value - 5
+  else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next = currentTime.value + 5
+  else if (event.key === 'Home') next = 0
+  else if (event.key === 'End') next = total
+  if (next === null) return
+  event.preventDefault()
+  setCurrentTime(Math.max(0, Math.min(total, next)))
 }
 
 const handleProgressHover = (event: MouseEvent) => {
@@ -150,10 +184,20 @@ const previewPositionPercent = computed(() => {
 <template>
   <div
     ref="progressBarRef"
+    role="slider"
+    tabindex="0"
+    aria-orientation="horizontal"
+    :aria-label="t('player.progress')"
+    aria-valuemin="0"
+    :aria-valuemax="Math.round(totalSeconds)"
+    :aria-valuenow="Math.round(currentSeconds)"
+    :aria-valuetext="progressValueText"
+    :aria-disabled="!currentSong || undefined"
     @click="handleProgressClick"
+    @keydown="handleProgressKeydown"
     @mousemove="handleProgressHover"
     @mouseleave="handleProgressLeave"
-    class="progress-wrapper group relative h-6 cursor-pointer select-none"
+    class="progress-wrapper group relative h-11 cursor-pointer select-none rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @mousedown="startDrag"
     @touchstart.prevent="startDrag"
   >

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { cloudSearch, searchSuggest, searchDefault } from '@/api'
+import { cloudSearch, searchSuggest, searchDefault, searchHotDetail } from '@/api'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Pagination from '@/components/Ui/Pagination.vue'
 import { Song } from '@/stores/interface'
 import { useAudio } from '@/composables/useAudio'
+import { useGlobalStore } from '@/stores/modules/global'
+import { storeToRefs } from 'pinia'
+import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
@@ -37,6 +40,10 @@ type SearchTab = 'song' | 'playlist' | 'mv'
 
 const { t } = useI18n()
 const { setPlaylist, play, currentSong } = useAudio()
+const route = useRoute()
+const router = useRouter()
+const globalStore = useGlobalStore()
+const { searchHistory } = storeToRefs(globalStore)
 
 interface MobileSearchState {
   q: string
@@ -45,6 +52,9 @@ interface MobileSearchState {
   suggest: string[]
   loading: boolean
   suggestVisible: boolean
+  hasSearched: boolean
+  hotSearches: Array<{ searchWord: string; score?: number; iconType?: number }>
+  loadingHot: boolean
   songs: SongData[]
   songPage: number
   songPageSize: number
@@ -65,6 +75,9 @@ const state = reactive<MobileSearchState>({
   suggest: [],
   loading: false,
   suggestVisible: false,
+  hasSearched: false,
+  hotSearches: [],
+  loadingHot: false,
   songs: [],
   songPage: 1,
   songPageSize: 20,
@@ -85,6 +98,9 @@ const {
   suggest,
   loading,
   suggestVisible,
+  hasSearched,
+  hotSearches,
+  loadingHot,
   songs,
   songPage,
   songPageSize,
@@ -105,11 +121,78 @@ const fetchDefault = async () => {
   state.placeholder = def || ''
 }
 
+const fetchHot = async () => {
+  if (state.loadingHot || state.hotSearches.length) return
+  state.loadingHot = true
+  try {
+    const res: any = await searchHotDetail()
+    state.hotSearches = Array.isArray(res?.data) ? res.data.slice(0, 10) : []
+  } catch {
+    state.hotSearches = []
+  } finally {
+    state.loadingHot = false
+  }
+}
+
+// 搜索建议：300ms 防抖，并用 AbortController 丢弃过期请求
+let suggestAbort: AbortController | null = null
 const fetchSuggest = async () => {
-  if (!state.q.trim()) return (state.suggest = [])
-  const res = await searchSuggest({ keywords: state.q, type: 'mobile' })
-  const list = (res as any)?.result?.allMatch || []
-  state.suggest = list.map((i: any) => i.keyword).slice(0, 8)
+  const term = state.q.trim()
+  suggestAbort?.abort()
+  if (!term) {
+    state.suggest = []
+    return
+  }
+  const controller = new AbortController()
+  suggestAbort = controller
+  try {
+    const res = await searchSuggest({ keywords: term, type: 'mobile' }, controller.signal)
+    if (controller.signal.aborted) return
+    const list = (res as any)?.result?.allMatch || []
+    state.suggest = list.map((i: any) => i.keyword).slice(0, 8)
+  } catch {
+    if (!controller.signal.aborted) state.suggest = []
+  }
+}
+const debouncedFetchSuggest = useDebounceFn(fetchSuggest, 300)
+
+const syncQueryToUrl = (term: string) => {
+  const current = String(route.query.q || '').trim()
+  if (current === term) return
+  const query = { ...route.query } as Record<string, any>
+  if (term) query.q = term
+  else delete query.q
+  router.replace({ path: '/search', query })
+}
+
+let suppressPagingFetch = false
+const resetResults = () => {
+  suppressPagingFetch = true
+  state.songs = []
+  state.playlists = []
+  state.mvs = []
+  state.songTotal = 0
+  state.playlistTotal = 0
+  state.mvTotal = 0
+  state.songPage = 1
+  state.playlistPage = 1
+  state.mvPage = 1
+  nextTick(() => {
+    suppressPagingFetch = false
+  })
+}
+
+const runSearch = async (keyword: string) => {
+  const term = keyword.trim()
+  if (!term) return
+  suggestAbort?.abort()
+  state.q = term
+  state.hasSearched = true
+  state.suggestVisible = false
+  globalStore.addSearchHistory(term)
+  syncQueryToUrl(term)
+  resetResults()
+  await searchAll()
 }
 
 const fetchSongs = async () => {
@@ -171,32 +254,43 @@ const fetchSongs = async () => {
 
 const fetchPlaylists = async () => {
   if (!state.q.trim()) return
-  const res = await cloudSearch({
-    keywords: state.q,
-    type: 1000,
-    limit: state.playlistPageSize,
-    offset: (state.playlistPage - 1) * state.playlistPageSize,
-  })
-  const { playlists, total } = transformSearchPlaylists(res as Record<string, unknown>)
-  state.playlists = playlists
-  state.playlistTotal = total
+  try {
+    const res = await cloudSearch({
+      keywords: state.q,
+      type: 1000,
+      limit: state.playlistPageSize,
+      offset: (state.playlistPage - 1) * state.playlistPageSize,
+    })
+    const { playlists, total } = transformSearchPlaylists(res as Record<string, unknown>)
+    state.playlists = playlists
+    state.playlistTotal = total
+  } catch {
+    state.playlists = []
+    state.playlistTotal = 0
+  }
 }
 
 const fetchMVs = async () => {
   if (!state.q.trim()) return
-  const res = await cloudSearch({
-    keywords: state.q,
-    type: 1004,
-    limit: state.mvPageSize,
-    offset: (state.mvPage - 1) * state.mvPageSize,
-  })
-  const { mvs, total } = transformSearchMVs(res as Record<string, unknown>)
-  state.mvs = mvs
-  state.mvTotal = total
+  try {
+    const res = await cloudSearch({
+      keywords: state.q,
+      type: 1004,
+      limit: state.mvPageSize,
+      offset: (state.mvPage - 1) * state.mvPageSize,
+    })
+    const { mvs, total } = transformSearchMVs(res as Record<string, unknown>)
+    state.mvs = mvs
+    state.mvTotal = total
+  } catch {
+    state.mvs = []
+    state.mvTotal = 0
+  }
 }
 
 const searchAll = async () => {
   if (!state.q.trim()) return
+  state.hasSearched = true
   state.loading = true
   try {
     await Promise.all([fetchSongs(), fetchPlaylists(), fetchMVs()])
@@ -207,52 +301,87 @@ const searchAll = async () => {
 
 onMounted(async () => {
   await fetchDefault()
-  await searchAll()
+  const initial = String(route.query.q || '').trim()
+  if (initial) {
+    state.q = initial
+    globalStore.addSearchHistory(initial)
+    await searchAll()
+  } else {
+    fetchHot()
+  }
   document.addEventListener('click', handleDocClick)
 })
 
-watch(() => state.q, fetchSuggest)
+watch(
+  () => state.q,
+  value => {
+    if (!value.trim()) {
+      suggestAbort?.abort()
+      state.suggest = []
+      return
+    }
+    debouncedFetchSuggest()
+  }
+)
+
+// 地址栏/浏览器前后退改变关键词时保持页面同步
+watch(
+  () => route.query.q,
+  async raw => {
+    const next = String(raw || '').trim()
+    if (next === state.q.trim()) return
+    state.suggestVisible = false
+    resetResults()
+    if (next) {
+      state.q = next
+      state.hasSearched = true
+      await searchAll()
+    } else {
+      state.q = ''
+      state.hasSearched = false
+      fetchHot()
+    }
+  }
+)
+
 watch(
   () => state.songPage,
   () => {
-    fetchSongs()
+    if (state.hasSearched && !suppressPagingFetch) fetchSongs()
   }
 )
 watch(
   () => state.playlistPage,
   () => {
-    fetchPlaylists()
+    if (state.hasSearched && !suppressPagingFetch) fetchPlaylists()
   }
 )
 watch(
   () => state.mvPage,
   () => {
-    fetchMVs()
+    if (state.hasSearched && !suppressPagingFetch) fetchMVs()
   }
 )
 
 const handleSuggestClick = (s: string) => {
-  state.q = s
-  state.songPage = 1
-  state.playlistPage = 1
-  state.mvPage = 1
-  state.suggestVisible = false
-  searchAll()
+  runSearch(s)
 }
 
 const clearQuery = () => {
   state.q = ''
   state.suggest = []
   state.suggestVisible = false
+  state.hasSearched = false
+  resetResults()
+  syncQueryToUrl('')
+  fetchHot()
 }
 
 const inputRef = useTemplateRef('inputRef')
 const handleSearchClick = () => {
-  if (!state.q.trim()) state.q = state.placeholder || ''
-  state.songPage = 1
-  state.playlistPage = 1
-  state.mvPage = 1
-  searchAll()
+  const term = state.q.trim() || state.placeholder.trim()
+  if (!term) return
+  runSearch(term)
   state.suggestVisible = false
   inputRef.value?.blur()
 }
@@ -267,6 +396,7 @@ const handleDocClick = (e: MouseEvent) => {
   if (el && target && !el.contains(target)) state.suggestVisible = false
 }
 onUnmounted(() => {
+  suggestAbort?.abort()
   document.removeEventListener('click', handleDocClick)
 })
 
@@ -328,8 +458,8 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col overflow-hidden">
-    <div class="shrink-0 px-4 pb-3">
+  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div class="mobile-search-top shrink-0 px-4 pb-3">
       <div ref="searchBoxRef" class="relative">
         <div class="glass-card flex items-center gap-2 px-3 py-2.5">
           <span class="icon-[mdi--magnify] search-icon h-5 w-5 shrink-0"></span>
@@ -346,16 +476,17 @@ watch(
             v-if="q"
             variant="ghost"
             size="none"
-            class="clear-btn flex h-7 w-7 items-center justify-center rounded-full transition-all"
+            class="clear-btn flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all"
             icon="icon-[mdi--close-circle]"
             icon-class="h-4 w-4"
             :title="$t('common.clear')"
+            :aria-label="$t('common.clear')"
             @click="clearQuery"
           />
           <Button
             variant="gradient"
             size="none"
-            class="search-btn text-white flex h-8 items-center gap-1.5 rounded-full px-4 text-xs font-medium transition-all active:scale-95"
+            class="search-btn flex h-11 items-center gap-1.5 rounded-full px-4 text-xs font-medium text-white transition-all active:scale-95"
             icon="icon-[mdi--magnify]"
             icon-class="h-4 w-4"
             @click="handleSearchClick"
@@ -369,7 +500,7 @@ watch(
             v-if="suggestVisible && suggest.length"
             class="suggest-dropdown absolute top-full right-0 left-0 z-20 mt-2 rounded-2xl p-3"
           >
-            <p class="suggest-title mb-2 px-1 text-[10px] font-medium tracking-wider uppercase">
+            <p class="suggest-title mb-2 px-1 text-[11px] font-medium tracking-wider uppercase">
               {{ $t('common.search.suggest') }}
             </p>
             <div class="flex flex-wrap gap-2">
@@ -388,13 +519,13 @@ watch(
         </Transition>
       </div>
 
-      <div class="glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
+      <div v-if="hasSearched" class="mobile-search-tabs glass-card mt-3 inline-flex w-full gap-1.5 p-1.5">
         <Button
           v-for="tabItem in tabs"
           :key="tabItem.key"
           variant="ghost"
           size="none"
-          class="tab-button flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-300"
+          class="tab-button flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium transition-all duration-300"
           :class="tab === tabItem.key ? 'tab-button-active' : ''"
           :icon="tabItem.icon"
           icon-class="h-4 w-4"
@@ -405,7 +536,104 @@ watch(
       </div>
     </div>
 
-    <div class="flex-1 overflow-hidden">
+    <!-- 未搜索：热门搜索 + 搜索历史 -->
+    <div v-if="!hasSearched" class="flex-1 overflow-y-auto px-4 pb-6">
+      <section v-if="searchHistory.length" class="mb-6">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="icon-[mdi--history] h-4 w-4 text-primary/40"></span>
+            <h2 class="text-primary/60 text-xs font-bold tracking-wider uppercase">
+              {{ $t('search.recentSearches') }}
+            </h2>
+          </div>
+          <button
+            type="button"
+            class="text-primary/40 hover:text-primary/70 flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-medium transition-colors"
+            @click="globalStore.clearSearchHistory()"
+          >
+            {{ $t('common.clear') }}
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div
+            v-for="keyword in searchHistory"
+            :key="keyword"
+            class="history-chip flex min-h-12 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-colors"
+          >
+            <button
+              type="button"
+              class="flex min-h-12 min-w-0 items-center gap-1.5 pr-1 pl-3.5 text-xs font-medium"
+              @click="runSearch(keyword)"
+            >
+              <span class="icon-[mdi--history] size-3.5 shrink-0 text-primary/40"></span>
+              <span class="text-primary/80 truncate">{{ keyword }}</span>
+            </button>
+            <button
+              type="button"
+              class="text-primary/40 hover:text-primary/80 flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors"
+              :aria-label="$t('search.removeHistory', { keyword })"
+              :title="$t('common.delete')"
+              @click="globalStore.removeSearchHistory(keyword)"
+            >
+              <span class="icon-[mdi--close] h-4 w-4"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="mb-3 flex items-center gap-2">
+          <span class="icon-[mdi--fire] h-4 w-4 text-orange-500/60"></span>
+          <h2 class="text-primary/40 text-xs font-medium">{{ $t('search.hotSearches') }}</h2>
+        </div>
+
+        <div v-if="loadingHot" class="space-y-2">
+          <div
+            v-for="i in 8"
+            :key="i"
+            class="flex min-h-11 items-center gap-3 rounded-xl px-3"
+          >
+            <div class="h-5 w-5 animate-pulse rounded bg-white/[0.05]"></div>
+            <div
+              class="h-3 animate-pulse rounded bg-white/[0.05]"
+              :style="{ width: `${30 + Math.random() * 35}%` }"
+            ></div>
+          </div>
+        </div>
+
+        <div v-else class="space-y-1">
+          <button
+            v-for="(item, index) in hotSearches"
+            :key="item.searchWord"
+            type="button"
+            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors active:bg-white/[0.04]"
+            @click="runSearch(item.searchWord)"
+          >
+            <span
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold"
+              :class="index < 3 ? 'bg-sky-500/15 text-sky-400' : 'text-primary/30'"
+            >
+              {{ index + 1 }}
+            </span>
+            <span class="text-primary/75 min-w-0 flex-1 truncate text-sm">
+              {{ item.searchWord }}
+            </span>
+            <span
+              v-if="item.iconType === 1"
+              class="text-primary/70 shrink-0 rounded bg-sky-500/10 px-1.5 py-0.5 text-[11px] font-bold"
+            >
+              HOT
+            </span>
+          </button>
+        </div>
+
+        <p v-if="!loadingHot && !hotSearches.length" class="text-primary/40 py-8 text-center text-sm">
+          {{ $t('search.enterKeyword') }}
+        </p>
+      </section>
+    </div>
+
+    <div v-else class="flex-1 overflow-hidden">
       <div v-if="loading" class="h-full overflow-auto px-4 py-6">
         <PageSkeleton :sections="['list']" :list-count="10" />
       </div>
@@ -423,15 +651,15 @@ watch(
       >
         <!-- Songs Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
-            <div v-if="songs.length > 0" class="flex items-center justify-between py-2">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
+            <div v-if="songs.length > 0" class="search-results-summary flex items-center justify-between py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: songTotal }) }}
               </p>
               <Button
                 variant="gradient"
                 size="none"
-                class="play-all-button text-white flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium shadow-lg transition-all duration-200 active:scale-95"
+                class="play-all-button flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-white shadow-lg transition-all duration-200 active:scale-95"
                 icon="icon-[mdi--play]"
                 icon-class="h-4 w-4"
                 @click="playAllSongs"
@@ -440,7 +668,10 @@ watch(
               </Button>
             </div>
 
-            <div v-if="songs.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && songs.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--music-note-off] h-10 w-10 opacity-40" />
               </div>
@@ -460,14 +691,17 @@ watch(
 
         <!-- Playlists Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
             <div v-if="playlists.length > 0" class="py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: playlistTotal }) }}
               </p>
             </div>
 
-            <div v-if="playlists.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && playlists.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--playlist-remove] h-10 w-10 opacity-40" />
               </div>
@@ -517,14 +751,17 @@ watch(
 
         <!-- MVs Slide -->
         <swiper-slide>
-          <div class="h-full w-full space-y-3 overflow-auto px-4 pb-6">
+          <div class="h-full min-h-11 w-full space-y-3 overflow-auto px-4 pb-6" tabindex="0">
             <div v-if="mvs.length > 0" class="py-2">
               <p class="info-text text-xs">
                 {{ t('search.result', { count: mvTotal }) }}
               </p>
             </div>
 
-            <div v-if="mvs.length === 0" class="empty-state flex flex-col items-center py-16">
+            <div
+              v-if="hasSearched && mvs.length === 0"
+              class="empty-state flex flex-col items-center py-16"
+            >
               <div class="empty-icon mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                 <span class="icon-[mdi--video-off] h-10 w-10 opacity-40" />
               </div>
@@ -578,6 +815,36 @@ watch(
 </template>
 
 <style scoped>
+/* 横屏手机高度有限：搜索框与结果 Tab 同排，给结果区保留可滚动高度 */
+@media (max-height: 500px) {
+  .mobile-search-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .mobile-search-top > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-search-tabs {
+    width: auto;
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+
+  .mobile-search-tabs .tab-button {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .search-results-summary {
+    display: none;
+  }
+}
+
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;
@@ -628,7 +895,7 @@ watch(
 
 .suggest-title {
   color: var(--glass-text-primary);
-  opacity: 0.4;
+  opacity: 0.7;
 }
 
 .suggest-tag {
@@ -644,7 +911,7 @@ watch(
 
 .tab-button {
   color: var(--glass-text-primary);
-  opacity: 0.6;
+  opacity: 0.78;
 }
 
 .tab-button-active {
@@ -656,7 +923,7 @@ watch(
 
 .info-text {
   color: var(--glass-text-primary);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .play-all-button {
@@ -757,6 +1024,13 @@ html.dark .playlist-cover {
 .playlist-card:active .playlist-play-btn {
   opacity: 1;
   transform: scale(1);
+}
+
+@media (hover: none) {
+  .playlist-play-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .playlist-name {

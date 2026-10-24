@@ -2,7 +2,9 @@
 import { ref, computed, useTemplateRef } from 'vue'
 import { useAudio } from '@/composables/useAudio'
 import { onClickOutside } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const { volume, isMuted, setVolume } = useAudio()
 
 const showPopup = ref(false)
@@ -77,6 +79,19 @@ const handleMouseUp = () => {
   document.removeEventListener('mousemove', handleMouseMove)
   document.removeEventListener('mouseup', handleMouseUp)
 }
+
+const volumeValueText = computed(() => `${Math.round(volume.value * 100)}%`)
+
+const handleVolumeKeydown = (event: KeyboardEvent) => {
+  let next: number | null = null
+  if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') next = volume.value - 0.05
+  else if (event.key === 'ArrowUp' || event.key === 'ArrowRight') next = volume.value + 0.05
+  else if (event.key === 'Home') next = 0
+  else if (event.key === 'End') next = 1
+  if (next === null) return
+  event.preventDefault()
+  setVolume(Math.max(0, Math.min(1, next)))
+}
 </script>
 
 <template>
@@ -93,7 +108,16 @@ const handleMouseUp = () => {
 
         <!-- Vertical Slider Container -->
         <div
-          class="relative flex h-32 w-10 cursor-pointer touch-none justify-center"
+          role="slider"
+          tabindex="0"
+          aria-orientation="vertical"
+          :aria-label="t('player.volume')"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          :aria-valuenow="Math.round(volume * 100)"
+          :aria-valuetext="volumeValueText"
+          class="relative flex h-32 w-11 cursor-pointer touch-none justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+          @keydown="handleVolumeKeydown"
           @touchstart.prevent="handleTouchStart"
           @mousedown.prevent="handleMouseDown"
         >
@@ -137,6 +161,8 @@ const handleMouseUp = () => {
       :class="{ 'text-primary': showPopup }"
       @click.stop="togglePopup"
       :icon="volumeIcon"
+      :aria-label="t('player.volume')"
+      :title="t('player.volume')"
       icon-class="text-primary/70 group-hover:text-primary h-7 w-7 transition-colors"
     >
     </Button>

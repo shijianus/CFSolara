@@ -206,11 +206,12 @@ const maxScore = computed(() => {
             <div v-if="total > 0" class="flex items-center gap-2">
               <div class="flex items-center gap-1 rounded-xl bg-white/5 p-1">
                 <button
-                  class="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg transition-all"
                   :class="
                     page > 1 ? 'text-primary hover:bg-white/10' : 'text-primary/30 cursor-not-allowed'
                   "
                   :disabled="page <= 1"
+                  :aria-label="$t('components.pagination.prev')"
                   @click="page > 1 && page--"
                 >
                   <span class="icon-[mdi--chevron-left] h-5 w-5" />
@@ -219,13 +220,14 @@ const maxScore = computed(() => {
                   {{ page }} / {{ Math.ceil(total / pageSize) || 1 }}
                 </span>
                 <button
-                  class="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg transition-all"
                   :class="
                     page < Math.ceil(total / pageSize)
                       ? 'text-primary hover:bg-white/10'
                       : 'text-primary/30 cursor-not-allowed'
                   "
                   :disabled="page >= Math.ceil(total / pageSize)"
+                  :aria-label="$t('components.pagination.next')"
                   @click="page < Math.ceil(total / pageSize) && page++"
                 >
                   <span class="icon-[mdi--chevron-right] h-5 w-5" />
@@ -306,7 +308,9 @@ const maxScore = computed(() => {
               <Transition name="fade-scale">
                 <button
                   v-if="searchInput"
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary/40 transition-colors hover:bg-white/10 hover:text-white"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-primary/40 transition-colors hover:bg-white/10 hover:text-white"
+                  :aria-label="$t('common.clear')"
+                  :title="$t('common.clear')"
                   @click="searchInput = ''"
                 >
                   <span class="icon-[mdi--close] h-3.5 w-3.5" />
@@ -314,7 +318,7 @@ const maxScore = computed(() => {
               </Transition>
               <!-- 搜索按钮 -->
               <button
-                class="search-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full px-5 text-xs font-semibold text-white transition-all duration-300 active:scale-95"
+                class="search-btn flex h-11 shrink-0 items-center gap-1.5 rounded-full px-5 text-xs font-semibold text-white transition-all duration-300 active:scale-95"
                 @click="handleSubmit"
               >
                 <span class="icon-[mdi--magnify] h-3.5 w-3.5" />
@@ -332,27 +336,37 @@ const maxScore = computed(() => {
               <span class="text-primary/60 text-xs font-bold uppercase tracking-wider">{{ $t('search.recentSearches') }}</span>
             </div>
             <button
-              class="text-primary/40 hover:text-primary/70 text-xs font-medium transition-colors"
+              class="text-primary/40 hover:text-primary/70 flex min-h-11 min-w-11 items-center justify-center px-1 text-xs font-medium transition-colors"
               @click="clearHistory"
             >
               {{ $t('common.clear') }}
             </button>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button
+            <div
               v-for="(keyword, ki) in searchHistory"
               :key="keyword"
-              class="history-chip group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:border-sky-500/30 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95"
+              class="history-chip group flex min-h-11 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-all duration-200 hover:border-sky-500/30 hover:bg-white/10 hover:-translate-y-0.5"
               :style="{ animationDelay: `${ki * 35}ms` }"
-              @click="doSearch(keyword)"
             >
-              <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
-              <span class="text-primary/80 group-hover:text-white transition-colors">{{ keyword }}</span>
-              <span
-                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/40 hover:text-sky-400!"
-                @click.stop="globalStore.removeSearchHistory(keyword)"
-              />
-            </button>
+              <button
+                type="button"
+                class="flex min-h-11 min-w-0 items-center gap-2 pr-1 pl-3.5 text-xs font-medium"
+                @click="doSearch(keyword)"
+              >
+                <span class="icon-[mdi--history] size-3.5 shrink-0 text-primary/40"></span>
+                <span class="text-primary/80 group-hover:text-primary truncate transition-colors">{{ keyword }}</span>
+              </button>
+              <button
+                type="button"
+                class="text-primary/40 hover:text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors"
+                :aria-label="$t('search.removeHistory', { keyword })"
+                :title="$t('common.delete')"
+                @click="globalStore.removeSearchHistory(keyword)"
+              >
+                <span class="icon-[mdi--close] h-4 w-4"></span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -417,11 +431,11 @@ const maxScore = computed(() => {
               <!-- 标签 -->
               <span
                 v-if="item.iconType === 1"
-                class="shrink-0 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-blue-400"
+                class="shrink-0 rounded-md bg-blue-500/15 px-1.5 py-0.5 text-[11px] font-bold leading-none text-blue-400"
               >HOT</span>
               <span
                 v-else-if="item.iconType === 5"
-                class="shrink-0 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-emerald-400"
+                class="shrink-0 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-bold leading-none text-emerald-400"
               >NEW</span>
 
               <!-- 热度值 -->

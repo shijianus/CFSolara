@@ -96,7 +96,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
 
 <template>
   <div class="flex-1 overflow-hidden">
-    <div class="h-full overflow-auto pb-4">
+    <div class="h-full overflow-auto pb-4" tabindex="0">
       <template v-if="isLoading">
         <MobileHomeSkeleton />
       </template>
@@ -115,7 +115,9 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                 role="button"
                 tabindex="0"
                 @click="handleBannerClick(item)"
-                class="relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl select-none"
+                @keydown.enter.prevent="handleBannerClick(item)"
+                @keydown.space.prevent="handleBannerClick(item)"
+                class="relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl select-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:outline-none"
               >
                 <LazyImage
                   :src="item.coverImgUrl"
@@ -166,7 +168,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   class="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent"
                 ></div>
                 <div
-                  class="bg-overlay/50 text-primary absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] backdrop-blur-sm"
+                  class="bg-overlay/50 text-primary absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] backdrop-blur-sm"
                 >
                   <span class="icon-[mdi--play] h-2.5 w-2.5"></span>
                   {{ formatCount(pl.playCount) }}
@@ -209,7 +211,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   imgClass="h-full w-full object-cover"
                 />
               </div>
-              <span class="artist-name w-16 truncate text-center text-[10px]">{{
+              <span class="artist-name w-16 truncate text-center text-[11px]">{{
                 artist.name
               }}</span>
             </router-link>
@@ -257,7 +259,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   class="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent"
                 ></div>
                 <div
-                  class="bg-overlay/50 text-primary absolute top-2 right-2 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] backdrop-blur-sm"
+                  class="bg-overlay/50 text-primary absolute top-2 right-2 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] backdrop-blur-sm"
                 >
                   <span class="icon-[mdi--play] h-2.5 w-2.5"></span>
                   {{ formatCount(mv.playCount) }}
@@ -271,7 +273,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                 </div>
                 <div class="absolute right-0 bottom-0 left-0 p-2">
                   <p class="text-primary truncate text-xs font-medium">{{ mv.name }}</p>
-                  <p class="text-primary/60 truncate text-[10px]">{{ mv.artist }}</p>
+                  <p class="text-primary/60 truncate text-[11px]">{{ mv.artist }}</p>
                 </div>
               </div>
             </router-link>

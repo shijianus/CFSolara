@@ -5,11 +5,20 @@ import Pagination from '@/components/Ui/Pagination.vue'
 import PageSkeleton from '@/components/PageSkeleton.vue'
 import Button from '@/components/Ui/Button.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useDialogA11y } from '@/composables/useDialogA11y'
 
 const show = defineModel<boolean>('show', { default: false })
 const props = defineProps<{ songId: number | string | null }>()
 
-const isMobile = useMediaQuery('(max-width: 768px)')
+const isMobile = useMediaQuery('(max-width: 819px), (max-height: 499px)')
+const panelRef = useTemplateRef<HTMLElement>('panelRef')
+const close = () => (show.value = false)
+
+useDialogA11y({
+  isOpen: show,
+  containerRef: panelRef,
+  onClose: close,
+})
 
 const state = reactive({
   loading: false,
@@ -57,8 +66,6 @@ watch(
   }
 )
 
-const close = () => (show.value = false)
-
 // Mobile swipe-to-close
 const contentRef = ref<HTMLElement>()
 const startY = ref(0)
@@ -102,7 +109,12 @@ const formatTime = (t: number | string) => {
 
       <!-- ═══ Drawer Panel ═══ -->
       <div
-        class="drawer-panel relative z-10 flex flex-col overflow-hidden"
+        ref="panelRef"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="comments-dialog-title"
+        tabindex="-1"
+        class="drawer-panel relative z-10 flex flex-col overflow-hidden outline-none"
         :class="
           isMobile
             ? 'mt-auto max-h-[88vh] w-full rounded-t-3xl'
@@ -132,7 +144,9 @@ const formatTime = (t: number | string) => {
               <span class="icon-[mdi--comment-text-multiple] h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 class="drawer-title text-lg font-bold">{{ $t('comments.title') }}</h2>
+              <h2 id="comments-dialog-title" class="drawer-title text-lg font-bold">
+                {{ $t('comments.title') }}
+              </h2>
               <p class="drawer-subtitle mt-0.5 text-sm">
                 {{ $t('comments.total', { total: state.total }) }}
               </p>
@@ -145,6 +159,8 @@ const formatTime = (t: number | string) => {
             icon="icon-[mdi--close]"
             icon-class="h-5 w-5"
             class="close-btn"
+            :aria-label="$t('common.close')"
+            :title="$t('common.close')"
             @click="close"
           />
         </div>
@@ -389,15 +405,15 @@ const formatTime = (t: number | string) => {
 }
 
 /* Desktop: slide from right */
-@media (min-width: 769px) {
+@media (min-width: 820px) and (min-height: 500px) {
   .drawer-enter-from .drawer-panel,
   .drawer-leave-to .drawer-panel {
     transform: translateX(100%);
   }
 }
 
-/* Mobile: slide from bottom */
-@media (max-width: 768px) {
+/* Mobile / landscape phone: slide from bottom */
+@media (max-width: 819px), (max-height: 499px) {
   .drawer-enter-from .drawer-panel,
   .drawer-leave-to .drawer-panel {
     transform: translateY(100%);

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useAudio } from '@/composables/useAudio'
 import { useEventListener } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const { volume, isMuted, setVolume, toggleMute } = useAudio()
 
 const volumeBarRef = useTemplateRef('volumeBarRef')
@@ -111,6 +113,19 @@ const previewPositionPercent = computed(() => {
 const previewVolumeText = computed(() => {
   return Math.round(state.previewVolume * 100) + '%'
 })
+
+const volumeValueText = computed(() => `${Math.round(volume.value * 100)}%`)
+
+const handleVolumeKeydown = (event: KeyboardEvent) => {
+  let next: number | null = null
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = volume.value - 0.05
+  else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next = volume.value + 0.05
+  else if (event.key === 'Home') next = 0
+  else if (event.key === 'End') next = 1
+  if (next === null) return
+  event.preventDefault()
+  setVolume(Math.max(0, Math.min(1, next)))
+}
 </script>
 
 <template>
@@ -121,7 +136,8 @@ const previewVolumeText = computed(() => {
       rounded="full"
       @click="toggleMute"
       class="text-primary/70 hover:text-primary flex items-center transition-colors"
-      title="Toggle Mute"
+      :title="isMuted ? t('player.unmute') : t('player.mute')"
+      :aria-label="isMuted ? t('player.unmute') : t('player.mute')"
       :icon="volumeIcon"
       icon-class="h-6 w-6"
     >
@@ -129,12 +145,21 @@ const previewVolumeText = computed(() => {
 
     <div
       ref="volumeBarRef"
+      role="slider"
+      tabindex="0"
+      aria-orientation="horizontal"
+      :aria-label="t('player.volume')"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      :aria-valuenow="Math.round(volume * 100)"
+      :aria-valuetext="volumeValueText"
       @click="handleVolumeClick"
+      @keydown="handleVolumeKeydown"
       @mousemove="handleVolumeHover"
       @mouseleave="handleVolumeLeave"
       @mousedown="startDrag"
       @touchstart.prevent="startDrag"
-      class="progress-wrapper group relative h-6 w-24 cursor-pointer select-none"
+      class="progress-wrapper group relative h-11 w-24 cursor-pointer select-none rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
     >
       <!-- Volume Preview Tooltip -->
       <Transition name="fade">

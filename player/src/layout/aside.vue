@@ -176,12 +176,12 @@ const isActive = (path: string) => {
               </span>
             </span>
             <div class="flex flex-col leading-none">
-              <span class="text-[9px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+              <span class="text-[11px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
               <div class="mt-0.5 flex items-center gap-1.5">
                 <span class="text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</span>
-                <span class="rounded bg-linear-to-r from-[#2563eb]/30 to-[#38bdf8]/30 px-1 py-0.2 text-[8px] font-bold text-white/90 border border-white/20">{{ BRAND_STUDIO }}</span>
+                <span class="rounded bg-linear-to-r from-[#2563eb]/30 to-[#38bdf8]/30 px-1 py-0.2 text-[11px] font-bold text-white/90 border border-white/20">{{ BRAND_STUDIO }}</span>
               </div>
-              <span class="mt-0.5 text-[9px] text-primary/40 font-semibold tracking-wider">{{ BRAND_TAGLINE }}</span>
+              <span class="mt-0.5 text-[11px] text-primary/40 font-semibold tracking-wider">{{ BRAND_TAGLINE }}</span>
             </div>
           </router-link>
 
@@ -190,14 +190,16 @@ const isActive = (path: string) => {
             <button
               @click="router.back()"
               title="Back"
-              class="flex h-6 w-6 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              aria-label="Back"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
             >
               <span class="icon-[mdi--chevron-left] h-3.5 w-3.5"></span>
             </button>
             <button
               @click="router.forward()"
               title="Forward"
-              class="flex h-6 w-6 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
+              aria-label="Forward"
+              class="flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors"
             >
               <span class="icon-[mdi--chevron-right] h-3.5 w-3.5"></span>
             </button>
@@ -226,7 +228,7 @@ const isActive = (path: string) => {
             </button>
             <span
               v-else
-              class="rounded bg-white/10 px-1 py-0.2 text-[8px] font-semibold text-primary/40"
+              class="rounded bg-white/10 px-1 py-0.2 text-[11px] font-semibold text-primary/40"
             >↵</span>
           </div>
         </div>
@@ -242,7 +244,7 @@ const isActive = (path: string) => {
 
           <div ref="navContainerRef">
             <div v-for="sec in sections" :key="sec.titleKey" class="mb-4">
-              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[11px] font-bold tracking-[.18em] uppercase">
                 {{ $t(sec.titleKey) }}
               </h3>
               <nav class="relative space-y-0.5">
@@ -252,7 +254,7 @@ const isActive = (path: string) => {
                   :to="item.to"
                   @mouseenter="prefetchRoute(item.to)"
                   @focus="prefetchRoute(item.to)"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
                     'hover:bg-white/5': !isActive(item.to),
@@ -272,7 +274,7 @@ const isActive = (path: string) => {
 
             <!-- 收藏的歌单（本地持久化） -->
             <div v-if="collectedPlaylists.length" class="mb-4">
-              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[11px] font-bold tracking-[.18em] uppercase">
                 {{ $t('layout.aside.collectedPlaylists') }}
               </h3>
               <nav class="relative space-y-0.5">
@@ -280,7 +282,7 @@ const isActive = (path: string) => {
                   v-for="pl in collectedPlaylists"
                   :key="pl.id"
                   :to="`/playlist/${pl.id}`"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 min-h-11 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
                     'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
@@ -306,10 +308,11 @@ const isActive = (path: string) => {
             :key="t.val"
             @click="globalStore.setTheme(t.val)"
             :class="[
-              'flex-1 h-7 rounded-full grid place-items-center text-xs font-semibold transition-all',
+              'flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all',
               theme === t.val ? 'bg-white/15 text-primary shadow-sm' : 'text-primary/40 hover:text-primary'
             ]"
             :title="t.label"
+            :aria-label="t.label"
           >
             <span :class="[t.icon, 'h-3.5 w-3.5']"></span>
           </button>

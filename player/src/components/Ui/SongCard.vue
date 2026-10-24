@@ -184,9 +184,10 @@ const handleMouseLeave = () => {
 </script>
 
 <template>
-  <div
+  <button
     ref="cardRef"
-    class="song-card group flex cursor-pointer items-center gap-4 rounded-2xl p-3.5 transition-all duration-200 hover:bg-white/10"
+    type="button"
+    class="song-card group flex w-full cursor-pointer items-center gap-4 rounded-2xl p-3.5 text-left transition-all duration-200 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70"
     @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -212,7 +213,7 @@ const handleMouseLeave = () => {
         img-class="h-full w-full object-cover"
       />
       <div
-        class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"
+        class="songcard-hover-play absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"
       >
         <span class="icon-[mdi--play] h-5 w-5 text-white" />
       </div>
@@ -230,11 +231,17 @@ const handleMouseLeave = () => {
     <span class="text-primary/30 shrink-0 text-xs font-mono">
       {{ formatDurationOrDash(song.duration) }}
     </span>
-  </div>
+  </button>
 </template>
 
 <style scoped>
 .song-card {
   will-change: transform;
+}
+
+@media (hover: none) {
+  .songcard-hover-play {
+    opacity: 1;
+  }
 }
 </style>

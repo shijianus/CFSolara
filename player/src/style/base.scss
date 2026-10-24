@@ -58,6 +58,39 @@ a {
   background: transparent !important;
 }
 
+/* ── 桌面端恢复细滚动条（设置页、长列表与页面滚动均可感知） ── */
+@media (min-width: 820px) and (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  * {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--glass-border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    display: block !important;
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    display: block !important;
+    background: transparent !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    display: block !important;
+    background-color: var(--glass-border-strong) !important;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--glass-text-muted) !important;
+  }
+}
+
 /* ── 播放动画图标 ── */
 .playing-icon {
   display: flex;

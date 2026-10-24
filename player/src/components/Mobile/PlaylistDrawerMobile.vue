@@ -104,9 +104,11 @@ const handleClear = () => {
     <Button
       variant="ghost"
       size="none"
-      class="group p-2"
+      class="group flex min-h-11 min-w-11 items-center justify-center p-2"
       icon="icon-[mdi--playlist-music-outline]"
       icon-class="text-primary/70 group-hover:text-primary h-7 w-7 transition-colors"
+      :aria-label="t('player.playlist')"
+      :title="t('player.playlist')"
       @click.stop="isDrawerOpen = true"
     />
 
@@ -117,14 +119,16 @@ const handleClear = () => {
           <!-- 标签页 -->
           <div class="flex items-center gap-4">
             <button
-              class="text-base font-bold transition-colors"
+              type="button"
+              class="min-h-11 px-1 text-base font-bold transition-colors"
               :class="activeTab === 'playlist' ? 'text-primary' : 'text-primary/40'"
               @click="activeTab = 'playlist'"
             >
               {{ t('player.playlist') }}
             </button>
             <button
-              class="text-base font-bold transition-colors"
+              type="button"
+              class="min-h-11 px-1 text-base font-bold transition-colors"
               :class="activeTab === 'history' ? 'text-primary' : 'text-primary/40'"
               @click="activeTab = 'history'"
             >
@@ -134,18 +138,21 @@ const handleClear = () => {
 
           <div class="flex items-center gap-3">
             <!-- 仅在播放列表标签页显示播放模式切换 -->
-            <div
+            <button
               v-if="activeTab === 'playlist'"
-              class="flex items-center gap-2"
+              type="button"
+              class="flex h-11 w-11 items-center justify-center"
+              :aria-label="t('player.playMode')"
               @click="togglePlayMode"
             >
               <span :class="playModeIcon" class="text-primary/60 h-5 w-5"></span>
-            </div>
+            </button>
             <Button
               variant="ghost"
               size="none"
-              class="text-primary/60 hover:text-primary flex items-center gap-1 rounded-full px-2 py-1 text-xs hover:bg-white/5"
+              class="text-primary/60 hover:text-primary flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 py-1 text-xs hover:bg-white/5"
               icon="icon-[mdi--trash-can-outline]"
+              :aria-label="t('common.clear')"
               icon-class="h-4 w-4"
               @click="handleClear"
             />
@@ -205,8 +212,9 @@ const handleClear = () => {
                 <Button
                   variant="ghost"
                   size="none"
-                  class="ml-2 p-2 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 active:opacity-100"
+                  class="queue-remove ml-2 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 active:opacity-100"
                   icon="icon-[mdi--close]"
+                  :aria-label="t('common.delete')"
                   icon-class="text-primary/40 hover:text-primary h-4 w-4"
                   @click.stop="removeSong(song.id)"
                 />
@@ -275,5 +283,12 @@ const handleClear = () => {
 }
 * {
   scrollbar-width: none !important;
+}
+
+/* 触屏设备没有 hover：删除按钮常显 */
+@media (hover: none) {
+  .queue-remove {
+    opacity: 1 !important;
+  }
 }
 </style>

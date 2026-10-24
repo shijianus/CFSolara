@@ -343,7 +343,7 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
                 <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                 <div class="absolute right-2 bottom-2 left-2">
                   <p class="text-primary truncate text-xs font-medium">{{ album.name }}</p>
-                  <p class="text-primary/60 text-[10px]">
+                  <p class="text-primary/60 text-[11px]">
                     {{ album.publishTime }} · {{ $t('commonUnits.songsShort', { count: album.size || 0 }) }}
                   </p>
                 </div>

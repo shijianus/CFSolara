@@ -22,6 +22,7 @@ const { t } = useI18n()
 const audioStore = useAudioStore()
 const downloadStore = useDownloadStore()
 const toastStore = useToastStore()
+const hasQueue = computed(() => playlist.value.length > 0)
 
 // 使用音频播放器组合式API
 const {
@@ -30,6 +31,7 @@ const {
   isPlaying,
   isLoading,
   currentTime,
+  playlist,
   formattedCurrentTime,
   formattedDuration,
   playModeIcon,
@@ -613,7 +615,7 @@ const emit = defineEmits(['show'])
 </script>
 <template>
   <footer
-    class="glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
+    class="footer-dock glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
     style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
     <!-- 独立音频频谱带 (限定在进度条上方 20px 独立带内，不透明度 <= 0.25，仅播放时出现，性能模式下不渲染) -->
@@ -636,14 +638,17 @@ const emit = defineEmits(['show'])
 
     <div class="relative z-10 flex items-center justify-between">
       <!-- 左侧：当前歌曲信息 -->
-      <div class="flex min-w-0 flex-1 space-x-4">
+      <div class="footer-left flex min-w-0 flex-1 gap-4">
         <!-- 封面容器 - 3D 翻转效果 -->
         <div class="cover-container" style="perspective: 800px;">
-          <div
+          <button
             ref="coverRef"
             id="footer-cover"
+            type="button"
+            :aria-label="t('player.openPlayer')"
+            :title="t('player.openPlayer')"
             @click="emit('show')"
-            class="cover-inner flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-cover shadow-lg ring-1 ring-white/15 transition-all duration-300 hover:shadow-xl hover:scale-105"
+            class="cover-inner flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-cover shadow-lg ring-1 ring-white/15 transition-all duration-300 outline-none hover:shadow-xl hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-400/70"
             :class="{ 'animate-pulse-subtle': isPlaying }"
             :style="{
               backgroundImage: state.displayCover
@@ -662,19 +667,19 @@ const emit = defineEmits(['show'])
                 <span class="w-1 bg-white rounded-full animate-equalizer-3"></span>
               </div>
             </div>
-          </div>
+          </button>
         </div>
-        <div id="footer-song-info" class="flex min-w-0 flex-col justify-around">
+        <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
           <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
-            {{ formatSongTitle(currentSong?.name) || t('player.unknownSong') }}
+            {{ currentSong ? formatSongTitle(currentSong.name) : t('player.selectSongToStart') }}
           </p>
-          <p class="text-primary/80 truncate text-xs">
-            {{ currentSong?.artist || t('player.unknownArtist') }}
+          <p v-if="currentSong" class="text-primary/80 truncate text-xs">
+            {{ currentSong.artist || t('player.unknownArtist') }}
           </p>
         </div>
         <div
           v-if="footerLyrics.enabled && mergedLines.length"
-          class="flex min-w-0 flex-col justify-around"
+          class="footer-lyrics flex min-w-0 flex-col justify-around"
         >
           <template v-for="mode in footerLyrics.modes" :key="mode">
             <p v-if="mode === 'original'" class="text-primary/80 truncate text-sm">
@@ -691,10 +696,15 @@ const emit = defineEmits(['show'])
       </div>
 
       <!-- 中间：播放控制 -->
-      <div class="flex items-center space-x-4">
+      <div class="footer-controls flex items-center gap-4">
         <Button
           variant="text"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
+          :aria-label="t('player.previous')"
+          :title="t('player.previous')"
           @click="previous"
           icon="icon-[mdi--skip-previous]"
           icon-class="size-6"
@@ -704,8 +714,11 @@ const emit = defineEmits(['show'])
           size="icon-lg"
           rounded="full"
           class="play-btn-glow"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
           @click="togglePlay"
           :title="isPlaying ? t('player.pause') : t('player.play')"
+          :aria-label="isPlaying ? t('player.pause') : t('player.play')"
           :loading="isLoading"
           :pulse="true"
           :press3d="true"
@@ -719,6 +732,11 @@ const emit = defineEmits(['show'])
         <Button
           variant="text"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
+          :disabled="!hasQueue"
+          :aria-disabled="!hasQueue"
+          :aria-label="t('player.next')"
+          :title="t('player.next')"
           @click="next"
           icon="icon-[mdi--skip-next]"
           icon-class="size-6"
@@ -728,13 +746,15 @@ const emit = defineEmits(['show'])
           :icon="playModeIcon"
           icon-class="size-6"
           size="none"
+          class="flex h-11 w-11 items-center justify-center"
           @click="togglePlayMode"
           :title="playModeText"
+          :aria-label="playModeText"
         />
       </div>
 
       <!-- 右侧：音质切换、下载、音量和其他控制 -->
-      <div class="relative flex flex-1 items-center justify-end space-x-2.5 sm:space-x-3.5">
+      <div class="footer-tools relative flex flex-1 items-center justify-end gap-2.5 sm:gap-3.5">
         <!-- 音质切换按钮 -->
         <div v-if="currentSong" class="relative">
           <button
@@ -746,14 +766,15 @@ const emit = defineEmits(['show'])
             aria-haspopup="true"
             :aria-expanded="showQualityMenu"
             aria-controls="quality-menu-panel"
-            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
+            class="footer-quality-pill group flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-sky-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80"
             :title="activeQualityTooltip"
+            :aria-label="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
               :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-sky-400 animate-pulse shadow-[0_0_6px_#38bdf8]' : 'bg-cyan-400'"
             ></span>
-            <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
+            <span class="whitespace-nowrap text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
             <span
               class="icon-[mdi--chevron-up] text-xs transition-transform duration-200"
               :class="{ 'rotate-180': showQualityMenu }"
@@ -807,7 +828,7 @@ const emit = defineEmits(['show'])
                   @click.stop="q.isAvailable && selectQuality(q.level)"
                   @keydown.enter.prevent.stop="q.isAvailable && selectQuality(q.level)"
                   @keydown.space.prevent.stop="q.isAvailable && selectQuality(q.level)"
-                  class="w-full min-h-[36px] py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
+                  class="w-full min-h-11 py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
                   :class="[
                     !q.isAvailable
                       ? 'opacity-45 cursor-not-allowed border border-transparent'
@@ -831,7 +852,7 @@ const emit = defineEmits(['show'])
                     <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
                     <span
                       v-if="effectiveQualityLevel === q.level && q.isAvailable"
-                      class="text-[10px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
+                      class="text-[11px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-medium shrink-0"
                     >
                       当前
                     </span>
@@ -862,12 +883,15 @@ const emit = defineEmits(['show'])
           size="none"
           icon="icon-[mdi--tray-arrow-down]"
           icon-class="size-5"
-          class="text-primary/70 hover:text-sky-400 flex items-center transition-colors cursor-pointer"
+          class="text-primary/70 hover:text-sky-400 flex h-11 w-11 items-center justify-center transition-colors cursor-pointer"
           :title="t('common.download') + '当前歌曲'"
+          :aria-label="t('common.download')"
           @click.stop="downloadCurrentSong"
         />
 
-        <VolumeControl />
+        <div class="footer-volume">
+          <VolumeControl />
+        </div>
         <PlaylistBubble v-model:show="showQueue" placement="top-right" :offset-y="20">
           <template #trigger>
             <Button
@@ -875,7 +899,9 @@ const emit = defineEmits(['show'])
               size="none"
               icon="icon-[mdi--playlist-music]"
               icon-class="size-6"
-              class="text-primary/70 hover:text-primary flex items-center transition-colors"
+              class="text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center transition-colors"
+              :aria-label="t('player.playlist')"
+              :title="t('player.playlist')"
             >
             </Button>
           </template>
@@ -896,6 +922,9 @@ const emit = defineEmits(['show'])
     <Transition name="fade">
       <div
         v-if="qualityToastMsg"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
         class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-sky-500/30 bg-neutral-900/90 px-4 py-1.5 text-xs font-semibold text-sky-300 shadow-xl backdrop-blur-xl"
       >
         <span class="icon-[mdi--check-circle] h-4 w-4 text-sky-400"></span>
@@ -906,6 +935,45 @@ const emit = defineEmits(['show'])
 </template>
 
 <style scoped>
+/* 歌名区域至少保留 8 个字符宽度，避免窄桌面下被音质/控制区挤没 */
+.footer-song-info {
+  min-width: 8em;
+}
+
+/* 820–1180px 窄桌面/平板：紧凑底栏，优先保证歌名与音质胶囊完整 */
+@media (max-width: 1180px) {
+  .footer-dock {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .footer-left {
+    gap: 0.5rem;
+  }
+
+  .footer-lyrics {
+    display: none;
+  }
+
+  .footer-controls {
+    gap: 0.5rem;
+  }
+
+  .footer-tools {
+    gap: 0.5rem;
+  }
+
+  .footer-dock .cover-inner {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .footer-volume {
+    display: none;
+  }
+}
+
 /* 封面容器 */
 .cover-container {
   position: relative;

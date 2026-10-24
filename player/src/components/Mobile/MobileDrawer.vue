@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
 import Button from '@/components/Ui/Button.vue'
+import { useI18n } from 'vue-i18n'
+import { useDialogA11y } from '@/composables/useDialogA11y'
 
 const props = defineProps<{
   title?: string
   height?: string
 }>()
 
+const { t } = useI18n()
 const isOpen = defineModel<boolean>('show', { default: false })
 const drawerRef = useTemplateRef<HTMLElement>('drawerRef')
+
+useDialogA11y({
+  isOpen,
+  containerRef: drawerRef,
+  onClose: () => {
+    isOpen.value = false
+  },
+})
 
 // 手动处理拖动逻辑
 const isDragging = ref(false)
@@ -89,7 +100,11 @@ onClickOutside(drawerRef, () => {
     >
       <div
         ref="drawerRef"
-        class="glass-container-strong flex w-full flex-col rounded-t-3xl rounded-b-none border-t border-white/10 shadow-2xl backdrop-blur-xl transition-colors"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="title || t('common.dialog')"
+        tabindex="-1"
+        class="glass-container-strong flex w-full flex-col rounded-t-3xl rounded-b-none border-t border-white/10 shadow-2xl outline-none backdrop-blur-xl transition-colors"
         :style="drawerStyle"
         @click.stop
       >
@@ -116,6 +131,8 @@ onClickOutside(drawerRef, () => {
             rounded="full"
             icon="icon-[mdi--close]"
             icon-class="h-6 w-6"
+            :aria-label="t('common.close')"
+            :title="t('common.close')"
             @click="isOpen = false"
           />
         </div>

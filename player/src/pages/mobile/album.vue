@@ -186,7 +186,7 @@ const goToArtist = () => {
             >
               {{ state.info.description }}
             </p>
-            <span class="mt-1 inline-flex items-center text-[10px] text-accent/60">
+            <span class="mt-1 inline-flex items-center text-[11px] text-accent/60">
               {{ state.showFullDesc ? t('common.collapse') : t('common.expand') }}
               <span
                 :class="state.showFullDesc ? 'icon-[mdi--chevron-up]' : 'icon-[mdi--chevron-down]'"

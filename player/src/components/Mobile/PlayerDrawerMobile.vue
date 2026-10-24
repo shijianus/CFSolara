@@ -490,6 +490,8 @@ const playModeIcon = computed(() => {
         rounded="full"
         icon="icon-[mdi--dots-horizontal]"
         icon-class="h-6 w-6 text-primary/90"
+        :aria-label="t('common.more')"
+        :title="t('common.more')"
         @click="showToolbar = !showToolbar"
       />
     </div>
@@ -680,14 +682,16 @@ const playModeIcon = computed(() => {
           <Button
             variant="ghost"
             size="none"
-            class="group p-2"
+            class="group flex min-h-11 min-w-11 items-center justify-center p-2"
             icon="icon-[mdi--message-processing-outline]"
             icon-class="h-6 w-6 text-primary/70 group-hover:text-primary transition-colors"
+            :aria-label="t('player.comments')"
+            :title="t('player.comments')"
             @click.stop="isCommentsOpen = true"
           />
           <span
             v-if="commentCount > 0"
-            class="pointer-events-none absolute top-2 right-2 flex h-4 min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-500 px-1 text-[0.6rem] font-bold text-white shadow-sm"
+            class="pointer-events-none absolute top-2 right-2 flex h-4 min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-500 px-1 text-[11px] font-bold text-white shadow-sm"
           >
             {{ commentCount > 999 ? '999+' : commentCount }}
           </span>
@@ -697,7 +701,7 @@ const playModeIcon = computed(() => {
           v-if="lyricsTrans.length"
           variant="ghost"
           size="none"
-          class="p-2"
+          class="flex min-h-11 min-w-11 items-center justify-center p-2"
           icon="icon-[mdi--translate]"
           :icon-class="['h-6 w-6', { 'text-primary': showTrans }]"
           @click.stop="toggleTransBtn"
@@ -707,7 +711,7 @@ const playModeIcon = computed(() => {
           v-if="lyricsRoma.length"
           variant="ghost"
           size="none"
-          class="group p-2"
+          class="group flex min-h-11 min-w-11 items-center justify-center p-2"
           icon="icon-[mdi--alphabetical]"
           :icon-class="[
             'h-6 w-6 text-primary/70 group-hover:text-primary transition-colors',
@@ -732,6 +736,8 @@ const playModeIcon = computed(() => {
           class="control-btn"
           :icon="playModeIcon"
           icon-class="text-primary/70 h-7 w-7"
+          :aria-label="t('player.playMode')"
+          :title="t('player.playMode')"
           @click="togglePlayMode"
         />
 
@@ -740,6 +746,10 @@ const playModeIcon = computed(() => {
           size="icon-lg"
           rounded="full"
           class="control-btn"
+          :disabled="!currentSong"
+          :aria-disabled="!currentSong"
+          :aria-label="t('player.previous')"
+          :title="t('player.previous')"
           icon="icon-[mdi--skip-previous]"
           icon-class="text-primary h-8 w-8"
           @click="previous"
@@ -752,9 +762,12 @@ const playModeIcon = computed(() => {
           class="play-btn size-16!"
           :class="isLoading ? 'opacity-60' : ''"
           :loading="isLoading"
-          :disabled="isLoading"
+          :disabled="isLoading || !currentSong"
+          :aria-disabled="isLoading || !currentSong"
           :icon="isPlaying ? 'mdi--pause' : 'mdi--play'"
           icon-class="h-8 w-8"
+          :aria-label="isPlaying ? t('player.pause') : t('player.play')"
+          :title="isPlaying ? t('player.pause') : t('player.play')"
           @click="handleTogglePlay"
         />
 
@@ -763,6 +776,10 @@ const playModeIcon = computed(() => {
           size="icon-lg"
           rounded="full"
           class="control-btn"
+          :disabled="!currentSong"
+          :aria-disabled="!currentSong"
+          :aria-label="t('player.next')"
+          :title="t('player.next')"
           icon="icon-[mdi--skip-next]"
           icon-class="text-primary h-8 w-8"
           @click="next"
@@ -994,9 +1011,10 @@ const playModeIcon = computed(() => {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  min-height: 44px;
   padding: 0.5rem;
   border-radius: 0.75rem;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   transition: all 0.2s ease;
 }
 

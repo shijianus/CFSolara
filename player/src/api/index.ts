@@ -75,8 +75,10 @@ export const cloudSearch = (params: {
 }) => httpGet('/cloudsearch', params)
 
 /** 搜索建议 */
-export const searchSuggest = (params: { keywords: string; type?: 'mobile' }) =>
-  httpGet('/search/suggest', params)
+export const searchSuggest = (
+  params: { keywords: string; type?: 'mobile' },
+  signal?: AbortSignal
+) => httpGet('/search/suggest', params, { signal })
 /** 热门搜索（简略） */
 export const searchHot = () => httpGet('/search/hot')
 /** 热门搜索（详细，含排名和热度） */
