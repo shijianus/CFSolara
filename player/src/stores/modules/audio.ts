@@ -1084,6 +1084,33 @@ export const useAudioStore = defineStore('audio', {
       this.audio.currentIndex = -1
     },
 
+    /**
+     * 插入到当前播放之后并立即播放，保留现有队列
+     * 队列为空时作为第一首；已存在的同曲目会先移出避免重复
+     */
+    playAfterCurrent(song: Song) {
+      const list = this.audio.playlist
+      const currentIndex = this.audio.currentIndex
+      const existing = list.findIndex((item: Song) => String(item.id) === String(song.id))
+
+      if (existing !== -1 && existing === currentIndex) {
+        this.playSong(this.audio.currentSong || song, currentIndex)
+        return
+      }
+
+      if (existing !== -1) {
+        list.splice(existing, 1)
+        if (existing < currentIndex) this.audio.currentIndex -= 1
+      }
+
+      const insertAt = this.audio.currentIndex + 1
+      list.splice(insertAt, 0, song)
+      this.audio.currentIndex = insertAt
+      this.audio.currentSong = song
+      this.audio.originalPlaylist = [...list]
+      this.playSong(song, insertAt, true)
+    },
+
     // 设置播放列表
     setPlaylist(songs: Song[], startIndex: number = 0) {
       this.audio.playlist = [...songs]

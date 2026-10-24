@@ -5,6 +5,7 @@ import { formatDurationOrDash } from '@/utils/time'
 import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import type { Song as StoreSong } from '@/stores/interface'
+import { prefersReducedMotion } from '@/utils/motion'
 
 interface Props {
   song: {
@@ -23,9 +24,15 @@ const props = defineProps<Props>()
 const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
 const coverRef = ref<HTMLElement | null>(null)
-const { setPlaylist, play } = useAudio()
+const { playAfterCurrent, currentSong, isPlaying } = useAudio()
 
-// 播放歌曲并执行封面飞行动画
+const isCurrent = computed(() => {
+  const current = currentSong.value
+  if (!current) return false
+  return String(current.id) === String(props.song.id)
+})
+
+// 播放歌曲并执行封面飞行动画：保留现有队列，插入到当前播放之后
 const handleClick = async (_event: MouseEvent) => {
   if (!cardRef.value || !coverRef.value) {
     if (props.to) router.push(props.to)
@@ -45,8 +52,9 @@ const handleClick = async (_event: MouseEvent) => {
     duration: props.song.duration,
     cover: props.song.cover,
   }
-  setPlaylist([storeSong], 0)
-  play(storeSong, 0)
+  playAfterCurrent(storeSong)
+
+  if (prefersReducedMotion()) return
 
   // 如果能找到 footer 封面，执行抛物线飞行动画
   if (footerCover && props.song.cover) {
@@ -149,6 +157,7 @@ const handleClick = async (_event: MouseEvent) => {
 
 // 悬停效果
 const handleMouseEnter = () => {
+  if (prefersReducedMotion()) return
   if (cardRef.value) {
     gsap.to(cardRef.value, {
       x: 4,
@@ -166,6 +175,7 @@ const handleMouseEnter = () => {
 }
 
 const handleMouseLeave = () => {
+  if (prefersReducedMotion()) return
   if (cardRef.value) {
     gsap.to(cardRef.value, {
       x: 0,
@@ -188,6 +198,7 @@ const handleMouseLeave = () => {
     ref="cardRef"
     type="button"
     class="song-card group flex w-full cursor-pointer items-center gap-4 rounded-2xl p-3.5 text-left transition-all duration-200 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400/70"
+    :aria-current="isCurrent ? 'true' : undefined"
     @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -213,15 +224,28 @@ const handleMouseLeave = () => {
         img-class="h-full w-full object-cover"
       />
       <div
-        class="songcard-hover-play absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100"
+        class="songcard-hover-play absolute inset-0 flex items-center justify-center transition-all"
+        :class="isCurrent ? 'bg-black/45 opacity-100' : 'bg-black/0 opacity-0 group-hover:bg-black/40 group-hover:opacity-100'"
       >
-        <span class="icon-[mdi--play] h-5 w-5 text-white" />
+        <span
+          v-if="isCurrent"
+          class="playing-icon"
+          aria-hidden="true"
+        >
+          <span class="bar" :class="{ animate: isPlaying }"></span>
+          <span class="bar" :class="{ animate: isPlaying }"></span>
+          <span class="bar" :class="{ animate: isPlaying }"></span>
+        </span>
+        <span v-else class="icon-[mdi--play] h-5 w-5 text-white" />
       </div>
     </div>
 
     <!-- 信息 -->
     <div class="min-w-0 flex-1">
-      <p class="text-primary truncate text-sm font-semibold transition-colors group-hover:text-[#60a5fa]">
+      <p
+        class="line-clamp-1 text-sm font-semibold transition-colors group-hover:text-[#60a5fa]"
+        :class="isCurrent ? 'text-sky-300' : 'text-primary'"
+      >
         {{ song.name }}
       </p>
       <p class="text-primary/50 mt-0.5 truncate text-xs">{{ song.artist }}</p>
