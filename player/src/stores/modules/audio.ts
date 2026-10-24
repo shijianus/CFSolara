@@ -46,6 +46,8 @@ const classifyPlaybackError = (error?: MediaError | Error | null): PlaybackError
 let lastPlaybackToastId: number | null = null
 let lastPlaybackToastKey = ''
 let lastPlaybackToastAt = 0
+/** 音质切换期间由 switchQuality 自行处理错误，避免误触发全局播放错误 */
+let switchingQuality = false
 
 /** 获取 Audio 单例（懒初始化） */
 const getAudioSingleton = (): HTMLAudioElement => {
@@ -268,6 +270,7 @@ export const useAudioStore = defineStore('audio', {
       audio.addEventListener('error', (e: any) => {
         this.audio.isLoading = false
         this.audio.isPlaying = false
+        if (switchingQuality) return
         this._reportPlaybackError(audio.error || e)
         console.error('Audio error:', e)
         // 触发一次刷新播放地址并重试，10秒内同一歌曲仅重试一次
@@ -694,16 +697,56 @@ export const useAudioStore = defineStore('audio', {
       }
     },
 
-    /** 切换当前播放歌曲的音质等级并平滑无缝恢复播放进度 */
-    async switchQuality(targetLevel: string) {
-      if (!this.audio.currentSong || !this.audio.audio) return
-      if (this.audio.currentSong.isLocal) return
+    /** 等待新音源可播放；error 事件视为切换失败 */
+    _waitForAudioReady(audio: HTMLAudioElement, timeout = 15000): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        let settled = false
+        const cleanup = () => {
+          audio.removeEventListener('loadedmetadata', onReady)
+          audio.removeEventListener('canplay', onReady)
+          audio.removeEventListener('error', onError)
+          clearTimeout(timer)
+        }
+        const finish = (fn: () => void) => {
+          if (settled) return
+          settled = true
+          cleanup()
+          fn()
+        }
+        const onReady = () => finish(resolve)
+        const onError = () =>
+          finish(() => reject(audio.error || new Error('Audio source unavailable')))
+        const timer = setTimeout(
+          () => finish(() => reject(new Error('Switch quality timeout'))),
+          timeout
+        )
+        audio.addEventListener('loadedmetadata', onReady)
+        audio.addEventListener('canplay', onReady)
+        audio.addEventListener('error', onError)
+      })
+    },
 
-      const currentTime = this.audio.audio.currentTime || 0
+    /** 切换当前播放歌曲的音质等级；失败回滚旧音源并向上抛出 */
+    async switchQuality(targetLevel: string) {
+      const song = this.audio.currentSong
+      const audio = this.audio.audio
+      if (!song || !audio) return
+      if (song.isLocal) return
+
+      const currentTime = audio.currentTime || 0
       const wasPlaying = this.audio.isPlaying
+      const oldUrl = song.url || ''
+      const oldBadge = song.qualityBadge
+      const idx = this.audio.currentIndex
+      const oldPlaylistUrl =
+        idx >= 0 && idx < this.audio.playlist.length ? this.audio.playlist[idx].url : undefined
+      const oldPlaylistBadge =
+        idx >= 0 && idx < this.audio.playlist.length
+          ? this.audio.playlist[idx].qualityBadge
+          : undefined
 
       // 查找对应音质配置
-      const qualityOpt = this.audio.currentSong.qualities?.find(q => q.level === targetLevel)
+      const qualityOpt = song.qualities?.find((q: { level: string }) => q.level === targetLevel)
       let newUrl = qualityOpt?.streamUrl || ''
 
       const brMap: Record<string, string> = {
@@ -714,36 +757,58 @@ export const useAudioStore = defineStore('audio', {
       const br = brMap[targetLevel] || '320'
 
       if (!newUrl) {
-        newUrl = `/api/music/stream?id=${encodeURIComponent(String(this.audio.currentSong.id))}&source=netease&br=${br}&title=${encodeURIComponent(this.audio.currentSong.name || '')}&artist=${encodeURIComponent(this.audio.currentSong.artist || '')}`
+        newUrl = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease&br=${br}&title=${encodeURIComponent(song.name || '')}&artist=${encodeURIComponent(song.artist || '')}`
       }
 
-      this.audio.currentSong.url = newUrl
       const badgeMap: Record<string, string> = {
         lossless: 'SQ',
         exhigh: 'HQ',
         standard: '标准',
       }
-      if (badgeMap[targetLevel]) {
-        this.audio.currentSong.qualityBadge = badgeMap[targetLevel]
-      }
+      const nextBadge = badgeMap[targetLevel] || oldBadge
 
-      // 同步到播放列表
-      const idx = this.audio.currentIndex
-      if (idx >= 0 && idx < this.audio.playlist.length) {
-        this.audio.playlist[idx].url = newUrl
-        this.audio.playlist[idx].qualityBadge = this.audio.currentSong.qualityBadge
-      }
-
+      switchingQuality = true
       this.audio.isLoading = true
       try {
-        this._loadAudioSrc(newUrl)
-        this.audio.audio.currentTime = currentTime
+        this._loadAudioSrc(newUrl, true)
+        await this._waitForAudioReady(audio)
+        try {
+          audio.currentTime = Math.min(currentTime, audio.duration || currentTime)
+        } catch {}
         if (wasPlaying) {
-          await this.audio.audio.play()
+          await audio.play()
         }
+
+        // 新音源确认可用后才提交状态
+        song.url = newUrl
+        song.qualityBadge = nextBadge
+        if (idx >= 0 && idx < this.audio.playlist.length) {
+          this.audio.playlist[idx].url = newUrl
+          this.audio.playlist[idx].qualityBadge = nextBadge
+        }
+        this.audio.error = null
       } catch (err) {
+        // 回滚 URL、徽章与音频源，保证 UI 与实际播放状态一致
+        song.url = oldUrl
+        song.qualityBadge = oldBadge
+        if (idx >= 0 && idx < this.audio.playlist.length) {
+          this.audio.playlist[idx].url = oldPlaylistUrl
+          this.audio.playlist[idx].qualityBadge = oldPlaylistBadge
+        }
+        this._loadAudioSrc(oldUrl, true)
+        try {
+          audio.currentTime = currentTime
+        } catch {}
+        if (wasPlaying) {
+          try {
+            await audio.play()
+          } catch {}
+        }
+        this.audio.error = null
         console.error('Switch quality failed:', err)
+        throw err
       } finally {
+        switchingQuality = false
         this.audio.isLoading = false
       }
     },

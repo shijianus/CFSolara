@@ -206,6 +206,7 @@ export default {
   },
   player: {
     next: '下一首',
+    qualitySwitchFailed: '音质切换失败，已恢复原音质',
     playbackError: {
       network: '网络连接异常，请检查网络后重试',
       source: '音源不可用，换一首试试',

@@ -16,10 +16,12 @@ import { adaptColorsForTheme } from '@/utils/colorThemeAdapter'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { gsap } from 'gsap'
 import { useDownloadStore } from '@/stores/modules/download'
+import { useToastStore } from '@/stores/modules/toast'
 
 const { t } = useI18n()
 const audioStore = useAudioStore()
 const downloadStore = useDownloadStore()
+const toastStore = useToastStore()
 
 // 使用音频播放器组合式API
 const {
@@ -524,9 +526,24 @@ const handleQualityMenuKeydown = (e: KeyboardEvent) => {
 const selectQuality = async (level: string) => {
   const target = availableQualities.value.find((q) => q.level === level)
   if (target && !target.isAvailable) return
+  if (level === currentQualityLevel.value) {
+    closeQualityMenuAndRestoreFocus()
+    return
+  }
+
+  try {
+    await audioStore.switchQuality(level)
+  } catch {
+    // 失败时保持菜单打开，徽章由 store 回滚，并给出明确错误反馈
+    toastStore.show({
+      message: t('player.qualitySwitchFailed'),
+      type: 'error',
+      duration: 4000,
+    })
+    return
+  }
+
   closeQualityMenuAndRestoreFocus()
-  if (level === currentQualityLevel.value) return
-  await audioStore.switchQuality(level)
   const labelMap: Record<string, string> = {
     lossless: 'SQ 无损音质',
     exhigh: 'HQ 极高音质',

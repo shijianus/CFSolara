@@ -216,6 +216,7 @@ export default {
   },
   player: {
     next: 'Next track',
+    qualitySwitchFailed: 'Failed to switch quality. The previous quality was restored.',
     playbackError: {
       network: 'Network error. Check your connection and try again.',
       source: 'This audio source is unavailable. Try another track.',
