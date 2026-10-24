@@ -339,20 +339,30 @@ const maxScore = computed(() => {
             </button>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button
+            <div
               v-for="(keyword, ki) in searchHistory"
               :key="keyword"
-              class="history-chip group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium transition-all duration-200 hover:border-sky-500/30 hover:bg-white/10 hover:-translate-y-0.5 active:scale-95"
+              class="history-chip group flex min-h-11 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-all duration-200 hover:border-sky-500/30 hover:bg-white/10 hover:-translate-y-0.5"
               :style="{ animationDelay: `${ki * 35}ms` }"
-              @click="doSearch(keyword)"
             >
-              <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
-              <span class="text-primary/80 group-hover:text-white transition-colors">{{ keyword }}</span>
-              <span
-                class="icon-[mdi--close] h-3 w-3 shrink-0 text-transparent transition-all group-hover:text-primary/40 hover:text-sky-400!"
-                @click.stop="globalStore.removeSearchHistory(keyword)"
-              />
-            </button>
+              <button
+                type="button"
+                class="flex min-h-11 min-w-0 items-center gap-2 pr-1 pl-3.5 text-xs font-medium"
+                @click="doSearch(keyword)"
+              >
+                <span class="icon-[mdi--history] size-3.5 shrink-0 text-primary/40"></span>
+                <span class="text-primary/80 group-hover:text-primary truncate transition-colors">{{ keyword }}</span>
+              </button>
+              <button
+                type="button"
+                class="text-primary/40 hover:text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors"
+                :aria-label="$t('search.removeHistory', { keyword })"
+                :title="$t('common.delete')"
+                @click="globalStore.removeSearchHistory(keyword)"
+              >
+                <span class="icon-[mdi--close] h-4 w-4"></span>
+              </button>
+            </div>
           </div>
         </div>
 

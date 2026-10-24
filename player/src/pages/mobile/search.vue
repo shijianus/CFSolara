@@ -554,16 +554,29 @@ watch(
           </button>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button
+          <div
             v-for="keyword in searchHistory"
             :key="keyword"
-            type="button"
-            class="history-chip flex min-h-11 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 text-xs font-medium transition-colors active:bg-white/10"
-            @click="runSearch(keyword)"
+            class="history-chip flex min-h-11 items-center rounded-full border border-white/10 bg-white/5 text-xs font-medium transition-colors"
           >
-            <span class="icon-[mdi--history] size-3.5 text-primary/40"></span>
-            <span class="text-primary/80">{{ keyword }}</span>
-          </button>
+            <button
+              type="button"
+              class="flex min-h-11 min-w-0 items-center gap-1.5 pr-1 pl-3.5 text-xs font-medium"
+              @click="runSearch(keyword)"
+            >
+              <span class="icon-[mdi--history] size-3.5 shrink-0 text-primary/40"></span>
+              <span class="text-primary/80 truncate">{{ keyword }}</span>
+            </button>
+            <button
+              type="button"
+              class="text-primary/40 hover:text-primary/80 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors"
+              :aria-label="$t('search.removeHistory', { keyword })"
+              :title="$t('common.delete')"
+              @click="globalStore.removeSearchHistory(keyword)"
+            >
+              <span class="icon-[mdi--close] h-4 w-4"></span>
+            </button>
+          </div>
         </div>
       </section>
 

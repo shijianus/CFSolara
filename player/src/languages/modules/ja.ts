@@ -80,6 +80,7 @@ export default {
     title: '音楽を探す',
     recentSearches: '検索履歴',
     hotSearches: '人気の検索',
+    removeHistory: '検索履歴を削除：{keyword}',
     foundResults: '{count} 件見つかりました',
   },
   charts: {

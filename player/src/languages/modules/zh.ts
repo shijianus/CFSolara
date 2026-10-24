@@ -76,6 +76,7 @@ export default {
     title: '发现音乐',
     recentSearches: '搜索历史',
     hotSearches: '热门搜索',
+    removeHistory: '删除搜索历史：{keyword}',
     foundResults: '共找到 {count} 条结果',
   },
   charts: {

@@ -80,6 +80,7 @@ export default {
     title: 'Discover Music',
     recentSearches: 'Recent Searches',
     hotSearches: 'Hot Searches',
+    removeHistory: 'Remove search history: {keyword}',
     foundResults: 'Found {count} results',
   },
   charts: {
