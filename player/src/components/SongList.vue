@@ -90,6 +90,13 @@ const isCurrent = (s: Song) => {
   return String(s.id ?? '') === String(cur.id ?? '')
 }
 
+// 整行单击即播放；行内链接/按钮保留各自行为
+const handleRowActivate = (song: Song, index: number, event: MouseEvent) => {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('a, button, input, [role="button"]')) return
+  playSongWithAnimation(song, index, event)
+}
+
 const openMV = (song: Song, index: number) => {
   const id = song.mvId || song.id
   if (id) {
@@ -173,6 +180,17 @@ const getQualityBadgeInfo = (song: Song) => {
   transition: all 0.2s ease;
   content-visibility: auto;
   contain-intrinsic-size: auto 53px;
+}
+
+/* 触屏设备没有 hover：行内播放按钮常显，序号让位 */
+@media (hover: none) {
+  .song-row-play {
+    opacity: 1;
+  }
+
+  .song-row-index {
+    opacity: 0;
+  }
 }
 
 /* 响应式调整 */
@@ -262,7 +280,7 @@ const getQualityBadgeInfo = (song: Song) => {
               : 'border-transparent hover:bg-white/10 hover:border-white/10'
           ]"
           :style="isCurrent(song) ? { backgroundColor: 'rgba(56,189,248, 0.14)' } : {}"
-          @dblclick="(e) => playSongWithAnimation(song, index, e)"
+          @click="(e: MouseEvent) => handleRowActivate(song, index, e)"
         >
           <!-- 左侧 2px 强调色指示条 (当前播放行) -->
           <span
@@ -275,7 +293,7 @@ const getQualityBadgeInfo = (song: Song) => {
             <!-- 未悬停且非当前播放：显示纯数字序号 -->
             <span
               v-if="!isCurrent(song)"
-              class="font-mono text-xs text-primary/60 transition-opacity duration-150 group-hover:opacity-0"
+              class="song-row-index font-mono text-xs text-primary/60 transition-opacity duration-150 group-hover:opacity-0"
             >
               {{ index + 1 }}
             </span>
@@ -291,8 +309,9 @@ const getQualityBadgeInfo = (song: Song) => {
             <button
               v-if="!isCurrent(song)"
               type="button"
-              class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-primary hover:text-sky-400 active:scale-90 cursor-pointer"
+              class="song-row-play absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-visible:opacity-100 text-primary hover:text-sky-400 active:scale-90 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
               :title="t('actions.play') || '播放'"
+              :aria-label="t('actions.play')"
               @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
             >
               <span class="icon-[mdi--play] h-5 w-5"></span>
