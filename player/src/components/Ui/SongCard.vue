@@ -208,7 +208,7 @@ const handleMouseLeave = () => {
       class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold tracking-tight"
       :class="
         index < 3
-          ? 'bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] text-white shadow-[0_0_12px_rgba(37,99,235,0.55)]'
+          ? 'bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] text-[var(--glass-text-accent)] shadow-[0_0_12px_rgba(37,99,235,0.55)]'
           : 'bg-primary/5 text-primary/40'
       "
     >
@@ -236,7 +236,7 @@ const handleMouseLeave = () => {
           <span class="bar" :class="{ animate: isPlaying }"></span>
           <span class="bar" :class="{ animate: isPlaying }"></span>
         </span>
-        <span v-else class="icon-[mdi--play] h-5 w-5 text-white" />
+        <span v-else class="icon-[mdi--play] h-5 w-5 text-[var(--glass-text-accent)]" />
       </div>
     </div>
 
