@@ -75,6 +75,9 @@ const load = async (id: number) => {
         cover: state.info.coverImgUrl,
         liked: false,
       }))
+      if (route.query.autoplay === '1') {
+        playAll()
+      }
     }
   } finally {
     state.loading = false

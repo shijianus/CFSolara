@@ -417,7 +417,7 @@ export function syncWordElements(
           const pct = Math.min(100, Math.max(0, ((effectiveTime - start) / dur) * 100))
           const pctStr = `${pct.toFixed(1)}%`
           charSpan.style.setProperty('--fill', pctStr)
-          charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active, #ffffff) 0%, var(--lyric-word-active, #ffffff) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) ${pctStr}, var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%)`
+          charSpan.style.backgroundImage = `linear-gradient(to right, var(--lyric-word-active) 0%, var(--lyric-word-active) ${pctStr}, var(--lyric-word-inactive) ${pctStr}, var(--lyric-word-inactive) 100%)`
           charSpan.classList.add('word-singing')
           charSpan.classList.remove('word-sung')
         } else {

@@ -6,6 +6,8 @@ interface Props {
   src?: string
   fallbackSrc?: string
   alt?: string
+  title?: string
+  seed?: string
   imgClass?: string
   wrapperClass?: string
 }
@@ -14,8 +16,34 @@ const props = withDefaults(defineProps<Props>(), {
   src: '',
   fallbackSrc: '',
   alt: '',
+  title: '',
+  seed: '',
   imgClass: '',
   wrapperClass: '',
+})
+
+const initialChar = computed(() => {
+  const t = (props.title || props.alt || '').trim()
+  if (!t) return ''
+  return t.charAt(0).toUpperCase()
+})
+
+const gradientPalette = computed(() => {
+  const seedStr = props.seed || props.title || props.alt || 'music'
+  let hash = 0
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash << 5) - hash + seedStr.charCodeAt(i)
+    hash |= 0
+  }
+  const palettes = [
+    'from-violet-600/50 via-purple-600/40 to-pink-500/50',
+    'from-rose-500/50 via-pink-600/40 to-amber-500/40',
+    'from-cyan-500/50 via-blue-600/40 to-indigo-500/50',
+    'from-emerald-500/50 via-teal-600/40 to-cyan-500/50',
+    'from-fuchsia-600/50 via-purple-500/40 to-indigo-600/50',
+    'from-amber-500/50 via-orange-500/40 to-rose-500/50',
+  ]
+  return palettes[Math.abs(hash) % palettes.length]
 })
 
 const el = ref<HTMLElement | null>(null)
@@ -125,21 +153,29 @@ const handleError = () => {
       :src="activeSrc"
       :alt="alt"
       :class="imgClass"
+      loading="lazy"
       decoding="async"
       referrerpolicy="no-referrer"
       @load="handleLoad"
       @error="handleError"
     />
-    <!-- 优雅渐变回退占位符 (替代生硬的断图图标) -->
+    <!-- 优雅生成式艺术回退占位符 (歌名首字 + 专辑派生底色) -->
     <div
       v-else
-      class="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-blue-500/30 backdrop-blur-sm"
+      class="flex h-full w-full items-center justify-center bg-gradient-to-br select-none border border-white/10"
+      :class="gradientPalette"
     >
-      <span class="icon-[mdi--music-note] text-white/50 h-6 w-6"></span>
+      <span v-if="initialChar" class="text-sm font-bold text-white/90 drop-shadow-sm font-sans select-none">
+        {{ initialChar }}
+      </span>
+      <span v-else class="icon-[mdi--music-note] text-white/50 h-5 w-5"></span>
     </div>
-    <!-- 加载中指示器 -->
-    <div v-if="isLoading && !activeSrc.startsWith('data:')" class="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
-      <span class="icon-[mdi--loading] text-glass-70 h-5 w-5 animate-spin"></span>
+    <!-- 加载中骨架指示器 -->
+    <div
+      v-if="isLoading && !activeSrc.startsWith('data:')"
+      class="absolute inset-0 flex items-center justify-center bg-white/10 animate-pulse"
+    >
+      <div class="h-3 w-3 rounded-full border border-pink-400/60 border-t-transparent animate-spin"></div>
     </div>
   </div>
 </template>

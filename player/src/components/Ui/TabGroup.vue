@@ -36,7 +36,7 @@ const handleTabClick = (key: T) => {
     class="flex items-center gap-2 p-1.5 transition-all"
     :class="{
       'glass-card': variant === 'glass',
-      'rounded-xl bg-white/5 backdrop-blur-sm': variant === 'gradient',
+      'rounded-xl bg-white/10 border border-white/5': variant === 'gradient',
     }"
   >
     <button

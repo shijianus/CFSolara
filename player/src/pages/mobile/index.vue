@@ -21,8 +21,31 @@ import {
   type ArtistData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useAudio } from '@/composables/useAudio'
+import type { Song as StoreSong } from '@/stores/interface'
 
 const { t } = useI18n()
+const router = useRouter()
+const { play, setPlaylist } = useAudio()
+
+const handleBannerClick = (item: BannerData) => {
+  if (item.targetType === 1 && item.targetId) {
+    const storeSong: StoreSong = {
+      id: Number(item.targetId),
+      name: item.description || item.title || 'Sonic 推荐新歌',
+      artist: item.title || 'Sonic 独家精选',
+      cover: item.coverImgUrl,
+      duration: 0,
+    }
+    setPlaylist([storeSong], 0)
+    play(storeSong, 0)
+    router.push(`/song/${item.targetId}?autoplay=1`)
+  } else if (item.targetType === 10 && item.targetId) {
+    router.push(`/album/${item.targetId}?autoplay=1`)
+  } else if (item.internalTo) {
+    router.push(item.internalTo)
+  }
+}
 
 interface HomeState {
   banners: BannerData[]
@@ -84,13 +107,14 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
             :space-between="12"
             :autoplay="{ delay: 4000, disableOnInteraction: false }"
             :pagination="{ clickable: true }"
-            class="home-swiper h-44 overflow-visible rounded-2xl"
+            class="home-swiper w-full aspect-[1080/400] max-h-[45vh] overflow-visible rounded-2xl"
           >
             <SwiperSlide v-for="(item, i) in banners" :key="i" class="rounded-2xl">
-              <a
-                :href="item.url || '#'"
-                target="_blank"
-                class="relative block h-full w-full overflow-hidden rounded-2xl"
+              <div
+                role="button"
+                tabindex="0"
+                @click="handleBannerClick(item)"
+                class="relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl select-none"
               >
                 <LazyImage
                   :src="item.coverImgUrl"
@@ -98,17 +122,17 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   imgClass="h-full w-full object-cover"
                 />
                 <div
-                  class="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent"
+                  class="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent"
                 ></div>
-                <div v-if="item.title" class="absolute right-3 bottom-3 left-3">
+                <div v-if="item.title" class="pointer-events-none absolute right-3 bottom-3 z-10">
                   <span
-                    class="text-primary inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium backdrop-blur-md"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white/95 backdrop-blur-md shadow-sm"
                   >
-                    <span class="icon-[mdi--fire] h-3.5 w-3.5 text-orange-300"></span>
+                    <span class="icon-[mdi--fire] h-3 w-3 text-orange-300"></span>
                     {{ item.title }}
                   </span>
                 </div>
-              </a>
+              </div>
             </SwiperSlide>
           </Swiper>
         </section>
@@ -154,7 +178,7 @@ const swiperModules = [Autoplay, Pagination, EffectCards]
                   </div>
                 </div>
               </div>
-              <p class="playlist-name line-clamp-2 text-xs leading-tight">{{ pl.name }}</p>
+              <p class="playlist-name line-clamp-2 leading-tight">{{ pl.name }}</p>
             </router-link>
           </div>
         </section>
@@ -315,6 +339,8 @@ html.dark .playlist-cover {
 .playlist-name {
   color: var(--glass-text-primary);
   opacity: 0.8;
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .artist-avatar {

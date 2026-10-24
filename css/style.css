@@ -1385,26 +1385,79 @@ input[type="range"]:active::-moz-range-thumb {
     border-bottom: none;
 }
 
-/* 加载更多按钮 - 增强样式 */
+/* 加载更多按钮 - 增强样式与主动预判流式交互 */
 .load-more-btn {
     width: 100%;
     background: var(--component-bg);
     color: var(--primary-color);
-    border: 2px solid var(--primary-color);
+    border: 1.5px solid rgba(139, 92, 246, 0.35);
     border-radius: 12px;
-    padding: 15px;
+    padding: 14px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     margin-top: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     position: relative;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(12px);
+    animation: sonicLoadMoreEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sonicLoadMoreEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.load-more-btn.auto-loading {
+    border-color: rgba(236, 72, 153, 0.4);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+    animation: sonicLoadMorePulse 2s infinite ease-in-out;
+}
+
+@keyframes sonicLoadMorePulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+    }
+}
+
+.load-more-btn.timeout-retry {
+    border-color: rgba(244, 63, 94, 0.6);
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(236, 72, 153, 0.2));
+    color: #ff80a0;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.25);
+    cursor: pointer;
+    animation: sonicRetryBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes sonicRetryBounce {
+    0% { transform: scale(0.96); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.load-more-btn.timeout-retry:hover {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.35), rgba(236, 72, 153, 0.35));
+    color: #ffffff;
+    border-color: rgba(244, 63, 94, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35);
 }
 
 .load-more-btn:hover {

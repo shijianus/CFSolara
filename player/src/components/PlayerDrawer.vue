@@ -475,9 +475,58 @@ watch(
   }
 )
 
+let prevActiveElement: HTMLElement | null = null
+let hasPushedDrawerHistory = false
+
+const handleUserClose = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    if (hasPushedDrawerHistory && window.history.state?.sonicDrawer) {
+      window.history.back()
+    }
+  }
+}
+
+const handleDrawerKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isOpen.value) {
+    e.preventDefault()
+    handleUserClose()
+  }
+}
+
+const handlePopState = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    hasPushedDrawerHistory = false
+  }
+}
+
+watch(isOpen, val => {
+  if (val) {
+    prevActiveElement = document.activeElement as HTMLElement | null
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleDrawerKeydown)
+    window.addEventListener('popstate', handlePopState)
+    if (!window.history.state?.sonicDrawer) {
+      window.history.pushState({ sonicDrawer: true }, '')
+      hasPushedDrawerHistory = true
+    }
+    nextTick(() => drawerRef.value?.focus())
+  } else {
+    document.body.style.overflow = ''
+    window.removeEventListener('keydown', handleDrawerKeydown)
+    window.removeEventListener('popstate', handlePopState)
+    hasPushedDrawerHistory = false
+    prevActiveElement?.focus?.()
+  }
+})
+
 onUnmounted(() => {
   stopWordSyncLoop()
   stopBackgroundBreathing()
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleDrawerKeydown)
+  window.removeEventListener('popstate', handlePopState)
 })
 </script>
 
@@ -485,7 +534,11 @@ onUnmounted(() => {
   <div
     v-if="isRendered"
     ref="drawerRef"
-    class="bg-overlay/95 absolute inset-0 z-50 flex backdrop-blur-md backdrop-filter"
+    role="dialog"
+    aria-modal="true"
+    aria-label="全屏音乐播放器与歌词"
+    tabindex="-1"
+    class="bg-overlay/95 absolute inset-0 z-50 flex backdrop-blur-md backdrop-filter outline-none"
   >
     <div v-show="useCoverBg" class="absolute inset-0 -z-10 overflow-hidden">
       <div ref="bgARef" class="bg-layer absolute inset-0 opacity-0" :style="bgAStyle"></div>
@@ -652,11 +705,14 @@ onUnmounted(() => {
 
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-md"
             rounded="lg"
-            @click="isOpen = false"
+            @click="handleUserClose"
             icon="icon-[mdi--chevron-down]"
             icon-class="h-5 w-5"
+            title="关闭播放器 (Esc)"
+            aria-label="关闭播放器"
+            class="min-h-[40px] min-w-[40px]"
           />
         </div>
       </div>
@@ -860,7 +916,6 @@ onUnmounted(() => {
             class="lyric-line text-center"
             :class="{
               current: index === (lyricsDragging ? dragPreviewIndex : currentLyricIndex),
-              'text-primary/40': index !== (lyricsDragging ? dragPreviewIndex : currentLyricIndex),
             }"
             @click="handleLineClick(line.time)"
           >
@@ -997,8 +1052,10 @@ onUnmounted(() => {
 }
 
 .lyrics-container {
-  --lyric-word-active: #ffffff;
-  --lyric-word-inactive: rgba(255, 255, 255, 0.38);
+  --lyric-word-active: var(--glass-lyrics-active);
+  --lyric-word-inactive: var(--glass-lyrics-inactive);
+  background: var(--glass-lyrics-scrim);
+  color: var(--glass-lyrics-inactive);
   mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -1016,10 +1073,10 @@ onUnmounted(() => {
   --fill: 0%;
   background-image: linear-gradient(
     to right,
-    var(--lyric-word-active, #ffffff) 0%,
-    var(--lyric-word-active, #ffffff) var(--fill, 0%),
-    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) var(--fill, 0%),
-    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%
+    var(--lyric-word-active) 0%,
+    var(--lyric-word-active) var(--fill, 0%),
+    var(--lyric-word-inactive) var(--fill, 0%),
+    var(--lyric-word-inactive) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -1032,8 +1089,8 @@ onUnmounted(() => {
 
 .lyric-line.current .word-char.word-sung {
   --fill: 100%;
-  -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
-  color: var(--lyric-word-active, #ffffff);
+  -webkit-text-fill-color: var(--lyric-word-active);
+  color: var(--lyric-word-active);
   background-image: none;
   transform: scale(1);
   opacity: 0.98;
@@ -1041,8 +1098,8 @@ onUnmounted(() => {
 
 .lyric-line:not(.current) .word-char.word-sung {
   --fill: 100%;
-  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
-  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  -webkit-text-fill-color: var(--lyric-word-inactive);
+  color: var(--lyric-word-inactive);
   background-image: none;
   transform: scale(1);
 }
@@ -1050,13 +1107,13 @@ onUnmounted(() => {
 .lyric-line.current .word-char.word-singing {
   transform: scale(1.08);
   font-weight: 800;
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 16px var(--glass-lyrics-glow);
 }
 
 .lyric-line:not(.current) .word-char {
   --fill: 0%;
-  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
-  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  -webkit-text-fill-color: var(--lyric-word-inactive);
+  color: var(--lyric-word-inactive);
   background-image: none;
 }
 
@@ -1069,12 +1126,14 @@ onUnmounted(() => {
   line-height: 1.8;
   padding: 0.5rem 1.5rem;
   margin-bottom: 0.25rem;
+  color: var(--glass-lyrics-inactive);
   transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
   white-space: pre-line;
   transform-origin: center center;
 }
 
 .lyric-line.current {
+  color: var(--glass-lyrics-active);
   text-shadow: 0 0 24px rgba(139, 92, 246, 0.65), 0 0 40px rgba(236, 72, 153, 0.4);
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.08));
   border-radius: 14px;
@@ -1085,14 +1144,16 @@ onUnmounted(() => {
 }
 .lyric-line.current .lyric-text {
   @apply font-extrabold;
-  color: #ffffff;
+  color: var(--glass-lyrics-active);
 }
 .lyric-line.current .lyric-sub {
-  @apply text-primary/80 mt-1 text-sm lg:text-base;
+  @apply mt-1 text-sm lg:text-base;
+  color: var(--glass-lyrics-inactive);
 }
 
 .lyric-sub {
-  @apply text-primary/40 mt-0.5 text-sm;
+  @apply mt-0.5 text-sm;
+  color: var(--glass-lyrics-inactive);
 }
 
 @media (max-width: 1024px) {

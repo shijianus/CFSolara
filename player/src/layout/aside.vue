@@ -102,6 +102,30 @@ const updateIndicator = () => {
   })
 }
 
+// 路由代码块按需预取（悬停或空闲预取脚本，不预取任何后端数据）
+const routeChunkLoaders: Record<string, () => Promise<any>> = {
+  '/': () => import('@/pages/index.vue'),
+  '/mv-list': () => import('@/pages/mv-list.vue'),
+  '/charts': () => import('@/pages/charts.vue'),
+  '/artists': () => import('@/pages/artists.vue'),
+  '/new-albums': () => import('@/pages/new-albums.vue'),
+  '/search': () => import('@/pages/search.vue'),
+  '/my-music': () => import('@/pages/my-music.vue'),
+  '/downloads': () => import('@/pages/downloads.vue'),
+  '/local-music': () => import('@/pages/local-music.vue'),
+  '/settings': () => import('@/pages/settings.vue'),
+}
+
+const prefetchedRoutes = new Set<string>()
+const prefetchRoute = (to: string) => {
+  if (!to || prefetchedRoutes.has(to)) return
+  const loader = routeChunkLoaders[to]
+  if (loader) {
+    prefetchedRoutes.add(to)
+    loader().catch(() => {})
+  }
+}
+
 // 监听路由变化
 watch(
   () => route.path,
@@ -113,10 +137,20 @@ watch(
   { immediate: true }
 )
 
-// 组件挂载后初始化
+// 组件挂载后初始化与空闲预取
 onMounted(() => {
   nextTick(() => {
     updateIndicator()
+  })
+  const scheduleIdle =
+    typeof window !== 'undefined' && 'requestIdleCallback' in window
+      ? (cb: () => void) => (window as any).requestIdleCallback(cb, { timeout: 2000 })
+      : (cb: () => void) => setTimeout(cb, 1200)
+
+  scheduleIdle(() => {
+    prefetchRoute('/search')
+    prefetchRoute('/downloads')
+    prefetchRoute('/settings')
   })
 })
 
@@ -136,7 +170,7 @@ const isActive = (path: string) => {
         <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
           <router-link to="/" class="group flex items-center gap-2.5">
             <span class="relative flex h-8.5 w-8.5 items-center justify-center rounded-2xl bg-linear-to-br from-[#8b5cf6] via-[#ec4899] to-[#3b82f6] p-0.5 shadow-[0_0_16px_rgba(139,92,246,0.6)] transition-transform duration-300 group-hover:scale-105">
-              <span class="flex h-full w-full items-center justify-center rounded-[13px] bg-black/25 backdrop-blur-xs">
+              <span class="flex h-full w-full items-center justify-center rounded-[13px] bg-black/40">
                 <span class="h-2 w-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-pulse"></span>
               </span>
             </span>
@@ -214,7 +248,9 @@ const isActive = (path: string) => {
                   v-for="item in sec.items"
                   :key="item.to"
                   :to="item.to"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200"
+                  @mouseenter="prefetchRoute(item.to)"
+                  @focus="prefetchRoute(item.to)"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
                     'hover:bg-white/5': !isActive(item.to),
@@ -263,6 +299,7 @@ const isActive = (path: string) => {
         <span class="icon-[mdi--chevron-right] h-5 w-5"></span>
         <span class="icon-[mdi--account-music] h-5 w-5"></span>
         <span class="icon-[mdi--album] h-5 w-5"></span>
+        <span class="icon-[mdi--download-circle-outline] h-5 w-5"></span>
         <span class="icon-[mdi--folder-music-outline] h-5 w-5"></span>
       </div>
     </div>
@@ -270,9 +307,12 @@ const isActive = (path: string) => {
 </template>
 
 <style scoped>
-/* 导航指示器过渡 */
+/* 导航指示器过渡与毛玻璃微光 */
 .nav-indicator {
   transition: opacity 0.2s ease;
+  background-color: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.08));
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.12));
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.12);
 }
 
 /* 导航链接悬停效果 */

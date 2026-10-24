@@ -3,6 +3,7 @@ import { albumNew } from '@/api'
 import { useI18n } from 'vue-i18n'
 import { transformAlbums, type AlbumData } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 
 const { t } = useI18n()
 
@@ -12,7 +13,9 @@ interface AlbumItem extends AlbumData {
 
 const state = reactive({
   albums: [] as AlbumItem[],
-  isLoading: false,
+  isPageLoading: false,
+  isLoadingMore: false,
+  isLoadError: false,
   area: 'ALL' as 'ALL' | 'ZH' | 'EA' | 'KR' | 'JP',
   offset: 0,
   limit: 30,
@@ -30,15 +33,19 @@ const areaOptions = [
 ]
 
 const loadAlbums = async (reset = false) => {
+  if (state.isLoadingMore) return
   if (reset) {
     state.offset = 0
     state.albums = []
     state.hasMore = true
+    state.isPageLoading = true
+  } else {
+    if (!state.hasMore) return
+    state.isLoadingMore = true
   }
-  if (!state.hasMore) return
+  state.isLoadError = false
 
   try {
-    state.isLoading = true
     const res = await albumNew({
       area: state.area,
       limit: state.limit,
@@ -54,8 +61,15 @@ const loadAlbums = async (reset = false) => {
     state.albums = reset ? mapped : [...state.albums, ...mapped]
     state.hasMore = albums.length === state.limit
     state.offset += state.limit
+  } catch {
+    if (!reset) {
+      state.isLoadError = true
+    } else {
+      state.hasMore = false
+    }
   } finally {
-    state.isLoading = false
+    if (reset) state.isPageLoading = false
+    state.isLoadingMore = false
   }
 }
 
@@ -89,7 +103,7 @@ onMounted(() => loadAlbums(true))
     </div>
 
     <div class="flex-1 overflow-auto px-1 sm:px-2 pb-6">
-      <PageSkeleton v-if="state.isLoading && !state.albums.length" :sections="['grid']" />
+      <PageSkeleton v-if="state.isPageLoading && !state.albums.length" :sections="['grid']" />
       <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         <router-link
           v-for="album in state.albums"
@@ -121,16 +135,17 @@ onMounted(() => loadAlbums(true))
         </router-link>
       </div>
 
-      <div v-if="state.hasMore && state.albums.length" class="mt-6 text-center">
-        <button
-          :disabled="state.isLoading"
-          class="glass-button px-6 py-2 text-sm"
-          @click="loadAlbums(false)"
-        >
-          <span v-if="state.isLoading" class="icon-[mdi--loading] mr-2 h-4 w-4 animate-spin" />
-          {{ state.isLoading ? t('common.loading') : t('newAlbums.loadMore') }}
-        </button>
-      </div>
+      <!-- 自动流式预加载与超时自愈重试 -->
+      <InfiniteScroll
+        :loading="state.isLoadingMore"
+        :has-more="state.hasMore"
+        :error="state.isLoadError"
+        :empty="!state.albums.length"
+        :loading-text="t('common.loading')"
+        :retry-text="t('newAlbums.loadMore')"
+        @load="loadAlbums(false)"
+        @retry="loadAlbums(false)"
+      />
     </div>
   </div>
 </template>

@@ -7,7 +7,7 @@ const { t } = useI18n()
 <template>
   <div class="pb-4">
     <section class="mb-6 px-4 pt-2">
-      <div class="relative h-44 w-full overflow-hidden rounded-2xl">
+      <div class="relative w-full aspect-[1080/400] max-h-[45vh] overflow-hidden rounded-2xl">
         <div class="skeleton-bg absolute inset-0"></div>
         <div class="animate-shimmer absolute inset-0"></div>
         <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">

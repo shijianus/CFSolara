@@ -75,6 +75,40 @@ const romaChecked = computed({
   get: () => footerLyrics.value.modes.includes('roma'),
   set: v => toggleMode('roma', v as boolean),
 })
+
+// 性能优先模式（关闭高斯模糊与背景流光特效）
+const isPerformanceMode = ref(false)
+
+const loadPerformanceMode = () => {
+  try {
+    isPerformanceMode.value = localStorage.getItem('sonic-perf-mode') === 'true'
+  } catch (_) {}
+}
+
+const togglePerformanceMode = () => {
+  const nextVal = !isPerformanceMode.value
+  isPerformanceMode.value = nextVal
+  try {
+    localStorage.setItem('sonic-perf-mode', String(nextVal))
+  } catch (_) {}
+  document.documentElement.classList.toggle('perf-mode', nextVal)
+}
+
+const prefetchBackground = (bgKey: string) => {
+  if (bgKey === 'colorbends') {
+    import('@/components/Background/ColorBends.vue')
+  } else if (bgKey === 'aurora') {
+    import('@/components/Background/Aurora.vue')
+  } else if (bgKey === 'shadowBling') {
+    import('@/components/Background/ShadowBling.vue')
+  } else if (bgKey === 'ultimate') {
+    import('@/components/Background/Ultimate.vue')
+  }
+}
+
+onMounted(() => {
+  loadPerformanceMode()
+})
 </script>
 
 <template>
@@ -137,7 +171,11 @@ const romaChecked = computed({
               </p>
             </div>
           </div>
-          <GlassSelect v-model="backgroundType" :options="bgOptions" />
+          <GlassSelect
+            v-model="backgroundType"
+            :options="bgOptions"
+            @hover-option="prefetchBackground"
+          />
         </div>
 
         <div class="glass-card space-y-5 rounded-2xl p-5">
@@ -240,6 +278,43 @@ const romaChecked = computed({
                 class="w-32"
               />
             </div>
+          </div>
+        </div>
+
+        <!-- 性能优先模式 (Performance Mode) -->
+        <div class="glass-card space-y-5 rounded-2xl p-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500 to-blue-600"
+              >
+                <span class="icon-[mdi--speedometer] h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 class="text-primary text-sm font-semibold">
+                  性能优先模式
+                </h3>
+                <p class="text-primary/50 text-xs">
+                  关闭毛玻璃高斯模糊与背景流光特效，降低低配设备 CPU/GPU 负载
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="isPerformanceMode"
+              @click="togglePerformanceMode"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+              :class="isPerformanceMode ? 'bg-pink-500' : 'bg-white/20'"
+            >
+              <span
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"
+                :class="isPerformanceMode ? 'translate-x-5' : 'translate-x-0'"
+              />
+            </button>
+          </div>
+          <div class="text-primary/60 text-xs">
+            当前状态：<span :class="isPerformanceMode ? 'text-pink-400 font-bold' : 'text-primary/80 font-medium'">{{ isPerformanceMode ? '已开启 (零模糊高帧率)' : '标准模式 (全特效玻璃质感)' }}</span>
           </div>
         </div>
       </div>

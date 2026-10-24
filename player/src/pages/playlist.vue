@@ -5,6 +5,7 @@ import { PlaylistInfo, PlaylistSong, CommentItem } from '@/typings'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
+import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 import { formatCount } from '@/utils/time'
 import { useI18n } from 'vue-i18n'
 import {
@@ -37,6 +38,10 @@ interface PlaylistState {
   comments: CommentItem[]
   isPageLoading: boolean
   similarPlaylists: SimilarPlaylist[]
+  commentPage: number
+  hasMoreComments: boolean
+  isLoadingMoreComments: boolean
+  isCommentLoadError: boolean
 }
 
 const state = reactive<PlaylistState>({
@@ -48,9 +53,23 @@ const state = reactive<PlaylistState>({
   comments: [],
   isPageLoading: true,
   similarPlaylists: [],
+  commentPage: 1,
+  hasMoreComments: true,
+  isLoadingMoreComments: false,
+  isCommentLoadError: false,
 })
-const { activeTab, playlistInfo, songs, newComment, comments, isPageLoading, similarPlaylists } =
-  toRefs(state)
+const {
+  activeTab,
+  playlistInfo,
+  songs,
+  newComment,
+  comments,
+  isPageLoading,
+  similarPlaylists,
+  hasMoreComments,
+  isLoadingMoreComments,
+  isCommentLoadError,
+} = toRefs(state)
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 const { t } = useI18n()
 
@@ -91,28 +110,62 @@ const loadPlaylist = async (id: number) => {
   }
 }
 
-const loadComments = async (id: number) => {
+const loadComments = async (id?: number, reset = false) => {
+  const targetId = id || Number(playlistId)
+  if (!targetId) return
+  if (state.isLoadingMoreComments) return
+  if (!reset && !state.hasMoreComments) return
+
+  if (reset) {
+    state.commentPage = 1
+    state.comments = []
+    state.hasMoreComments = true
+  } else {
+    state.isLoadingMoreComments = true
+  }
+  state.isCommentLoadError = false
+
   try {
-    const res = await commentNew({ id, type: 2, sortType: 1, pageNo: 1, pageSize: 10 })
+    const res = await commentNew({
+      id: targetId,
+      type: 2,
+      sortType: 1,
+      pageNo: state.commentPage,
+      pageSize: 20,
+    })
     const list = (res as any)?.data?.comments || (res as any)?.comments || []
     if (Array.isArray(list)) {
-      state.comments = list.map((c: any, i: number) => ({
+      const mapped = list.map((c: any, i: number) => ({
         username: c?.user?.nickname || t('comments.user'),
-        avatarGradient: gradients[i % gradients.length],
+        avatarGradient: gradients[(state.comments.length + i) % gradients.length],
         time: c?.time ? new Date(c.time).toLocaleString() : '',
         content: c?.content || '',
         likes: c?.likedCount || 0,
         avatarUrl: c?.user?.avatarUrl || '',
-        replies: (c?.beReplied || []).map((r: any) => ({
+        replies: (c?.beReplied || []).map((r: any, ri: number) => ({
           username: r?.user?.nickname || t('comments.user'),
           avatarUrl: r?.user?.avatarUrl || '',
-          avatarGradient: gradients[(i + 1) % gradients.length],
+          avatarGradient: gradients[(state.comments.length + i + ri + 1) % gradients.length],
           time: '',
           content: r?.content || '',
         })),
       }))
+
+      state.comments = reset ? mapped : [...state.comments, ...mapped]
+      state.hasMoreComments = list.length === 20
+      if (mapped.length) state.commentPage += 1
+    } else {
+      state.hasMoreComments = false
     }
-  } catch {}
+  } catch {
+    if (!reset) {
+      state.isCommentLoadError = true
+    } else {
+      state.hasMoreComments = false
+    }
+  } finally {
+    state.isLoadingMoreComments = false
+  }
 }
 
 const loadSimilarPlaylists = async (name: string) => {
@@ -517,19 +570,17 @@ const tabsWithCount = computed(() =>
               <p class="text-primary/50 text-sm font-medium">{{ $t('comments.empty') }}</p>
             </div>
 
-            <!-- 加载更多 -->
-            <div
-              v-if="comments.length >= 10"
-              class="border-t border-glass p-5 text-center"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                class="text-primary/60 hover:text-primary text-sm font-medium transition-colors"
-              >
-                {{ $t('comments.loadMore') }}
-              </Button>
-            </div>
+            <!-- 评论流式自动触底加载与超时重试 -->
+            <InfiniteScroll
+              :loading="isLoadingMoreComments"
+              :has-more="hasMoreComments"
+              :error="isCommentLoadError"
+              :empty="!comments.length"
+              :loading-text="$t('comments.loadMore')"
+              :retry-text="$t('comments.loadMore')"
+              @load="loadComments(undefined, false)"
+              @retry="loadComments(undefined, false)"
+            />
           </div>
         </section>
 

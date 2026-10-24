@@ -91,10 +91,42 @@ export async function handleUpstreamEndpoint(
       });
       const data: any = await resp.json();
       if (data && data.banners) {
-        const banners = data.banners.map((b: any) => ({
-          ...b,
-          typeTitle: b.typeTitle ? `Sonic ${b.typeTitle.replace('首发', '独家').replace('网易', '')}` : 'Sonic 精选',
-        }));
+        // 严格屏蔽纯外部商业活动（targetType === 3000 或无有效音乐实体的外链）
+        const filtered = data.banners.filter((b: any) => {
+          if (b.targetType === 3000) return false;
+          const tid = b.targetId || (typeof b.url === 'string' && (b.url.match(/song\/(\d+)/) || b.url.match(/album\/(\d+)/))?.[1]);
+          if (!tid) return false;
+          // 仅允许单曲(1)、专辑(10)、歌单(1000)、MV(1004)在站内闭环展示
+          return [1, 10, 1000, 1004].includes(b.targetType);
+        });
+
+        const banners = filtered.map((b: any) => {
+          const tid = b.targetId || (typeof b.url === 'string' && (b.url.match(/song\/(\d+)/) || b.url.match(/album\/(\d+)/))?.[1]);
+          let internalPath = '';
+          if (b.targetType === 1) internalPath = `/song/${tid}?autoplay=1`;
+          else if (b.targetType === 10) internalPath = `/album/${tid}?autoplay=1`;
+          else if (b.targetType === 1000) internalPath = `/playlist/${tid}`;
+          else if (b.targetType === 1004) internalPath = `/mv-player/${tid}`;
+          else internalPath = `/song/${tid}?autoplay=1`;
+
+          let cleanTitle = b.typeTitle || '';
+          cleanTitle = cleanTitle.replace(/网易|云音乐|首发/g, '').trim();
+          if (!cleanTitle) {
+            if (b.targetType === 1) cleanTitle = '新歌独家';
+            else if (b.targetType === 10) cleanTitle = '新碟独家';
+            else if (b.targetType === 1000) cleanTitle = '甄选歌单';
+            else if (b.targetType === 1004) cleanTitle = '精选MV';
+            else cleanTitle = '独家推荐';
+          }
+
+          return {
+            ...b,
+            targetId: tid,
+            url: internalPath, // 替换为纯净的站内路由，绝不泄漏任何 orpheus:// 或外站 URL
+            typeTitle: `Sonic ${cleanTitle}`,
+          };
+        });
+
         return jsonResponse(
           { code: 200, brand: 'Sonic', banners: desensitizeData(banners) },
           { headers: { 'Cache-Control': 'public, max-age=1800' } },
@@ -445,9 +477,13 @@ export async function handleUpstreamEndpoint(
 
   // 15. Song Detail
   if (normEndpoint === 'song/detail') {
-    const ids = url.searchParams.get('ids') || '[]';
+    let ids = url.searchParams.get('ids') || url.searchParams.get('id') || '[]';
+    if (ids && !ids.startsWith('[')) {
+      ids = `[${ids}]`;
+    }
+    const cleanId = ids.replace(/[\[\]\s]/g, '');
     try {
-      const resp = await fetch(`https://music.163.com/api/song/detail?ids=${encodeURIComponent(ids)}`, {
+      const resp = await fetch(`https://music.163.com/api/song/detail/?id=${encodeURIComponent(cleanId)}&ids=${encodeURIComponent(ids)}`, {
         headers: UPSTREAM_HEADERS,
       });
       const data: any = await resp.json();
@@ -457,6 +493,31 @@ export async function handleUpstreamEndpoint(
       );
     } catch {}
     return jsonResponse({ code: 200, brand: 'Sonic', songs: [] });
+  }
+
+  // 16. Album Detail
+  if (normEndpoint === 'album') {
+    const id = url.searchParams.get('id') || '';
+    if (id) {
+      try {
+        const resp = await fetch(`https://music.163.com/api/v1/album/${encodeURIComponent(id)}`, {
+          headers: UPSTREAM_HEADERS,
+        });
+        const data: any = await resp.json();
+        if (data && (data.code === 200 || data.album)) {
+          return jsonResponse(
+            {
+              code: 200,
+              brand: 'Sonic',
+              album: desensitizeData(data.album || {}),
+              songs: desensitizeData(data.songs || []),
+            },
+            { headers: { 'Cache-Control': 'public, max-age=3600' } },
+          );
+        }
+      } catch {}
+    }
+    return jsonResponse({ code: 200, brand: 'Sonic', album: {}, songs: [] });
   }
 
   // 16. Song URL

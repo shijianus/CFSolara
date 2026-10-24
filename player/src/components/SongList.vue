@@ -119,27 +119,46 @@ const formatSongTitle = (title: string, maxLen = MAX_TITLE_LEN) => {
   return title.length > maxLen ? title.slice(0, maxLen) + '...' : title
 }
 
+const isPredominantlyLossless = computed(() => {
+  if (!props.songs || props.songs.length === 0) return false
+  const sqCount = props.songs.filter(
+    s => s.qualityBadge === 'SQ' || s.qualities?.[0]?.level === 'lossless'
+  ).length
+  return sqCount / props.songs.length >= 0.8
+})
+
 const getQualityBadgeInfo = (song: Song) => {
   const isLossless = song.qualityBadge === 'SQ' || song.qualities?.[0]?.level === 'lossless'
   const isExhigh = song.qualityBadge === 'HQ' || song.qualities?.[0]?.level === 'exhigh'
+  const hasMultiple = Boolean(song.qualities && song.qualities.length > 1)
+
+  // 当绝大多数（80%以上）曲目均为 SQ 无损时，不逐行重复贴大徽章；仅标明例外或留作底栏切换
+  if (isPredominantlyLossless.value && isLossless) {
+    return null
+  }
+
   if (isLossless) {
     return {
-      label: 'SQ 无损',
-      title: 'SQ: 超清无损母带音质 (FLAC / 16~24bit)',
-      badgeClass: 'bg-gradient-to-r from-violet-600/30 to-pink-600/30 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.2)]',
+      label: 'SQ',
+      title: hasMultiple
+        ? `SQ: 无损音质 (FLAC，仅表示该音质档位，可在底栏切换)`
+        : 'SQ: 无损音质 (FLAC，仅表示该音质档位)',
+      badgeClass: 'bg-pink-500/10 text-pink-300/90 border border-pink-500/25',
     }
   }
   if (isExhigh) {
     return {
-      label: 'HQ 极高',
-      title: 'HQ: 极高音质 (320Kbps MP3)',
-      badgeClass: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+      label: 'HQ',
+      title: hasMultiple
+        ? `HQ: 极高音质 (MP3 320k，可在底栏切换)`
+        : 'HQ: 极高音质 (MP3 320k)',
+      badgeClass: 'bg-cyan-500/15 text-cyan-300/90 border border-cyan-500/25',
     }
   }
   return {
     label: '标准',
-    title: '标准: 标清音质 (128Kbps MP3)',
-    badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    title: '标准: 标准音质 (MP3 128k)',
+    badgeClass: 'bg-emerald-500/15 text-emerald-300/90 border border-emerald-500/25',
   }
 }
 </script>
@@ -148,6 +167,8 @@ const getQualityBadgeInfo = (song: Song) => {
 /* 歌曲项悬停效果 - 移除位移，改用更平滑的背景过渡 */
 .song-item {
   transition: all 0.2s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 53px;
 }
 
 /* 响应式调整 */
@@ -230,32 +251,48 @@ const getQualityBadgeInfo = (song: Song) => {
         <div
           v-for="(song, index) in songs"
           :key="song.id || index"
-          class="song-item group flex cursor-pointer items-center rounded-xl p-2 hover:bg-white/10"
-          :class="isCurrent(song) ? 'bg-white/10' : ''"
+          class="song-item group relative flex cursor-pointer items-center rounded-xl p-2 border transition-colors duration-150 overflow-hidden"
+          :class="[
+            isCurrent(song)
+              ? 'border-pink-500/25'
+              : 'border-transparent hover:bg-white/10 hover:border-white/10'
+          ]"
+          :style="isCurrent(song) ? { backgroundColor: 'rgba(236, 72, 153, 0.14)' } : {}"
           @dblclick="(e) => playSongWithAnimation(song, index, e)"
         >
+          <!-- 左侧 2px 强调色指示条 (当前播放行) -->
+          <span
+            v-if="isCurrent(song)"
+            class="absolute left-0 top-2 bottom-2 w-[2px] bg-pink-500 rounded-r"
+            aria-hidden="true"
+          ></span>
           <!-- 序号/播放状态 -->
-          <div class="flex w-14 shrink-0 items-center justify-center text-center">
+          <div class="relative flex w-14 shrink-0 items-center justify-center text-center select-none">
+            <!-- 未悬停且非当前播放：显示纯数字序号 -->
             <span
               v-if="!isCurrent(song)"
-              class="text-primary/60 text-sm font-medium group-hover:hidden"
+              class="font-mono text-xs text-primary/60 transition-opacity duration-150 group-hover:opacity-0"
             >
               {{ index + 1 }}
             </span>
-            <div v-if="isCurrent(song)" class="playing-icon">
+
+            <!-- 当前播放状态：动效均衡器柱 -->
+            <div v-else class="playing-icon flex items-center justify-center gap-0.5">
               <span class="bar" :class="{ animate: isPlaying }"></span>
               <span class="bar" :class="{ animate: isPlaying }"></span>
               <span class="bar" :class="{ animate: isPlaying }"></span>
             </div>
-            <Button
+
+            <!-- 悬停时：平滑浮现播放三角按钮 -->
+            <button
               v-if="!isCurrent(song)"
-              variant="text"
-              size="none"
-              class="hidden! transition-colors group-hover:block! hover:text-pink-400"
+              type="button"
+              class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100 text-primary hover:text-pink-400 active:scale-90 cursor-pointer"
+              :title="t('actions.play') || '播放'"
               @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
             >
-              <span class="icon-[mdi--play] h-6 w-6"></span>
-            </Button>
+              <span class="icon-[mdi--play] h-5 w-5"></span>
+            </button>
           </div>
 
           <div class="grid min-w-0 flex-1 grid-cols-12 items-center gap-4">
@@ -268,6 +305,8 @@ const getQualityBadgeInfo = (song: Song) => {
                   :src="formatCoverUrl(song.cover, { size: 90, artist: song.artist })"
                   :fallback-src="formatCoverUrl('', { artist: song.artist })"
                   :alt="t('components.songList.coverAlt')"
+                  :title="song.name"
+                  :seed="song.album || song.artist || song.name"
                   imgClass="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   wrapperClass="h-full w-full"
                 />
@@ -283,22 +322,14 @@ const getQualityBadgeInfo = (song: Song) => {
                   >
                     {{ formatSongTitle(song.name) }}
                   </h3>
-                  <!-- Sonic 规范音质标签 (无损/极高/标准) -->
+                  <!-- 精炼降噪音质徽章 (全列表以SQ为主时不重复显眼刷屏，只标出例外；多音质收归进交互提示) -->
                   <span
-                    v-if="song.qualityBadge || (song.qualities && song.qualities.length > 0)"
-                    :title="getQualityBadgeInfo(song).title"
-                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider leading-none select-none transition-all cursor-help"
-                    :class="getQualityBadgeInfo(song).badgeClass"
+                    v-if="getQualityBadgeInfo(song)"
+                    :title="getQualityBadgeInfo(song)!.title"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium leading-none select-none transition-all cursor-help"
+                    :class="getQualityBadgeInfo(song)!.badgeClass"
                   >
-                    {{ getQualityBadgeInfo(song).label }}
-                  </span>
-                  <!-- 多音质版本集中切换标识 -->
-                  <span
-                    v-if="song.qualities && song.qualities.length > 1"
-                    :title="`包含 ${song.qualities.length} 个音质版本，播放后可在底栏切换`"
-                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium leading-none select-none bg-amber-500/15 text-amber-300 border border-amber-500/30 cursor-help"
-                  >
-                    多音质
+                    {{ getQualityBadgeInfo(song)!.label }}
                   </span>
                 </div>
                 <div class="mt-0.5 flex items-center gap-2 md:hidden">
@@ -354,42 +385,50 @@ const getQualityBadgeInfo = (song: Song) => {
                 formatDuration(song.duration)
               }}</span>
             </div>
-            <!-- 操控按钮 -->
-            <div
-              class="col-span-2 flex items-center justify-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            >
-              <Button
-                v-if="song.mvId"
-                variant="ghost"
-                size="icon-md"
-                rounded="full"
-                class="h-9 w-9"
-                icon="icon-[mdi--movie-open-play]"
-                iconClass="h-5 w-5"
-                :title="t('common.playMV')"
-                @click.stop="openMV(song, index)"
-              />
-              <Button
-                v-if="song.id"
-                variant="ghost"
-                size="icon-md"
-                rounded="full"
-                class="h-9 w-9"
-                icon="icon-[mdi--information-outline]"
-                iconClass="h-5 w-5"
-                :title="t('common.detail')"
-                @click.stop="router.push(`/song/${song.id}`)"
-              />
-              <Button
-                variant="ghost"
-                size="icon-md"
-                rounded="full"
-                class="h-9 w-9"
-                icon="icon-[mdi--tray-arrow-down]"
-                iconClass="h-5 w-5"
-                :title="t('common.download')"
-                @click.stop="downloadSong(song, index)"
-              />
+            <!-- 操控按钮 (常态显示低透明度的"···"，悬停显示三个 32px 按钮，间距 8px) -->
+            <div class="col-span-2 relative flex items-center justify-center min-h-[32px]">
+              <!-- 常态：低透明度 (0.5) 更多图标 -->
+              <div class="flex items-center justify-center text-white/50 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
+                <span class="icon-[mdi--dots-horizontal] h-5 w-5"></span>
+              </div>
+
+              <!-- 悬停或键盘聚焦时：显示三个 32px 按钮，间距 8px (gap-2) -->
+              <div class="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('actions.play') || '播放'"
+                  @click.stop="(e: MouseEvent) => playSongWithAnimation(song, index, e)"
+                >
+                  <span class="icon-[mdi--play] h-4 w-4"></span>
+                </button>
+                <button
+                  v-if="song.mvId"
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-purple-300 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.playMV')"
+                  @click.stop="openMV(song, index)"
+                >
+                  <span class="icon-[mdi--movie-open-play] h-4 w-4"></span>
+                </button>
+                <button
+                  v-else-if="song.id"
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.detail')"
+                  @click.stop="router.push(`/song/${song.id}`)"
+                >
+                  <span class="icon-[mdi--information-outline] h-4 w-4"></span>
+                </button>
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:text-pink-400 hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                  :title="t('common.download')"
+                  @click.stop="downloadSong(song, index)"
+                >
+                  <span class="icon-[mdi--tray-arrow-down] h-4 w-4"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

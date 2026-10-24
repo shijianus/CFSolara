@@ -238,44 +238,226 @@ onUnmounted(() => {
   if (qualityToastTimer) clearTimeout(qualityToastTimer)
 })
 
+import {
+  probeSongQualities,
+  getCachedProbeResult,
+  cancelSongProbe,
+  type SongProbeResult,
+  type QualityLevel,
+} from '@/utils/qualityProbe'
+
 // ═══════ 音质切换与下载控制 ═══════
 const showQualityMenu = ref(false)
 const qualityMenuRef = ref<HTMLElement | null>(null)
+const qualityBtnRef = ref<HTMLButtonElement | null>(null)
+const qualityItemRefs = ref<HTMLButtonElement[]>([])
+const focusedQualityIndex = ref(0)
 const qualityToastMsg = ref('')
 let qualityToastTimer: any = null
 
-const availableQualities = computed(() => {
-  if (currentSong.value?.qualities && currentSong.value.qualities.length > 0) {
-    return currentSong.value.qualities.map((q) => ({
-      level: q.level,
-      label: q.label,
-      bitrate: q.bitrate,
-      desc: q.desc || (q.level === 'lossless' ? '超清无损母带音质' : q.level === 'exhigh' ? '极高品质MP3' : '标准流畅音质'),
-    }))
-  }
-  return [
-    { level: 'lossless', label: 'SQ 无损', bitrate: 'FLAC 24bit', desc: '超清无损母带音质 (FLAC / 24-bit)' },
-    { level: 'exhigh', label: 'HQ 极高', bitrate: '320kbps', desc: '极高品质MP3 (320kbps 饱满声场)' },
-    { level: 'standard', label: '标准', bitrate: '128kbps', desc: '标准流畅音质 (128kbps 快速省流)' },
-  ]
+// 歌曲真实音质探测结果
+const currentSongProbe = ref<SongProbeResult | null>(null)
+
+const currentQualityLevel = computed<QualityLevel>(() => {
+  const badge = currentSong.value?.qualityBadge
+  if (badge === 'SQ') return 'lossless'
+  if (badge === 'HQ') return 'exhigh'
+  if (badge === '标准' || badge === 'STANDARD') return 'standard'
+  const firstLevel = currentSong.value?.qualities?.[0]?.level
+  if (firstLevel === 'lossless' || firstLevel === 'exhigh' || firstLevel === 'standard') return firstLevel
+  return 'lossless'
 })
 
-const currentQualityLevel = computed(() => {
-  const badge = currentSong.value?.qualityBadge
-  if (badge === 'SQ' || currentSong.value?.qualities?.[0]?.level === 'lossless') return 'lossless'
-  if (badge === 'HQ' || currentSong.value?.qualities?.[0]?.level === 'exhigh') return 'exhigh'
+// 实际生效的音质档位（当请求档位不可用时降级至实际生效档位，如标准）
+const effectiveQualityLevel = computed<QualityLevel>(() => {
+  const req = currentQualityLevel.value
+  const probe = currentSongProbe.value
+  if (!probe) return req
+
+  const currentItem = probe[req]
+  if (currentItem && currentItem.isAvailable) {
+    return req
+  }
+
+  // 请求档位不可用或静默降级：寻找音源实际能提供的最高可用档位
+  if (probe.exhigh.isAvailable) return 'exhigh'
+  if (probe.standard.isAvailable) return 'standard'
   return 'standard'
 })
 
-const activeQualityBadge = computed(() => {
-  if (currentQualityLevel.value === 'lossless') return 'SQ 无损'
-  if (currentQualityLevel.value === 'exhigh') return 'HQ 极高'
-  return '标准'
+let probingSongId = ''
+
+// 触发音质探测（仅在打开浮层或当前档位非标准需判断降级时触发）
+const triggerProbeIfNeeded = async () => {
+  const song = currentSong.value
+  if (!song || !song.id) {
+    currentSongProbe.value = null
+    return
+  }
+
+  const cached = getCachedProbeResult(song.id)
+  if (cached) {
+    currentSongProbe.value = cached
+    return
+  }
+
+  if (probingSongId === String(song.id)) {
+    return
+  }
+
+  // 只在用户打开音质浮层，或需要判断降级（当前请求档位不是标准）时才探测
+  const needsProbe = showQualityMenu.value || currentQualityLevel.value !== 'standard'
+  if (!needsProbe) {
+    return
+  }
+
+  probingSongId = String(song.id)
+  try {
+    const res = await probeSongQualities(song)
+    if (currentSong.value && String(currentSong.value.id) === String(song.id)) {
+      currentSongProbe.value = res
+    }
+  } catch (e) {
+    // 探测异常或中止维持兜底
+  } finally {
+    if (probingSongId === String(song.id)) {
+      probingSongId = ''
+    }
+  }
+}
+
+// 监听当前歌曲变化，切歌时取消旧歌未完成探测
+watch(
+  () => currentSong.value,
+  (newSong, oldSong) => {
+    if (oldSong?.id && String(oldSong.id) !== String(newSong?.id)) {
+      cancelSongProbe(oldSong.id)
+    }
+    if (!newSong || !newSong.id) {
+      currentSongProbe.value = null
+      return
+    }
+    const cached = getCachedProbeResult(newSong.id)
+    if (cached) {
+      currentSongProbe.value = cached
+      return
+    }
+    currentSongProbe.value = null
+    triggerProbeIfNeeded()
+  },
+  { immediate: true }
+)
+
+// 监听浮层展开状态：用户打开浮层时按需探测
+watch(
+  () => showQualityMenu.value,
+  (isOpen) => {
+    if (isOpen) {
+      triggerProbeIfNeeded()
+    }
+  }
+)
+
+// 可用档位列表（由探测数据驱动）
+const availableQualities = computed(() => {
+  const probe = currentSongProbe.value
+  const levels: { level: QualityLevel; defaultLabel: string }[] = [
+    { level: 'lossless', defaultLabel: 'SQ 无损' },
+    { level: 'exhigh', defaultLabel: 'HQ 极高' },
+    { level: 'standard', defaultLabel: '标准' },
+  ]
+
+  return levels.map(({ level, defaultLabel }) => {
+    const item = probe ? probe[level] : null
+    const isAvailable = item ? item.isAvailable : true
+    const unavailableReason = item?.unavailableReason
+
+    let bitrateDisplay = ''
+    if (item) {
+      if (!isAvailable && unavailableReason) {
+        bitrateDisplay = unavailableReason
+      } else {
+        bitrateDisplay = item.bitrateLabel
+      }
+    } else {
+      bitrateDisplay = '探测中…'
+    }
+
+    return {
+      level,
+      label: item?.label || defaultLabel,
+      bitrate: bitrateDisplay,
+      isAvailable,
+      unavailableReason,
+      formatLabel: item?.formatLabel || '未知',
+      sizeFormatted: item?.sizeFormatted || '—',
+    }
+  })
 })
 
-const isLosslessActive = computed(() => currentQualityLevel.value === 'lossless')
+// 底栏标识与提示文本（检测是否发生静默降级）
+const qualityDisplayInfo = computed(() => {
+  const reqLevel = currentQualityLevel.value
+  const probe = currentSongProbe.value
 
-const qualityBtnRef = ref<HTMLButtonElement | null>(null)
+  const nominalBadge = reqLevel === 'lossless' ? 'SQ 无损' : reqLevel === 'exhigh' ? 'HQ 极高' : '标准'
+
+  if (!probe) {
+    const isProbing = reqLevel !== 'standard' || showQualityMenu.value
+    return {
+      badge: nominalBadge,
+      tooltip: isProbing ? `当前音质: ${nominalBadge} (探测中…)` : `当前音质: ${nominalBadge}`,
+      isDegraded: false,
+      isLossless: reqLevel === 'lossless',
+    }
+  }
+
+  const currentItem = probe[reqLevel]
+  if (currentItem && currentItem.isAvailable) {
+    // 请求档位真实可用
+    return {
+      badge: nominalBadge,
+      tooltip: `当前音质: ${nominalBadge} (${currentItem.bitrateLabel})`,
+      isDegraded: false,
+      isLossless: reqLevel === 'lossless' && (currentItem.formatLabel === 'FLAC' || currentItem.formatLabel === 'WAV' || currentItem.formatLabel === 'ALAC'),
+    }
+  }
+
+  // 请求档位不可用或被静默降级：寻找音源实际能提供的最高可用档位
+  const fallbackTier = probe.exhigh.isAvailable
+    ? probe.exhigh
+    : probe.standard.isAvailable
+      ? probe.standard
+      : null
+
+  if (fallbackTier) {
+    const actualFmt = fallbackTier.formatLabel || 'MP3'
+    const actualBitrateNum = fallbackTier.actualBitrateKbps || (fallbackTier.level === 'exhigh' ? 320 : 128)
+    const actualBadge = `${actualFmt} ${actualBitrateNum}k`
+    const tooltip = `请求 ${nominalBadge},音源实际提供 ${actualFmt} ${actualBitrateNum} kbps`
+
+    return {
+      badge: actualBadge,
+      tooltip,
+      isDegraded: true,
+      isLossless: false,
+    }
+  }
+
+  // 均不可用或探测失败
+  return {
+    badge: '未知',
+    tooltip: `当前音质: ${nominalBadge} (音源状态未知)`,
+    isDegraded: false,
+    isLossless: false,
+  }
+})
+
+const activeQualityBadge = computed(() => qualityDisplayInfo.value.badge)
+const activeQualityTooltip = computed(() => qualityDisplayInfo.value.tooltip)
+const isLosslessActive = computed(() => qualityDisplayInfo.value.isLossless)
+const isDegradedQuality = computed(() => qualityDisplayInfo.value.isDegraded)
+
 const menuCoords = ref({ bottom: 0, right: 0 })
 
 const updateQualityMenuPosition = () => {
@@ -287,15 +469,62 @@ const updateQualityMenuPosition = () => {
   }
 }
 
+const openAndFocusQualityMenu = () => {
+  updateQualityMenuPosition()
+  showQualityMenu.value = true
+  const activeIdx = availableQualities.value.findIndex(q => q.level === effectiveQualityLevel.value)
+  focusedQualityIndex.value = activeIdx >= 0 ? activeIdx : 0
+  nextTick(() => {
+    qualityItemRefs.value[focusedQualityIndex.value]?.focus()
+  })
+}
+
+const closeQualityMenuAndRestoreFocus = () => {
+  showQualityMenu.value = false
+  nextTick(() => {
+    qualityBtnRef.value?.focus()
+  })
+}
+
 const toggleQualityMenu = () => {
   if (!showQualityMenu.value) {
-    updateQualityMenuPosition()
+    openAndFocusQualityMenu()
+  } else {
+    closeQualityMenuAndRestoreFocus()
   }
-  showQualityMenu.value = !showQualityMenu.value
+}
+
+const moveQualityFocus = (delta: number) => {
+  if (availableQualities.value.length === 0) return
+  focusedQualityIndex.value =
+    (focusedQualityIndex.value + delta + availableQualities.value.length) % availableQualities.value.length
+  nextTick(() => {
+    qualityItemRefs.value[focusedQualityIndex.value]?.focus()
+  })
+}
+
+const handleQualityMenuKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    e.stopPropagation()
+    moveQualityFocus(1)
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    e.stopPropagation()
+    moveQualityFocus(-1)
+  } else if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closeQualityMenuAndRestoreFocus()
+  } else if (e.key === 'Tab') {
+    closeQualityMenuAndRestoreFocus()
+  }
 }
 
 const selectQuality = async (level: string) => {
-  showQualityMenu.value = false
+  const target = availableQualities.value.find((q) => q.level === level)
+  if (target && !target.isAvailable) return
+  closeQualityMenuAndRestoreFocus()
   if (level === currentQualityLevel.value) return
   await audioStore.switchQuality(level)
   const labelMap: Record<string, string> = {
@@ -328,14 +557,37 @@ const handleDocumentClick = (e: MouseEvent | PointerEvent) => {
   showQualityMenu.value = false
 }
 
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && showQualityMenu.value) {
+    e.preventDefault()
+    closeQualityMenuAndRestoreFocus()
+  }
+}
+
+const isPerfMode = ref(false)
+const updatePerfModeState = () => {
+  if (typeof document !== 'undefined') {
+    isPerfMode.value = document.documentElement.classList.contains('perf-mode')
+  }
+}
+let perfObserver: MutationObserver | null = null
+
 onMounted(() => {
+  updatePerfModeState()
+  if (typeof MutationObserver !== 'undefined') {
+    perfObserver = new MutationObserver(() => updatePerfModeState())
+    perfObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  }
   document.addEventListener('pointerdown', handleDocumentClick)
+  document.addEventListener('keydown', handleKeydown)
   window.addEventListener('resize', updateQualityMenuPosition)
   window.addEventListener('scroll', updateQualityMenuPosition, true)
 })
 
 onUnmounted(() => {
+  if (perfObserver) perfObserver.disconnect()
   document.removeEventListener('pointerdown', handleDocumentClick)
+  document.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('resize', updateQualityMenuPosition)
   window.removeEventListener('scroll', updateQualityMenuPosition, true)
 })
@@ -347,10 +599,11 @@ const emit = defineEmits(['show'])
     class="glass-dock player-panel relative w-full shrink-0 overflow-hidden rounded-[26px] p-3 sm:p-4"
     style="-webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%); backdrop-filter: blur(28px) saturate(190%) contrast(105%);"
   >
-    <!-- 音频可视化器背景 -->
+    <!-- 独立音频频谱带 (限定在进度条上方 20px 独立带内，不透明度 <= 0.25，仅播放时出现，性能模式下不渲染) -->
     <div
-      v-if="isAnalyserInitialized && audioVisualizer.enabledInFooter"
-      class="pointer-events-none absolute bottom-0 w-full left-0 z-0 opacity-30"
+      v-if="isPlaying && isAnalyserInitialized && audioVisualizer.enabledInFooter && !isPerfMode"
+      class="footer-visualizer-strip pointer-events-none absolute left-3 right-3 h-[20px] overflow-hidden select-none z-0 opacity-25"
+      style="bottom: 34px;"
     >
       <AudioVisualizer
         :frequency-data="frequencyData"
@@ -360,7 +613,7 @@ const emit = defineEmits(['show'])
         :bar-width="3"
         :bar-gap="2"
         :gradient-colors="visualizerGradient"
-        :height="80"
+        :height="20"
       />
     </div>
 
@@ -468,14 +721,20 @@ const emit = defineEmits(['show'])
         <!-- 音质切换按钮 -->
         <div v-if="currentSong" class="relative">
           <button
+            id="footer-quality-btn"
             ref="qualityBtnRef"
             @click.stop="toggleQualityMenu"
-            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer"
-            :title="'当前音质: ' + activeQualityBadge + ' (点击切换音质)'"
+            @keydown.down.prevent="openAndFocusQualityMenu"
+            @keydown.up.prevent="openAndFocusQualityMenu"
+            aria-haspopup="true"
+            :aria-expanded="showQualityMenu"
+            aria-controls="quality-menu-panel"
+            class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/15 text-primary hover:border-pink-500/40 select-none shadow-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500/80"
+            :title="activeQualityTooltip"
           >
             <span
               class="w-1.5 h-1.5 rounded-full"
-              :class="isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
+              :class="isDegradedQuality ? 'bg-amber-400' : isLosslessActive ? 'bg-pink-400 animate-pulse shadow-[0_0_6px_#ec4899]' : 'bg-cyan-400'"
             ></span>
             <span class="text-[11px] tracking-wide">{{ activeQualityBadge }}</span>
             <span
@@ -490,78 +749,90 @@ const emit = defineEmits(['show'])
           <Transition name="quality-pop">
             <div
               v-if="showQualityMenu"
+              id="quality-menu-panel"
               ref="qualityMenuRef"
+              role="radiogroup"
+              aria-labelledby="quality-menu-title"
               :style="{
                 position: 'fixed',
                 bottom: `${menuCoords.bottom}px`,
                 right: `${menuCoords.right}px`,
-                zIndex: 99999,
+                zIndex: 60,
               }"
               class="quality-panel-popover w-64 overflow-hidden rounded-2xl select-none"
+              @keydown="handleQualityMenuKeydown"
             >
               <!-- 顶部标题 -->
               <div
-                class="px-3.5 py-2.5 flex items-center justify-between border-b border-white/10"
-                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.14), rgba(139, 92, 246, 0.14));"
+                class="px-3 py-2 flex items-center justify-between border-b border-white/10"
+                style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.10));"
               >
                 <div class="flex items-center gap-1.5">
-                  <span class="icon-[mdi--waveform] h-4 w-4 text-pink-400"></span>
-                  <span class="text-xs font-bold text-primary tracking-wide">音频规格切换</span>
+                  <span class="icon-[mdi--waveform] h-3.5 w-3.5 text-pink-400"></span>
+                  <span id="quality-menu-title" class="text-[11px] font-semibold text-white/90 tracking-wider">音频规格</span>
                 </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border border-pink-500/30">
-                  Hi-Fi 原声
+                <span class="text-[11px] font-mono font-medium text-pink-300">
+                  {{ activeQualityBadge }}
                 </span>
               </div>
 
-              <!-- 音质选项列表 -->
-              <div class="p-2 space-y-1.5">
+              <!-- 音质选项列表 (不可用项置灰并展示原因，显示真实格式与码率) -->
+              <div class="p-1.5 space-y-1">
                 <button
-                  v-for="q in availableQualities"
+                  v-for="(q, index) in availableQualities"
                   :key="q.level"
-                  @click.stop="selectQuality(q.level)"
-                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-200 group cursor-pointer"
+                  :ref="(el) => { if (el) qualityItemRefs[index] = el as HTMLButtonElement }"
+                  role="radio"
+                  :aria-checked="effectiveQualityLevel === q.level && q.isAvailable"
+                  :aria-disabled="!q.isAvailable"
+                  :disabled="!q.isAvailable"
+                  :tabindex="q.isAvailable ? (focusedQualityIndex === index ? 0 : -1) : -1"
+                  @click.stop="q.isAvailable && selectQuality(q.level)"
+                  @keydown.enter.prevent.stop="q.isAvailable && selectQuality(q.level)"
+                  @keydown.space.prevent.stop="q.isAvailable && selectQuality(q.level)"
+                  class="w-full min-h-[36px] py-1.5 flex items-center justify-between px-2.5 rounded-xl text-left transition-all duration-150 group outline-none"
                   :class="[
-                    currentQualityLevel === q.level
-                      ? 'border border-pink-500/50 text-pink-200 font-semibold shadow-[0_0_16px_rgba(236,72,153,0.2)]'
-                      : 'border border-transparent text-primary/80 hover:bg-white/10 hover:text-primary'
+                    !q.isAvailable
+                      ? 'opacity-45 cursor-not-allowed border border-transparent'
+                      : effectiveQualityLevel === q.level
+                        ? 'bg-pink-500/15 border border-pink-500/40 text-pink-200 font-semibold shadow-sm cursor-pointer'
+                        : 'border border-transparent text-white/85 hover:bg-white/10 hover:text-white cursor-pointer'
                   ]"
-                  :style="currentQualityLevel === q.level ? 'background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(139, 92, 246, 0.22));' : ''"
                 >
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                      <span
-                        class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold leading-none select-none"
-                        :class="[
-                          q.level === 'lossless'
-                            ? 'bg-gradient-to-r from-violet-600/40 to-pink-600/40 text-pink-300 border border-pink-500/40 shadow-[0_0_8px_rgba(236,72,153,0.3)]'
-                            : q.level === 'exhigh'
-                              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/35'
-                              : 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/35'
-                        ]"
-                      >
-                        {{ q.label }}
-                      </span>
-                      <span class="text-[11px] font-mono opacity-85 text-primary">{{ q.bitrate }}</span>
-                    </div>
-                    <p class="text-[10px] text-primary/50 mt-1 truncate leading-tight">{{ q.desc }}</p>
+                  <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                    <!-- 左侧指示条 -->
+                    <span
+                      class="w-1 h-3.5 rounded-full transition-all duration-150 shrink-0"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'bg-gradient-to-b from-pink-500 to-rose-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-transparent'"
+                    ></span>
+                    <span
+                      class="text-xs transition-colors shrink-0"
+                      :class="effectiveQualityLevel === q.level && q.isAvailable ? 'text-pink-200 font-bold' : 'text-white/90 font-medium'"
+                    >
+                      {{ q.label }}
+                    </span>
+                    <!-- “当前” 标记：当且仅当该档位为实际生效且可用档位时显示 -->
+                    <span
+                      v-if="effectiveQualityLevel === q.level && q.isAvailable"
+                      class="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-medium shrink-0"
+                    >
+                      当前
+                    </span>
                   </div>
-                  <div
-                    class="ml-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all"
+                  <!-- 右侧：真实规格或置灰原因 (不可用原因文字统一 13px) -->
+                  <span
+                    class="shrink-0 transition-colors text-right pl-1"
                     :class="[
-                      currentQualityLevel === q.level
-                        ? 'border-pink-400 bg-pink-500 text-white shadow-sm'
-                        : 'border-white/20 bg-transparent opacity-40'
+                      !q.isAvailable
+                        ? 'text-[13px] text-white/65 font-normal font-sans'
+                        : effectiveQualityLevel === q.level
+                          ? 'text-xs text-pink-300 font-semibold font-mono'
+                          : 'text-xs text-white/65 group-hover:text-white/85 font-mono'
                     ]"
                   >
-                    <span v-if="currentQualityLevel === q.level" class="icon-[mdi--check] h-3.5 w-3.5"></span>
-                  </div>
+                    {{ q.bitrate }}
+                  </span>
                 </button>
-              </div>
-
-              <!-- 底部切换提示 -->
-              <div class="px-3.5 py-1.5 border-t border-white/10 text-[10px] text-primary/50 flex items-center gap-1.5 bg-black/15">
-                <span class="icon-[mdi--sync] h-3.5 w-3.5 text-pink-400 shrink-0"></span>
-                <span>即时无缝切换 · 自动保留当前播放位置</span>
               </div>
             </div>
           </Transition>
@@ -595,13 +866,13 @@ const emit = defineEmits(['show'])
       </div>
     </div>
 
-    <!-- 进度条 -->
+    <!-- 进度条与高对比度时间文字 (对比度 >= 4.5:1，独立层级不被频谱遮盖) -->
     <div v-if="currentSong" class="relative z-10 mt-3 flex items-center space-x-3">
-      <span class="text-primary/60 text-xs">{{
+      <span class="text-white/80 text-xs font-medium font-mono tabular-nums select-none">{{
         isLoading ? t('player.loading') : formattedCurrentTime
       }}</span>
       <MusicProgress class="flex-1" />
-      <span class="text-primary/60 text-xs">{{ formattedDuration }}</span>
+      <span class="text-white/80 text-xs font-medium font-mono tabular-nums select-none">{{ formattedDuration }}</span>
     </div>
 
     <!-- 音质切换即时反馈 Toast -->
@@ -671,25 +942,55 @@ const emit = defineEmits(['show'])
   animation: equalizer-3 0.5s ease-in-out infinite 0.2s;
 }
 
-/* 音质菜单与反馈弹窗过渡 */
+/* 音质菜单与反馈弹窗过渡 (引用设计令牌并遵守 prefers-reduced-motion) */
 .quality-pop-enter-active,
-.quality-pop-leave-active {
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+.quality-pop-leave-active,
+.quality-pop-appear-active {
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .quality-pop-enter-from,
-.quality-pop-leave-to {
+.quality-pop-leave-to,
+.quality-pop-appear-from {
   opacity: 0;
-  transform: translateY(8px) scale(0.96);
+  transform: translateY(6px) scale(0.97);
+}
+.quality-pop-enter-to,
+.quality-pop-leave-from,
+.quality-pop-appear-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
-/* 音质规格上浮菜单毛玻璃容器 */
+@media (prefers-reduced-motion: reduce) {
+  .quality-pop-enter-active,
+  .quality-pop-leave-active {
+    transition: opacity 0.05s ease !important;
+    transform: none !important;
+  }
+  .quality-pop-enter-from,
+  .quality-pop-leave-to {
+    opacity: 0;
+    transform: none !important;
+  }
+}
+
+/* 音质规格上浮菜单毛玻璃容器 (深紫玻璃底色，模糊半径限制在 24px 内) */
 .quality-panel-popover {
-  background-color: light-dark(rgba(255, 255, 255, 0.90), rgba(20, 16, 36, 0.92));
-  border: 1px solid light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+  background-color: #1e1a34;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 24px 60px -12px rgba(0, 0, 0, 0.65),
-    0 0 35px -8px rgba(139, 92, 246, 0.35),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
+    0 16px 36px -8px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .quality-panel-popover {
+    background-color: rgba(30, 26, 52, 0.94);
+    backdrop-filter: blur(var(--glass-blur, 24px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
+  }
 }
 
 .fade-enter-active,

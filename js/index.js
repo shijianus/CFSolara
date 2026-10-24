@@ -2549,10 +2549,19 @@ async function performSearch(isLiveSearch = false) {
     }
 }
 
-// 加载更多搜索结果
-async function loadMoreResults() {
+let searchLoadMoreObserver = null;
+let searchLoadMoreTimeoutTimer = null;
+let isSearchingMoreActive = false;
+
+// 加载更多搜索结果 - 自动化流式触底加载与超时容错重试
+async function loadMoreResults(isManualRetry = false) {
     if (!state.hasMoreResults || !state.searchKeyword) {
         debugLog("没有更多结果或搜索关键词为空");
+        return;
+    }
+
+    if (isSearchingMoreActive) {
+        debugLog("已在加载更多搜索结果中，忽略重复触发");
         return;
     }
 
@@ -2562,9 +2571,32 @@ async function loadMoreResults() {
         return;
     }
 
+    isSearchingMoreActive = true;
+    if (searchLoadMoreTimeoutTimer) {
+        clearTimeout(searchLoadMoreTimeoutTimer);
+        searchLoadMoreTimeoutTimer = null;
+    }
+
+    // 启动 7 秒超时检测降级
+    searchLoadMoreTimeoutTimer = setTimeout(() => {
+        if (isSearchingMoreActive) {
+            debugLog("加载更多搜索结果超时，切换为手动重试操作态");
+            const btn = document.getElementById("loadMoreBtn");
+            if (btn) {
+                btn.disabled = false;
+                btn.classList.remove("auto-loading");
+                btn.classList.add("timeout-retry");
+                btn.innerHTML = '<i class="fas fa-redo-alt"></i><span>加载较慢，点击重新加载</span>';
+            }
+            isSearchingMoreActive = false;
+        }
+    }, 7000);
+
     try {
         loadMoreBtn.disabled = true;
-        loadMoreBtn.innerHTML = '<span class="loader"></span><span>加载中...</span>';
+        loadMoreBtn.classList.remove("timeout-retry");
+        loadMoreBtn.classList.add("auto-loading");
+        loadMoreBtn.innerHTML = '<span class="loader"></span><span>正在获取更多精彩音乐...</span>';
 
         state.searchPage++;
         debugLog(`加载第 ${state.searchPage} 页结果`);
@@ -2574,26 +2606,41 @@ async function loadMoreResults() {
         safeSetLocalStorage("searchSource", source);
         const results = await API.search(state.searchKeyword, source, 20, state.searchPage);
 
+        if (searchLoadMoreTimeoutTimer) {
+            clearTimeout(searchLoadMoreTimeoutTimer);
+            searchLoadMoreTimeoutTimer = null;
+        }
+        isSearchingMoreActive = false;
+
         if (results.length > 0) {
             state.searchResults = [...state.searchResults, ...results];
             state.hasMoreResults = results.length === 20;
             displaySearchResults(results, {
                 totalCount: state.searchResults.length,
             });
-            debugLog(`加载完成: 新增 ${results.length} 个结果`);
+            debugLog(`加载完成: 新增 ${results.length} 个结果, 按钮已依据数据状态自适应处理`);
         } else {
             state.hasMoreResults = false;
-            showNotification("没有更多结果了");
+            showNotification("已加载全部歌曲");
             debugLog("没有更多结果");
+            if (loadMoreBtn) {
+                loadMoreBtn.remove();
+            }
         }
     } catch (error) {
+        if (searchLoadMoreTimeoutTimer) {
+            clearTimeout(searchLoadMoreTimeoutTimer);
+            searchLoadMoreTimeoutTimer = null;
+        }
+        isSearchingMoreActive = false;
         console.error("加载更多失败:", error);
-        showNotification("加载失败，请稍后重试", "error");
-        state.searchPage--; // 回退页码
-    } finally {
+        state.searchPage = Math.max(1, state.searchPage - 1); // 回退页码
+
         if (loadMoreBtn) {
             loadMoreBtn.disabled = false;
-            loadMoreBtn.innerHTML = "<i class=\"fas fa-plus\"></i><span>加载更多</span>";
+            loadMoreBtn.classList.remove("auto-loading");
+            loadMoreBtn.classList.add("timeout-retry");
+            loadMoreBtn.innerHTML = '<i class="fas fa-redo-alt"></i><span>加载受阻，点击重新加载</span>';
         }
     }
 }
@@ -2677,14 +2724,44 @@ function createSearchResultItem(song, index) {
 function createLoadMoreButton() {
     const button = document.createElement("button");
     button.id = "loadMoreBtn";
-    button.className = "load-more-btn";
+    button.className = "load-more-btn auto-loading";
     button.type = "button";
-    button.innerHTML = '<i class="fas fa-plus"></i><span>加载更多</span>';
+    button.innerHTML = '<span class="loader"></span><span>正在获取更多音乐...</span>';
+
+    // 允许用户在超时/失败后手动点击重新加载
     button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        loadMoreResults();
+        debugLog("用户手动点击加载更多/重试按钮");
+        loadMoreResults(true);
     });
+
+    // 自动视口感知：用户初次滑到底部时带有直接动画，并自动开始加载
+    if ("IntersectionObserver" in window) {
+        if (searchLoadMoreObserver) {
+            searchLoadMoreObserver.disconnect();
+        }
+        searchLoadMoreObserver = new IntersectionObserver((entries) => {
+            const entry = entries[0];
+            if (entry && entry.isIntersecting) {
+                if (state.hasMoreResults && !isSearchingMoreActive && !button.classList.contains("timeout-retry")) {
+                    debugLog("用户视口触底，自动触发加载更多");
+                    loadMoreResults(false);
+                }
+            }
+        }, {
+            root: null,
+            rootMargin: "150px",
+            threshold: 0.1,
+        });
+        // 在微任务中挂载观察
+        setTimeout(() => {
+            if (document.body.contains(button)) {
+                searchLoadMoreObserver.observe(button);
+            }
+        }, 50);
+    }
+
     return button;
 }
 

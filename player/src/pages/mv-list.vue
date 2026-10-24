@@ -4,6 +4,7 @@ import { mvAll } from '@/api'
 import { formatCount } from '@/utils/time'
 import TabGroup from '@/components/Ui/TabGroup.vue'
 import Button from '@/components/Ui/Button.vue'
+import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
 const { t } = useI18n()
 
@@ -49,8 +50,10 @@ const state = reactive({
   hasMore: true,
   page: 0,
   isPageLoading: true,
+  isLoadingMore: false,
+  isLoadError: false,
 })
-const { categories, selectedCategoryKey, mvList, hasMore, isPageLoading } = toRefs(state)
+const { categories, selectedCategoryKey, mvList, hasMore, isPageLoading, isLoadingMore, isLoadError } = toRefs(state)
 
 const selectCategory = (key: string) => {
   state.selectedCategoryKey = key
@@ -71,6 +74,17 @@ const formatSec = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`
 
 const fetchList = async (reset = false) => {
+  if (state.isLoadingMore) return
+  if (!reset && !state.hasMore) return
+
+  if (reset) {
+    state.isPageLoading = true
+    state.page = 0
+  } else {
+    state.isLoadingMore = true
+  }
+  state.isLoadError = false
+
   try {
     const type = state.categories.find(c => c.key === state.selectedCategoryKey)?.type
     const limit = 24
@@ -91,14 +105,20 @@ const fetchList = async (reset = false) => {
     state.mvList = reset ? mapped : state.mvList.concat(mapped)
     state.hasMore = mapped.length === limit
     if (mapped.length) state.page += 1
-    if (reset) state.isPageLoading = false
   } catch {
-    state.hasMore = false
+    if (!reset) {
+      state.isLoadError = true
+    } else {
+      state.hasMore = false
+    }
+  } finally {
+    if (reset) state.isPageLoading = false
+    state.isLoadingMore = false
   }
 }
 
 const loadMore = () => {
-  fetchList()
+  fetchList(false)
 }
 
 onMounted(() => {
@@ -209,12 +229,17 @@ onMounted(() => {
           </router-link>
         </section>
 
-        <div v-if="hasMore" class="mt-8 flex justify-center pb-4">
-          <Button variant="soft" size="md" rounded="lg" class="gap-2" @click="loadMore">
-            <span class="icon-[mdi--refresh] h-5 w-5"></span>
-            {{ t('mvList.actions.loadMore') }}
-          </Button>
-        </div>
+        <!-- 现代化自动流式触底加载与降级重试 -->
+        <InfiniteScroll
+          :loading="isLoadingMore"
+          :has-more="hasMore"
+          :error="isLoadError"
+          :empty="!mvList.length"
+          :loading-text="t('common.loading')"
+          :retry-text="t('mvList.actions.loadMore')"
+          @load="loadMore"
+          @retry="loadMore"
+        />
       </div>
     </template>
   </div>

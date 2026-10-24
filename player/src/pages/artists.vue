@@ -3,6 +3,7 @@ import { artistList } from '@/api'
 import { useI18n } from 'vue-i18n'
 import { transformArtists, type ArtistData } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 
 const { t } = useI18n()
 
@@ -12,7 +13,9 @@ interface ArtistItem extends ArtistData {
 
 const state = reactive({
   artists: [] as ArtistItem[],
-  isLoading: false,
+  isPageLoading: false,
+  isLoadingMore: false,
+  isLoadError: false,
   type: -1,
   area: -1,
   initial: '',
@@ -45,15 +48,19 @@ const initialOptions = [
 ]
 
 const loadArtists = async (reset = false) => {
+  if (state.isLoadingMore) return
   if (reset) {
     state.offset = 0
     state.artists = []
     state.hasMore = true
+    state.isPageLoading = true
+  } else {
+    if (!state.hasMore) return
+    state.isLoadingMore = true
   }
-  if (!state.hasMore) return
+  state.isLoadError = false
 
   try {
-    state.isLoading = true
     const params: any = {
       limit: state.limit,
       offset: state.offset,
@@ -73,8 +80,15 @@ const loadArtists = async (reset = false) => {
     state.artists = reset ? mapped : [...state.artists, ...mapped]
     state.hasMore = artists.length === state.limit
     state.offset += state.limit
+  } catch {
+    if (!reset) {
+      state.isLoadError = true
+    } else {
+      state.hasMore = false
+    }
   } finally {
-    state.isLoading = false
+    if (reset) state.isPageLoading = false
+    state.isLoadingMore = false
   }
 }
 
@@ -133,7 +147,7 @@ onMounted(() => loadArtists(true))
     </div>
 
     <div class="flex-1 overflow-auto px-1 sm:px-2 pb-6">
-      <PageSkeleton v-if="state.isLoading && !state.artists.length" :sections="['grid']" />
+      <PageSkeleton v-if="state.isPageLoading && !state.artists.length" :sections="['grid']" />
       <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         <router-link
           v-for="artist in state.artists"
@@ -158,16 +172,17 @@ onMounted(() => loadArtists(true))
         </router-link>
       </div>
 
-      <div v-if="state.hasMore && state.artists.length" class="mt-6 text-center">
-        <button
-          :disabled="state.isLoading"
-          class="glass-button px-6 py-2 text-sm"
-          @click="loadArtists(false)"
-        >
-          <span v-if="state.isLoading" class="icon-[mdi--loading] mr-2 h-4 w-4 animate-spin" />
-          {{ state.isLoading ? t('common.loading') : t('artists.loadMore') }}
-        </button>
-      </div>
+      <!-- 自动流式触底加载与超时自愈重试 -->
+      <InfiniteScroll
+        :loading="state.isLoadingMore"
+        :has-more="state.hasMore"
+        :error="state.isLoadError"
+        :empty="!state.artists.length"
+        :loading-text="t('common.loading')"
+        :retry-text="t('artists.loadMore')"
+        @load="loadArtists(false)"
+        @retry="loadArtists(false)"
+      />
     </div>
   </div>
 </template>

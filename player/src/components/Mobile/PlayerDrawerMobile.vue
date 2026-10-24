@@ -378,9 +378,54 @@ onMounted(() => {
   }
 })
 
+let hasPushedDrawerHistoryMobile = false
+
+const closeDrawerMobile = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    if (hasPushedDrawerHistoryMobile && window.history.state?.sonicDrawerMobile) {
+      window.history.back()
+    }
+  }
+}
+
+const handlePopStateMobile = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    hasPushedDrawerHistoryMobile = false
+  }
+}
+
+const handleKeydownMobile = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isOpen.value) {
+    e.preventDefault()
+    closeDrawerMobile()
+  }
+}
+
+watch(isOpen, val => {
+  if (val) {
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeydownMobile)
+    window.addEventListener('popstate', handlePopStateMobile)
+    if (!window.history.state?.sonicDrawerMobile) {
+      window.history.pushState({ sonicDrawerMobile: true }, '')
+      hasPushedDrawerHistoryMobile = true
+    }
+  } else {
+    document.body.style.overflow = ''
+    window.removeEventListener('keydown', handleKeydownMobile)
+    window.removeEventListener('popstate', handlePopStateMobile)
+    hasPushedDrawerHistoryMobile = false
+  }
+})
+
 onUnmounted(() => {
   stopWordSyncLoop()
   stopBackgroundBreathing()
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleKeydownMobile)
+  window.removeEventListener('popstate', handlePopStateMobile)
 })
 
 // 播放模式图标
@@ -401,7 +446,11 @@ const playModeIcon = computed(() => {
   <div
     v-if="isRendered"
     ref="drawerRef"
-    class="bg-overlay/95 fixed inset-0 z-9999 flex flex-col backdrop-blur-xl"
+    role="dialog"
+    aria-modal="true"
+    aria-label="全屏音乐播放器与歌词"
+    tabindex="-1"
+    class="bg-overlay/95 fixed inset-0 z-9999 flex flex-col backdrop-blur-xl outline-none"
   >
     <!-- 封面模糊背景（可切换启用） -->
     <div v-show="useCoverBg" class="absolute inset-0 -z-10 overflow-hidden">
@@ -426,7 +475,9 @@ const playModeIcon = computed(() => {
         rounded="full"
         icon="icon-[mdi--chevron-down]"
         icon-class="h-7 w-7 text-primary/90"
-        @click="isOpen = false"
+        title="关闭播放器 (Esc)"
+        aria-label="关闭播放器"
+        @click="closeDrawerMobile"
       />
 
       <div class="flex flex-col items-center">
@@ -591,8 +642,7 @@ const playModeIcon = computed(() => {
             class="lyric-line mb-6 px-4 text-center"
             :class="{
               current: index === currentLyricIndex,
-              'text-primary scale-105 transform font-semibold': index === currentLyricIndex,
-              'text-primary/40': index !== currentLyricIndex,
+              'scale-105 transform font-semibold': index === currentLyricIndex,
             }"
             @click.stop="handleLineClick(line.time)"
           >
@@ -826,8 +876,10 @@ const playModeIcon = computed(() => {
 }
 
 .lyrics-container {
-  --lyric-word-active: #ffffff;
-  --lyric-word-inactive: rgba(255, 255, 255, 0.38);
+  --lyric-word-active: var(--glass-lyrics-active);
+  --lyric-word-inactive: var(--glass-lyrics-inactive);
+  background: var(--glass-lyrics-scrim);
+  color: var(--glass-lyrics-inactive);
   mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -844,10 +896,10 @@ const playModeIcon = computed(() => {
   --fill: 0%;
   background-image: linear-gradient(
     to right,
-    var(--lyric-word-active, #ffffff) 0%,
-    var(--lyric-word-active, #ffffff) var(--fill, 0%),
-    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) var(--fill, 0%),
-    var(--lyric-word-inactive, rgba(255, 255, 255, 0.38)) 100%
+    var(--lyric-word-active) 0%,
+    var(--lyric-word-active) var(--fill, 0%),
+    var(--lyric-word-inactive) var(--fill, 0%),
+    var(--lyric-word-inactive) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -860,8 +912,8 @@ const playModeIcon = computed(() => {
 
 .lyric-line.current .word-char.word-sung {
   --fill: 100%;
-  -webkit-text-fill-color: var(--lyric-word-active, #ffffff);
-  color: var(--lyric-word-active, #ffffff);
+  -webkit-text-fill-color: var(--lyric-word-active);
+  color: var(--lyric-word-active);
   background-image: none;
   transform: scale(1);
   opacity: 0.98;
@@ -869,8 +921,8 @@ const playModeIcon = computed(() => {
 
 .lyric-line:not(.current) .word-char.word-sung {
   --fill: 100%;
-  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
-  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.45));
+  -webkit-text-fill-color: var(--lyric-word-inactive);
+  color: var(--lyric-word-inactive);
   background-image: none;
   transform: scale(1);
 }
@@ -878,13 +930,13 @@ const playModeIcon = computed(() => {
 .lyric-line.current .word-char.word-singing {
   transform: scale(1.08);
   font-weight: 800;
-  text-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
+  text-shadow: 0 0 14px var(--glass-lyrics-glow);
 }
 
 .lyric-line:not(.current) .word-char {
   --fill: 0%;
-  -webkit-text-fill-color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
-  color: var(--lyric-word-inactive, rgba(255, 255, 255, 0.4));
+  -webkit-text-fill-color: var(--lyric-word-inactive);
+  color: var(--lyric-word-inactive);
   background-image: none;
 }
 
@@ -894,8 +946,13 @@ const playModeIcon = computed(() => {
 
 .lyric-line {
   line-height: 1.6;
+  color: var(--glass-lyrics-inactive);
   transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
   transform-origin: center center;
+}
+
+.lyric-line.current {
+  color: var(--glass-lyrics-active);
 }
 
 

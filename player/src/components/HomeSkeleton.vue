@@ -2,13 +2,12 @@
 <template>
   <div class="space-y-10 p-5 pb-8">
     <!-- Banner skeleton -->
-    <section>
+    <section class="max-h-[50vh]">
       <div class="overflow-hidden rounded-2xl bg-white/5">
-        <div class="aspect-[2.2/0.6] relative">
-          <div class="absolute inset-0 animate-shimmer"></div>
-          <div class="absolute right-0 bottom-0 left-0 p-5 lg:p-7">
-            <div class="mb-2.5 h-5 w-20 rounded-full bg-white/8"></div>
-            <div class="h-6 w-64 rounded-lg bg-white/10"></div>
+        <div class="relative aspect-[1080/400] max-h-[46vh]">
+          <div class="animate-shimmer absolute inset-0"></div>
+          <div class="absolute right-3.5 bottom-3.5 lg:right-4 lg:bottom-4">
+            <div class="h-6 w-20 rounded-full bg-white/10"></div>
           </div>
         </div>
       </div>

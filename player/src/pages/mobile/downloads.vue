@@ -1,15 +1,54 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDownloadStore } from '@/stores/modules/download'
 import { useAudioStore } from '@/stores/modules/audio'
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { formatDuration } from '@/utils/time'
 import type { Song } from '@/stores/interface'
+import type { DownloadedSong } from '@/utils/indexedDB'
+import { parseAudioBlob, type ParsedAudioMeta, type ResolvedBlobTier } from '@/utils/blobMetadataParser'
 
 const router = useRouter()
 const downloadStore = useDownloadStore()
 const audioStore = useAudioStore()
+
+const parsedMetaMap = ref<Record<string, ParsedAudioMeta>>({})
+const metadataCache = new Map<string, ParsedAudioMeta>()
+
+const parseBlobMetadata = async (item: DownloadedSong) => {
+  if (!item.file || !(item.file instanceof Blob)) return
+  const idStr = String(item.id)
+  if (metadataCache.has(idStr)) {
+    parsedMetaMap.value[idStr] = metadataCache.get(idStr)!
+    return
+  }
+  try {
+    const reqQuality = item.qualityLevel || (item.qualityBadge === 'SQ' ? 'lossless' : item.qualityBadge === 'HQ' ? 'exhigh' : 'standard')
+    const parsed = await parseAudioBlob(item.file, item.duration, reqQuality)
+    metadataCache.set(idStr, parsed)
+    parsedMetaMap.value[idStr] = parsed
+  } catch {
+    // 保持标准默认回退
+  }
+}
+
+const getParsedMeta = (item: DownloadedSong): ParsedAudioMeta => {
+  const idStr = String(item.id)
+  return (
+    parsedMetaMap.value[idStr] || {
+      displayTag: '—',
+      detailText: '',
+      mismatchWarning: null,
+      isLossless: false,
+      resolvedTier: 'standard',
+    }
+  )
+}
+
+const getSongActualTier = (item: DownloadedSong): ResolvedBlobTier => {
+  return getParsedMeta(item).resolvedTier
+}
 
 onMounted(() => {
   downloadStore.loadDownloads()
@@ -19,14 +58,24 @@ const downloads = computed(() => downloadStore.downloadedList)
 const searchQuery = ref('')
 const selectedQuality = ref<'all' | 'lossless' | 'exhigh' | 'standard'>('all')
 
+watch(
+  downloads,
+  (list) => {
+    if (list && list.length > 0) {
+      list.forEach((item) => parseBlobMetadata(item))
+    }
+  },
+  { immediate: true, deep: true }
+)
+
 const filteredDownloads = computed(() => {
   let list = [...downloads.value]
   if (selectedQuality.value === 'lossless') {
-    list = list.filter((d) => d.qualityLevel === 'lossless' || d.qualityBadge === 'SQ')
+    list = list.filter((d) => getSongActualTier(d) === 'lossless')
   } else if (selectedQuality.value === 'exhigh') {
-    list = list.filter((d) => d.qualityLevel === 'exhigh' || d.qualityBadge === 'HQ')
+    list = list.filter((d) => getSongActualTier(d) === 'exhigh')
   } else if (selectedQuality.value === 'standard') {
-    list = list.filter((d) => d.qualityLevel === 'standard' || d.qualityBadge === '标准')
+    list = list.filter((d) => getSongActualTier(d) === 'standard')
   }
 
   const q = searchQuery.value.trim().toLowerCase()
@@ -42,25 +91,29 @@ const filteredDownloads = computed(() => {
 })
 
 const toSongList = (items: typeof downloads.value): Song[] => {
-  return items.map((d) => ({
-    id: d.id,
-    name: d.name,
-    artist: d.artist,
-    album: d.album,
-    duration: (d.duration || 0) * 1000,
-    cover: d.cover,
-    url: URL.createObjectURL(d.file),
-    isLocal: true,
-    qualityBadge: d.qualityBadge,
-    qualities: [
-      {
-        level: d.qualityLevel,
-        label: d.qualityBadge,
-        bitrate: d.bitrate || '',
-        format: d.format,
-      },
-    ],
-  }))
+  return items.map((d) => {
+    const meta = getParsedMeta(d)
+    const badge = meta.isLossless ? 'SQ' : meta.displayTag.includes('320') ? 'HQ' : '标准'
+    return {
+      id: d.id,
+      name: d.name,
+      artist: d.artist,
+      album: d.album,
+      duration: (d.duration || 0) * 1000,
+      cover: d.cover,
+      url: URL.createObjectURL(d.file),
+      isLocal: true,
+      qualityBadge: badge,
+      qualities: [
+        {
+          level: d.qualityLevel,
+          label: badge,
+          bitrate: meta.displayTag,
+          format: meta.isLossless ? 'flac' : 'mp3',
+        },
+      ],
+    }
+  })
 }
 
 const playAll = () => {
@@ -118,8 +171,11 @@ const formatSongTitle = (title: string, maxLen = 18) => {
             <h1 class="text-lg font-bold text-primary">
               下载列表
             </h1>
-            <p class="text-xs text-primary/60 mt-0.5">
+            <p v-if="downloads.length > 0" class="text-xs text-primary/60 mt-0.5">
               共 {{ downloadStore.totalCount }} 首 · 占用 {{ downloadStore.totalSizeFormatted }}
+            </p>
+            <p v-else class="text-xs text-primary/50 mt-0.5">
+              暂无离线音乐 · 支持随时免流播放
             </p>
           </div>
         </div>
@@ -188,12 +244,12 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         :class="[
           isCurrentPlaying(item)
             ? 'border-pink-500/50 bg-pink-500/10 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
-            : 'border-white/5 bg-white/[0.03] active:bg-white/10'
+            : 'border-primary/10 bg-primary/[0.03] active:bg-primary/10'
         ]"
       >
         <div class="flex items-center gap-3 min-w-0 flex-1">
           <!-- 封面艺术图 -->
-          <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-sm border border-white/5">
+          <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-sm border border-primary/10">
             <img
               :src="formatCoverUrl(item.cover, { size: 100, artist: item.artist })"
               alt="cover"
@@ -214,22 +270,22 @@ const formatSongTitle = (title: string, maxLen = 18) => {
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
               <h4
-                class="truncate text-sm font-semibold transition-colors"
-                :class="isCurrentPlaying(item) ? 'text-pink-300 font-bold' : 'text-primary'"
+                class="truncate text-sm font-semibold text-primary transition-colors"
+                :class="{ 'font-bold': isCurrentPlaying(item) }"
               >
                 {{ formatSongTitle(item.name, 18) }}
               </h4>
               <span
-                class="shrink-0 rounded px-1.5 py-0.2 text-[9px] font-bold leading-none select-none"
+                class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none select-none whitespace-nowrap"
                 :class="[
-                  item.qualityBadge === 'SQ' || item.qualityLevel === 'lossless'
-                    ? 'bg-gradient-to-r from-violet-600/35 to-pink-600/35 text-pink-300 border border-pink-500/40'
-                    : item.qualityBadge === 'HQ' || item.qualityLevel === 'exhigh'
-                      ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-500/30'
-                      : 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/30'
+                  getParsedMeta(item).isLossless
+                    ? 'bg-violet-600/20 text-primary border border-pink-500/40'
+                    : getParsedMeta(item).displayTag.includes('320')
+                      ? 'bg-indigo-500/20 text-primary border border-indigo-500/30'
+                      : 'bg-primary/10 text-primary/70 border border-primary/20'
                 ]"
               >
-                {{ item.qualityBadge === 'SQ' || item.qualityLevel === 'lossless' ? 'SQ 无损' : item.qualityBadge === 'HQ' ? 'HQ 极高' : '标准' }}
+                {{ getParsedMeta(item).displayTag }}
               </span>
             </div>
             <p class="truncate text-xs text-primary/50 mt-0.5">
@@ -268,7 +324,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
       </div>
       <p class="text-sm font-semibold text-primary/70">暂无离线音乐</p>
       <p class="text-xs text-primary/40 mt-1 max-w-xs leading-relaxed">
-        在歌曲列表或播放控制台点击下载，随时离线畅听无损母带。
+        在歌曲列表或播放控制台点击下载，随时离线播放音乐。
       </p>
       <button
         @click="router.push('/search')"

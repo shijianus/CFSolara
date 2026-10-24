@@ -3,11 +3,41 @@ body,
 #app {
   height: 100%;
   width: 100%;
-  font-family: 'Plus Jakarta Sans', 'Noto Sans SC', system-ui, -apple-system, sans-serif, 'hanyi';
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  touch-action: manipulation;
+}
+
+:lang(zh-CN),
+:lang(zh),
+:lang(zh-CN) body,
+:lang(zh-CN) #app {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+a {
+  touch-action: manipulation;
 }
 
 #app {
   display: flex;
+}
+
+/* ── 14px 及以下正文、按钮、表格、弹窗等 UI 文字统一基准字重为 500 (Medium) ── */
+.text-xs:not(.font-semibold):not(.font-bold):not(.font-light):not(.font-thin),
+.text-sm:not(.font-semibold):not(.font-bold):not(.font-light):not(.font-thin),
+.text-\[11px\]:not(.font-semibold):not(.font-bold),
+.text-\[12px\]:not(.font-semibold):not(.font-bold),
+.text-\[13px\]:not(.font-semibold):not(.font-bold),
+.text-\[14px\]:not(.font-semibold):not(.font-bold) {
+  font-weight: 500;
 }
 
 /* ── 全局隐藏所有显式滚动条滑块（全平台无感自然滚动） ── */
@@ -26,11 +56,6 @@ body,
 ::-webkit-scrollbar-thumb {
   display: none !important;
   background: transparent !important;
-}
-
-@font-face {
-  font-family: 'hanyi';
-  src: url('../assets/hanyi.woff2');
 }
 
 /* ── 播放动画图标 ── */

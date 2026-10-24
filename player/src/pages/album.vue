@@ -46,6 +46,9 @@ const load = async () => {
       cover: s?.al?.picUrl || s?.album?.picUrl || album?.picUrl || '',
       liked: false,
     }))
+    if (route.query.autoplay === '1' && state.songs.length > 0) {
+      playAll()
+    }
   } finally {
     state.loading = false
   }
