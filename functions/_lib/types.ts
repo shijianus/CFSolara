@@ -8,13 +8,35 @@ export interface AppEnv {
   SONIC_SECRET?: string;
   KV?: any;
   DB?: any;
+  // Linux VPS Local Engine & Inter-Service Auth
+  SONIC_RUNTIME?: 'cf-pages' | 'linux-engine' | string;
+  SONIC_LOCAL_ENGINE_URL?: string;
+  SONIC_ENGINE_SECRET?: string;
+  SONIC_ENGINE_HOST?: string;
+  SONIC_REQUIRE_ENGINE_AUTH?: string;
+  SONIC_REQUIRE_AUTH?: string;
+  SONIC_ENGINE_TIMEOUT_MS?: string;
+  SONIC_CB_FAILURE_THRESHOLD?: string;
+  SONIC_CB_COOLDOWN_MS?: string;
+  SONIC_NCM_API_URL?: string;
+  // Optional Server-Side Platform Cookies (NEVER expose to frontend or logs)
+  NETEASE_COOKIE?: string;
+  QQ_COOKIE?: string;
+  KUGOU_COOKIE?: string;
+  SONIC_REAL_IP?: string;
+  // Compliance & Feature Flags (VIP unblock & third-party aggregators OFF by default)
+  SONIC_ENABLE_UNBLOCK?: string;
+  SONIC_ENABLE_FREE_CROSS_MATCH?: string;
+  SONIC_UPSTREAM_LYRIVA?: string;
   SONIC_UPSTREAM_GDSTUDIO?: string;
   SONIC_UPSTREAM_AMLL?: string;
   SONIC_UPSTREAM_LRCLIB?: string;
   SONIC_UPSTREAM_METING?: string;
+  SONIC_ENABLE_LYRIVA?: string;
   SONIC_ENABLE_NETEASE?: string;
   SONIC_ENABLE_QQ?: string;
   SONIC_ENABLE_KUGOU?: string;
+  SONIC_ENABLE_KUWO?: string;
   SONIC_ENABLE_AMLL?: string;
   SONIC_ENABLE_LRCLIB?: string;
   SONIC_ENABLE_GDSTUDIO?: string;
@@ -23,6 +45,8 @@ export interface AppEnv {
   SONIC_APPLE_MUSIC_TOKEN?: string;
   SONIC_YOUTUBE_API_KEY?: string;
   SONIC_TIMEOUT_MS?: string;
+  SONIC_RATE_LIMIT_ANON_RPM?: string;
+  SONIC_RATE_LIMIT_AUTH_RPM?: string;
   [key: string]: any;
 }
 

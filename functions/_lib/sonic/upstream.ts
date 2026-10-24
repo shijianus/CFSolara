@@ -2,9 +2,12 @@
 // Bridges standard music platform requests (home, playlists, MVs, charts, artists) to high-availability upstreams,
 // with complete desensitization, privacy anonymization, and Edge CDN caching.
 
-import { jsonResponse } from '../http';
+import { jsonResponse, handleOptions } from '../http';
 import { BRAND_PRODUCT } from '../brand';
-import { SONIC_UA } from './config';
+import { getSonicConfig, SONIC_UA } from './config';
+import { callLocalEngineJson } from './local-engine';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from './security';
+import type { AppEnv } from '../types';
 
 const UPSTREAM_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -81,8 +84,93 @@ export async function handleUpstreamEndpoint(
   endpoint: string,
   url: URL,
   request: Request,
+  env?: AppEnv,
 ): Promise<Response> {
+  if (request.method === 'OPTIONS') return handleOptions();
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, 'upstream');
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
+
+  const cfg = getSonicConfig(env);
   const normEndpoint = endpoint.replace(/^\/+|\/+$/g, '').toLowerCase();
+
+  // Discrepancy 7 fix: graceful response for legacy NetEase login status checks in SPA
+  if (normEndpoint === 'login/status') {
+    return jsonResponse({
+      code: 200,
+      brand: 'Sonic',
+      data: { code: 200, account: null, profile: null },
+      authProvider: 'epomail-oauth2',
+      loginUrl: '/api/auth/login',
+    });
+  }
+
+  // Primary Hop (when running on Cloudflare Pages): forward commercial catalog queries to Linux Local Engine
+  let degradedHeader = false;
+  if (cfg.enableLocalEngine) {
+    const engineRes = await callLocalEngineJson<any>(`/api/${normEndpoint}${url.search}`, env, {
+      request,
+      timeoutMs: cfg.engineTimeoutMs,
+    });
+    if (engineRes.ok && engineRes.data) {
+      return jsonResponse(engineRes.data, {
+        headers: {
+          'Cache-Control': 'public, max-age=1800',
+          'X-Sonic-Provider': 'local-engine',
+        },
+      });
+    }
+    degradedHeader = true;
+  }
+
+  // Helper: on Linux VPS with internal `ncm-api` container (`NeteaseCloudMusicApiEnhanced`), try encrypted NCM API for rich commercial routes
+  const ncmDirectEndpoints = new Set([
+    'playlist/detail',
+    'playlist/track/all',
+    'toplist/detail',
+    'song/detail',
+    'album',
+    'album/new',
+    'artist/detail',
+    'artist/songs',
+    'artist/top/song',
+    'artist/album',
+    'artist/mv',
+    'artists',
+    'mv/all',
+    'mv/first',
+    'mv/detail',
+    'mv/url',
+    'comment/music',
+    'comment/playlist',
+    'comment/album',
+    'comment/mv',
+    'search/suggest',
+  ]);
+  if (cfg.ncmApiUrl && ncmDirectEndpoints.has(normEndpoint)) {
+    try {
+      const qs = new URLSearchParams(url.searchParams);
+      qs.set('realIP', cfg.realIp);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (env?.NETEASE_COOKIE) headers.Cookie = String(env.NETEASE_COOKIE).trim();
+      const ncmResp = await fetch(`${cfg.ncmApiUrl}/${normEndpoint}?${qs.toString()}`, {
+        headers,
+        signal: AbortSignal.timeout(cfg.timeoutMs),
+      });
+      if (ncmResp.ok) {
+        const ncmData = await ncmResp.json();
+        if (ncmData && (ncmData.code === 200 || ncmData.songs || ncmData.playlist || ncmData.data)) {
+          return jsonResponse(desensitizeData({ brand: 'Sonic', ...ncmData }), {
+            headers: {
+              'Cache-Control': 'public, max-age=1800',
+              'X-Sonic-Provider': 'local-netease',
+            },
+          });
+        }
+      }
+    } catch {}
+  }
 
   // 1. Banner
   if (normEndpoint === 'banner') {
@@ -611,7 +699,7 @@ export async function handleUpstreamEndpoint(
     try {
       const { searchNexus } = await import('./nexus-search');
       const page = Math.floor(parseInt(offset, 10) / parseInt(limit, 10)) + 1;
-      const res = await searchNexus(keywords, { page, count: parseInt(limit, 10) });
+      const res = await searchNexus(keywords, { page, count: parseInt(limit, 10), request }, env);
       const songs = (res.data?.tracks || []).map((t: any) => ({
         id: t.id,
         name: t.title || t.name,

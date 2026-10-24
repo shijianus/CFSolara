@@ -141,6 +141,13 @@ export function computeQualityScore(level: SonicLyricLevel, lineCount: number, a
   return Math.min(100, Math.round(score));
 }
 
+export function normalizeText(text: string): string {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[\s\-_—·.,!?'"`()[\]{}<>《》「」【】]/g, '')
+    .trim();
+}
+
 export function normalizeArtistString(artist: unknown): string {
   if (Array.isArray(artist)) {
     return artist

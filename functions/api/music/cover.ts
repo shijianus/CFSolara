@@ -1,5 +1,13 @@
-import { corsHeaders, handleOptions } from '../../_lib/http';
+import { handleOptions } from '../../_lib/http';
 import { fetchMusicProvider } from '../../_lib/music';
+import { getSonicConfig } from '../../_lib/sonic/config';
+import {
+  callNeteaseLinuxApi,
+  resolveKugouCoverUrl,
+  resolveNeteaseCoverUrl,
+  resolveQQCoverUrl,
+} from '../../_lib/sonic/native-protocols';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
 import type { AppEnv } from '../../_lib/types';
 
 const DEFAULT_COVER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
@@ -15,15 +23,15 @@ const DEFAULT_COVER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="300" h
   <path d="M142 118v46a18 18 0 1 0 12 17v-40l24-7v-16z" fill="#ffffff"/>
 </svg>`;
 
-function svgResponse(): Response {
-  return new Response(DEFAULT_COVER_SVG, {
-    status: 200,
-    headers: {
-      'Content-Type': 'image/svg+xml;charset=utf-8',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=86400',
-    },
-  });
+function svgResponse(degraded = false): Response {
+  const headers: Record<string, string> = {
+    'Content-Type': 'image/svg+xml;charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': 'public, max-age=3600',
+    'X-Sonic-Cover-Fallback': 'svg',
+  };
+  if (degraded) headers['X-Sonic-Degraded'] = '1';
+  return new Response(DEFAULT_COVER_SVG, { status: 200, headers });
 }
 
 function getRefererForHost(hostname: string): string {
@@ -35,7 +43,7 @@ function getRefererForHost(hostname: string): string {
   return '';
 }
 
-async function proxyImage(imageUrl: string): Promise<Response | null> {
+async function proxyImage(imageUrl: string, providerTag = 'direct'): Promise<Response | null> {
   try {
     const parsed = new URL(imageUrl);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
@@ -46,9 +54,7 @@ async function proxyImage(imageUrl: string): Promise<Response | null> {
       Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     };
     const referer = getRefererForHost(parsed.hostname);
-    if (referer) {
-      headers.Referer = referer;
-    }
+    if (referer) headers.Referer = referer;
 
     const upstream = await fetch(parsed.toString(), {
       headers,
@@ -59,11 +65,16 @@ async function proxyImage(imageUrl: string): Promise<Response | null> {
     if (!upstream.ok) return null;
 
     const contentType = upstream.headers.get('content-type') || 'image/jpeg';
+    if (!contentType.includes('image/')) return null;
+
     const respHeaders = new Headers();
     respHeaders.set('Content-Type', contentType);
+    const cl = upstream.headers.get('content-length');
+    if (cl) respHeaders.set('Content-Length', cl);
     respHeaders.set('Access-Control-Allow-Origin', '*');
     respHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
     respHeaders.set('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+    respHeaders.set('X-Sonic-Provider', providerTag);
 
     return new Response(upstream.body, {
       status: 200,
@@ -80,128 +91,115 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     return new Response('Method not allowed', { status: 405 });
   }
 
+  const engineDenied = checkEngineAccess(request, env);
+  if (engineDenied) return engineDenied;
+  const rl = await evaluateGatewayRateLimit(request, env, 'music-cover');
+  if (!rl.allowed) return buildRateLimitErrorResponse(rl);
+
+  const cfg = getSonicConfig(env);
   const url = new URL(request.url);
   const targetUrl = url.searchParams.get('url') || url.searchParams.get('target');
   const id = url.searchParams.get('id') || '';
   const source = (url.searchParams.get('source') || 'netease').toLowerCase();
   const artist = url.searchParams.get('artist') || '';
   const cleanId = id.trim();
+  const pPrefix = cfg.runtime === 'linux-engine' ? 'local-' : '';
 
   // 1. Direct URL Proxy Mode (bypasses CORS & anti-hotlinking referer restrictions)
   if (targetUrl) {
-    const proxied = await proxyImage(targetUrl);
+    const proxied = await proxyImage(targetUrl, `${pPrefix}proxy`);
     if (proxied) return proxied;
   }
 
-  // 2. ID-based Resolution
+  // 2. ID-based Native Resolution
   if (cleanId) {
-    // 2.1 If id is already a full URL, proxy directly
     if (cleanId.startsWith('http://') || cleanId.startsWith('https://')) {
-      const proxied = await proxyImage(cleanId);
+      const proxied = await proxyImage(cleanId, `${pPrefix}url`);
       if (proxied) return proxied;
     }
 
-    // 2.2 Source: NetEase
-    if (source === 'netease' || source === 'gdstudio') {
-      try {
-        // First try GDStudio/Meting types=pic
-        const picData = await fetchMusicProvider(env, {
-          types: 'pic',
-          id: cleanId,
-          source: 'netease',
-        });
-        if (picData && typeof picData === 'object' && picData.url && typeof picData.url === 'string') {
-          const proxied = await proxyImage(picData.url);
-          if (proxied) return proxied;
-        }
-      } catch {}
+    // 2.1 NetEase Native (`ncm-api` / `linuxapi` song detail)
+    if (source === 'netease' || source === 'ncm' || source === 'sonic' || (source === 'gdstudio' && /^\d+$/.test(cleanId))) {
+      const picUrl = await resolveNeteaseCoverUrl(cleanId, env);
+      if (picUrl) {
+        const proxied = await proxyImage(picUrl, `${pPrefix}netease`);
+        if (proxied) return proxied;
+      }
 
-      // Fallback: NetEase song/detail by id
-      try {
-        const detailRes = await fetch(
-          `https://music.163.com/api/song/detail/?id=${encodeURIComponent(cleanId)}&ids=[${encodeURIComponent(cleanId)}]`,
-          {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              Referer: 'https://music.163.com/',
-            },
-            signal: AbortSignal.timeout(4000),
-          }
-        );
-        if (detailRes.ok) {
-          const detailJson: any = await detailRes.json();
-          const song = detailJson?.songs?.[0];
-          const picUrl = song?.album?.picUrl || song?.artists?.[0]?.img1v1Url;
-          if (picUrl) {
-            const proxied = await proxyImage(picUrl);
+      if (cfg.enableGdstudio) {
+        try {
+          const picData = await fetchMusicProvider(env, { types: 'pic', id: cleanId, source: 'netease' });
+          if (picData?.url && typeof picData.url === 'string') {
+            const proxied = await proxyImage(picData.url, 'gdstudio');
             if (proxied) return proxied;
           }
-        }
-      } catch {}
+        } catch {}
+      }
     }
 
-    // 2.3 Source: QQ Music
+    // 2.2 QQ Music Native (`albummid` direct + `songmid` -> `albummid` lookup)
     if (source === 'qq' || source === 'tencent') {
-      // Album cover attempt
-      const albumCoverUrl = `https://y.gtimg.cn/music/photo_new/T002R300x300M000${cleanId}.jpg`;
-      const proxiedAlbum = await proxyImage(albumCoverUrl);
-      if (proxiedAlbum) return proxiedAlbum;
-
-      // Singer photo attempt
+      const qqPicUrl = await resolveQQCoverUrl(cleanId, env);
+      if (qqPicUrl) {
+        const proxied = await proxyImage(qqPicUrl, `${pPrefix}qq`);
+        if (proxied) return proxied;
+      }
       const singerPhotoUrl = `https://y.gtimg.cn/music/photo_new/T001R300x300M000${cleanId}.jpg`;
-      const proxiedSinger = await proxyImage(singerPhotoUrl);
+      const proxiedSinger = await proxyImage(singerPhotoUrl, `${pPrefix}qq-singer`);
       if (proxiedSinger) return proxiedSinger;
     }
 
-    // 2.4 Source: Kugou (Hash)
+    // 2.3 Kugou Native (`getSongInfo` hash lookup)
     if (source === 'kugou') {
+      const kgPicUrl = await resolveKugouCoverUrl(cleanId, env);
+      if (kgPicUrl) {
+        const proxied = await proxyImage(kgPicUrl, `${pPrefix}kugou`);
+        if (proxied) return proxied;
+      }
+    }
+  }
+
+  // 3. Artist Avatar Native Resolution (`ncm-api` or encrypted `linuxapi` type=100)
+  if (artist && artist.trim()) {
+    const cleanArtist = artist.trim().split(/[/&,、]/)[0]?.trim() || artist.trim();
+    if (cfg.ncmApiUrl) {
       try {
-        const kgRes = await fetch(
-          `http://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash=${encodeURIComponent(cleanId)}`,
-          {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-            signal: AbortSignal.timeout(4000),
-          }
+        const aRes = await fetch(
+          `${cfg.ncmApiUrl}/cloudsearch?keywords=${encodeURIComponent(cleanArtist)}&type=100&limit=1&realIP=${encodeURIComponent(cfg.realIp)}`,
+          { signal: AbortSignal.timeout(4000) },
         );
-        if (kgRes.ok) {
-          const kgJson: any = await kgRes.json();
-          const rawCover = kgJson?.album_img || kgJson?.imgUrl;
-          if (rawCover) {
-            const cleanKgCover = rawCover.replace('{size}', '400').replace('http://', 'https://');
-            const proxied = await proxyImage(cleanKgCover);
+        if (aRes.ok) {
+          const aJson = (await aRes.json()) as any;
+          const aItem = aJson?.result?.artists?.[0];
+          const artPic = aItem?.img1v1Url || aItem?.picUrl;
+          if (artPic) {
+            const proxied = await proxyImage(String(artPic).replace('http://', 'https://'), `${pPrefix}netease-artist`);
             if (proxied) return proxied;
           }
         }
       } catch {}
     }
-  }
 
-  // 3. Artist Avatar Fallback
-  if (artist && artist.trim()) {
     try {
-      const artRes = await fetch(
-        `https://music.163.com/api/search/get/web?s=${encodeURIComponent(artist.trim())}&type=100&limit=1`,
+      const artJson = await callNeteaseLinuxApi(
         {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-            Referer: 'https://music.163.com/',
-          },
-          signal: AbortSignal.timeout(4000),
-        }
+          method: 'POST',
+          url: 'http://music.163.com/api/cloudsearch/pc',
+          params: { s: cleanArtist, type: 100, limit: 1, offset: 0 },
+        },
+        env,
+        AbortSignal.timeout(4500),
       );
-      if (artRes.ok) {
-        const artJson: any = await artRes.json();
-        const aItem = artJson?.result?.artists?.[0];
-        const artPic = aItem?.img1v1Url || aItem?.picUrl;
-        if (artPic) {
-          const proxied = await proxyImage(artPic.replace('http://', 'https://'));
-          if (proxied) return proxied;
-        }
+      const aItem = artJson?.result?.artists?.[0];
+      const artPic = aItem?.img1v1Url || aItem?.picUrl;
+      if (artPic) {
+        const proxied = await proxyImage(String(artPic).replace('http://', 'https://'), `${pPrefix}netease-artist`);
+        if (proxied) return proxied;
       }
     } catch {}
   }
 
-  // 4. Guaranteed Beautiful Fallback (never broken 404 image icon)
+  // 4. Guaranteed SVG Fallback (never broken 404 image icon)
   return svgResponse();
 }
 

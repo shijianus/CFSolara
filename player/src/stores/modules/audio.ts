@@ -9,6 +9,7 @@ import { useSettingsStore } from './settings'
 import { useToastStore } from './toast'
 import i18n from '@/languages'
 import { downloadedMusicDB, localMusicDB } from '@/utils/indexedDB'
+import { inspectGatewayHeaders, markStreamFailure, gatewayHealth } from '@/utils/gatewayHealth'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -292,6 +293,12 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isPaused = false
         this.audio.error = null
         this._dismissPlaybackErrorToast()
+        if (gatewayHealth.statusKind === 'track-fail') {
+          gatewayHealth.statusKind = gatewayHealth.degraded ? 'degraded' : 'normal'
+          gatewayHealth.message = gatewayHealth.degraded
+            ? '边缘降级模式 · 本地解析引擎重连中，当前由 Cloudflare 边缘提供检索与歌词'
+            : ''
+        }
       })
 
       // 播放暂停
@@ -358,13 +365,43 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isMuted = audio.muted
       })
 
-      // 错误处理
-      audio.addEventListener('error', (e: any) => {
+      // 错误处理（区分“本地引擎降级导致的流不可用 503”与“单曲版权/普通播放失败”）
+      audio.addEventListener('error', async (e: any) => {
         this.audio.isLoading = false
         this.audio.isPlaying = false
         if (switchingQuality) return
-        this._reportPlaybackError(audio.error || e)
         console.error('Audio error:', e)
+
+        const failedSrc = audio.currentSrc || audio.src || ''
+        if (failedSrc && failedSrc.includes('/api/music/stream')) {
+          try {
+            const diagRes = await fetch(failedSrc, {
+              method: 'GET',
+              headers: { Range: 'bytes=0-0' },
+            })
+            inspectGatewayHeaders(diagRes.headers)
+            if (diagRes.status === 503 || diagRes.headers.get('x-sonic-degraded') === '1') {
+              let errBody: any = null
+              try {
+                errBody = await diagRes.json()
+              } catch {}
+              if (diagRes.status === 503 || errBody?.error?.code === 'STREAM_UNAVAILABLE_DEGRADED') {
+                this.audio.error = '服务降级运行：本地引擎离线，边缘节点暂无法获取该曲音频流'
+                markStreamFailure('stream-degraded-fail', this.audio.error)
+                this._reportPlaybackError(e, this.audio.error)
+                return
+              }
+            } else if (diagRes.status === 404) {
+              this.audio.error = '当前曲目暂无可用音源或受版权限制'
+              markStreamFailure('track-fail', this.audio.error)
+              this._reportPlaybackError(e, this.audio.error)
+              return
+            }
+          } catch {}
+        }
+
+        this._reportPlaybackError(audio.error || e)
+
         // 触发一次刷新播放地址并重试，10秒内同一歌曲仅重试一次
         const now = Date.now()
         const id = this.audio.currentSong?.id ?? null
@@ -1167,10 +1204,10 @@ export const useAudioStore = defineStore('audio', {
       this.audio.playHistory = []
     },
 
-    /** 播放失败：写入 audio.error 并弹出全局 Toast（重试/下一首），同类错误节流 10 秒 */
-    _reportPlaybackError(error?: MediaError | Error | null) {
+    /** 播放失败：写入 audio.error 并弹出全局 Toast（重试/下一首），同类错误节流 10 秒；messageOverride 用于网关降级等已探明的具体原因 */
+    _reportPlaybackError(error?: MediaError | Error | null, messageOverride?: string) {
       const kind = classifyPlaybackError(error)
-      const message = i18n.global.t(`player.playbackError.${kind}`)
+      const message = messageOverride || i18n.global.t(`player.playbackError.${kind}`)
       this.audio.error = message
       this.audio.isLoading = false
 

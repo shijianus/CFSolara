@@ -21,10 +21,12 @@ export type SonicProvider =
   | 'none';
 
 export type SonicMatchLevel = 'HIGH_CONFIDENCE' | 'MEDIUM' | 'LOW' | 'NONE';
-export type SonicCacheLevel = 'memory' | 'kv' | 'cf-cache' | 'none';
+export type SonicCacheLevel = 'memory' | 'kv' | 'cf-cache' | 'cf-cache-stale' | 'memory-stale' | 'none';
 
 export interface SonicAttempt {
   provider: string;
+  via?: 'local-engine' | 'cf-direct' | 'third-party' | string;
+  source?: string;
   ok: boolean;
   ms: number;
   error?: string;

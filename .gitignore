@@ -4,7 +4,12 @@ dist
 dist/
 .wrangler/
 .env
+.env.*
+!.env.example
 .dev.vars
+dist-server/
+rollback-backups/
+rollback-*.json
 screenshots/
 player/node_modules
 player/node_modules/

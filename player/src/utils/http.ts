@@ -8,6 +8,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios'
 import NProgress from '@/config/nprogress'
+import { inspectGatewayHeaders, markStreamFailure } from '@/utils/gatewayHealth'
 
 /** 创建 axios 实例 */
 const instance: AxiosInstance = axios.create({
@@ -33,16 +34,27 @@ instance.interceptors.request.use(
     (error) => Promise.reject(error)
 )
 
-/** 响应拦截器：结束进度条、直接返回 data */
+/** 响应拦截器：结束进度条、感知网关降级状态、直接返回 data */
 instance.interceptors.response.use(
     (response: AxiosResponse) => {
-        const { data } = response
+        const { data, headers } = response
+        inspectGatewayHeaders(headers as any, data)
 
         // 进度条结束
         NProgress.done()
         return data
     },
     (error) => {
+        if (error?.response) {
+            inspectGatewayHeaders(error.response.headers, error.response.data)
+            if (
+                error.response.status === 503 &&
+                (error.response.data?.degraded ||
+                    error.response.data?.error?.code === 'STREAM_UNAVAILABLE_DEGRADED')
+            ) {
+                markStreamFailure('stream-degraded-fail')
+            }
+        }
         // 响应错误时也结束进度条
         NProgress.done()
         return Promise.reject(error)

@@ -1,4 +1,11 @@
 import type { AppEnv, HighPrecisionLyricPayload, LyricFetchOptions, LyricLine, LyricSyncType, LyricWord, SongItem } from './types';
+import { getSonicConfig } from './sonic/config';
+import {
+  resolvePlayableStream,
+  searchKuwoNative,
+  searchNeteaseNative,
+  sonicTrackToLegacySongItem,
+} from './sonic/native-protocols';
 
 const DEFAULT_API_BASE = 'https://music-api.gdstudio.xyz/api.php';
 const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
@@ -81,6 +88,38 @@ export async function fetchMusicProvider(env: AppEnv, params: Record<string, str
 }
 
 export async function searchTracks(env: AppEnv, query: string, source = 'netease', count = 20, page = 1): Promise<SongItem[]> {
+  const cleanSource = (source || 'netease').toLowerCase().trim();
+  const cfg = getSonicConfig(env);
+
+  // 1. Primary: Native / Local Engine protocols (no third-party free API reliance)
+  try {
+    if (cleanSource === 'netease' || cleanSource === 'ncm' || cleanSource === 'sonic') {
+      const ne = await searchNeteaseNative(query, count, page, env);
+      if (ne.tracks.length > 0) {
+        return ne.tracks.map(sonicTrackToLegacySongItem);
+      }
+    } else if (cleanSource === 'kuwo') {
+      const kw = await searchKuwoNative(query, count, page);
+      if (kw.length > 0) {
+        return kw.map(sonicTrackToLegacySongItem);
+      }
+    } else if (cleanSource === 'qq' || cleanSource === 'tencent' || cleanSource === 'kugou') {
+      const { getProvider } = await import('./sonic/providers');
+      const p = getProvider(cleanSource);
+      if (p?.search) {
+        const list = await p.search(query, { count, page, env });
+        if (list.length > 0) {
+          return list.map(sonicTrackToLegacySongItem);
+        }
+      }
+    }
+  } catch {}
+
+  // 2. Optional Last-Resort Fallback: Third-party GDStudio (ONLY when SONIC_ENABLE_GDSTUDIO=1)
+  if (!cfg.enableGdstudio) {
+    return [];
+  }
+
   const data = await fetchMusicProvider(env, {
     types: 'search',
     source,
@@ -103,89 +142,17 @@ export async function getTrackStreamUrl(
   title?: string,
   artist?: string
 ): Promise<string> {
-  let cleanId = id;
-  let cleanSource = source;
-  if (cleanId.includes(':')) {
-    const parts = cleanId.split(':');
-    cleanSource = parts[0] || cleanSource;
-    cleanId = parts.slice(1).join(':');
-  }
-
-  // 1. Direct Kuwo stream if source is kuwo or id is numeric rid
-  if (cleanSource === 'kuwo') {
-    try {
-      const kuwoUrl = `https://antiserver.kuwo.cn/anti.s?type=convert_url&rid=${encodeURIComponent(cleanId)}&format=mp3&response=url`;
-      const res = await fetch(kuwoUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          Referer: 'https://www.kuwo.cn/',
-        },
-      });
-      if (res.ok) {
-        const directUrl = (await res.text()).trim();
-        if (directUrl && directUrl.startsWith('http')) return directUrl;
-      }
-    } catch {}
-  }
-
-  // 2. Primary GDStudio / Meting Bridge (netease, joox, bilibili)
-  try {
-    const data = await fetchMusicProvider(env, {
-      types: 'url',
-      id: cleanId,
-      source: cleanSource === 'qq' ? 'tencent' : cleanSource,
-      br: quality,
-    });
-    if (typeof data === 'object' && data !== null && typeof data.url === 'string' && data.url.startsWith('http')) {
-      return data.url;
-    }
-  } catch {}
-
-  // 3. High-availability Kuwo search fallback when track is restricted or unresolvable
-  const searchKeywords = [title, artist].filter(Boolean).join(' ').trim();
-  if (searchKeywords) {
-    try {
-      const kwSearchUrl = `http://search.kuwo.cn/r.s?client=kt&all=${encodeURIComponent(searchKeywords)}&pn=0&rn=3&vipver=1&ft=music&encoding=utf8&rformat=json&mobi=1`;
-      const kwRes = await fetch(kwSearchUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Sonic/2.1.0' },
-      });
-      if (kwRes.ok) {
-        const kwJson: any = await kwRes.json();
-        const rid = kwJson?.abslist?.[0]?.MUSICRID?.replace('MUSIC_', '');
-        if (rid) {
-          const kwPlayUrl = `https://antiserver.kuwo.cn/anti.s?type=convert_url&rid=${encodeURIComponent(rid)}&format=mp3&response=url`;
-          const playRes = await fetch(kwPlayUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              Referer: 'https://www.kuwo.cn/',
-            },
-          });
-          if (playRes.ok) {
-            const finalAudioUrl = (await playRes.text()).trim();
-            if (finalAudioUrl && finalAudioUrl.startsWith('http')) return finalAudioUrl;
-          }
-        }
-      }
-    } catch {}
-  }
-
-  // 4. NetEase Direct Outer MP3 fallback
-  if (cleanSource === 'netease' && /^\d+$/.test(cleanId)) {
-    try {
-      const outerUrl = `https://music.163.com/song/media/outer/url?id=${cleanId}.mp3`;
-      const testRes = await fetch(outerUrl, {
-        method: 'HEAD',
-        redirect: 'manual',
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-      });
-      const loc = testRes.headers.get('location') || '';
-      if (loc && !loc.includes('404')) {
-        return outerUrl;
-      }
-    } catch {}
-  }
-
-  return '';
+  const resolved = await resolvePlayableStream(
+    {
+      id,
+      source,
+      quality,
+      title,
+      artist,
+    },
+    env,
+  );
+  return resolved?.url || '';
 }
 
 export function isMetadataLine(text: string, title?: string, artist?: string): boolean {
@@ -1012,33 +979,23 @@ export async function fetchDirectQQLyrics(songmid: string): Promise<string> {
   return '';
 }
 
-async function crawlNetEaseBySearch(query: string): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
+async function crawlNetEaseBySearch(query: string, env?: AppEnv): Promise<{ raw: string; id: string; title: string; artist: string } | null> {
   try {
-    const sUrl = `https://music.163.com/api/search/get/web?s=${encodeURIComponent(query)}&type=1&offset=0&total=true&limit=6`;
-    const sRes = await fetch(sUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        Referer: 'https://music.163.com/',
-      },
-    });
-    if (!sRes.ok) return null;
-    const sJson = (await sRes.json()) as any;
-    const songs = sJson.result?.songs;
-    if (!Array.isArray(songs) || songs.length === 0) return null;
+    const searchRes = await searchNeteaseNative(query, 5, 1, env);
+    if (!searchRes.tracks.length) return null;
 
     let candidate: { raw: string; id: string; title: string; artist: string } | null = null;
 
-    for (const song of songs.slice(0, 5)) {
-      if (!song?.id) continue;
-      const raw = await fetchDirectNetEaseLyrics(String(song.id));
+    for (const song of searchRes.tracks.slice(0, 5)) {
+      if (!song?.platformId) continue;
+      const raw = await fetchDirectNetEaseLyrics(song.platformId);
       if (raw && isValidLyric(raw)) {
         const item = {
           raw,
-          id: String(song.id),
-          title: String(song.name || ''),
-          artist: Array.isArray(song.artists) ? song.artists.map((a: any) => a.name).join(' / ') : '',
+          id: song.platformId,
+          title: song.title || '',
+          artist: song.artist || '',
         };
-        // 优先采纳含逐字 YRC 标签的候选项（包括网易云原生 JSON 逐字与标签逐字）
         if (raw.includes('{"t":') || (raw.includes('[') && raw.includes(']('))) {
           return item;
         }
@@ -1632,8 +1589,8 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
       }
     }
 
-    // 上游 Provider 备选
-    if (!rawLyric) {
+    // 第三方上游 Provider 备选（默认关闭，仅当显式开启 SONIC_ENABLE_GDSTUDIO=1 时启用）
+    if (!rawLyric && getSonicConfig(env).enableGdstudio) {
       try {
         const data = await fetchMusicProvider(env, { types: 'lyric', id, source });
         if (typeof data === 'object' && data !== null && typeof data.lyric === 'string' && isValidLyric(data.lyric)) {
@@ -1683,7 +1640,7 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
   // 若未获取到原始歌词但提供了搜索线索，优先尝试从网易云获取录音室官方参考 LRC（用于获取权威时间轴与时长）
   if (!rawLyric && searchQuery) {
     try {
-      const netRef = await crawlNetEaseBySearch(searchQuery);
+      const netRef = await crawlNetEaseBySearch(searchQuery, env);
       if (netRef?.raw && isValidLyric(netRef.raw)) {
         rawLyric = netRef.raw;
         finalSource = 'netease';
@@ -1728,7 +1685,7 @@ export async function getUniversalLyrics(env: AppEnv, options: LyricFetchOptions
 
     // 2.3 若当前依然没有任何有效歌词，继续依次尝试网易云、QQ、LRCLIB 与酷狗普通 LRC
     if (!rawLyric) {
-      const neteaseResult = await crawlNetEaseBySearch(searchQuery);
+      const neteaseResult = await crawlNetEaseBySearch(searchQuery, env);
       if (neteaseResult?.raw && isValidLyric(neteaseResult.raw)) {
         rawLyric = neteaseResult.raw;
         finalSource = 'netease';

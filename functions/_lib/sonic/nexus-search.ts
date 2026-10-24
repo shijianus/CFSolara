@@ -17,10 +17,14 @@ import { gdstudioProvider } from './providers/gdstudio';
 import { neteaseProvider } from './providers/netease';
 import { qqProvider } from './providers/qq';
 import { kugouProvider } from './providers/kugou';
+import { callLocalEngineJson, type CircuitState } from './local-engine';
 
 export interface NexusSearchResult {
   data: SonicSearchData;
   attempts: SonicAttempt[];
+  degraded?: boolean;
+  degradedReason?: string;
+  circuitState?: CircuitState;
 }
 
 async function computeSongSha(title: string, artist: string): Promise<string> {
@@ -75,37 +79,91 @@ function cleanArtistForMatching(artist: string): string {
 
 export async function searchNexus(
   query: string,
-  options: SonicSearchOptions = {},
+  options: SonicSearchOptions & { request?: Request } = {},
   env?: AppEnv,
 ): Promise<NexusSearchResult> {
   const config = getSonicConfig(env);
   const attempts: SonicAttempt[] = [];
+  let degraded = false;
+  let degradedReason: string | undefined;
+  let circuitState: CircuitState | undefined;
 
   const page = options.page || 1;
   const count = Math.min(50, Math.max(1, options.count || 20));
+  const isSinglePlatform = Boolean(options.platform && options.platform !== 'nexus' && options.platform !== 'all');
 
-  // Determine active providers
+  // 1. Primary Hop (when running on Cloudflare Pages): Linux VPS Local Engine
+  if (config.enableLocalEngine && !isSinglePlatform) {
+    const q = new URLSearchParams({
+      q: query,
+      page: String(page),
+      count: String(count),
+      nocache: '1',
+    });
+    const engineTimeout = Math.min(config.engineTimeoutMs, config.timeoutMs);
+    const engineRes = await callLocalEngineJson<{
+      brand?: string;
+      data?: SonicSearchData;
+      meta?: { attempts?: SonicAttempt[] };
+    }>(`/api/sonic/search/nexus?${q.toString()}`, env, {
+      request: options.request,
+      timeoutMs: engineTimeout,
+      signal: options.signal,
+    });
+    circuitState = engineRes.circuitState;
+
+    if (engineRes.ok && engineRes.data?.data && Array.isArray(engineRes.data.data.tracks)) {
+      const upstreamAttempts = (engineRes.data.meta?.attempts || []).map((a) => ({
+        ...a,
+        via: a.via || 'local-engine',
+        source: a.source || a.via || 'local-engine',
+      }));
+      return {
+        data: engineRes.data.data,
+        attempts: [
+          { provider: 'local-engine', via: 'local-engine', source: 'local-engine', ok: true, ms: engineRes.latencyMs },
+          ...upstreamAttempts,
+        ],
+        degraded: false,
+        circuitState: 'CLOSED',
+      };
+    }
+
+    degraded = true;
+    degradedReason = engineRes.error || 'local_engine_unavailable';
+    attempts.push({
+      provider: 'local-engine',
+      via: 'local-engine',
+      source: 'local-engine',
+      ok: false,
+      ms: engineRes.latencyMs,
+      error: degradedReason,
+    });
+  }
+
+  // 2. Local / Direct Native Providers (Linux Engine primary OR Cloudflare Edge graceful degradation)
   let activeProviders: SonicProviderAdapter[] = [];
 
-  if (options.platform && options.platform !== 'nexus' && options.platform !== 'all') {
-    const single = getProvider(options.platform);
-    if (single && single.search) {
+  if (isSinglePlatform) {
+    const single = getProvider(options.platform!);
+    if (single && single.search && single.isEnabled(env)) {
       activeProviders = [single];
-    } else {
-      activeProviders = [gdstudioProvider];
     }
   } else {
-    // Parallel Multi-Upstream: GDStudio, NetEase, QQ, Kugou
-    if (config.enableGdstudio && gdstudioProvider.search) activeProviders.push(gdstudioProvider);
     if (config.enableNetease && neteaseProvider.search) activeProviders.push(neteaseProvider);
     if (config.enableQq && qqProvider.search) activeProviders.push(qqProvider);
     if (config.enableKugou && kugouProvider.search) activeProviders.push(kugouProvider);
   }
 
+  const via = config.runtime === 'linux-engine' ? 'local-engine' : 'cf-direct';
+  const formatProviderName = (rawName: string) =>
+    config.runtime === 'linux-engine' ? `local-${rawName}` : rawName;
+
   // Parallel Execution with timeout isolation & Promise.allSettled
   const results = await Promise.allSettled(
     activeProviders.map(async (provider) => {
       const pStart = Date.now();
+      const pLabel = formatProviderName(String(provider.name));
       try {
         const timeoutSignal = AbortSignal.timeout(config.timeoutMs);
         const tracks = await provider.search!(query, {
@@ -117,14 +175,19 @@ export async function searchNexus(
         });
 
         attempts.push({
-          provider: String(provider.name),
-          ok: true,
+          provider: pLabel,
+          via,
+          source: via,
+          ok: tracks.length > 0,
           ms: Date.now() - pStart,
+          error: tracks.length === 0 ? 'Empty result set' : undefined,
         });
         return { provider: String(provider.name), tracks };
       } catch (err: any) {
         attempts.push({
-          provider: String(provider.name),
+          provider: pLabel,
+          via,
+          source: via,
           ok: false,
           ms: Date.now() - pStart,
           error: err?.message || 'Search timeout or network error',
@@ -147,6 +210,39 @@ export async function searchNexus(
         if (t && t.title) {
           allRankedTracks.push({ track: t, rank: idx, provider: r.value.provider });
         }
+      });
+    }
+  }
+
+  // 3. Optional Last-Resort Fallback: Third-Party GDStudio (DISABLED BY DEFAULT)
+  if (allRankedTracks.length === 0 && !isSinglePlatform && config.enableGdstudio && gdstudioProvider.search) {
+    const gStart = Date.now();
+    try {
+      const gTracks = await gdstudioProvider.search(query, {
+        page,
+        count,
+        env,
+        signal: AbortSignal.timeout(config.timeoutMs),
+      });
+      attempts.push({
+        provider: 'gdstudio',
+        via: 'third-party',
+        source: 'third-party',
+        ok: gTracks.length > 0,
+        ms: Date.now() - gStart,
+        error: gTracks.length === 0 ? 'Empty third-party fallback result' : undefined,
+      });
+      gTracks.forEach((t, idx) => {
+        if (t && t.title) allRankedTracks.push({ track: t, rank: idx, provider: 'gdstudio' });
+      });
+    } catch (err: any) {
+      attempts.push({
+        provider: 'gdstudio',
+        via: 'third-party',
+        source: 'third-party',
+        ok: false,
+        ms: Date.now() - gStart,
+        error: err?.message || 'GDStudio fallback error',
       });
     }
   }
@@ -252,9 +348,9 @@ export async function searchNexus(
         existing.duration = track.duration;
       }
 
-      // Add to internal sources tracking without exposing third-party provider names
+      // Record per-platform source IDs for cross-provider lyric/stream resolution
       existing.sources.push({
-        platform: 'sonic',
+        platform: origPlat,
         platformId: canonicalId,
         duration: track.duration,
       });
@@ -315,14 +411,14 @@ export async function searchNexus(
         cover: finalCover,
         coverUrl: finalCover,
         artistPic: cleanArtistPic || finalCover,
-        platform: 'sonic',
+        platform: isSinglePlatform ? origPlat : 'sonic',
         platformId: canonicalId,
         qualities,
         qualityBadge: isHighTier ? 'SQ' : 'HQ',
         streamUrl: `/api/music/stream?${qParams}`,
         sources: [
           {
-            platform: 'sonic',
+            platform: origPlat,
             platformId: canonicalId,
             duration: track.duration,
           },
@@ -414,5 +510,8 @@ export async function searchNexus(
       tracks: finalTracks,
     },
     attempts,
+    degraded,
+    degradedReason,
+    circuitState,
   };
 }
