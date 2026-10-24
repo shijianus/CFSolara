@@ -16,6 +16,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   const circuit = getLocalEngineCircuitSnapshot(env);
 
   return jsonResponse({
+    brand: 'Sonic',
     name: API_NAME,
     version: '2.2.0',
     copyright: BRAND_COPYRIGHT,
