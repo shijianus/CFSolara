@@ -448,7 +448,7 @@ const playModeIcon = computed(() => {
     ref="drawerRef"
     role="dialog"
     aria-modal="true"
-    aria-label="全屏音乐播放器与歌词"
+    :aria-label="t('player.fullPlayerAria')"
     tabindex="-1"
     class="bg-overlay/95 fixed inset-0 z-9999 flex flex-col backdrop-blur-xl outline-none"
   >
@@ -475,8 +475,8 @@ const playModeIcon = computed(() => {
         rounded="full"
         icon="icon-[mdi--chevron-down]"
         icon-class="h-7 w-7 text-primary/90"
-        title="关闭播放器 (Esc)"
-        aria-label="关闭播放器"
+        :title="t('player.closePlayerTitle')"
+        :aria-label="t('player.closePlayer')"
         @click="closeDrawerMobile"
       />
 

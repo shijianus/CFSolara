@@ -536,7 +536,7 @@ onUnmounted(() => {
     ref="drawerRef"
     role="dialog"
     aria-modal="true"
-    aria-label="全屏音乐播放器与歌词"
+    :aria-label="t('player.fullPlayerAria')"
     tabindex="-1"
     class="bg-overlay/95 absolute inset-0 z-50 flex backdrop-blur-md backdrop-filter outline-none"
   >

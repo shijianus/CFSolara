@@ -82,7 +82,7 @@ watch(
             <p class="line-clamp-2 text-xs leading-tight font-medium text-white">{{ pl.name }}</p>
             <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-white/70">
               <span class="icon-[mdi--music-note] h-3 w-3" />
-              <span>{{ $t('commonUnits.songsShort', pl.trackCount) }}</span>
+              <span>{{ $t('commonUnits.songsShort', { count: pl.trackCount }) }}</span>
             </div>
           </div>
           <div

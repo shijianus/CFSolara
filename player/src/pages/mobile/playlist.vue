@@ -238,7 +238,7 @@ const toggleCollect = () => {
               <div class="mt-2 flex items-center gap-3 text-[11px] text-accent/60">
                 <span class="flex items-center gap-1">
                   <span class="icon-[mdi--music-note] h-3.5 w-3.5"></span>
-                  {{ $t('commonUnits.songsShort', state.info.songCount) }}
+                  {{ $t('commonUnits.songsShort', { count: state.info.songCount }) }}
                 </span>
                 <span class="flex items-center gap-1">
                   <span class="icon-[mdi--heart] h-3.5 w-3.5"></span>

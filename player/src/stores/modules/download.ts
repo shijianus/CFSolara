@@ -258,8 +258,8 @@ export const useDownloadStore = defineStore('download', {
         const badgeLabel =
           qualityChoice.level === 'lossless' ? 'SQ' : qualityChoice.level === 'exhigh' ? 'HQ' : '标准'
 
-        const safeArtist = (song.artist || '未知歌手').replace(/[\\/:*?"<>|]/g, '_')
-        const safeTitle = (song.name || '未知歌曲').replace(/[\\/:*?"<>|]/g, '_')
+        const safeArtist = (song.artist || i18n.global.t('player.unknownArtist')).replace(/[\\/:*?"<>|]/g, '_')
+        const safeTitle = (song.name || i18n.global.t('player.unknownSong')).replace(/[\\/:*?"<>|]/g, '_')
         const fileName = `${safeArtist} - ${safeTitle} [${badgeLabel}].${ext}`
 
         // 3. 持久化存储至 IndexedDB

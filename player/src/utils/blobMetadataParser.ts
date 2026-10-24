@@ -3,6 +3,7 @@
  * 直接读取 Blob 头部 ArrayBuffer，解析真实音频封装格式与码率
  * 杜绝落库字段伪造，不依赖 Node.js Buffer
  */
+import i18n from '@/languages'
 
 export type ResolvedBlobTier = 'lossless' | 'exhigh' | 'standard'
 
@@ -229,10 +230,16 @@ export async function parseAudioBlob(blob: Blob, durationSeconds?: number, reqQu
   const req = reqQualityLevel || 'standard'
   if (req === 'lossless' && !isLossless) {
     const actualBitrateStr = finalBitrateKbps ? `${finalBitrateKbps} kbps` : '128 kbps'
-    mismatchWarning = `请求 SQ 无损, 实际为 ${container === 'M4A' ? 'AAC' : 'MP3'} ${actualBitrateStr}`
+    mismatchWarning = i18n.global.t('quality.mismatchLossless', {
+      format: container === 'M4A' ? 'AAC' : 'MP3',
+      bitrate: actualBitrateStr,
+    })
   } else if (req === 'exhigh' && (!classificationBitrate || classificationBitrate < 256)) {
     const actualBitrateStr = finalBitrateKbps ? `${finalBitrateKbps} kbps` : '128 kbps'
-    mismatchWarning = `请求 HQ 极高, 实际为 ${container === 'M4A' ? 'AAC' : 'MP3'} ${actualBitrateStr}`
+    mismatchWarning = i18n.global.t('quality.mismatchExhigh', {
+      format: container === 'M4A' ? 'AAC' : 'MP3',
+      bitrate: actualBitrateStr,
+    })
   }
 
   const details: string[] = []

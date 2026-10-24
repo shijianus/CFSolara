@@ -1,4 +1,5 @@
 import { useAudioStore } from '@/stores/modules/audio'
+import i18n from '@/languages'
 import {
   type LyricWord,
   buildProcessedWords,
@@ -98,7 +99,7 @@ export const parseAnyLrc = (raw: string): RawLyricLine[] => {
 
   // 1. 纯音乐判断
   if (/^\[00:00(?:\.00+)?\]\s*(纯音乐，请欣赏|纯音乐|暂无填词)/i.test(trimmed)) {
-    return [{ time: 0, startMs: 0, text: '纯音乐，请欣赏' }]
+    return [{ time: 0, startMs: 0, text: i18n.global.t('song.pureMusic') }]
   }
 
   // 2. 网易云 YRC 逐字 JSON 格式解析 {"t":28950,"c":[{"tx":"故"},{"tx":"事"}]}
@@ -332,7 +333,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
       if (nexusRes?.brand === 'Sonic' && nexusRes?.data) {
         const d = nexusRes.data
         if (d.instrumental) {
-          ori = [{ time: 0, text: '纯音乐，请欣赏' }]
+          ori = [{ time: 0, text: i18n.global.t('song.pureMusic') }]
         } else if (Array.isArray(d.syncedLyrics) && d.syncedLyrics.length > 0) {
           ori = processLinesToWords(d.syncedLyrics, title, artist)
 
@@ -361,7 +362,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
 
         const musicRes = await fetch(`/api/music/lyric?${musicParams.toString()}`).then(r => r.json()) as any
         if (musicRes?.isPureMusic) {
-          ori = [{ time: 0, text: '纯音乐，请欣赏' }]
+          ori = [{ time: 0, text: i18n.global.t('song.pureMusic') }]
         } else if (Array.isArray(musicRes?.lines) && musicRes.lines.length > 0) {
           ori = processLinesToWords(musicRes.lines, title, artist)
 
@@ -398,7 +399,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
 
     if (thisSeq !== currentFetchSeq) return
 
-    state.lyricsOriginal = ori.length > 0 ? ori : [{ time: 0, text: '暂无歌词' }]
+    state.lyricsOriginal = ori.length > 0 ? ori : [{ time: 0, text: i18n.global.t('song.noLyrics') }]
     state.lyricsTrans = tran
     state.lyricsRoma = roma
     lastCacheKey.value = cacheKey
@@ -410,7 +411,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
     })
   } catch {
     if (thisSeq !== currentFetchSeq) return
-    state.lyricsOriginal = [{ time: 0, text: '歌词获取失败' }]
+    state.lyricsOriginal = [{ time: 0, text: i18n.global.t('song.lyricsFailed') }]
     state.lyricsTrans = []
     state.lyricsRoma = []
   } finally {
