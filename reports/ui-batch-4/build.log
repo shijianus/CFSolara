@@ -35,7 +35,7 @@ computing gzip size...
 [2mdist/[22m[35mstatic/css/recent-4Ttgp5ek.css                                                      [39m[1m[2m  1.34 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
 [2mdist/[22m[35mstatic/css/search-Bo4mzrg9.css                                                      [39m[1m[2m  1.35 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
 [2mdist/[22m[35mstatic/css/album-BPqUzGCF.css                                                       [39m[1m[2m  1.38 kB[22m[1m[22m[2m │ gzip:   0.49 kB[22m
-[2mdist/[22m[35mstatic/css/index-PM2kIIIe.css                                                       [39m[1m[2m  1.49 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[2mdist/[22m[35mstatic/css/index-C51LwBOi.css                                                       [39m[1m[2m  1.49 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
 [2mdist/[22m[35mstatic/css/playlist-CuUqlmtp.css                                                    [39m[1m[2m  1.70 kB[22m[1m[22m[2m │ gzip:   0.52 kB[22m
 [2mdist/[22m[35mstatic/css/artist-DwLGLPD7.css                                                      [39m[1m[2m  1.89 kB[22m[1m[22m[2m │ gzip:   0.56 kB[22m
 [2mdist/[22m[35mstatic/css/VinylDisc-TyrUmC8o.css                                                   [39m[1m[2m  2.32 kB[22m[1m[22m[2m │ gzip:   0.82 kB[22m
@@ -58,7 +58,7 @@ computing gzip size...
 [2mdist/[22m[36mstatic/js/@vue_devtools-api@7.7.10-l0sNRNKZ.js                                      [39m[1m[2m  0.00 kB[22m[1m[22m[2m │ gzip:   0.02 kB[22m
 [2mdist/[22m[36mstatic/js/@vue_devtools-api@6.6.4-l0sNRNKZ.js                                       [39m[1m[2m  0.00 kB[22m[1m[22m[2m │ gzip:   0.02 kB[22m
 [2mdist/[22m[36mstatic/js/abort-controller@3.0.0-jTbv3-Qo.js                                        [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
-[2mdist/[22m[36mstatic/js/usePlayActions-BhJh4EU9.js                                                [39m[1m[2m  0.75 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36mstatic/js/usePlayActions-DbZtN6B3.js                                                [39m[1m[2m  0.75 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
 [2mdist/[22m[36mstatic/js/readable-web-to-node-stream@3.0.4-CPJyh3-l.js                             [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
 [2mdist/[22m[36mstatic/js/safe-buffer@5.2.1-DfCRmTBr.js                                             [39m[1m[2m  0.91 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
 [2mdist/[22m[36mstatic/js/ieee754@1.2.1-DqQQEDOD.js                                                 [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
@@ -67,100 +67,100 @@ computing gzip size...
 [2mdist/[22m[36mstatic/js/base64-js@1.5.1-DRz5BQNA.js                                               [39m[1m[2m  1.44 kB[22m[1m[22m[2m │ gzip:   0.78 kB[22m
 [2mdist/[22m[36mstatic/js/useDialogA11y-BWBsDdCa.js                                                 [39m[1m[2m  1.47 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
 [2mdist/[22m[36mstatic/js/TabGroup.vue_vue_type_script_setup_true_lang-BLaHUr2x.js                  [39m[1m[2m  1.52 kB[22m[1m[22m[2m │ gzip:   0.80 kB[22m
-[2mdist/[22m[36mstatic/js/time-Bcu_U_HD.js                                                          [39m[1m[2m  1.62 kB[22m[1m[22m[2m │ gzip:   0.64 kB[22m
+[2mdist/[22m[36mstatic/js/time-BZHda_di.js                                                          [39m[1m[2m  1.62 kB[22m[1m[22m[2m │ gzip:   0.64 kB[22m
 [2mdist/[22m[36mstatic/js/Ultimate-CsobpwzR.js                                                      [39m[1m[2m  1.73 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
 [2mdist/[22m[36mstatic/js/@vueuse_shared@13.9.0_vue@3.5.44_typescript@5.9.3_-roJgBhkz.js            [39m[1m[2m  1.75 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m
 [2mdist/[22m[36mstatic/js/process@0.11.10-CHwIkQcA.js                                               [39m[1m[2m  1.75 kB[22m[1m[22m[2m │ gzip:   0.74 kB[22m
 [2mdist/[22m[36mstatic/js/content-type@1.0.5-75sqNbC9.js                                            [39m[1m[2m  1.94 kB[22m[1m[22m[2m │ gzip:   0.85 kB[22m
 [2mdist/[22m[36mstatic/js/music-metadata-browser@2.5.11-DvAL8234.js                                 [39m[1m[2m  2.05 kB[22m[1m[22m[2m │ gzip:   0.91 kB[22m
 [2mdist/[22m[36mstatic/js/not-found-D6AQ7lWU.js                                                     [39m[1m[2m  2.29 kB[22m[1m[22m[2m │ gzip:   1.07 kB[22m
-[2mdist/[22m[36mstatic/js/mv-list-D9VuhPOd.js                                                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:   1.22 kB[22m
-[2mdist/[22m[36mstatic/js/Artplayer-CgLrpT4y.js                                                     [39m[1m[2m  2.33 kB[22m[1m[22m[2m │ gzip:   1.22 kB[22m
-[2mdist/[22m[36mstatic/js/charts-DWDlmugB.js                                                        [39m[1m[2m  2.36 kB[22m[1m[22m[2m │ gzip:   1.19 kB[22m
-[2mdist/[22m[36mstatic/js/local-music-DEgtzaxp.js                                                   [39m[1m[2m  2.37 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+[2mdist/[22m[36mstatic/js/mv-list-C-wGaEff.js                                                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:   1.22 kB[22m
+[2mdist/[22m[36mstatic/js/Artplayer-CtTlyWgR.js                                                     [39m[1m[2m  2.33 kB[22m[1m[22m[2m │ gzip:   1.22 kB[22m
+[2mdist/[22m[36mstatic/js/charts-sh3xRuBN.js                                                        [39m[1m[2m  2.36 kB[22m[1m[22m[2m │ gzip:   1.19 kB[22m
+[2mdist/[22m[36mstatic/js/local-music-Cdw_hYF2.js                                                   [39m[1m[2m  2.37 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
 [2mdist/[22m[36mstatic/js/pinia-plugin-persistedstate_ddfd936eb8745b9977382ab3c0b52b34-fFNy23FG.js  [39m[1m[2m  2.56 kB[22m[1m[22m[2m │ gzip:   1.12 kB[22m
 [2mdist/[22m[36mstatic/js/Pagination.vue_vue_type_script_setup_true_lang-DQGH2muJ.js                [39m[1m[2m  2.62 kB[22m[1m[22m[2m │ gzip:   1.27 kB[22m
 [2mdist/[22m[36mstatic/js/peek-readable@4.1.0-BWi8eg25.js                                           [39m[1m[2m  2.65 kB[22m[1m[22m[2m │ gzip:   0.97 kB[22m
 [2mdist/[22m[36mstatic/js/artplayer-plugin-hls-control@1.1.0-yNOA8Vim.js                            [39m[1m[2m  2.69 kB[22m[1m[22m[2m │ gzip:   1.23 kB[22m
-[2mdist/[22m[36mstatic/js/likes-BzFTFZPn.js                                                         [39m[1m[2m  2.73 kB[22m[1m[22m[2m │ gzip:   1.38 kB[22m
-[2mdist/[22m[36mstatic/js/library-BbUJwivM.js                                                       [39m[1m[2m  2.90 kB[22m[1m[22m[2m │ gzip:   0.81 kB[22m
-[2mdist/[22m[36mstatic/js/LazyImage.vue_vue_type_script_setup_true_lang-CTPIu_Ye.js                 [39m[1m[2m  2.95 kB[22m[1m[22m[2m │ gzip:   1.34 kB[22m
-[2mdist/[22m[36mstatic/js/local-music-DTUL0z4N.js                                                   [39m[1m[2m  2.99 kB[22m[1m[22m[2m │ gzip:   1.43 kB[22m
+[2mdist/[22m[36mstatic/js/likes-CfHUXa8W.js                                                         [39m[1m[2m  2.73 kB[22m[1m[22m[2m │ gzip:   1.38 kB[22m
+[2mdist/[22m[36mstatic/js/library-D5jSA0VH.js                                                       [39m[1m[2m  2.90 kB[22m[1m[22m[2m │ gzip:   0.81 kB[22m
+[2mdist/[22m[36mstatic/js/LazyImage.vue_vue_type_script_setup_true_lang-jmgEx3Lq.js                 [39m[1m[2m  2.95 kB[22m[1m[22m[2m │ gzip:   1.35 kB[22m
+[2mdist/[22m[36mstatic/js/local-music-l8pQerUZ.js                                                   [39m[1m[2m  2.99 kB[22m[1m[22m[2m │ gzip:   1.43 kB[22m
 [2mdist/[22m[36mstatic/js/PageSkeleton.vue_vue_type_script_setup_true_lang-D1wzSB6B.js              [39m[1m[2m  3.40 kB[22m[1m[22m[2m │ gzip:   1.15 kB[22m
-[2mdist/[22m[36mstatic/js/blobMetadataParser-ByQJQoZG.js                                            [39m[1m[2m  3.40 kB[22m[1m[22m[2m │ gzip:   1.73 kB[22m
+[2mdist/[22m[36mstatic/js/blobMetadataParser-HEKwU7Z_.js                                            [39m[1m[2m  3.40 kB[22m[1m[22m[2m │ gzip:   1.73 kB[22m
 [2mdist/[22m[36mstatic/js/@intlify_shared@11.4.16-CVlbnv6f.js                                       [39m[1m[2m  3.59 kB[22m[1m[22m[2m │ gzip:   1.73 kB[22m
-[2mdist/[22m[36mstatic/js/recent-DIz7Uwdj.js                                                        [39m[1m[2m  3.62 kB[22m[1m[22m[2m │ gzip:   1.70 kB[22m
+[2mdist/[22m[36mstatic/js/recent-Dp566YbK.js                                                        [39m[1m[2m  3.62 kB[22m[1m[22m[2m │ gzip:   1.70 kB[22m
 [2mdist/[22m[36mstatic/js/string_decoder@1.3.0-vNpVOtsY.js                                          [39m[1m[2m  3.67 kB[22m[1m[22m[2m │ gzip:   1.21 kB[22m
-[2mdist/[22m[36mstatic/js/useAudio-CXLVpadx.js                                                      [39m[1m[2m  3.75 kB[22m[1m[22m[2m │ gzip:   1.51 kB[22m
+[2mdist/[22m[36mstatic/js/useAudio-DpywPXR7.js                                                      [39m[1m[2m  3.75 kB[22m[1m[22m[2m │ gzip:   1.51 kB[22m
 [2mdist/[22m[36mstatic/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.44_typescript@5.9.3_-mZkTuhUC.js     [39m[1m[2m  3.83 kB[22m[1m[22m[2m │ gzip:   1.91 kB[22m
 [2mdist/[22m[36mstatic/js/strtok3@6.3.0-DayP3RT_.js                                                 [39m[1m[2m  4.18 kB[22m[1m[22m[2m │ gzip:   1.31 kB[22m
 [2mdist/[22m[36mstatic/js/@vue_shared@3.5.44-CmvyE7TZ.js                                            [39m[1m[2m  4.18 kB[22m[1m[22m[2m │ gzip:   2.03 kB[22m
-[2mdist/[22m[36mstatic/js/GlassSelect-DuNnXBUX.js                                                   [39m[1m[2m  4.19 kB[22m[1m[22m[2m │ gzip:   1.92 kB[22m
+[2mdist/[22m[36mstatic/js/GlassSelect-DfAFL6hn.js                                                   [39m[1m[2m  4.19 kB[22m[1m[22m[2m │ gzip:   1.92 kB[22m
 [2mdist/[22m[36mstatic/js/nprogress@0.2.0-CL0iIYw-.js                                               [39m[1m[2m  4.26 kB[22m[1m[22m[2m │ gzip:   1.80 kB[22m
 [2mdist/[22m[36mstatic/js/Button.vue_vue_type_style_index_0_lang-Bet90EeH.js                        [39m[1m[2m  4.43 kB[22m[1m[22m[2m │ gzip:   2.02 kB[22m
 [2mdist/[22m[36mstatic/js/ShadowBling-DD8770OC.js                                                   [39m[1m[2m  4.60 kB[22m[1m[22m[2m │ gzip:   2.11 kB[22m
-[2mdist/[22m[36mstatic/js/song-DQOYLKsk.js                                                          [39m[1m[2m  4.62 kB[22m[1m[22m[2m │ gzip:   2.10 kB[22m
-[2mdist/[22m[36mstatic/js/my-music-DVFQRETK.js                                                      [39m[1m[2m  4.67 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m
-[2mdist/[22m[36mstatic/js/new-albums-pHxmswgt.js                                                    [39m[1m[2m  4.67 kB[22m[1m[22m[2m │ gzip:   2.14 kB[22m
+[2mdist/[22m[36mstatic/js/song-CA70_MbZ.js                                                          [39m[1m[2m  4.62 kB[22m[1m[22m[2m │ gzip:   2.10 kB[22m
+[2mdist/[22m[36mstatic/js/my-music-BwI3x0fJ.js                                                      [39m[1m[2m  4.67 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m
+[2mdist/[22m[36mstatic/js/new-albums-D_egQsOc.js                                                    [39m[1m[2m  4.67 kB[22m[1m[22m[2m │ gzip:   2.14 kB[22m
 [2mdist/[22m[36mstatic/js/debug@4.4.3-B5WAY-HH.js                                                   [39m[1m[2m  4.81 kB[22m[1m[22m[2m │ gzip:   2.06 kB[22m
 [2mdist/[22m[36mstatic/js/@vueuse_core@13.9.0_vue@3.5.44_typescript@5.9.3_-CmFbZCuS.js              [39m[1m[2m  4.85 kB[22m[1m[22m[2m │ gzip:   2.27 kB[22m
-[2mdist/[22m[36mstatic/js/mv-player-DLPcI79m.js                                                     [39m[1m[2m  4.90 kB[22m[1m[22m[2m │ gzip:   2.23 kB[22m
+[2mdist/[22m[36mstatic/js/mv-player-BLzTBdBC.js                                                     [39m[1m[2m  4.90 kB[22m[1m[22m[2m │ gzip:   2.23 kB[22m
 [2mdist/[22m[36mstatic/js/InfiniteScroll.vue_vue_type_script_setup_true_lang-D_MieGND.js            [39m[1m[2m  4.94 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
 [2mdist/[22m[36mstatic/js/token-types@4.2.1-DIW-oYqj.js                                             [39m[1m[2m  5.07 kB[22m[1m[22m[2m │ gzip:   1.46 kB[22m
-[2mdist/[22m[36mstatic/js/MobileSongList-CP28CDpW.js                                                [39m[1m[2m  5.20 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
-[2mdist/[22m[36mstatic/js/album-DLS7KiPY.js                                                         [39m[1m[2m  5.36 kB[22m[1m[22m[2m │ gzip:   2.26 kB[22m
-[2mdist/[22m[36mstatic/js/transformers-3X6jD1zn.js                                                  [39m[1m[2m  5.44 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
-[2mdist/[22m[36mstatic/js/settingsOptions-DIwAH1BV.js                                               [39m[1m[2m  5.62 kB[22m[1m[22m[2m │ gzip:   2.04 kB[22m
-[2mdist/[22m[36mstatic/js/artists-CeiNkEOo.js                                                       [39m[1m[2m  5.76 kB[22m[1m[22m[2m │ gzip:   2.32 kB[22m
+[2mdist/[22m[36mstatic/js/MobileSongList-C6MpDhFO.js                                                [39m[1m[2m  5.20 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
+[2mdist/[22m[36mstatic/js/album-BOzcH8R0.js                                                         [39m[1m[2m  5.36 kB[22m[1m[22m[2m │ gzip:   2.26 kB[22m
+[2mdist/[22m[36mstatic/js/transformers-KoSSwzAb.js                                                  [39m[1m[2m  5.44 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
+[2mdist/[22m[36mstatic/js/settingsOptions-BrlNXhl7.js                                               [39m[1m[2m  5.62 kB[22m[1m[22m[2m │ gzip:   2.04 kB[22m
+[2mdist/[22m[36mstatic/js/artists-CPkErlc5.js                                                       [39m[1m[2m  5.76 kB[22m[1m[22m[2m │ gzip:   2.32 kB[22m
 [2mdist/[22m[36mstatic/js/events@3.3.0-DQ172AOg.js                                                  [39m[1m[2m  6.13 kB[22m[1m[22m[2m │ gzip:   2.09 kB[22m
-[2mdist/[22m[36mstatic/js/recent-DWkWrxv6.js                                                        [39m[1m[2m  6.20 kB[22m[1m[22m[2m │ gzip:   2.43 kB[22m
-[2mdist/[22m[36mstatic/js/charts-DM4xm9UD.js                                                        [39m[1m[2m  6.37 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
-[2mdist/[22m[36mstatic/js/PlaylistCommentsPopup.vue_vue_type_script_setup_true_lang-DG2JyY92.js     [39m[1m[2m  6.39 kB[22m[1m[22m[2m │ gzip:   2.79 kB[22m
-[2mdist/[22m[36mstatic/js/album-DLFMNnPq.js                                                         [39m[1m[2m  6.66 kB[22m[1m[22m[2m │ gzip:   2.70 kB[22m
-[2mdist/[22m[36mstatic/js/Aurora-DEBXafpH.js                                                        [39m[1m[2m  6.71 kB[22m[1m[22m[2m │ gzip:   2.79 kB[22m
+[2mdist/[22m[36mstatic/js/recent-B45YLNQY.js                                                        [39m[1m[2m  6.20 kB[22m[1m[22m[2m │ gzip:   2.43 kB[22m
+[2mdist/[22m[36mstatic/js/charts-Ds_I_VSV.js                                                        [39m[1m[2m  6.37 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
+[2mdist/[22m[36mstatic/js/PlaylistCommentsPopup.vue_vue_type_script_setup_true_lang-DDLHFAay.js     [39m[1m[2m  6.39 kB[22m[1m[22m[2m │ gzip:   2.79 kB[22m
+[2mdist/[22m[36mstatic/js/album-DBTrY_Ot.js                                                         [39m[1m[2m  6.66 kB[22m[1m[22m[2m │ gzip:   2.70 kB[22m
+[2mdist/[22m[36mstatic/js/Aurora-BT_l09En.js                                                        [39m[1m[2m  6.71 kB[22m[1m[22m[2m │ gzip:   2.79 kB[22m
 [2mdist/[22m[36mstatic/js/ColorBends-CKJBYb13.js                                                    [39m[1m[2m  6.72 kB[22m[1m[22m[2m │ gzip:   2.70 kB[22m
-[2mdist/[22m[36mstatic/js/SongCommentsDialog-lrXYRNFK.js                                            [39m[1m[2m  6.75 kB[22m[1m[22m[2m │ gzip:   2.78 kB[22m
-[2mdist/[22m[36mstatic/js/ShadowBlingSettingsPanel-D2L8x4Xk.js                                      [39m[1m[2m  7.46 kB[22m[1m[22m[2m │ gzip:   2.96 kB[22m
-[2mdist/[22m[36mstatic/js/mv-list-BfzyG0A6.js                                                       [39m[1m[2m  7.55 kB[22m[1m[22m[2m │ gzip:   3.30 kB[22m
-[2mdist/[22m[36mstatic/js/likes-DNG8B6Qd.js                                                         [39m[1m[2m  8.08 kB[22m[1m[22m[2m │ gzip:   2.81 kB[22m
-[2mdist/[22m[36mstatic/js/UltimateSettingsPanel-7ksG6ncb.js                                         [39m[1m[2m  9.09 kB[22m[1m[22m[2m │ gzip:   2.33 kB[22m
-[2mdist/[22m[36mstatic/js/song-CVJTpw0d.js                                                          [39m[1m[2m  9.31 kB[22m[1m[22m[2m │ gzip:   3.43 kB[22m
-[2mdist/[22m[36mstatic/js/LocalMusicSettings.vue_vue_type_script_setup_true_lang-2Xg2193p.js        [39m[1m[2m 10.16 kB[22m[1m[22m[2m │ gzip:   3.72 kB[22m
-[2mdist/[22m[36mstatic/js/artist-9Wt9KGxv.js                                                        [39m[1m[2m 10.19 kB[22m[1m[22m[2m │ gzip:   3.55 kB[22m
-[2mdist/[22m[36mstatic/js/playlist-CIVdzbqe.js                                                      [39m[1m[2m 10.31 kB[22m[1m[22m[2m │ gzip:   3.63 kB[22m
-[2mdist/[22m[36mstatic/js/ColorBendsSettingsPanel-Cxdg_OUq.js                                       [39m[1m[2m 10.39 kB[22m[1m[22m[2m │ gzip:   2.62 kB[22m
-[2mdist/[22m[36mstatic/js/AuroraSettingsPanel-BPoj6rKV.js                                           [39m[1m[2m 10.49 kB[22m[1m[22m[2m │ gzip:   2.48 kB[22m
-[2mdist/[22m[36mstatic/js/mv-player-CkJbfk-a.js                                                     [39m[1m[2m 10.57 kB[22m[1m[22m[2m │ gzip:   4.05 kB[22m
-[2mdist/[22m[36mstatic/js/settings-CgP5RBas.js                                                      [39m[1m[2m 10.61 kB[22m[1m[22m[2m │ gzip:   3.01 kB[22m
-[2mdist/[22m[36mstatic/js/downloads-Cu8nG-34.js                                                     [39m[1m[2m 11.85 kB[22m[1m[22m[2m │ gzip:   4.32 kB[22m
-[2mdist/[22m[36mstatic/js/artist-B8x27Mfh.js                                                        [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:   4.19 kB[22m
-[2mdist/[22m[36mstatic/js/useLyrics-qgW4S1NS.js                                                     [39m[1m[2m 13.98 kB[22m[1m[22m[2m │ gzip:   5.60 kB[22m
-[2mdist/[22m[36mstatic/js/VinylDisc-D4g5ozum.js                                                     [39m[1m[2m 14.32 kB[22m[1m[22m[2m │ gzip:   5.87 kB[22m
-[2mdist/[22m[36mstatic/js/settings-hFu_rMzb.js                                                      [39m[1m[2m 14.58 kB[22m[1m[22m[2m │ gzip:   4.01 kB[22m
-[2mdist/[22m[36mstatic/js/index-Bn9I0AZo.js                                                         [39m[1m[2m 14.84 kB[22m[1m[22m[2m │ gzip:   4.33 kB[22m
+[2mdist/[22m[36mstatic/js/SongCommentsDialog-DXqfzMaf.js                                            [39m[1m[2m  6.75 kB[22m[1m[22m[2m │ gzip:   2.78 kB[22m
+[2mdist/[22m[36mstatic/js/ShadowBlingSettingsPanel-CevoSnnr.js                                      [39m[1m[2m  7.46 kB[22m[1m[22m[2m │ gzip:   2.95 kB[22m
+[2mdist/[22m[36mstatic/js/mv-list-D9DDL18a.js                                                       [39m[1m[2m  7.55 kB[22m[1m[22m[2m │ gzip:   3.30 kB[22m
+[2mdist/[22m[36mstatic/js/likes-RaQVU2rs.js                                                         [39m[1m[2m  8.08 kB[22m[1m[22m[2m │ gzip:   2.82 kB[22m
+[2mdist/[22m[36mstatic/js/UltimateSettingsPanel-D20aeV_6.js                                         [39m[1m[2m  9.09 kB[22m[1m[22m[2m │ gzip:   2.33 kB[22m
+[2mdist/[22m[36mstatic/js/song-C219ZZ-r.js                                                          [39m[1m[2m  9.31 kB[22m[1m[22m[2m │ gzip:   3.43 kB[22m
+[2mdist/[22m[36mstatic/js/LocalMusicSettings.vue_vue_type_script_setup_true_lang-DsZPhbyp.js        [39m[1m[2m 10.16 kB[22m[1m[22m[2m │ gzip:   3.72 kB[22m
+[2mdist/[22m[36mstatic/js/artist-BGNvyUcM.js                                                        [39m[1m[2m 10.19 kB[22m[1m[22m[2m │ gzip:   3.55 kB[22m
+[2mdist/[22m[36mstatic/js/playlist-BU-PvD62.js                                                      [39m[1m[2m 10.31 kB[22m[1m[22m[2m │ gzip:   3.64 kB[22m
+[2mdist/[22m[36mstatic/js/ColorBendsSettingsPanel-CjPt_WcA.js                                       [39m[1m[2m 10.39 kB[22m[1m[22m[2m │ gzip:   2.62 kB[22m
+[2mdist/[22m[36mstatic/js/AuroraSettingsPanel-BpvykNGz.js                                           [39m[1m[2m 10.49 kB[22m[1m[22m[2m │ gzip:   2.48 kB[22m
+[2mdist/[22m[36mstatic/js/mv-player-GDEm1fBA.js                                                     [39m[1m[2m 10.57 kB[22m[1m[22m[2m │ gzip:   4.05 kB[22m
+[2mdist/[22m[36mstatic/js/settings-Dyog4Nx6.js                                                      [39m[1m[2m 10.61 kB[22m[1m[22m[2m │ gzip:   3.01 kB[22m
+[2mdist/[22m[36mstatic/js/downloads-k7tgduKz.js                                                     [39m[1m[2m 11.85 kB[22m[1m[22m[2m │ gzip:   4.32 kB[22m
+[2mdist/[22m[36mstatic/js/artist-jub7vp97.js                                                        [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:   4.19 kB[22m
+[2mdist/[22m[36mstatic/js/useLyrics-1IsXUfrq.js                                                     [39m[1m[2m 13.98 kB[22m[1m[22m[2m │ gzip:   5.60 kB[22m
+[2mdist/[22m[36mstatic/js/VinylDisc-BkPI3xZR.js                                                     [39m[1m[2m 14.32 kB[22m[1m[22m[2m │ gzip:   5.87 kB[22m
+[2mdist/[22m[36mstatic/js/settings-BaG6dSgv.js                                                      [39m[1m[2m 14.58 kB[22m[1m[22m[2m │ gzip:   4.01 kB[22m
+[2mdist/[22m[36mstatic/js/index-3t8gv6bw.js                                                         [39m[1m[2m 14.84 kB[22m[1m[22m[2m │ gzip:   4.33 kB[22m
 [2mdist/[22m[36mstatic/js/@vue_runtime-dom@3.5.44-BHLEhviT.js                                       [39m[1m[2m 15.69 kB[22m[1m[22m[2m │ gzip:   6.74 kB[22m
 [2mdist/[22m[36mstatic/js/@intlify_core-base@11.4.16-BjXxucC-.js                                    [39m[1m[2m 15.97 kB[22m[1m[22m[2m │ gzip:   6.35 kB[22m
 [2mdist/[22m[36mstatic/js/@intlify_message-compiler@11.4.16-BSdPHGS3.js                             [39m[1m[2m 16.76 kB[22m[1m[22m[2m │ gzip:   5.33 kB[22m
 [2mdist/[22m[36mstatic/js/@vue_reactivity@3.5.44-Ds8hiMkI.js                                        [39m[1m[2m 18.18 kB[22m[1m[22m[2m │ gzip:   6.62 kB[22m
-[2mdist/[22m[36mstatic/js/search-QCpozh93.js                                                        [39m[1m[2m 18.20 kB[22m[1m[22m[2m │ gzip:   6.09 kB[22m
-[2mdist/[22m[36mstatic/js/playlist-Cke6C7B3.js                                                      [39m[1m[2m 18.58 kB[22m[1m[22m[2m │ gzip:   6.13 kB[22m
-[2mdist/[22m[36mstatic/js/SongList-Bt4Gb0e2.js                                                      [39m[1m[2m 19.46 kB[22m[1m[22m[2m │ gzip:   5.91 kB[22m
-[2mdist/[22m[36mstatic/js/search-S4yTrs8S.js                                                        [39m[1m[2m 20.29 kB[22m[1m[22m[2m │ gzip:   6.77 kB[22m
+[2mdist/[22m[36mstatic/js/search-DVQDNtnS.js                                                        [39m[1m[2m 18.20 kB[22m[1m[22m[2m │ gzip:   6.09 kB[22m
+[2mdist/[22m[36mstatic/js/playlist-DjjNL22F.js                                                      [39m[1m[2m 18.58 kB[22m[1m[22m[2m │ gzip:   6.13 kB[22m
+[2mdist/[22m[36mstatic/js/SongList-CkavS6Kb.js                                                      [39m[1m[2m 19.46 kB[22m[1m[22m[2m │ gzip:   5.91 kB[22m
+[2mdist/[22m[36mstatic/js/search-BBGZNjKk.js                                                        [39m[1m[2m 20.29 kB[22m[1m[22m[2m │ gzip:   6.78 kB[22m
 [2mdist/[22m[36mstatic/js/file-type@16.5.4-BNhMQ8o2.js                                              [39m[1m[2m 20.84 kB[22m[1m[22m[2m │ gzip:   6.60 kB[22m
 [2mdist/[22m[36mstatic/js/vue-i18n@11.4.16_vue@3.5.44_typescript@5.9.3_-9e2KY1pV.js                 [39m[1m[2m 21.30 kB[22m[1m[22m[2m │ gzip:   7.23 kB[22m
-[2mdist/[22m[36mstatic/js/downloads-BBns0cM2.js                                                     [39m[1m[2m 22.55 kB[22m[1m[22m[2m │ gzip:   6.95 kB[22m
+[2mdist/[22m[36mstatic/js/downloads-Ddiu5mgj.js                                                     [39m[1m[2m 22.55 kB[22m[1m[22m[2m │ gzip:   6.95 kB[22m
 [2mdist/[22m[36mstatic/js/buffer@6.0.3-Cy13c_WP.js                                                  [39m[1m[2m 25.29 kB[22m[1m[22m[2m │ gzip:   7.28 kB[22m
 [2mdist/[22m[36mstatic/js/vue-router@4.6.4_vue@3.5.44_typescript@5.9.3_-Bd-mUMbo.js                 [39m[1m[2m 25.75 kB[22m[1m[22m[2m │ gzip:  10.13 kB[22m
-[2mdist/[22m[36mstatic/js/index-CImmvIb2.js                                                         [39m[1m[2m 35.22 kB[22m[1m[22m[2m │ gzip:   9.28 kB[22m
-[2mdist/[22m[36mstatic/js/index-BNz5zGG_.js                                                         [39m[1m[2m 37.56 kB[22m[1m[22m[2m │ gzip:  11.66 kB[22m
+[2mdist/[22m[36mstatic/js/index-Bwirc2D0.js                                                         [39m[1m[2m 35.22 kB[22m[1m[22m[2m │ gzip:   9.28 kB[22m
+[2mdist/[22m[36mstatic/js/index-DTkhMVgC.js                                                         [39m[1m[2m 37.56 kB[22m[1m[22m[2m │ gzip:  11.66 kB[22m
 [2mdist/[22m[36mstatic/js/ogl@1.0.11-Bwnig-Ps.js                                                    [39m[1m[2m 47.99 kB[22m[1m[22m[2m │ gzip:  13.89 kB[22m
 [2mdist/[22m[36mstatic/js/@vue_runtime-core@3.5.44-BTy8drBe.js                                      [39m[1m[2m 51.42 kB[22m[1m[22m[2m │ gzip:  21.38 kB[22m
 [2mdist/[22m[36mstatic/js/axios@1.20.0-BCn5QfZZ.js                                                  [39m[1m[2m 51.44 kB[22m[1m[22m[2m │ gzip:  19.49 kB[22m
 [2mdist/[22m[36mstatic/js/readable-stream@4.8.0-qL0elw96.js                                         [39m[1m[2m 78.06 kB[22m[1m[22m[2m │ gzip:  24.82 kB[22m
-[2mdist/[22m[36mstatic/js/index-Ctuo9kcL.js                                                         [39m[1m[2m 79.35 kB[22m[1m[22m[2m │ gzip:  24.76 kB[22m
+[2mdist/[22m[36mstatic/js/index-Bf2T7Y9O.js                                                         [39m[1m[2m 79.35 kB[22m[1m[22m[2m │ gzip:  24.76 kB[22m
 [2mdist/[22m[36mstatic/js/swiper@12.2.0-BvF9zYzA.js                                                 [39m[1m[2m113.50 kB[22m[1m[22m[2m │ gzip:  33.75 kB[22m
 [2mdist/[22m[36mstatic/js/gsap@3.15.0-a3sj5zmn.js                                                   [39m[1m[2m114.01 kB[22m[1m[22m[2m │ gzip:  45.16 kB[22m
-[2mdist/[22m[36mstatic/js/index-DzL_bWzI.js                                                         [39m[1m[2m134.45 kB[22m[1m[22m[2m │ gzip:  43.24 kB[22m
+[2mdist/[22m[36mstatic/js/index-8_s-MvPW.js                                                         [39m[1m[2m134.45 kB[22m[1m[22m[2m │ gzip:  43.26 kB[22m
 [2mdist/[22m[36mstatic/js/artplayer@5.4.0-D8D46wwu.js                                               [39m[1m[2m141.51 kB[22m[1m[22m[2m │ gzip:  37.24 kB[22m
 [2mdist/[22m[36mstatic/js/music-metadata@7.14.0-niWA3jcV.js                                         [39m[1m[2m155.44 kB[22m[1m[22m[2m │ gzip:  44.23 kB[22m
 [2mdist/[22m[36mstatic/js/three@0.181.2-BPWI-S8h.js                                                 [39m[1m[2m482.14 kB[22m[1m[22m[2m │ gzip: 123.95 kB[22m
@@ -170,130 +170,130 @@ computing gzip size...
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
-[32m✓ built in 22.64s[39m
+[32m✓ built in 22.41s[39m
 
 ✨ [vite-plugin-compression]:algorithm=gzip - compressed file successfully: 
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/404.html.gz                                                                             1.50kb / gzip: 0.81kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/index.html.gz                                                                           5.36kb / gzip: 1.88kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/album-BPqUzGCF.css.gz                                                        1.34kb / gzip: 0.48kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/404.html.gz                                                                             1.50kb / gzip: 0.81kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/artist-Bzcbn-J0.css.gz                                                       1.04kb / gzip: 0.38kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/artist-DwLGLPD7.css.gz                                                       1.85kb / gzip: 0.55kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/downloads-B-2_R58r.css.gz                                                    1.21kb / gzip: 0.30kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/index.html.gz                                                                           5.36kb / gzip: 1.88kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/Button-dbk5zgAa.css.gz                                                       3.40kb / gzip: 1.01kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-24NtREM6.css.gz                                                        2.59kb / gzip: 0.63kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/playlist-CuUqlmtp.css.gz                                                     1.66kb / gzip: 0.51kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-40cB_zYP.css.gz                                                        5.27kb / gzip: 1.58kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-PM2kIIIe.css.gz                                                        1.45kb / gzip: 0.52kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/recent-4Ttgp5ek.css.gz                                                       1.31kb / gzip: 0.34kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/downloads-B-2_R58r.css.gz                                                    1.21kb / gzip: 0.30kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-24NtREM6.css.gz                                                        2.59kb / gzip: 0.63kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-C51LwBOi.css.gz                                                        1.45kb / gzip: 0.52kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/MobileSongList-CC7UBzEX.css.gz                                               1.26kb / gzip: 0.36kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/nprogress@0.2-BgDCIyLK.css.gz                                                1.07kb / gzip: 0.42kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/search-DdlKA7Xo.css.gz                                                       4.82kb / gzip: 1.08kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/search-Bo4mzrg9.css.gz                                                       1.32kb / gzip: 0.49kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/playlist-CuUqlmtp.css.gz                                                     1.66kb / gzip: 0.51kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/recent-4Ttgp5ek.css.gz                                                       1.31kb / gzip: 0.34kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/settings-97S9ecje.css.gz                                                     2.67kb / gzip: 0.78kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-DcvODqi0.css.gz                                                        14.56kb / gzip: 3.39kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/SongCommentsDialog-CnBCecnd.css.gz                                           2.67kb / gzip: 0.70kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/search-Bo4mzrg9.css.gz                                                       1.32kb / gzip: 0.49kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/Ultimate-C0kvV8-d.css.gz                                                     3.11kb / gzip: 0.71kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/MobileSongList-CC7UBzEX.css.gz                                               1.26kb / gzip: 0.36kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/settings-97S9ecje.css.gz                                                     2.67kb / gzip: 0.78kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/search-DdlKA7Xo.css.gz                                                       4.82kb / gzip: 1.08kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/VinylDisc-TyrUmC8o.css.gz                                                    2.26kb / gzip: 0.80kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@intlify_shared@11.4.16-CVlbnv6f.js.gz                                        3.50kb / gzip: 1.69kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vueuse_shared@13.9.0_vue@3.5.44_typescript@5.9.3_-roJgBhkz.js.gz             1.71kb / gzip: 0.93kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/swiper@12.2-DO-EkFpm.css.gz                                                  13.33kb / gzip: 2.26kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vueuse_core@13.9.0_vue@3.5.44_typescript@5.9.3_-CmFbZCuS.js.gz               4.74kb / gzip: 2.21kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vueuse_shared@13.9.0_vue@3.5.44_typescript@5.9.3_-roJgBhkz.js.gz             1.71kb / gzip: 0.93kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@intlify_message-compiler@11.4.16-BSdPHGS3.js.gz                              16.37kb / gzip: 5.20kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@intlify_core-base@11.4.16-BjXxucC-.js.gz                                     15.60kb / gzip: 6.20kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/album-DLFMNnPq.js.gz                                                          6.51kb / gzip: 2.63kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vue_reactivity@3.5.44-Ds8hiMkI.js.gz                                         17.75kb / gzip: 6.46kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/album-DLS7KiPY.js.gz                                                          5.24kb / gzip: 2.21kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vue_shared@3.5.44-CmvyE7TZ.js.gz                                             4.08kb / gzip: 1.98kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/album-DBTrY_Ot.js.gz                                                          6.51kb / gzip: 2.63kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vue_runtime-dom@3.5.44-BHLEhviT.js.gz                                        15.33kb / gzip: 6.58kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artists-CeiNkEOo.js.gz                                                        5.62kb / gzip: 2.27kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artist-9Wt9KGxv.js.gz                                                         9.95kb / gzip: 3.47kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Artplayer-CgLrpT4y.js.gz                                                      2.28kb / gzip: 1.19kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artist-B8x27Mfh.js.gz                                                         12.03kb / gzip: 4.09kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@intlify_core-base@11.4.16-BjXxucC-.js.gz                                     15.60kb / gzip: 6.20kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/album-BOzcH8R0.js.gz                                                          5.24kb / gzip: 2.21kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artists-CPkErlc5.js.gz                                                        5.62kb / gzip: 2.27kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vue_reactivity@3.5.44-Ds8hiMkI.js.gz                                         17.75kb / gzip: 6.46kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Artplayer-CtTlyWgR.js.gz                                                      2.28kb / gzip: 1.19kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artplayer-plugin-hls-control@1.1.0-yNOA8Vim.js.gz                             2.63kb / gzip: 1.21kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/base64-js@1.5.1-DRz5BQNA.js.gz                                                1.41kb / gzip: 0.76kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/AuroraSettingsPanel-BPoj6rKV.js.gz                                            10.24kb / gzip: 2.42kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Aurora-DEBXafpH.js.gz                                                         6.55kb / gzip: 2.72kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Button.vue_vue_type_style_index_0_lang-Bet90EeH.js.gz                         4.32kb / gzip: 1.98kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/charts-DM4xm9UD.js.gz                                                         6.22kb / gzip: 2.61kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/charts-DWDlmugB.js.gz                                                         2.30kb / gzip: 1.16kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/blobMetadataParser-ByQJQoZG.js.gz                                             3.32kb / gzip: 1.69kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/content-type@1.0.5-75sqNbC9.js.gz                                             1.89kb / gzip: 0.83kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artist-jub7vp97.js.gz                                                         12.03kb / gzip: 4.09kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Aurora-BT_l09En.js.gz                                                         6.55kb / gzip: 2.72kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/charts-sh3xRuBN.js.gz                                                         2.30kb / gzip: 1.16kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/AuroraSettingsPanel-BpvykNGz.js.gz                                            10.24kb / gzip: 2.42kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/blobMetadataParser-HEKwU7Z_.js.gz                                             3.32kb / gzip: 1.69kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/buffer@6.0.3-Cy13c_WP.js.gz                                                   24.70kb / gzip: 7.10kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ColorBendsSettingsPanel-Cxdg_OUq.js.gz                                        10.15kb / gzip: 2.54kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/charts-Ds_I_VSV.js.gz                                                         6.22kb / gzip: 2.61kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ColorBends-CKJBYb13.js.gz                                                     6.56kb / gzip: 2.64kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ColorBendsSettingsPanel-CjPt_WcA.js.gz                                        10.15kb / gzip: 2.54kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/content-type@1.0.5-75sqNbC9.js.gz                                             1.89kb / gzip: 0.83kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/downloads-k7tgduKz.js.gz                                                      11.57kb / gzip: 4.21kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/debug@4.4.3-B5WAY-HH.js.gz                                                    4.69kb / gzip: 2.01kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/downloads-Cu8nG-34.js.gz                                                      11.57kb / gzip: 4.21kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Button.vue_vue_type_style_index_0_lang-Bet90EeH.js.gz                         4.32kb / gzip: 1.98kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/downloads-Ddiu5mgj.js.gz                                                      22.02kb / gzip: 6.78kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/GlassSelect-DfAFL6hn.js.gz                                                    4.09kb / gzip: 1.87kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/events@3.3.0-DQ172AOg.js.gz                                                   5.98kb / gzip: 2.04kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/file-type@16.5.4-BNhMQ8o2.js.gz                                               20.35kb / gzip: 6.44kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/downloads-BBns0cM2.js.gz                                                      22.02kb / gzip: 6.78kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/GlassSelect-DuNnXBUX.js.gz                                                    4.09kb / gzip: 1.87kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-Bn9I0AZo.js.gz                                                          14.49kb / gzip: 4.21kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-BNz5zGG_.js.gz                                                          36.68kb / gzip: 11.38kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-CImmvIb2.js.gz                                                          34.39kb / gzip: 9.04kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/library-BbUJwivM.js.gz                                                        2.83kb / gzip: 0.79kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/InfiniteScroll.vue_vue_type_script_setup_true_lang-D_MieGND.js.gz             4.82kb / gzip: 1.84kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/LazyImage.vue_vue_type_script_setup_true_lang-CTPIu_Ye.js.gz                  2.88kb / gzip: 1.31kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/likes-BzFTFZPn.js.gz                                                          2.67kb / gzip: 1.35kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/LocalMusicSettings.vue_vue_type_script_setup_true_lang-2Xg2193p.js.gz         9.92kb / gzip: 3.63kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/likes-DNG8B6Qd.js.gz                                                          7.89kb / gzip: 2.75kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/MobileSongList-CP28CDpW.js.gz                                                 5.08kb / gzip: 1.84kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/local-music-DEgtzaxp.js.gz                                                    2.32kb / gzip: 1.14kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/local-music-DTUL0z4N.js.gz                                                    2.92kb / gzip: 1.39kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-3t8gv6bw.js.gz                                                          14.49kb / gzip: 4.21kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/library-D5jSA0VH.js.gz                                                        2.83kb / gzip: 0.79kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-Bwirc2D0.js.gz                                                          34.39kb / gzip: 9.04kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-DTkhMVgC.js.gz                                                          36.68kb / gzip: 11.37kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/local-music-Cdw_hYF2.js.gz                                                    2.32kb / gzip: 1.14kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/likes-CfHUXa8W.js.gz                                                          2.67kb / gzip: 1.35kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/likes-RaQVU2rs.js.gz                                                          7.89kb / gzip: 2.75kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/media-typer@1.1.1-Qqsyr4fc.js.gz                                              1.06kb / gzip: 0.47kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/local-music-l8pQerUZ.js.gz                                                    2.92kb / gzip: 1.39kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/music-metadata-browser@2.5.11-DvAL8234.js.gz                                  2.00kb / gzip: 0.88kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ms@2.1.3-CzQ2E3wO.js.gz                                                       1.35kb / gzip: 0.65kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-list-BfzyG0A6.js.gz                                                        7.37kb / gzip: 3.22kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-list-D9VuhPOd.js.gz                                                        2.25kb / gzip: 1.19kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-player-CkJbfk-a.js.gz                                                      10.32kb / gzip: 3.95kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-player-DLPcI79m.js.gz                                                      4.79kb / gzip: 2.17kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/LocalMusicSettings.vue_vue_type_script_setup_true_lang-DsZPhbyp.js.gz         9.92kb / gzip: 3.63kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/MobileSongList-C6MpDhFO.js.gz                                                 5.08kb / gzip: 1.84kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-list-C-wGaEff.js.gz                                                        2.25kb / gzip: 1.19kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-player-BLzTBdBC.js.gz                                                      4.79kb / gzip: 2.18kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/new-albums-D_egQsOc.js.gz                                                     4.56kb / gzip: 2.08kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-player-GDEm1fBA.js.gz                                                      10.32kb / gzip: 3.95kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/mv-list-D9DDL18a.js.gz                                                        7.37kb / gzip: 3.22kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/not-found-D6AQ7lWU.js.gz                                                      2.24kb / gzip: 1.05kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/my-music-DVFQRETK.js.gz                                                       4.56kb / gzip: 1.76kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/my-music-BwI3x0fJ.js.gz                                                       4.56kb / gzip: 1.76kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/nprogress@0.2.0-CL0iIYw-.js.gz                                                4.16kb / gzip: 1.76kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/new-albums-pHxmswgt.js.gz                                                     4.56kb / gzip: 2.08kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Pagination.vue_vue_type_script_setup_true_lang-DQGH2muJ.js.gz                 2.55kb / gzip: 1.24kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/PageSkeleton.vue_vue_type_script_setup_true_lang-D1wzSB6B.js.gz               3.32kb / gzip: 1.12kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/pinia-plugin-persistedstate_ddfd936eb8745b9977382ab3c0b52b34-fFNy23FG.js.gz   2.50kb / gzip: 1.10kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/LazyImage.vue_vue_type_script_setup_true_lang-jmgEx3Lq.js.gz                  2.88kb / gzip: 1.31kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/peek-readable@4.1.0-BWi8eg25.js.gz                                            2.59kb / gzip: 0.94kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/pinia@3.0.4_typescript@5.9.3_vue@3.5.44_typescript@5.9.3_-mZkTuhUC.js.gz      3.74kb / gzip: 1.87kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Pagination.vue_vue_type_script_setup_true_lang-DQGH2muJ.js.gz                 2.55kb / gzip: 1.24kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/process@0.11.10-CHwIkQcA.js.gz                                                1.71kb / gzip: 0.73kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/playlist-CIVdzbqe.js.gz                                                       10.07kb / gzip: 3.55kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/recent-DIz7Uwdj.js.gz                                                         3.54kb / gzip: 1.66kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/PlaylistCommentsPopup.vue_vue_type_script_setup_true_lang-DG2JyY92.js.gz      6.24kb / gzip: 2.72kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/recent-DWkWrxv6.js.gz                                                         6.05kb / gzip: 2.37kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/playlist-Cke6C7B3.js.gz                                                       18.14kb / gzip: 5.98kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settings-CgP5RBas.js.gz                                                       10.36kb / gzip: 2.94kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/search-QCpozh93.js.gz                                                         17.78kb / gzip: 5.94kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settings-hFu_rMzb.js.gz                                                       14.24kb / gzip: 3.91kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/pinia-plugin-persistedstate_ddfd936eb8745b9977382ab3c0b52b34-fFNy23FG.js.gz   2.50kb / gzip: 1.10kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/recent-Dp566YbK.js.gz                                                         3.54kb / gzip: 1.66kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/playlist-BU-PvD62.js.gz                                                       10.07kb / gzip: 3.55kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/PlaylistCommentsPopup.vue_vue_type_script_setup_true_lang-DDLHFAay.js.gz      6.24kb / gzip: 2.72kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/recent-B45YLNQY.js.gz                                                         6.05kb / gzip: 2.37kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settings-BaG6dSgv.js.gz                                                       14.24kb / gzip: 3.91kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/search-BBGZNjKk.js.gz                                                         19.82kb / gzip: 6.61kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ogl@1.0.11-Bwnig-Ps.js.gz                                                     46.87kb / gzip: 13.51kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settingsOptions-DIwAH1BV.js.gz                                                5.49kb / gzip: 1.99kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/search-DVQDNtnS.js.gz                                                         17.78kb / gzip: 5.94kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ShadowBling-DD8770OC.js.gz                                                    4.50kb / gzip: 2.06kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/song-CVJTpw0d.js.gz                                                           9.09kb / gzip: 3.34kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/SongCommentsDialog-lrXYRNFK.js.gz                                             6.59kb / gzip: 2.72kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/song-DQOYLKsk.js.gz                                                           4.51kb / gzip: 2.05kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ShadowBlingSettingsPanel-D2L8x4Xk.js.gz                                       7.29kb / gzip: 2.88kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/strtok3@6.3.0-DayP3RT_.js.gz                                                  4.08kb / gzip: 1.28kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settings-Dyog4Nx6.js.gz                                                       10.36kb / gzip: 2.94kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/settingsOptions-BrlNXhl7.js.gz                                                5.49kb / gzip: 1.99kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/SongCommentsDialog-DXqfzMaf.js.gz                                             6.59kb / gzip: 2.72kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/ShadowBlingSettingsPanel-CevoSnnr.js.gz                                       7.29kb / gzip: 2.88kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/song-C219ZZ-r.js.gz                                                           9.09kb / gzip: 3.34kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/song-CA70_MbZ.js.gz                                                           4.51kb / gzip: 2.05kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/playlist-DjjNL22F.js.gz                                                       18.14kb / gzip: 5.98kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/string_decoder@1.3.0-vNpVOtsY.js.gz                                           3.59kb / gzip: 1.18kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/TabGroup.vue_vue_type_script_setup_true_lang-BLaHUr2x.js.gz                   1.48kb / gzip: 0.78kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/transformers-3X6jD1zn.js.gz                                                   5.32kb / gzip: 1.84kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/SongList-Bt4Gb0e2.js.gz                                                       19.01kb / gzip: 5.76kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/search-S4yTrs8S.js.gz                                                         19.82kb / gzip: 6.61kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/token-types@4.2.1-DIW-oYqj.js.gz                                              4.95kb / gzip: 1.43kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/time-Bcu_U_HD.js.gz                                                           1.58kb / gzip: 0.62kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useDialogA11y-BWBsDdCa.js.gz                                                  1.43kb / gzip: 0.73kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/UltimateSettingsPanel-7ksG6ncb.js.gz                                          8.88kb / gzip: 2.28kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useAudio-CXLVpadx.js.gz                                                       3.66kb / gzip: 1.47kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/strtok3@6.3.0-DayP3RT_.js.gz                                                  4.08kb / gzip: 1.28kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/transformers-KoSSwzAb.js.gz                                                   5.32kb / gzip: 1.84kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/Ultimate-CsobpwzR.js.gz                                                       1.69kb / gzip: 0.78kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useLyrics-qgW4S1NS.js.gz                                                      13.66kb / gzip: 5.46kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/VinylDisc-D4g5ozum.js.gz                                                      13.98kb / gzip: 5.72kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/SongList-CkavS6Kb.js.gz                                                       19.01kb / gzip: 5.76kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/token-types@4.2.1-DIW-oYqj.js.gz                                              4.95kb / gzip: 1.43kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/UltimateSettingsPanel-D20aeV_6.js.gz                                          8.88kb / gzip: 2.28kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useAudio-DpywPXR7.js.gz                                                       3.66kb / gzip: 1.47kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useDialogA11y-BWBsDdCa.js.gz                                                  1.43kb / gzip: 0.73kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/time-BZHda_di.js.gz                                                           1.58kb / gzip: 0.62kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/useLyrics-1IsXUfrq.js.gz                                                      13.66kb / gzip: 5.46kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/VinylDisc-BkPI3xZR.js.gz                                                      13.98kb / gzip: 5.72kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artist-BGNvyUcM.js.gz                                                         9.95kb / gzip: 3.47kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/vue-i18n@11.4.16_vue@3.5.44_typescript@5.9.3_-9e2KY1pV.js.gz                  20.80kb / gzip: 7.06kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/vue-router@4.6.4_vue@3.5.44_typescript@5.9.3_-Bd-mUMbo.js.gz                  25.15kb / gzip: 9.89kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/@vue_runtime-core@3.5.44-BTy8drBe.js.gz                                       50.21kb / gzip: 20.86kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/axios@1.20.0-BCn5QfZZ.js.gz                                                   50.24kb / gzip: 19.03kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/vue-router@4.6.4_vue@3.5.44_typescript@5.9.3_-Bd-mUMbo.js.gz                  25.15kb / gzip: 9.89kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-Bf2T7Y9O.js.gz                                                          77.49kb / gzip: 24.17kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/css/index-D8OQXrJ5.css.gz                                                        219.32kb / gzip: 31.04kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-Ctuo9kcL.js.gz                                                          77.49kb / gzip: 24.17kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/readable-stream@4.8.0-qL0elw96.js.gz                                          76.23kb / gzip: 24.23kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/artplayer@5.4.0-D8D46wwu.js.gz                                                138.19kb / gzip: 36.27kb
-dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-DzL_bWzI.js.gz                                                          131.30kb / gzip: 42.16kb
+dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/index-8_s-MvPW.js.gz                                                          131.30kb / gzip: 42.17kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/gsap@3.15.0-a3sj5zmn.js.gz                                                    111.34kb / gzip: 43.95kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/music-metadata@7.14.0-niWA3jcV.js.gz                                          151.80kb / gzip: 43.08kb
 dist/D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/static/js/swiper@12.2.0-BvF9zYzA.js.gz                                                  110.84kb / gzip: 32.90kb
