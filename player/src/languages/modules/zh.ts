@@ -325,6 +325,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: '暂无可播放的 MV 地址',
+    videoError: 'MV 播放失败，请重试',
     stats: {
       plays: '次播放',
       likes: '赞',

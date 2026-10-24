@@ -334,6 +334,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: '再生可能なMVソースがありません',
+    videoError: 'MVの再生に失敗しました。再試行してください。',
     stats: {
       plays: '回再生',
       likes: 'いいね',

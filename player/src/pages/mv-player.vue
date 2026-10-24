@@ -23,6 +23,8 @@ const state = reactive({
   comments: [] as MVComment[],
   isPageLoading: true,
   isLiked: false,
+  playerError: false,
+  playerRetryKey: 0,
 })
 const { currentMV, relatedMVs, comments, isPageLoading } = toRefs(state)
 
@@ -31,6 +33,7 @@ const playRelatedMV = (mv: any) => {
 }
 
 const loadMV = async (id: number) => {
+  state.playerError = false
   try {
     const [detailRes, urlRes, simiRes] = await Promise.allSettled([
       mvDetail({ mvid: id }),
@@ -65,6 +68,8 @@ const loadMV = async (id: number) => {
     }
 
     state.isLiked = libraryStore.isMvLiked(state.currentMV.id)
+    state.playerError = !state.currentMV.url
+    state.playerRetryKey += 1
     state.relatedMVs = (sList || []).slice(0, 10).map(
       (mv: any): RelatedMV => ({
         id: Number(mv?.id),
@@ -78,8 +83,22 @@ const loadMV = async (id: number) => {
       })
     )
   } catch {
+    state.playerError = true
   } finally {
     state.isPageLoading = false
+  }
+}
+
+const handlePlayerError = () => {
+  state.playerError = true
+}
+
+const retryVideo = async () => {
+  const id = Number(route.params.id)
+  if (!Number.isNaN(id)) {
+    state.playerError = false
+    state.playerRetryKey += 1
+    await loadMV(id)
   }
 }
 
@@ -144,16 +163,38 @@ watch(
               <div class="glass-card overflow-hidden">
                 <div class="aspect-video w-full bg-black">
                   <Artplayer
-                    v-if="currentMV.url"
+                    v-if="currentMV.url && !state.playerError"
+                    :key="state.playerRetryKey"
                     :src="currentMV.url"
                     :title="currentMV.title"
                     :poster="currentMV.cover"
                     :autoplay="true"
                     :muted="false"
                     class="aspect-video h-full!"
+                    @error="handlePlayerError"
                   />
-                  <div v-else class="flex h-full w-full items-center justify-center bg-white/5">
-                    <span class="icon-[mdi--loading] text-primary h-10 w-10 animate-spin"></span>
+                  <div
+                    v-else
+                    class="flex h-full w-full flex-col items-center justify-center gap-3 bg-primary/5 px-6 text-center"
+                  >
+                    <span class="icon-[mdi--video-off-outline] text-primary/30 h-12 w-12"></span>
+                    <p class="text-primary/70 text-sm">
+                      {{
+                        currentMV.url
+                          ? $t('mvPlayer.videoError')
+                          : $t('mvPlayer.videoUnavailable')
+                      }}
+                    </p>
+                    <Button
+                      variant="soft"
+                      size="sm"
+                      rounded="full"
+                      class="min-h-11"
+                      @click="retryVideo"
+                    >
+                      <span class="icon-[mdi--refresh] mr-1.5 h-4 w-4"></span>
+                      {{ $t('common.retry') }}
+                    </Button>
                   </div>
                 </div>
               </div>

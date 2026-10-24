@@ -336,6 +336,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: 'No playable MV source available',
+    videoError: 'MV playback failed. Please retry.',
     stats: {
       plays: 'plays',
       likes: 'likes',
