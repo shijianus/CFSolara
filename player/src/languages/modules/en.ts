@@ -16,6 +16,9 @@ export default {
     clear: 'Clear',
     loading: 'Loading',
     noData: 'No Data',
+    close: 'Close',
+    undo: 'Undo',
+    retry: 'Retry',
     search: {
       placeholder: 'Search songs, artists, albums...',
       label: 'Search',
@@ -212,6 +215,12 @@ export default {
     },
   },
   player: {
+    next: 'Next track',
+    playbackError: {
+      network: 'Network error. Check your connection and try again.',
+      source: 'This audio source is unavailable. Try another track.',
+      copyright: 'This track is unavailable due to copyright restrictions.',
+    },
     play: 'Play',
     pause: 'Pause',
     loading: 'Loading…',

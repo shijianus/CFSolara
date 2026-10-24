@@ -6,6 +6,8 @@ import { defineStore } from 'pinia'
 import { songUrlV1 } from '@/api'
 import { Song, PlayMode, AudioStoreState } from '../interface'
 import { useSettingsStore } from './settings'
+import { useToastStore } from './toast'
+import i18n from '@/languages'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -18,6 +20,32 @@ let lastRetrySongId: string | number | null = null
 let lastRetryTime = 0
 /** 标记当前播放歌曲是否已触发过下一首预加载，避免重复发起 */
 let hasPreloadedNext = false
+
+type PlaybackErrorKind = 'network' | 'source' | 'copyright'
+
+/** 将媒体错误/播放异常归类为网络、音源不可用或版权受限 */
+const classifyPlaybackError = (error?: MediaError | Error | null): PlaybackErrorKind => {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'network'
+  const mediaError = error as MediaError | null
+  if (mediaError && typeof mediaError.code === 'number') {
+    if (mediaError.code === 2) return 'network'
+    if (mediaError.code === 3) return 'source'
+    // 媒体源不受支持/被拒绝：非本地源优先按版权受限提示
+    if (mediaError.code === 4) return 'copyright'
+  }
+  const msg = String((error as Error | null)?.message || '').toLowerCase()
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('offline')) {
+    return 'network'
+  }
+  if (msg.includes('403') || msg.includes('404') || msg.includes('copyright') || msg.includes('版权')) {
+    return 'copyright'
+  }
+  return 'source'
+}
+
+let lastPlaybackToastId: number | null = null
+let lastPlaybackToastKey = ''
+let lastPlaybackToastAt = 0
 
 /** 获取 Audio 单例（懒初始化） */
 const getAudioSingleton = (): HTMLAudioElement => {
@@ -169,6 +197,7 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isPlaying = true
         this.audio.isPaused = false
         this.audio.error = null
+        this._dismissPlaybackErrorToast()
       })
 
       // 播放暂停
@@ -237,9 +266,9 @@ export const useAudioStore = defineStore('audio', {
 
       // 错误处理
       audio.addEventListener('error', (e: any) => {
-        this.audio.error = '播放出错，请重试'
         this.audio.isLoading = false
         this.audio.isPlaying = false
+        this._reportPlaybackError(audio.error || e)
         console.error('Audio error:', e)
         // 触发一次刷新播放地址并重试，10秒内同一歌曲仅重试一次
         const now = Date.now()
@@ -387,8 +416,8 @@ export const useAudioStore = defineStore('audio', {
         // 添加到播放历史
         this.addToHistory(this.audio.currentSong)
       } catch (error: any) {
-        this.audio.error = '播放失败，请检查网络连接'
         this.audio.isPlaying = false
+        this._reportPlaybackError(error)
         console.error('Play error:', error)
         // 播放失败时也尝试刷新 URL 后重试
         const id = this.audio.currentSong?.id ?? null
@@ -417,6 +446,7 @@ export const useAudioStore = defineStore('audio', {
         this.audio.error = null
       } catch (e) {
         console.error('Refresh url failed:', e)
+        this._reportPlaybackError(e as Error)
       } finally {
         this.audio.isLoading = false
       }
@@ -913,9 +943,64 @@ export const useAudioStore = defineStore('audio', {
       this.audio.playHistory = []
     },
 
+    /** 播放失败：写入 audio.error 并弹出全局 Toast（重试/下一首），同类错误节流 10 秒 */
+    _reportPlaybackError(error?: MediaError | Error | null) {
+      const kind = classifyPlaybackError(error)
+      const message = i18n.global.t(`player.playbackError.${kind}`)
+      this.audio.error = message
+      this.audio.isLoading = false
+
+      const songId = this.audio.currentSong?.id ?? ''
+      const key = `${songId}:${kind}`
+      const now = Date.now()
+      if (lastPlaybackToastId !== null && key === lastPlaybackToastKey && now - lastPlaybackToastAt < 10000) {
+        return
+      }
+      lastPlaybackToastKey = key
+      lastPlaybackToastAt = now
+      if (lastPlaybackToastId !== null) {
+        useToastStore().dismiss(lastPlaybackToastId)
+      }
+
+      lastPlaybackToastId = useToastStore().show({
+        message,
+        type: 'error',
+        duration: 0,
+        actions: [
+          {
+            label: i18n.global.t('common.retry'),
+            primary: true,
+            handler: () => {
+              this.clearError()
+              if (this.audio.currentSong) {
+                this.playSong(this.audio.currentSong, this.audio.currentIndex, true)
+              }
+            },
+          },
+          {
+            label: i18n.global.t('player.next'),
+            handler: () => {
+              this.clearError()
+              this.nextSong()
+            },
+          },
+        ],
+      })
+    },
+
+    /** 播放恢复后关闭残留的播放错误 Toast */
+    _dismissPlaybackErrorToast() {
+      if (lastPlaybackToastId !== null) {
+        useToastStore().dismiss(lastPlaybackToastId)
+        lastPlaybackToastId = null
+        lastPlaybackToastKey = ''
+      }
+    },
+
     // 清除错误信息
     clearError() {
       this.audio.error = null
+      this._dismissPlaybackErrorToast()
     },
 
     // 销毁音频播放器

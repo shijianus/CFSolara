@@ -16,6 +16,9 @@ export default {
     clear: '清除',
     loading: '加载中',
     noData: '暂无数据',
+    close: '关闭',
+    undo: '撤销',
+    retry: '重试',
     search: { placeholder: '搜索音乐、歌手、专辑...', label: '搜索', suggest: '搜索建议' },
     viewAll: '查看全部',
     playMV: '播放MV',
@@ -202,6 +205,12 @@ export default {
     },
   },
   player: {
+    next: '下一首',
+    playbackError: {
+      network: '网络连接异常，请检查网络后重试',
+      source: '音源不可用，换一首试试',
+      copyright: '该歌曲受版权限制，暂时无法播放',
+    },
     play: '播放',
     pause: '暂停',
     loading: '加载中…',

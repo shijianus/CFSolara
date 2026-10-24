@@ -16,6 +16,9 @@ export default {
     clear: 'クリア',
     loading: '読み込み中',
     noData: 'データなし',
+    close: '閉じる',
+    undo: '元に戻す',
+    retry: '再試行',
     search: {
       placeholder: '楽曲・アーティスト・アルバムを検索...',
       label: '検索',
@@ -210,6 +213,12 @@ export default {
     },
   },
   player: {
+    next: '次の曲',
+    playbackError: {
+      network: 'ネットワークに接続できません。通信状況を確認して再試行してください。',
+      source: '音源が利用できません。別の曲をお試しください。',
+      copyright: 'この曲は著作権の制限により再生できません。',
+    },
     play: '再生',
     pause: '一時停止',
     loading: '読み込み中…',
