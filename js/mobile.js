@@ -1,15 +1,14 @@
 (function () {
-    if (!window.__SONIC_IS_MOBILE && !window.__SOLARA_IS_MOBILE) {
+    if (!window.__SONIC_IS_MOBILE) {
         return;
     }
 
-    const bridge = window.SonicMobileBridge || window.SolaraMobileBridge || {};
+    const bridge = window.SonicMobileBridge || {};
     bridge.handlers = bridge.handlers || {};
     bridge.queue = Array.isArray(bridge.queue) ? bridge.queue : [];
     window.SonicMobileBridge = bridge;
-    window.SolaraMobileBridge = bridge;
 
-    const dom = window.SonicDom || window.SolaraDom || {};
+    const dom = window.SonicDom || {};
     let initialized = false;
 
     function updateMobileToolbarTitleImpl() {

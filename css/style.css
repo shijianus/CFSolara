@@ -1555,8 +1555,7 @@ body.dark-mode .epomail-auth-btn {
 }
 
 /* API Modal & Auth Styles */
-.sonic-modal-backdrop,
-.solara-modal-backdrop {
+.sonic-modal-backdrop {
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -1568,8 +1567,7 @@ body.dark-mode .epomail-auth-btn {
     padding: 20px;
 }
 
-.sonic-modal-card,
-.solara-modal-card {
+.sonic-modal-card {
     background: var(--container-bg, #1a1a24);
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
     border-radius: 20px;
@@ -1585,8 +1583,7 @@ body.dark-mode .epomail-auth-btn {
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.sonic-modal-header,
-.solara-modal-header {
+.sonic-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1594,8 +1591,7 @@ body.dark-mode .epomail-auth-btn {
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
-.sonic-modal-header h3,
-.solara-modal-header h3 {
+.sonic-modal-header h3 {
     margin: 0;
     font-size: 16px;
     display: flex;
@@ -1604,8 +1600,7 @@ body.dark-mode .epomail-auth-btn {
     color: var(--primary-color, #1abc9c);
 }
 
-.sonic-modal-close,
-.solara-modal-close {
+.sonic-modal-close {
     background: none;
     border: none;
     font-size: 24px;
@@ -1614,13 +1609,11 @@ body.dark-mode .epomail-auth-btn {
     line-height: 1;
 }
 
-.sonic-modal-body,
-.solara-modal-body {
+.sonic-modal-body {
     padding: 24px;
 }
 
-.sonic-user-badge,
-.solara-user-badge {
+.sonic-user-badge {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1630,28 +1623,24 @@ body.dark-mode .epomail-auth-btn {
     margin-bottom: 16px;
 }
 
-.sonic-user-avatar,
-.solara-user-avatar {
+.sonic-user-avatar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
     border: 2px solid var(--primary-color, #1abc9c);
 }
 
-.sonic-user-badge strong,
-.solara-user-badge strong {
+.sonic-user-badge strong {
     display: block;
     font-size: 15px;
 }
 
-.sonic-user-badge small,
-.solara-user-badge small {
+.sonic-user-badge small {
     color: var(--text-secondary, #999);
     font-size: 12px;
 }
 
-.sonic-modal-tip,
-.solara-modal-tip {
+.sonic-modal-tip {
     font-size: 13px;
     line-height: 1.6;
     color: var(--text-secondary, #ccc);
@@ -1704,8 +1693,7 @@ body.dark-mode .epomail-auth-btn {
     margin-top: 4px;
 }
 
-.sonic-modal-footer,
-.solara-modal-footer {
+.sonic-modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -1713,8 +1701,7 @@ body.dark-mode .epomail-auth-btn {
     border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
-.sonic-btn-primary,
-.solara-btn-primary {
+.sonic-btn-primary {
     background: var(--primary-color, #1abc9c);
     color: #fff;
     border: none;
@@ -1724,8 +1711,7 @@ body.dark-mode .epomail-auth-btn {
     font-weight: 600;
 }
 
-.sonic-btn-danger,
-.solara-btn-danger {
+.sonic-btn-danger {
     background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.3);
