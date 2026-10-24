@@ -62,6 +62,46 @@ const currentBackgroundComponent = computed<Component>(
   () => backgroundComponents[currentBackgroundType.value]
 )
 const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBackgroundType.value])
+
+// ── 路由过渡（不依赖 requestAnimationFrame）──
+// Vue 的 CSS 过渡靠 rAF 翻转 enter-from/enter-to 类,在后台冻结 rAF 的内嵌 WebView
+// 中会永远停在 opacity:0。这里改用 setTimeout 驱动内联样式过渡,并尊重系统减少动效偏好。
+const ROUTE_TRANSITION_MS = 300
+const prefersReducedMotion = () =>
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const onRouteEnter = (el: Element, done: () => void) => {
+  const node = el as HTMLElement
+  if (prefersReducedMotion()) return done()
+  node.style.transition = `opacity ${ROUTE_TRANSITION_MS}ms ease, transform ${ROUTE_TRANSITION_MS}ms ease`
+  node.style.opacity = '0'
+  node.style.transform = 'translateX(-20px)'
+  setTimeout(() => {
+    node.style.opacity = '1'
+    node.style.transform = 'translateX(0)'
+    setTimeout(() => {
+      node.style.transition = ''
+      node.style.opacity = ''
+      node.style.transform = ''
+      done()
+    }, ROUTE_TRANSITION_MS)
+  }, 20)
+}
+
+const onRouteLeave = (el: Element, done: () => void) => {
+  const node = el as HTMLElement
+  if (prefersReducedMotion()) return done()
+  node.style.transition = `opacity ${ROUTE_TRANSITION_MS}ms ease, transform ${ROUTE_TRANSITION_MS}ms ease`
+  setTimeout(() => {
+    node.style.opacity = '0'
+    node.style.transform = 'translateX(20px)'
+  }, 20)
+  setTimeout(() => {
+    node.style.transition = ''
+    done()
+  }, ROUTE_TRANSITION_MS + 20)
+}
 </script>
 
 <template>
@@ -98,7 +138,7 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
           class="section-container relative flex flex-1 min-h-0 flex-col overflow-hidden p-2 rounded-[28px]"
         >
           <router-view v-slot="{ Component, route }">
-            <transition appear name="fade-transform" mode="out-in">
+            <transition appear mode="out-in" :css="false" @enter="onRouteEnter" @leave="onRouteLeave">
               <keep-alive>
                 <component :is="Component" :key="route.path" />
               </keep-alive>
@@ -120,21 +160,6 @@ const currentBackgroundProps = computed(() => backgroundPropsMap.value[currentBa
   </div>
 </template>
 <style>
-.fade-transform-enter-active,
-.fade-transform-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-transform-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-.fade-transform-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
 .fade-bg-enter-active,
 .fade-bg-leave-active {
   transition: opacity 0.4s ease;
