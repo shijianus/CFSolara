@@ -263,6 +263,7 @@ export default {
     selectSongToStart: '曲を選んで再生を開始',
     progress: '再生位置',
     volume: '音量',
+    openPlayer: 'プレイヤーを開く',
     unknownArtist: '不明なアーティスト',
     unknownAlbum: '不明なアルバム',
     online: 'オンライン',

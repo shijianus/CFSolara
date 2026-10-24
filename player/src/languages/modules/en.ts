@@ -265,6 +265,7 @@ export default {
     selectSongToStart: 'Choose a song to start',
     progress: 'Playback progress',
     volume: 'Volume',
+    openPlayer: 'Open player',
     unknownArtist: 'Unknown Artist',
     unknownAlbum: 'Unknown Album',
     online: 'Online',

@@ -255,6 +255,7 @@ export default {
     selectSongToStart: '选择一首歌开始',
     progress: '播放进度',
     volume: '音量',
+    openPlayer: '打开播放器',
     unknownArtist: '未知艺术家',
     unknownAlbum: '未知专辑',
     online: '在线',

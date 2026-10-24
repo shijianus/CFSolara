@@ -641,11 +641,14 @@ const emit = defineEmits(['show'])
       <div class="footer-left flex min-w-0 flex-1 gap-4">
         <!-- 封面容器 - 3D 翻转效果 -->
         <div class="cover-container" style="perspective: 800px;">
-          <div
+          <button
             ref="coverRef"
             id="footer-cover"
+            type="button"
+            :aria-label="t('player.openPlayer')"
+            :title="t('player.openPlayer')"
             @click="emit('show')"
-            class="cover-inner flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-cover shadow-lg ring-1 ring-white/15 transition-all duration-300 hover:shadow-xl hover:scale-105"
+            class="cover-inner flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-cover shadow-lg ring-1 ring-white/15 transition-all duration-300 outline-none hover:shadow-xl hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-400/70"
             :class="{ 'animate-pulse-subtle': isPlaying }"
             :style="{
               backgroundImage: state.displayCover
@@ -664,7 +667,7 @@ const emit = defineEmits(['show'])
                 <span class="w-1 bg-white rounded-full animate-equalizer-3"></span>
               </div>
             </div>
-          </div>
+          </button>
         </div>
         <div id="footer-song-info" class="footer-song-info flex min-w-0 flex-col justify-around">
           <p :title="currentSong?.name" class="text-primary truncate text-sm font-medium">
