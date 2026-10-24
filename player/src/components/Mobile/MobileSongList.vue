@@ -13,7 +13,7 @@ interface Props {
   showIndex?: boolean
   context?: 'queue' | 'generic'
 }
-const { playByIndex, addSong, playlist } = useAudio()
+const { playByIndex, setPlaylist, play } = useAudio()
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'compact',
@@ -36,11 +36,12 @@ const isCurrent = (s: Song) => {
 const handleClick = (s: Song, i: number) => {
   if (props.context === 'queue') {
     playByIndex(i)
-  } else {
-    addSong(s as any)
-    const idx = playlist.value.findIndex((p: any) => p.id === s.id)
-    playByIndex(idx >= 0 ? idx : Math.max(0, playlist.value.length - 1))
+    return
   }
+  // 通用列表：把当前列表整体设为播放队列，并从点击位置开始播放
+  const queue = props.songs.slice() as Song[]
+  setPlaylist(queue, i)
+  play(queue[i], i)
 }
 
 const formatSongTitle = (title: string, maxLen = 18) => {
