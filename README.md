@@ -205,6 +205,16 @@ QQ_COOKIE=""
 KUGOU_COOKIE=""
 ```
 
+### 4. 生产环境双轨回滚预案 (Rollback Guide)
+当发生极端故障需完整恢复至原始直连 VPS Tunnel 架构时，可运行内置回滚脚本：
+```bash
+# 1. 验证备份完整性并展示将要发送的 API 请求 (干跑验证，默认安全模式)
+./scripts/rollback-production.sh --dry-run
+
+# 2. 真实执行回滚 (恢复 Tunnel Ingress 路由与 DNS CNAME 记录)
+./scripts/rollback-production.sh --execute
+```
+
 ---
 
 ## 💖 致谢与开源协议参考 (Credits)

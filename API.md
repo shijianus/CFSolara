@@ -202,6 +202,18 @@ async function getSongLyrics(title: string, artist = '', platform = 'netease', p
 
 ---
 
+## 🔄 生产环境双轨回滚预案 (Production Rollback)
+当需要将生产域名与 Tunnel 路由恢复至变更前状态时，可执行仓库内置的双轨回滚脚本：
+```bash
+# 干跑验证备份文件完整性并预览将发送的 API 请求 (默认安全模式)
+./scripts/rollback-production.sh --dry-run
+
+# 真实执行回滚 (恢复 Tunnel Ingress 映射与 DNS CNAME 记录)
+./scripts/rollback-production.sh --execute
+```
+
+---
+
 ## 🛡️ 架构独立性与多专案协作准则
 - CFSolara 作为一个**独立的 Cloudflare Pages + Linux 本地解析引擎服务**运行，完全独立于任何特定博客或网站。
 - 外部专案（如 `shijianus-blog`）仅通过 HTTP RESTful API 与 CFSolara 交互，保证了微服务架构的高内聚、低耦合与分布式弹性部署。
