@@ -123,17 +123,17 @@ const handleClick = async (event: MouseEvent) => {
   tl.to(ring, {
     opacity: 1,
     scale: 1.3,
-    duration: 0.08,
+    duration: 0.06,
     ease: 'power2.out',
-  }, 0.04)
+  }, 0.02)
 
   tl.to(ring, {
     opacity: 0,
     scale: 1.5,
-    duration: 0.08,
+    duration: 0.06,
     ease: 'power2.in',
     onComplete: () => ring.remove(),
-  }, 0.14)
+  }, 0.10)
 
   // 淡出过渡到新页面
   tl.to([clone, overlay], {
