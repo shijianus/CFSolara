@@ -1,0 +1,11 @@
+文件数 before=42 after=37
+== 前后差值（仅变化文件） ==
+scripts/final_delivery_verification_results.json           18 ->   0
+index.html                                                 15 ->   0
+css/style.css                                              14 ->   0
+js/index.js                                                 9 ->   0
+scripts/brand-audit.mjs                                     6 ->   4
+js/mobile.js                                                4 ->   0
+scripts/test_puppeteer_init.js                              1 ->   0
+reports/archived/final_delivery_verification_results.json   0 ->  18
+总计: 164 -> 119

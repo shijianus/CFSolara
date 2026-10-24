@@ -18,7 +18,7 @@ const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/pu
             return {
                 hasLyricsCache: typeof window.lyricsCache !== 'undefined',
                 hasSyncLyrics: typeof window.syncLyrics !== 'undefined',
-                hasSolaraDom: typeof window.SolaraDom !== 'undefined',
+                hasSonicDom: typeof window.SonicDom !== 'undefined',
                 hasPlayer: typeof dom !== 'undefined' || typeof window.dom !== 'undefined'
             };
         });
