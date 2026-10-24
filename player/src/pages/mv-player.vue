@@ -6,9 +6,11 @@ import { MVInfo, RelatedMV, MVComment } from '@/typings'
 import { formatCount } from '@/utils/time'
 import Button from '@/components/Ui/Button.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+const libraryStore = useLibraryStore()
 
 const formatSec = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`
@@ -21,6 +23,8 @@ const state = reactive({
   comments: [] as MVComment[],
   isPageLoading: true,
   isLiked: false,
+  playerError: false,
+  playerRetryKey: 0,
 })
 const { currentMV, relatedMVs, comments, isPageLoading } = toRefs(state)
 
@@ -29,6 +33,7 @@ const playRelatedMV = (mv: any) => {
 }
 
 const loadMV = async (id: number) => {
+  state.playerError = false
   try {
     const [detailRes, urlRes, simiRes] = await Promise.allSettled([
       mvDetail({ mvid: id }),
@@ -53,15 +58,18 @@ const loadMV = async (id: number) => {
       playCount: String(d?.playCount || d?.playCountTxt || ''),
       likes: String(d?.likedCount || ''),
       publishDate: d?.publishTime || d?.publishDate || '',
-      category: d?.subed ? '已订阅' : 'Sonic MV',
+      category: d?.subed ? '已订阅' : 'sonic MV',
       emoji: '🎬',
-      gradient: 'from-indigo-500 to-primary-600',
+      gradient: 'from-blue-500 to-primary-600',
       liked: !!d?.liked,
       isNew: false,
       description: d?.desc || d?.briefDesc || '',
       url: videoUrl,
     }
 
+    state.isLiked = libraryStore.isMvLiked(state.currentMV.id)
+    state.playerError = !state.currentMV.url
+    state.playerRetryKey += 1
     state.relatedMVs = (sList || []).slice(0, 10).map(
       (mv: any): RelatedMV => ({
         id: Number(mv?.id),
@@ -71,12 +79,26 @@ const loadMV = async (id: number) => {
         playCount: String(mv?.playCount || ''),
         cover: mv?.cover || mv?.coverImg || mv?.picUrl || '',
         emoji: '🎵',
-        gradient: 'from-pink-400 to-primary-500',
+        gradient: 'from-sky-400 to-primary-500',
       })
     )
   } catch {
+    state.playerError = true
   } finally {
     state.isPageLoading = false
+  }
+}
+
+const handlePlayerError = () => {
+  state.playerError = true
+}
+
+const retryVideo = async () => {
+  const id = Number(route.params.id)
+  if (!Number.isNaN(id)) {
+    state.playerError = false
+    state.playerRetryKey += 1
+    await loadMV(id)
   }
 }
 
@@ -95,7 +117,14 @@ const loadComments = async (id: number) => {
 }
 
 const toggleLike = () => {
-  state.isLiked = !state.isLiked
+  const mv = state.currentMV
+  if (!mv.id) return
+  state.isLiked = libraryStore.toggleLikeMv({
+    id: mv.id,
+    name: mv.title,
+    artist: mv.artist,
+    cover: mv.cover,
+  })
 }
 
 const shareMV = async () => {
@@ -134,16 +163,38 @@ watch(
               <div class="glass-card overflow-hidden">
                 <div class="aspect-video w-full bg-black">
                   <Artplayer
-                    v-if="currentMV.url"
+                    v-if="currentMV.url && !state.playerError"
+                    :key="state.playerRetryKey"
                     :src="currentMV.url"
                     :title="currentMV.title"
                     :poster="currentMV.cover"
                     :autoplay="true"
                     :muted="false"
                     class="aspect-video h-full!"
+                    @error="handlePlayerError"
                   />
-                  <div v-else class="flex h-full w-full items-center justify-center bg-white/5">
-                    <span class="icon-[mdi--loading] text-primary h-10 w-10 animate-spin"></span>
+                  <div
+                    v-else
+                    class="flex h-full w-full flex-col items-center justify-center gap-3 bg-primary/5 px-6 text-center"
+                  >
+                    <span class="icon-[mdi--video-off-outline] text-primary/30 h-12 w-12"></span>
+                    <p class="text-primary/70 text-sm">
+                      {{
+                        currentMV.url
+                          ? $t('mvPlayer.videoError')
+                          : $t('mvPlayer.videoUnavailable')
+                      }}
+                    </p>
+                    <Button
+                      variant="soft"
+                      size="sm"
+                      rounded="full"
+                      class="min-h-11"
+                      @click="retryVideo"
+                    >
+                      <span class="icon-[mdi--refresh] mr-1.5 h-4 w-4"></span>
+                      {{ $t('common.retry') }}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -157,7 +208,7 @@ watch(
                   <Button
                     variant="ghost"
                     size="sm"
-                    class="text-primary/70 flex items-center gap-2 text-sm font-medium transition-colors hover:text-pink-400"
+                    class="text-primary/70 flex items-center gap-2 text-sm font-medium transition-colors hover:text-sky-400"
                     icon="icon-[mdi--account-music]"
                     icon-class="h-5 w-5"
                     @click="router.push(`/artist/${currentMV.artistId}`)"
@@ -182,11 +233,11 @@ watch(
                   <Button
                     variant="glass"
                     size="md"
-                    class="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all"
+                    class="flex min-h-11 items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all"
                     :class="
                       state.isLiked
-                        ? 'border-pink-500/30! bg-pink-500/20! text-pink-400!'
-                        : 'text-primary hover:text-pink-400'
+                        ? 'border-sky-500/30! bg-sky-500/20! text-sky-400!'
+                        : 'text-primary hover:text-sky-400'
                     "
                     :icon="state.isLiked ? 'mdi--thumb-up' : 'mdi--thumb-up-outline'"
                     icon-class="h-5 w-5"
@@ -197,7 +248,7 @@ watch(
                   <Button
                     variant="glass"
                     size="md"
-                    class="text-primary flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:text-pink-400"
+                    class="text-primary flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:text-sky-400"
                     icon="icon-[mdi--share-variant-outline]"
                     icon-class="h-5 w-5"
                     @click="shareMV"
@@ -233,7 +284,7 @@ watch(
                     />
                     <div
                       v-else
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-pink-400 to-purple-500 text-sm font-medium text-white"
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-sky-400 to-blue-500 text-sm font-medium text-white"
                     >
                       {{ c.username.charAt(0) }}
                     </div>
@@ -243,25 +294,9 @@ watch(
                         <span class="text-primary/40 text-xs">{{ c.time }}</span>
                       </div>
                       <p class="text-primary/80 text-sm leading-relaxed">{{ c.content }}</p>
-                      <div class="mt-3 flex items-center gap-4">
-                        <Button
-                          variant="ghost"
-                          size="none"
-                          class="text-primary/40 flex items-center gap-1.5 text-xs transition-colors hover:text-pink-400"
-                          icon="icon-[mdi--thumb-up-outline]"
-                          icon-class="h-4 w-4"
-                        >
-                          {{ c.likes || '' }}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="none"
-                          class="text-primary/40 hover:text-primary flex items-center gap-1.5 text-xs transition-colors"
-                          icon="icon-[mdi--reply]"
-                          icon-class="h-4 w-4"
-                        >
-                          {{ t('mvPlayer.comments.reply') }}
-                        </Button>
+                      <div class="mt-3 flex items-center gap-1.5 text-xs text-primary/40">
+                        <span class="icon-[mdi--thumb-up-outline] h-4 w-4"></span>
+                        <span>{{ c.likes || 0 }}</span>
                       </div>
                     </div>
                   </div>
@@ -308,7 +343,7 @@ watch(
                     </div>
                     <div class="min-w-0 flex-1 py-1">
                       <h3
-                        class="text-primary mb-1.5 line-clamp-2 text-sm leading-tight font-medium transition-colors group-hover:text-pink-400"
+                        class="text-primary mb-1.5 line-clamp-2 text-sm leading-tight font-medium transition-colors group-hover:text-sky-400"
                       >
                         {{ mv.title }}
                       </h3>

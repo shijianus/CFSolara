@@ -93,6 +93,15 @@ export const useLocalMusicStore = defineStore('localMusic', {
       this.musics = this.musics.filter(m => m.id !== id)
     },
 
+    /** 撤销删除：把文件写回 IndexedDB 并恢复到原位置 */
+    async restoreMusic(music: LocalMusic, index?: number) {
+      await localMusicDB.add(music)
+      if (!this.musics.some(m => m.id === music.id)) {
+        const target = Math.max(0, Math.min(index ?? this.musics.length, this.musics.length))
+        this.musics.splice(target, 0, music)
+      }
+    },
+
     getAudioDuration(file: File): Promise<number> {
       return new Promise((resolve, reject) => {
         const audio = new Audio()
@@ -126,7 +135,8 @@ export const useLocalMusicStore = defineStore('localMusic', {
         album: music.album,
         cover: music.cover,
         url: URL.createObjectURL(music.file), // 创建 Blob URL
-        duration: music.duration,
+        // 元数据解析出的时长单位为秒，Store 层 Song.duration 统一为毫秒
+        duration: Math.round((music.duration || 0) * 1000),
         // 其他字段
         mvId: 0,
         publishTime: music.createTime,

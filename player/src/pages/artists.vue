@@ -7,7 +7,7 @@ import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 
 const { t } = useI18n()
 
-interface ArtistItem extends ArtistData {
+interface ArtistItem extends Omit<ArtistData, 'alias'> {
   alias?: string
 }
 
@@ -81,15 +81,23 @@ const loadArtists = async (reset = false) => {
     state.hasMore = artists.length === state.limit
     state.offset += state.limit
   } catch {
-    if (!reset) {
-      state.isLoadError = true
-    } else {
-      state.hasMore = false
-    }
+    state.isLoadError = true
+    state.hasMore = false
   } finally {
     if (reset) state.isPageLoading = false
     state.isLoadingMore = false
   }
+}
+
+const resetFilters = () => {
+  const changed = state.type !== -1 || state.area !== -1 || state.initial !== ''
+  if (!changed) {
+    loadArtists(true)
+    return
+  }
+  state.type = -1
+  state.area = -1
+  state.initial = ''
 }
 
 watch([type, area, initial], () => loadArtists(true))
@@ -108,7 +116,7 @@ onMounted(() => loadArtists(true))
               v-for="opt in typeOptions"
               :key="opt.key"
               class="rounded-lg px-3 py-1.5 text-xs transition-all"
-              :class="type === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+              :class="type === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
               @click="type = opt.key"
             >
               {{ t(opt.labelKey) }}
@@ -123,7 +131,7 @@ onMounted(() => loadArtists(true))
               v-for="opt in areaOptions"
               :key="opt.key"
               class="rounded-lg px-3 py-1.5 text-xs transition-all"
-              :class="area === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+              :class="area === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
               @click="area = opt.key"
             >
               {{ t(opt.labelKey) }}
@@ -137,7 +145,7 @@ onMounted(() => loadArtists(true))
             v-for="opt in initialOptions"
             :key="opt.key"
             class="rounded px-2 py-1 text-xs transition-all"
-            :class="initial === opt.key ? 'bg-pink-500/20 text-pink-400' : 'text-primary/60 hover:bg-white/5'"
+            :class="initial === opt.key ? 'bg-sky-500/20 text-sky-400' : 'text-primary/60 hover:bg-white/5'"
             @click="initial = opt.key"
           >
             {{ opt.key || t(opt.labelKey) }}
@@ -180,8 +188,10 @@ onMounted(() => loadArtists(true))
         :empty="!state.artists.length"
         :loading-text="t('common.loading')"
         :retry-text="t('artists.loadMore')"
+        :reset-text="$t('components.infiniteScroll.reset')"
         @load="loadArtists(false)"
         @retry="loadArtists(false)"
+        @reset="resetFilters"
       />
     </div>
   </div>

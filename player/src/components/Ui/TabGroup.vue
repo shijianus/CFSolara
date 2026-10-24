@@ -48,7 +48,7 @@ const handleTabClick = (key: T) => {
         modelValue === tab.key
           ? variant === 'glass'
             ? 'bg-hover-glass text-primary shadow-sm font-medium'
-            : 'bg-linear-to-r from-pink-500/80 to-rose-500/80 text-white shadow-sm font-medium'
+            : 'bg-linear-to-r from-sky-500/80 to-blue-500/80 text-white shadow-sm font-medium'
           : 'text-primary/60 hover:text-primary/80 hover:bg-hover-glass/50 font-medium',
       ]"
       @click="handleTabClick(tab.key)"

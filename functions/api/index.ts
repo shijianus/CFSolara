@@ -1,4 +1,5 @@
 import { handleOptions, jsonResponse } from '../_lib/http';
+import { API_DESCRIPTION, API_NAME, BRANDING, BRAND_COPYRIGHT } from '../_lib/brand';
 import type { AppEnv } from '../_lib/types';
 
 export async function onRequest({ request }: { request: Request; env: AppEnv }): Promise<Response> {
@@ -8,10 +9,11 @@ export async function onRequest({ request }: { request: Request; env: AppEnv }):
   const base = url.origin;
 
   return jsonResponse({
-    name: 'Sonic Music Cloud Platform & Aggregation Gateway',
+    name: API_NAME,
     version: '2.1.0',
-    copyright: '© EpoCanvas',
-    description: '轻量化音乐云平台与开放聚合网关，支持 Epomail OAuth 真人验证与细粒度 API 连结',
+    copyright: BRAND_COPYRIGHT,
+    description: API_DESCRIPTION,
+    branding: BRANDING,
     auth: {
       provider: 'Epomail OAuth 2.0',
       loginUrl: `${base}/api/auth/login`,

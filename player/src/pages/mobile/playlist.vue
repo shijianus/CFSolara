@@ -12,8 +12,10 @@ import {
   type SongData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const { t } = useI18n()
+const libraryStore = useLibraryStore()
 
 type PlaylistInfo = {
   name: string
@@ -31,6 +33,8 @@ type PlaylistInfo = {
 const route = useRoute()
 const playlistId = computed(() => Number(route.params.id))
 
+const SONG_PAGE_SIZE = 100
+
 const state = reactive({
   info: {} as PlaylistInfo,
   songs: [] as SongData[],
@@ -38,15 +42,42 @@ const state = reactive({
   collected: false,
   showFullDesc: false,
   showComments: false,
+  songTotal: 0,
+  hasMoreSongs: false,
+  isLoadingMoreSongs: false,
+  isSongLoadError: false,
+  isPreparingFullList: false,
+  partialPlayNotice: '',
 })
 
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 
+/** 拉取一页歌曲；reset 为 true 时覆盖，否则按 offset 追加并去重 */
+const loadSongPage = async (id: number, offset: number, reset: boolean) => {
+  const res = await playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset })
+  const page = transformSongs(res as Record<string, unknown>)
+  if (reset) {
+    state.songs = page
+  } else {
+    const seen = new Set(state.songs.map(s => String(s.id)))
+    state.songs.push(...page.filter(s => !seen.has(String(s.id))))
+  }
+  const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+  state.hasMoreSongs = !reachedTotal && page.length === SONG_PAGE_SIZE
+  state.isSongLoadError = false
+}
+
 const load = async (id: number) => {
+  state.songs = []
+  state.songTotal = 0
+  state.hasMoreSongs = false
+  state.isLoadingMoreSongs = false
+  state.isSongLoadError = false
+  state.partialPlayNotice = ''
   try {
     const [detailRes, tracksRes] = await Promise.all([
       playlistDetail({ id }),
-      playlistTrackAll({ id, limit: 100 }),
+      playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset: 0 }),
     ])
 
     const detail = transformPlaylistDetail(
@@ -59,12 +90,74 @@ const load = async (id: number) => {
         playCount: formatCount(detail.playCount as number),
         likes: formatCount(detail.likes as number),
       }
+      state.songTotal = detail.songCount
+      state.collected = libraryStore.isPlaylistCollected(id)
     }
 
     state.songs = transformSongs(tracksRes as Record<string, unknown>)
+    const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+    state.hasMoreSongs = !reachedTotal && state.songs.length === SONG_PAGE_SIZE
+  } catch {
+    state.isSongLoadError = true
   } finally {
     state.loading = false
   }
+}
+
+const loadMoreSongs = async () => {
+  if (state.isLoadingMoreSongs || !state.hasMoreSongs) return
+  state.isLoadingMoreSongs = true
+  try {
+    await loadSongPage(playlistId.value, state.songs.length, false)
+  } catch {
+    state.isSongLoadError = true
+  } finally {
+    state.isLoadingMoreSongs = false
+  }
+}
+
+const ensureAllSongsLoaded = async () => {
+  if (!state.songs.length || !state.hasMoreSongs) return true
+  state.isPreparingFullList = true
+  try {
+    while (state.hasMoreSongs) {
+      const before = state.songs.length
+      await loadSongPage(playlistId.value, before, false)
+      if (state.songs.length === before) break
+    }
+    return !state.hasMoreSongs
+  } catch {
+    state.isSongLoadError = true
+    return false
+  } finally {
+    state.isPreparingFullList = false
+  }
+}
+
+const handlePlayAll = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  playAllAction(state.songs)
+}
+
+const handleShufflePlay = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  shufflePlayAction(state.songs)
 }
 
 watch(
@@ -79,12 +172,16 @@ watch(
   { immediate: true }
 )
 
-const playAll = () => playAllAction(state.songs)
-
-const shufflePlay = () => shufflePlayAction(state.songs)
-
 const toggleCollect = () => {
-  state.collected = !state.collected
+  if (!playlistId.value) return
+  state.collected = libraryStore.toggleCollectPlaylist({
+    id: playlistId.value,
+    name: state.info.name,
+    coverImgUrl: state.info.coverImgUrl,
+    trackCount: state.info.songCount,
+    creator: state.info.creator,
+    playCount: state.info.playCount,
+  })
 }
 </script>
 
@@ -181,7 +278,7 @@ const toggleCollect = () => {
           class="play-all-btn flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-medium"
           icon="icon-[mdi--play-circle]"
           icon-class="h-5 w-5"
-          @click="playAll"
+          @click="handlePlayAll"
         >
           {{ t('actions.playAll') }}
         </Button>
@@ -192,7 +289,7 @@ const toggleCollect = () => {
           class="shuffle-btn flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-medium"
           icon="icon-[mdi--shuffle-variant]"
           icon-class="h-5 w-5"
-          @click="shufflePlay"
+          @click="handleShufflePlay"
         >
           {{ t('actions.shufflePlay') }}
         </Button>
@@ -224,7 +321,50 @@ const toggleCollect = () => {
 
       <div class="flex-1 overflow-auto px-4 pb-6">
         <section>
+          <div
+            v-if="state.partialPlayNotice"
+            class="mb-3 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-primary/80"
+            role="status"
+          >
+            <span class="icon-[mdi--alert-outline] mt-0.5 h-4 w-4 shrink-0 text-amber-400"></span>
+            <span class="flex-1">{{ state.partialPlayNotice }}</span>
+            <button
+              type="button"
+              class="min-h-11 min-w-11 shrink-0 rounded-lg px-2 text-[11px] font-medium text-primary/60 hover:text-primary focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="state.partialPlayNotice = ''"
+            >
+              {{ t('playlist.dismiss') }}
+            </button>
+          </div>
           <MobileSongList :songs="state.songs" :show-index="true" />
+          <div class="mt-3 flex flex-col items-center gap-2 pb-2">
+            <p v-if="state.songTotal" class="text-[11px] text-primary/50">
+              {{ t('playlist.loadedProgress', { loaded: state.songs.length, total: state.songTotal }) }}
+            </p>
+            <Button
+              v-if="state.hasMoreSongs"
+              variant="glass"
+              size="sm"
+              rounded="full"
+              class="min-h-11"
+              :loading="state.isLoadingMoreSongs || state.isPreparingFullList"
+              :disabled="state.isLoadingMoreSongs || state.isPreparingFullList"
+              @click="loadMoreSongs"
+            >
+              {{ state.isLoadingMoreSongs || state.isPreparingFullList ? t('playlist.loadingAll') : t('playlist.loadMore') }}
+            </Button>
+            <p v-else-if="state.songs.length" class="text-[11px] text-primary/40">
+              {{ t('playlist.allLoaded') }}
+            </p>
+            <button
+              v-if="state.isSongLoadError && !state.isLoadingMoreSongs"
+              type="button"
+              class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="loadMoreSongs"
+            >
+              {{ t('playlist.retryLoad') }}
+            </button>
+          </div>
         </section>
       </div>
     </template>
@@ -264,14 +404,14 @@ const toggleCollect = () => {
 }
 
 .play-all-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  box-shadow: 0 4px 16px rgba(56,189,248, 0.35);
   transition: all 0.3s ease;
 }
 
 .play-all-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(56,189,248, 0.3);
 }
 
 .shuffle-btn {
@@ -298,9 +438,9 @@ const toggleCollect = () => {
 }
 
 .collect-btn.collected {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  border-color: rgba(236, 72, 153, 0.3);
-  color: #ec4899;
+  background: linear-gradient(135deg, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
+  border-color: rgba(56,189,248, 0.3);
+  color: #38bdf8;
 }
 
 .comment-btn {

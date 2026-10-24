@@ -1,6 +1,8 @@
-# 🎶 CFSolara 开放音乐 API 平台规范 (API Platform Documentation)
+# 🎶 epocanvas sonic 开放音乐 API 平台规范 (API Platform Documentation)
 
-> CFSolara 现已升级为**平台化音乐服务**，将原有的单体音乐播放器解耦为细粒度的微服务 API，并通过 **Epomail OAuth 2.0** 作为统一接入鉴权体系，有效防止接口被滥用，同时允许第三方独立项目（如个人博客、静态站点、桌面与移动端应用）通过安全的 API Key 连结接入。
+> **epocanvas sonic** 现已升级为**平台化音乐服务**，将原有的单体音乐播放器解耦为细粒度的微服务 API，并通过 **Epomail OAuth 2.0** 作为统一接入鉴权体系，有效防止接口被滥用，同时允许第三方独立项目（如个人博客、静态站点、桌面与移动端应用）通过安全的 API Key 连结接入。
+>
+> **兼容说明**：`CFSolara`、`solara_live_`、`X-CFSolara-Key`、`solara.epocanvas.com` 等旧命名仍作为历史兼容标识保留；新接入请使用 `sonic_live_`、`X-Sonic-Key` 与 `sonic.epocanvas.com`。
 
 ---
 
@@ -13,13 +15,14 @@
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
 2. **专案连结 API Key**：
-   - 登录 Epomail 后即可自动获得专案 API Key（格式如 `solara_live_...`）。
+   - 登录 Epomail 后即可自动获得专案 API Key（格式如 `sonic_live_...`；旧版 `solara_live_...` 仍兼容）。
    - 在第三方专案发起请求时，只需在 HTTP 请求头添加：
      ```http
-     X-CFSolara-Key: solara_live_xxxxxxxx
+     X-Sonic-Key: sonic_live_xxxxxxxx
      # 或
-     Authorization: Bearer solara_live_xxxxxxxx
+     Authorization: Bearer sonic_live_xxxxxxxx
      ```
+   - 旧版 `X-CFSolara-Key: solara_live_xxxxxxxx` 仍会被接受。
    - 拥有 API Key 的专案可享受高频配额（120 次/分钟）与无损 FLAC / 320Kbps 音频流直传。
 
 ---
@@ -91,13 +94,13 @@
 - **验证与调用 Curl 示例**：
   ```bash
   # 方式 1: 通过歌名与歌手全网实时爬取 (如中文热歌)
-  curl -s "https://solara.epocanvas.com/api/lyric?title=晴天&artist=周杰伦"
+  curl -s "https://sonic.epocanvas.com/api/lyric?title=晴天&artist=周杰伦"
 
   # 方式 2: 通过综合关键词全网爬取 (如国际外文歌曲)
-  curl -s "https://solara.epocanvas.com/api/lyric?q=Shape%20of%20You%20Ed%20Sheeran"
+  curl -s "https://sonic.epocanvas.com/api/lyric?q=Shape%20of%20You%20Ed%20Sheeran"
 
   # 方式 3: 通过歌曲 ID 精确获取逐字歌词
-  curl -s "https://solara.epocanvas.com/api/lyric?id=26289183&source=netease"
+  curl -s "https://sonic.epocanvas.com/api/lyric?id=26289183&source=netease"
   ```
 - **响应示例 (逐字模式 Word-Level Sync)**：
   ```json
@@ -181,14 +184,14 @@
 
 ```typescript
 // 外部专案客户端示例
-const API_BASE = 'https://solara.epocanvas.com/api'; // 或自建 CFSolara 域名
-const API_KEY = 'solara_live_xxxxxxxx';
+const API_BASE = 'https://sonic.epocanvas.com/api'; // 或自建 epocanvas sonic 域名
+const API_KEY = 'sonic_live_xxxxxxxx'; // 旧版 solara_live_ 仍兼容
 
 // 1. 点歌搜索
 async function searchSong(keyword: string) {
   const res = await fetch(`${API_BASE}/music/search?q=${encodeURIComponent(keyword)}&source=netease&count=10`, {
     headers: {
-      'X-CFSolara-Key': API_KEY,
+      'X-Sonic-Key': API_KEY,
     }
   });
   return await res.json();
@@ -203,7 +206,7 @@ function getAudioStreamUrl(songId: string, source = 'netease') {
 async function getSongLyrics(songId: string, source = 'netease') {
   const res = await fetch(`${API_BASE}/music/lyric?id=${encodeURIComponent(songId)}&source=${source}`, {
     headers: {
-      'X-CFSolara-Key': API_KEY,
+      'X-Sonic-Key': API_KEY,
     }
   });
   return await res.json();
@@ -213,5 +216,5 @@ async function getSongLyrics(songId: string, source = 'netease') {
 ---
 
 ## 🛡️ 架构独立性与多专案协作准则
-- CFSolara 作为一个**独立的 Cloudflare Pages / Workers 服务**运行，完全独立于任何特定博客或网站。
-- 外部专案（如 `shijianus-blog`）仅通过 HTTP RESTful API 与 CFSolara 交互，保证了微服务架构的高内聚、低耦合与分散式部署。
+- epocanvas sonic 作为一个**独立的 Cloudflare Pages / Workers 服务**运行，完全独立于任何特定博客或网站。
+- 外部专案（如 `shijianus-blog`）仅通过 HTTP RESTful API 与 epocanvas sonic 交互，保证了微服务架构的高内聚、低耦合与分散式部署。

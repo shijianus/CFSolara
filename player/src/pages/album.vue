@@ -8,6 +8,7 @@ import { usePlayActions } from '@/composables/usePlayActions'
 import {
   transformAlbumDetail,
   extractArray,
+  normalizeDurationMs,
   type SongData,
   type AlbumData,
 } from '@/utils/transformers'
@@ -42,7 +43,7 @@ const load = async () => {
           : '',
       album: s?.al?.name || s?.album?.name || album?.name || '',
       albumId: s?.al?.id ?? s?.album?.id ?? album?.id,
-      duration: s?.dt ?? s?.duration ?? 0,
+      duration: normalizeDurationMs(s?.dt ?? s?.duration ?? 0),
       cover: s?.al?.picUrl || s?.album?.picUrl || album?.picUrl || '',
       liked: false,
     }))
@@ -69,7 +70,7 @@ onMounted(() => load())
             class="h-full w-full object-cover opacity-30"
             referrerpolicy="no-referrer"
           />
-          <div v-else class="h-full w-full bg-linear-to-br from-pink-500/40 to-purple-600/40"></div>
+          <div v-else class="h-full w-full bg-linear-to-br from-sky-500/40 to-blue-600/40"></div>
         </div>
         <div class="absolute inset-0 flex items-end p-6">
           <div class="flex items-center gap-4">
@@ -83,7 +84,7 @@ onMounted(() => load())
               />
               <div
                 v-else
-                class="flex h-full w-full items-center justify-center rounded-xl bg-linear-to-br from-pink-400 to-purple-500"
+                class="flex h-full w-full items-center justify-center rounded-xl bg-linear-to-br from-sky-400 to-blue-500"
               >
                 <span class="icon-[mdi--album] h-8 w-8"></span>
               </div>
@@ -142,7 +143,7 @@ onMounted(() => load())
           <p v-if="!showDesc" class="text-primary/80 line-clamp-3">{{ state.info.description }}</p>
           <p v-else class="text-primary/80">{{ state.info.description }}</p>
           <button
-            class="hover:text-primary mt-2 text-xs text-purple-300"
+            class="hover:text-primary mt-2 text-xs text-blue-300"
             @click="showDesc = !showDesc"
           >
             {{ showDesc ? $t('albumPage.collapse') : $t('albumPage.expandMore') }}

@@ -7,16 +7,18 @@ import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 import {
   transformAlbumDetail,
-  transformSongs,
   extractArray,
+  normalizeDurationMs,
   type SongData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const albumId = computed(() => Number(route.params.id))
+const libraryStore = useLibraryStore()
 
 type AlbumInfo = {
   name: string
@@ -58,6 +60,7 @@ const load = async (id: number) => {
         songCount: album.size || songs.length || 0,
         coverImgUrl: album.picUrl,
       }
+      state.collected = libraryStore.isAlbumCollected(id)
     }
 
     if (Array.isArray(songs) && songs.length) {
@@ -71,7 +74,7 @@ const load = async (id: number) => {
             : state.info.artist,
         album: state.info.name,
         albumId: id,
-        duration: s?.dt ?? s?.duration ?? 0,
+        duration: normalizeDurationMs(s?.dt ?? s?.duration ?? 0),
         cover: state.info.coverImgUrl,
         liked: false,
       }))
@@ -99,7 +102,15 @@ const playAll = () => playAllAction(state.songs)
 const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
-  state.collected = !state.collected
+  if (!albumId.value) return
+  state.collected = libraryStore.toggleCollectAlbum({
+    id: albumId.value,
+    name: state.info.name,
+    picUrl: state.info.coverImgUrl,
+    artist: state.info.artist,
+    artistId: state.info.artistId,
+    trackCount: state.info.songCount,
+  })
 }
 
 const goToArtist = () => {
@@ -261,14 +272,14 @@ const goToArtist = () => {
 }
 
 .play-all-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  box-shadow: 0 4px 16px rgba(56,189,248, 0.35);
   transition: all 0.3s ease;
 }
 
 .play-all-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(56,189,248, 0.3);
 }
 
 .shuffle-btn {
@@ -295,9 +306,9 @@ const goToArtist = () => {
 }
 
 .collect-btn.collected {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-  border-color: rgba(236, 72, 153, 0.3);
-  color: #ec4899;
+  background: linear-gradient(135deg, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
+  border-color: rgba(56,189,248, 0.3);
+  color: #38bdf8;
 }
 
 .desc-section {

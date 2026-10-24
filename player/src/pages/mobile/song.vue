@@ -2,8 +2,11 @@
 import { songDetail, lyric } from '@/api'
 import { useAudio } from '@/composables/useAudio'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
+import { normalizeDurationMs } from '@/utils/transformers'
 
 const route = useRoute()
+const libraryStore = useLibraryStore()
 
 const state = reactive({
   id: String(route.params.id || ''),
@@ -14,10 +17,9 @@ const state = reactive({
   cover: '',
   lrc: [] as Array<{ time: number; text: string }>,
   loading: true,
-  liked: false,
 })
 
-const { play, setPlaylist, currentSong, isPlaying } = useAudio()
+const { play, pause, resume, setPlaylist, currentSong, isPlaying } = useAudio()
 
 import { parseAnyLrc } from '@/composables/useLyrics'
 
@@ -38,7 +40,7 @@ const load = async (id: string) => {
           ? song.artists.map((a: any) => a.name).join(' / ')
           : ''
       state.album = song?.al?.name || song?.album?.name || ''
-      state.duration = song?.dt ?? song?.duration ?? 0
+      state.duration = normalizeDurationMs(song?.dt ?? song?.duration ?? 0)
       state.cover = song?.al?.picUrl || song?.album?.picUrl || ''
       if (route.query.autoplay === '1') {
         playCurrent()
@@ -58,25 +60,45 @@ onMounted(() => {
   }
 })
 
+const isCurrentPlaying = computed(
+  () => String(currentSong.value?.id ?? '') === String(state.id) && isPlaying.value
+)
+
 const playCurrent = () => {
   const s = {
     id: state.id,
     name: state.name,
     artist: state.artist,
     album: state.album,
-    duration: Math.floor((state.duration || 0) / 1000),
+    // Song.duration 统一毫秒
+    duration: state.duration,
     cover: state.cover,
-    liked: state.liked,
+    liked: libraryStore.isSongLiked(state.id),
   }
-  if (currentSong.value && String(currentSong.value.id) === String(state.id) && isPlaying.value) {
+  const isSameSong = String(currentSong.value?.id ?? '') === String(state.id)
+  if (isSameSong) {
+    if (isPlaying.value) {
+      pause()
+    } else {
+      resume()
+    }
     return
   }
   setPlaylist([s], 0)
   play(s, 0)
 }
 
+const isLiked = computed(() => libraryStore.isSongLiked(state.id))
+
 const toggleLike = () => {
-  state.liked = !state.liked
+  libraryStore.toggleLikeSong({
+    id: state.id,
+    name: state.name,
+    artist: state.artist,
+    album: state.album,
+    duration: state.duration,
+    cover: state.cover,
+  })
 }
 </script>
 
@@ -105,22 +127,29 @@ const toggleLike = () => {
           </div>
           <div class="min-w-0 flex-1">
             <h1 class="text-primary truncate text-lg font-bold">{{ state.name }}</h1>
-            <p class="truncate text-xs text-purple-300">{{ state.artist }}</p>
-            <p class="truncate text-[11px] text-purple-400">{{ state.album }}</p>
+            <p class="truncate text-xs text-blue-300">{{ state.artist }}</p>
+            <p class="truncate text-[11px] text-blue-400">{{ state.album }}</p>
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="glass-button text-primary rounded-full bg-linear-to-r from-pink-500 to-purple-600 px-3 py-2 text-sm"
+              type="button"
+              class="glass-button text-primary flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600"
+              :aria-label="isCurrentPlaying ? $t('player.pause') : $t('player.play')"
               @click="playCurrent"
             >
-              <span class="icon-[mdi--play] h-4 w-4"></span>
+              <span
+                :class="isCurrentPlaying ? 'icon-[mdi--pause]' : 'icon-[mdi--play]'"
+                class="h-4 w-4"
+              ></span>
             </button>
             <button
-              class="glass-button text-primary rounded-full px-3 py-2 text-sm"
+              type="button"
+              class="glass-button text-primary flex h-11 w-11 items-center justify-center rounded-full"
+              :aria-label="isLiked ? $t('common.unlike') : $t('common.like')"
               @click="toggleLike"
             >
               <span
-                :class="state.liked ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
+                :class="isLiked ? 'icon-[mdi--heart]' : 'icon-[mdi--heart-outline]'"
                 class="h-4 w-4"
               ></span>
             </button>

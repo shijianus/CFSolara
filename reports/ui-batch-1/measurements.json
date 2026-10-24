@@ -1,0 +1,914 @@
+[
+  {
+    "page": "settings",
+    "viewport": "1440x900",
+    "theme": "light",
+    "file": "screenshots\\settings-1440x900-light.png",
+    "metrics": {
+      "themeClass": "perf-mode",
+      "title": "设置",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "titleContrast": "16.84",
+      "cardBackground": "rgb(244, 248, 255)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "浅色模式",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "1440x900",
+    "theme": "light",
+    "file": "screenshots\\downloads-1440x900-light.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(9, 23, 44, 0.92)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "file": "screenshots\\settings-1440x900-dark.png",
+    "metrics": {
+      "themeClass": "perf-mode dark",
+      "title": "设置",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "titleContrast": "17.50",
+      "cardBackground": "rgb(7, 16, 31)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "暗黑模式",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "file": "screenshots\\downloads-1440x900-dark.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(239, 246, 255, 0.94)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "820x700",
+    "theme": "light",
+    "file": "screenshots\\settings-820x700-light.png",
+    "metrics": {
+      "themeClass": "perf-mode",
+      "title": "设置",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "titleContrast": "16.84",
+      "cardBackground": "rgb(244, 248, 255)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "浅色模式",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "820x700",
+    "theme": "light",
+    "file": "screenshots\\downloads-820x700-light.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(9, 23, 44, 0.92)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "820x700",
+    "theme": "dark",
+    "file": "screenshots\\settings-820x700-dark.png",
+    "metrics": {
+      "themeClass": "perf-mode dark",
+      "title": "设置",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "titleContrast": "17.50",
+      "cardBackground": "rgb(7, 16, 31)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "暗黑模式",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "820x700",
+    "theme": "dark",
+    "file": "screenshots\\downloads-820x700-dark.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(239, 246, 255, 0.94)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "844x390",
+    "theme": "light",
+    "file": "screenshots\\settings-844x390-light.png",
+    "metrics": {
+      "themeClass": "perf-mode",
+      "title": "设置",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "titleContrast": "16.84",
+      "cardBackground": "rgb(244, 248, 255)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "浅色模式",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "844x390",
+    "theme": "light",
+    "file": "screenshots\\downloads-844x390-light.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(9, 23, 44, 0.92)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(9, 23, 44, 0.92)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "844x390",
+    "theme": "dark",
+    "file": "screenshots\\settings-844x390-dark.png",
+    "metrics": {
+      "themeClass": "perf-mode dark",
+      "title": "设置",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "titleContrast": "17.50",
+      "cardBackground": "rgb(7, 16, 31)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "暗黑模式",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "中文",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "高级",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "臻品母带",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "显示",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "柱状图",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        },
+        {
+          "text": "hard-light",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+        }
+      ],
+      "perfSwitch": "true"
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "844x390",
+    "theme": "dark",
+    "file": "screenshots\\downloads-844x390-dark.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(239, 246, 255, 0.94)",
+      "firstArtist": "周杰伦",
+      "firstArtistColor": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)",
+      "sortLabel": {
+        "text": "最新下载",
+        "color": "rgba(239, 246, 255, 0.94)"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "390x844",
+    "theme": "light",
+    "file": "screenshots\\settings-390x844-light.png",
+    "metrics": {
+      "themeClass": "perf-mode",
+      "title": "sonic",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "titleContrast": "16.84",
+      "cardBackground": "rgb(244, 248, 255)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "rgba(9, 23, 44, 0.92)"
+        },
+        {
+          "text": "",
+          "color": "rgba(9, 23, 44, 0.92)",
+          "arrowColor": "rgba(9, 23, 44, 0.92)"
+        }
+      ]
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "390x844",
+    "theme": "light",
+    "file": "screenshots\\downloads-390x844-light.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(9, 23, 44, 0.92)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(9, 23, 44, 0.92)",
+      "firstArtistColor": null
+    }
+  },
+  {
+    "page": "settings",
+    "viewport": "390x844",
+    "theme": "dark",
+    "file": "screenshots\\settings-390x844-dark.png",
+    "metrics": {
+      "themeClass": "perf-mode dark",
+      "title": "sonic",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "titleContrast": "17.50",
+      "cardBackground": "rgb(7, 16, 31)",
+      "cardBackgroundImage": "none",
+      "cardShadow": "none",
+      "buttons": [
+        {
+          "text": "",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "rgba(239, 246, 255, 0.94)"
+        },
+        {
+          "text": "",
+          "color": "rgba(239, 246, 255, 0.94)",
+          "arrowColor": "rgba(239, 246, 255, 0.94)"
+        }
+      ]
+    }
+  },
+  {
+    "page": "downloads",
+    "viewport": "390x844",
+    "theme": "dark",
+    "file": "screenshots\\downloads-390x844-dark.png",
+    "metrics": {
+      "title": "下载列表",
+      "titleColor": "rgba(239, 246, 255, 0.94)",
+      "firstName": "晴天",
+      "firstNameColor": "rgba(239, 246, 255, 0.94)",
+      "firstArtistColor": null
+    }
+  },
+  {
+    "page": "search",
+    "viewport": "1440x900",
+    "theme": "light",
+    "file": "screenshots\\search-1440x900-light.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      }
+    ]
+  },
+  {
+    "page": "search",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "file": "screenshots\\search-1440x900-dark.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      }
+    ]
+  },
+  {
+    "page": "search",
+    "viewport": "820x700",
+    "theme": "light",
+    "file": "screenshots\\search-820x700-light.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      }
+    ]
+  },
+  {
+    "page": "search",
+    "viewport": "820x700",
+    "theme": "dark",
+    "file": "screenshots\\search-820x700-dark.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      }
+    ]
+  },
+  {
+    "page": "search",
+    "viewport": "844x390",
+    "theme": "light",
+    "file": "screenshots\\search-844x390-light.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.204996 -0.00941616 -0.0454784 / 0.645098)"
+      }
+    ]
+  },
+  {
+    "page": "search",
+    "viewport": "844x390",
+    "theme": "dark",
+    "file": "screenshots\\search-844x390-dark.png",
+    "metrics": [
+      {
+        "word": "4",
+        "heat": "2070w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "5",
+        "heat": "1720w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "6",
+        "heat": "1510w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      },
+      {
+        "word": "7",
+        "heat": "1280w",
+        "fontSize": "11px",
+        "color": "oklab(0.970473 -0.00372097 -0.0136536 / 0.658824)"
+      }
+    ]
+  },
+  {
+    "page": "home-mobile",
+    "viewport": "390x844",
+    "theme": "light",
+    "file": "screenshots\\home-mobile-390x844-light.png",
+    "metrics": {
+      "playlistName": "清晨通勤 · 轻电子精选集",
+      "fontSize": "11px",
+      "color": "rgba(9, 23, 44, 0.92)",
+      "opacity": "0.8",
+      "sectionTitle": "推荐歌单",
+      "sectionTitleColor": "rgba(9, 23, 44, 0.92)"
+    }
+  },
+  {
+    "page": "home-mobile",
+    "viewport": "390x844",
+    "theme": "dark",
+    "file": "screenshots\\home-mobile-390x844-dark.png",
+    "metrics": {
+      "playlistName": "清晨通勤 · 轻电子精选集",
+      "fontSize": "11px",
+      "color": "rgba(239, 246, 255, 0.94)",
+      "opacity": "0.8",
+      "sectionTitle": "推荐歌单",
+      "sectionTitleColor": "rgba(239, 246, 255, 0.94)"
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "1440x900",
+    "theme": "light",
+    "file": "screenshots\\lyrics-1440x900-light.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 895,
+        "y": 106,
+        "w": 500,
+        "h": 733
+      }
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "file": "screenshots\\lyrics-1440x900-dark.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 895,
+        "y": 106,
+        "w": 500,
+        "h": 733
+      }
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "820x700",
+    "theme": "light",
+    "file": "screenshots\\lyrics-820x700-light.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 248,
+        "y": 76,
+        "w": 541,
+        "h": 586
+      }
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "820x700",
+    "theme": "dark",
+    "file": "screenshots\\lyrics-820x700-dark.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 248,
+        "y": 76,
+        "w": 541,
+        "h": 586
+      }
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "390x844",
+    "theme": "light",
+    "file": "screenshots\\lyrics-390x844-light.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 18,
+        "y": 121,
+        "w": 354,
+        "h": 557
+      }
+    }
+  },
+  {
+    "page": "lyrics",
+    "viewport": "390x844",
+    "theme": "dark",
+    "file": "screenshots\\lyrics-390x844-dark.png",
+    "metrics": {
+      "lineCount": 12,
+      "currentText": "Re So So Si Do Si La",
+      "currentColor": "rgba(255, 255, 255, 0.98)",
+      "otherColor": "color(srgb 1 1 1 / 0.666667)",
+      "containerBackground": "rgba(4, 12, 24, 0.72)",
+      "activeToken": "#fffffffa",
+      "inactiveToken": "color-mix(in srgb, #fffffffa 68%, transparent)",
+      "rect": {
+        "x": 18,
+        "y": 121,
+        "w": 354,
+        "h": 557
+      }
+    }
+  }
+]

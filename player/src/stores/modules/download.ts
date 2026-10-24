@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { downloadedMusicDB, type DownloadedSong } from '@/utils/indexedDB'
 import type { Song } from '../interface'
 import { useAudioStore } from './audio'
+import { useToastStore } from './toast'
+import i18n from '@/languages'
 
 export interface QualityChoice {
   level: string // 'lossless' | 'exhigh' | 'standard'
@@ -49,6 +51,11 @@ export const useDownloadStore = defineStore('download', {
     dialogVisible: false,
     currentDownloadSong: null as Song | null,
     errorMsg: null as string | null,
+    downloadProgress: 0,
+    downloadedBytes: 0,
+    totalBytes: 0,
+    lastManualSave: null as { blob: Blob; fileName: string } | null,
+    abortController: null as AbortController | null,
   }),
 
   getters: {
@@ -95,14 +102,121 @@ export const useDownloadStore = defineStore('download', {
       this.errorMsg = null
     },
 
+    /** 查询同一首歌是否已下载过指定音质 */
+    async findDownloadedByQuality(
+      id: string | number,
+      qualityLevel: string
+    ): Promise<DownloadedSong | null> {
+      const inMemory = this.downloadedList.find(
+        item => String(item.id) === String(id) && item.qualityLevel === qualityLevel
+      )
+      if (inMemory) return inMemory
+      try {
+        const list = await downloadedMusicDB.getAll()
+        this.downloadedList = list.sort((a, b) => (b.downloadTime || 0) - (a.downloadTime || 0))
+        return (
+          this.downloadedList.find(
+            item => String(item.id) === String(id) && item.qualityLevel === qualityLevel
+          ) || null
+        )
+      } catch {
+        return null
+      }
+    },
+
+    /** 取消进行中的下载 */
+    cancelDownload() {
+      this.abortController?.abort()
+    },
+
+    /** 浏览器自动保存被拦截/失去用户手势时，由用户点击后重新保存 */
+    saveManually() {
+      const payload = this.lastManualSave
+      if (!payload) return
+      this._saveBlob(payload.blob, payload.fileName)
+      useToastStore().show({
+        message: i18n.global.t('download.saved'),
+        type: 'success',
+        duration: 3000,
+      })
+    },
+
+    _saveBlob(blob: Blob, fileName: string) {
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = fileName
+      a.rel = 'noopener'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000)
+    },
+
+    _canAutoSave(): boolean {
+      const activation = (navigator as Navigator & { userActivation?: { isActive: boolean } })
+        .userActivation
+      return !activation || activation.isActive !== false
+    },
+
+    _fetchBlobWithProgress(
+      streamUrl: string,
+      signal: AbortSignal,
+      onProgress: (loaded: number, total: number) => void
+    ): Promise<Blob> {
+      return new Promise<Blob>((resolve, reject) => {
+        if (signal.aborted) {
+          reject(new DOMException('Aborted', 'AbortError'))
+          return
+        }
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', streamUrl)
+        xhr.responseType = 'blob'
+        xhr.onprogress = event => onProgress(event.loaded, event.lengthComputable ? event.total : 0)
+        xhr.onerror = () => reject(new Error(i18n.global.t('download.networkError')))
+        xhr.onabort = () => reject(new DOMException('Aborted', 'AbortError'))
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.response)
+          } else {
+            reject(
+              new Error(
+                xhr.status === 403 || xhr.status === 404
+                  ? i18n.global.t('download.sourceUnavailable')
+                  : `HTTP ${xhr.status}`
+              )
+            )
+          }
+        }
+        signal.addEventListener('abort', () => xhr.abort(), { once: true })
+        xhr.send()
+      })
+    },
+
     /**
-     * 触发下载并存入本地 IndexedDB，同时唤起浏览器文件另存为
+     * 触发下载并存入本地 IndexedDB；支持进度、取消与手动保存兜底
      */
-    async startDownload(song: Song, qualityChoice: QualityChoice) {
-      if (!song) return
+    async startDownload(
+      song: Song,
+      qualityChoice: QualityChoice,
+      options: { overwrite?: boolean } = {}
+    ) {
+      if (!song || this.isDownloading) return
+      const existing = await this.findDownloadedByQuality(song.id, qualityChoice.level)
+      if (existing && !options.overwrite) {
+        const err = new Error('DUPLICATE_DOWNLOAD')
+        err.name = 'DuplicateDownloadError'
+        throw err
+      }
+
+      const controller = new AbortController()
+      this.abortController = controller
       this.isDownloading = true
       this.downloadingId = song.id
       this.errorMsg = null
+      this.downloadProgress = 0
+      this.downloadedBytes = 0
+      this.totalBytes = 0
 
       try {
         const brMap: Record<string, string> = {
@@ -121,12 +235,19 @@ export const useDownloadStore = defineStore('download', {
           streamUrl = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease&br=${br}&title=${encodeURIComponent(song.name || '')}&artist=${encodeURIComponent(song.artist || '')}`
         }
 
-        // 1. 获取音频二进制 Blob
-        const response = await fetch(streamUrl)
-        if (!response.ok) {
-          throw new Error(`音频流请求失败 HTTP ${response.status}`)
-        }
-        const blob = await response.blob()
+        // 1. 获取音频二进制 Blob（带进度，可取消）
+        const blob = await this._fetchBlobWithProgress(
+          streamUrl,
+          controller.signal,
+          (loaded, total) => {
+            this.downloadedBytes = loaded
+            this.totalBytes = total
+            this.downloadProgress =
+              total > 0 ? Math.min(99, Math.round((loaded / total) * 100)) : 0
+          }
+        )
+        if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
+        this.downloadProgress = 100
 
         // 2. 格式与文件名规范
         const isFlac =
@@ -134,7 +255,8 @@ export const useDownloadStore = defineStore('download', {
           blob.type.includes('flac') ||
           streamUrl.includes('flac')
         const ext = isFlac ? 'flac' : 'mp3'
-        const badgeLabel = qualityChoice.level === 'lossless' ? 'SQ' : qualityChoice.level === 'exhigh' ? 'HQ' : '标准'
+        const badgeLabel =
+          qualityChoice.level === 'lossless' ? 'SQ' : qualityChoice.level === 'exhigh' ? 'HQ' : '标准'
 
         const safeArtist = (song.artist || '未知歌手').replace(/[\\/:*?"<>|]/g, '_')
         const safeTitle = (song.name || '未知歌曲').replace(/[\\/:*?"<>|]/g, '_')
@@ -161,32 +283,61 @@ export const useDownloadStore = defineStore('download', {
         await downloadedMusicDB.add(downloadedSong)
 
         // 4. 更新内存状态
-        const existingIdx = this.downloadedList.findIndex((item) => String(item.id) === String(song.id))
+        const existingIdx = this.downloadedList.findIndex(
+          (item) => String(item.id) === String(song.id)
+        )
         if (existingIdx >= 0) {
           this.downloadedList.splice(existingIdx, 1, downloadedSong)
         } else {
           this.downloadedList.unshift(downloadedSong)
         }
 
-        // 5. 唤起浏览器本地文件保存
-        const blobUrl = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = blobUrl
-        a.download = fileName
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 30000)
+        // 5. 自动保存；异步请求后可能已失去用户手势，保留手动保存入口
+        this.lastManualSave = { blob, fileName }
+        const canAutoSave = this._canAutoSave()
+        if (canAutoSave) {
+          try {
+            this._saveBlob(blob, fileName)
+          } catch {
+            // 浏览器可能拦截自动下载，转入手动保存提示
+          }
+        }
+        useToastStore().show({
+          message: canAutoSave
+            ? i18n.global.t('download.completed', { name: song.name })
+            : i18n.global.t('download.manualSaveRequired'),
+          type: canAutoSave ? 'success' : 'warning',
+          duration: canAutoSave ? 8000 : 0,
+          actions: [
+            {
+              label: i18n.global.t('download.saveNow'),
+              primary: true,
+              handler: () => this.saveManually(),
+            },
+          ],
+        })
 
         // 关闭弹窗
         this.closeDownloadDialog()
       } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          this.errorMsg = null
+          useToastStore().show({
+            message: i18n.global.t('download.cancelled'),
+            type: 'info',
+            duration: 3000,
+          })
+          return
+        }
         console.error('[DownloadStore] Download failed:', err)
-        this.errorMsg = err?.message || '下载失败，请检查网络或更换音质'
+        const reason = err?.message || i18n.global.t('download.networkError')
+        this.errorMsg = i18n.global.t('download.failed', { reason })
+        useToastStore().show({ message: this.errorMsg, type: 'error', duration: 5000 })
         throw err
       } finally {
         this.isDownloading = false
         this.downloadingId = null
+        this.abortController = null
       }
     },
 

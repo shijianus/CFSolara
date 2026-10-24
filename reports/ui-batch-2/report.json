@@ -1,0 +1,61 @@
+{
+  "batch": 2,
+  "branch": "fix/ui-batch-2",
+  "baselineTag": "before-batch-2",
+  "baselineCommit": "e1ae74e",
+  "commits": 25,
+  "codeCommits": 24,
+  "codeFiles": 55,
+  "changedFiles": 119,
+  "insertions": 5578,
+  "deletions": 538,
+  "issues": [
+    { "id": "UI-005", "status": "pass", "summary": "playlist pagination, songCount tab, full queue before play all" },
+    { "id": "UI-029", "status": "pass", "summary": "artist songs/albums load more, MV stat hidden" },
+    { "id": "UI-010", "status": "pass", "summary": "duration normalized to milliseconds across detail/album/search" },
+    { "id": "UI-021", "status": "pass", "summary": "no fake SQ badge, no 200s default duration, no fabricated qualities" },
+    { "id": "UI-041", "status": "pass", "summary": "comment total from API and reset before playlist switch" },
+    { "id": "UI-006", "status": "pass", "summary": "search artist keeps real ID, plain text fallback" },
+    { "id": "UI-011", "status": "pass", "summary": "persistent library store for likes/playlists/artists/MVs/albums" },
+    { "id": "UI-012", "status": "pass", "summary": "comments read-only, fake write/like/reply controls removed" },
+    { "id": "UI-043", "status": "pass", "summary": "MV likes use library store on desktop and mobile" },
+    { "id": "UI-061", "status": "pass", "summary": "blob URL restored from IndexedDB; missing source clears current track with toast" },
+    { "id": "UI-008", "status": "pass", "summary": "global toast with network/source/copyright classification, retry and next actions" },
+    { "id": "UI-009", "status": "pass", "summary": "quality switch throws and rolls back on failure; success-only UI commit" },
+    { "id": "UI-013", "status": "pass", "summary": "song detail play button pauses while playing on desktop and mobile" },
+    { "id": "UI-019/020", "status": "pass", "summary": "queue clear and local delete with 5s undo" },
+    { "id": "UI-031", "status": "pass", "summary": "download progress/cancel/completion, duplicate overwrite confirm, manual save fallback" },
+    { "id": "UI-042", "status": "pass", "summary": "MV no-source/error state with retry instead of infinite spinner" },
+    { "id": "UI-058", "status": "pass", "summary": "InfiniteScroll empty/reset and error/retry states" }
+  ],
+  "verification": {
+    "unitTests": { "files": 5, "tests": 21, "status": "pass" },
+    "typecheck": {
+      "status": "baseline errors only",
+      "currentErrors": 48,
+      "baselineErrors": 69,
+      "netReduction": 21
+    },
+    "lint": {
+      "officialScript": "unavailable (ESLint 9 flat config missing)",
+      "changedFilesFallback": { "errors": 0, "warnings": 724 }
+    },
+    "build": { "status": "pass", "duration": "14.65s" },
+    "screenshots": {
+      "viewports": ["1440x900", "820x700", "844x390", "390x844"],
+      "themes": ["dark", "light"],
+      "coreShots": 40,
+      "stateShots": 20
+    }
+  },
+  "pending": [
+    "844x390 still uses desktop layout because the router breakpoint is max-width: 768px",
+    "light-theme playlist category chip contrast is a pre-existing text-white/accent-gradient issue",
+    "same song with a different quality overwrites the single downloaded_music IndexedDB record",
+    "official ESLint 9 config migration is still pending",
+    "local music delete undo UI is covered by unit test because headless file upload is unavailable",
+    "artist MV entry remains absent; MV stat is hidden",
+    "comments remain read-only until a backend write API exists",
+    "formatDate still emits Chinese date suffixes in en/ja"
+  ]
+}

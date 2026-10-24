@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { topSong } from '@/api'
 import { transformTopSongs, type SongData } from '@/utils/transformers'
+import MobileSongList from '@/components/Mobile/MobileSongList.vue'
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -35,8 +36,7 @@ const handleTabClick = (t: any) => {
 <template>
   <div class="flex-1 overflow-auto px-3 pb-6">
     <div class="glass-nav sticky top-0 z-10 pt-2 pb-3">
-      <div class="glass-nav sticky top-0 z-10 pt-2 pb-3">
-        <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2">
           <button
             v-for="type in types"
             :key="type.key"
@@ -46,16 +46,12 @@ const handleTabClick = (t: any) => {
           >
             {{ t(type.labelKey) }}
           </button>
-        </div>
-      </div>
-      <div v-if="state.loading" class="py-6">
-        <PageSkeleton :sections="['list']" :list-count="10" />
       </div>
       <div v-if="state.loading" class="py-6">
         <PageSkeleton :sections="['list']" :list-count="10" />
       </div>
       <div v-else>
-        <HotSongsMobile :songs="state.songs" />
+        <MobileSongList :songs="state.songs" :show-index="true" />
       </div>
     </div>
   </div>

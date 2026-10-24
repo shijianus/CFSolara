@@ -81,7 +81,7 @@ onUnmounted(() => {
           :class="[
             it.icon,
             'relative mb-1 h-5 w-5 transition-transform',
-            ($route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/')) && 'text-[#8b5cf6] drop-shadow-[0_0_8px_rgba(139,92,246,0.8)] scale-110'
+            ($route.path === it.to || ($route.path.startsWith(it.to) && it.to !== '/')) && 'text-[#2563eb] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110'
           ]"
         />
         <span class="relative">{{ t(it.labelKey) }}</span>

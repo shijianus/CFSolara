@@ -8,7 +8,7 @@ import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const { setPlaylist, play, playlist, clearPlaylist } = useAudio()
+const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
 
 const state = reactive({
   activeTab: 'playlist' as 'playlist' | 'history',
@@ -33,7 +33,7 @@ const playAllQueue = () => {
 }
 
 const handleClearQueue = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
 }
 
 const tabs = computed(() => [
@@ -77,7 +77,7 @@ const tabs = computed(() => [
           variant="solid"
           size="sm"
           rounded="lg"
-          class="gap-2 shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30"
+          class="gap-2 shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30"
           @click="playAllQueue"
         >
           <span class="icon-[mdi--play] h-4 w-4" />
@@ -88,7 +88,7 @@ const tabs = computed(() => [
           variant="solid"
           size="sm"
           rounded="lg"
-          class="gap-2 shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30"
+          class="gap-2 shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30"
           @click="playAllRecent"
         >
           <span class="icon-[mdi--play] h-4 w-4" />

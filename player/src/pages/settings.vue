@@ -124,7 +124,7 @@ onMounted(() => {
         <div class="glass-card space-y-5 rounded-2xl p-5">
           <div class="flex items-center gap-3 border-b border-white/10 pb-4">
             <div
-              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-purple-600"
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-blue-600"
             >
               <span class="icon-[mdi--palette-outline] h-5 w-5 text-white" />
             </div>
@@ -158,7 +158,7 @@ onMounted(() => {
         <div class="glass-card space-y-5 rounded-2xl p-5">
           <div class="flex items-center gap-3 border-b border-white/10 pb-4">
             <div
-              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-pink-500 to-rose-600"
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-sky-500 to-blue-600"
             >
               <span class="icon-[mdi--image-filter-hdr] h-5 w-5 text-white" />
             </div>
@@ -181,7 +181,7 @@ onMounted(() => {
         <div class="glass-card space-y-5 rounded-2xl p-5">
           <div class="flex items-center gap-3 border-b border-white/10 pb-4">
             <div
-              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500 to-teal-600"
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500 to-blue-600"
             >
               <span class="icon-[mdi--music-circle] h-5 w-5 text-white" />
             </div>
@@ -198,7 +198,7 @@ onMounted(() => {
         <div class="glass-card space-y-5 rounded-2xl p-5">
           <div class="flex items-center gap-3 border-b border-white/10 pb-4">
             <div
-              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-amber-500 to-orange-600"
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-sky-500 to-blue-600"
             >
               <span class="icon-[mdi--subtitles-outline] h-5 w-5 text-white" />
             </div>
@@ -304,8 +304,8 @@ onMounted(() => {
               role="switch"
               :aria-checked="isPerformanceMode"
               @click="togglePerformanceMode"
-              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500/50"
-              :class="isPerformanceMode ? 'bg-pink-500' : 'bg-white/20'"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              :class="isPerformanceMode ? 'bg-sky-500' : 'bg-white/20'"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"
@@ -314,7 +314,7 @@ onMounted(() => {
             </button>
           </div>
           <div class="text-primary/60 text-xs">
-            当前状态：<span :class="isPerformanceMode ? 'text-pink-400 font-bold' : 'text-primary/80 font-medium'">{{ isPerformanceMode ? '已开启 (零模糊高帧率)' : '标准模式 (全特效玻璃质感)' }}</span>
+            当前状态：<span :class="isPerformanceMode ? 'text-sky-400 font-bold' : 'text-primary/80 font-medium'">{{ isPerformanceMode ? '已开启 (零模糊高帧率)' : '标准模式 (全特效玻璃质感)' }}</span>
           </div>
         </div>
       </div>

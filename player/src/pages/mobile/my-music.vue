@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useAudio } from '@/composables/useAudio'
 
-const { playlist, clearPlaylist } = useAudio()
+const { playlist, clearPlaylistWithUndo } = useAudio()
 
 const handleClearQueue = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
 }
 </script>
 

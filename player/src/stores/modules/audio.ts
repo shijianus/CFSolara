@@ -6,6 +6,9 @@ import { defineStore } from 'pinia'
 import { songUrlV1 } from '@/api'
 import { Song, PlayMode, AudioStoreState } from '../interface'
 import { useSettingsStore } from './settings'
+import { useToastStore } from './toast'
+import i18n from '@/languages'
+import { downloadedMusicDB, localMusicDB } from '@/utils/indexedDB'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -18,6 +21,36 @@ let lastRetrySongId: string | number | null = null
 let lastRetryTime = 0
 /** 标记当前播放歌曲是否已触发过下一首预加载，避免重复发起 */
 let hasPreloadedNext = false
+
+type PlaybackErrorKind = 'network' | 'source' | 'copyright'
+
+/** 将媒体错误/播放异常归类为网络、音源不可用或版权受限 */
+export const classifyPlaybackError = (error?: MediaError | Error | null): PlaybackErrorKind => {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'network'
+  const mediaError = error as MediaError | null
+  if (mediaError && typeof mediaError.code === 'number') {
+    if (mediaError.code === 2) return 'network'
+    if (mediaError.code === 3) return 'source'
+    // 媒体源不受支持/被拒绝：非本地源优先按版权受限提示
+    if (mediaError.code === 4) return 'copyright'
+  }
+  const msg = String((error as Error | null)?.message || '').toLowerCase()
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('offline')) {
+    return 'network'
+  }
+  if (msg.includes('403') || msg.includes('404') || msg.includes('copyright') || msg.includes('版权')) {
+    return 'copyright'
+  }
+  return 'source'
+}
+
+let lastPlaybackToastId: number | null = null
+let lastPlaybackToastKey = ''
+let lastPlaybackToastAt = 0
+/** 音质切换期间由 switchQuality 自行处理错误，避免误触发全局播放错误 */
+let switchingQuality = false
+/** 本次页面会话内已重新生成的 Blob URL，避免重复读取 IndexedDB */
+const restoredBlobUrls = new Set<string>()
 
 /** 获取 Audio 单例（懒初始化） */
 const getAudioSingleton = (): HTMLAudioElement => {
@@ -150,11 +183,100 @@ export const useAudioStore = defineStore('audio', {
               : 0
           this.audio.currentIndex = index
           this.audio.currentSong = this.audio.playlist[index]
-          this.audio.audio.src = (this.audio.currentSong && this.audio.currentSong.url) || ''
-          this.audio.audio.load()
+          if (this._isStaleBlobUrl(this.audio.currentSong)) {
+            // 页面刷新后 blob: URL 失效，异步从 IndexedDB 重建，避免先加载坏源
+            this.restoreCurrentSongSource()
+          } else {
+            // 仅设置源，不主动 load：避免恢复历史歌曲时自动请求并弹出播放错误
+            this.audio.audio.src = (this.audio.currentSong && this.audio.currentSong.url) || ''
+          }
         }
-        //
       }
+    },
+
+    /** blob: URL 仅在创建它的页面会话内有效；未重建过的视为失效 */
+    _isStaleBlobUrl(song?: Song | null): boolean {
+      return Boolean(
+        song?.url?.startsWith('blob:') && !restoredBlobUrls.has(song.url)
+      )
+    },
+
+    /** 按歌曲 id 从下载库/本地音乐库取回原始 Blob */
+    async _findBlobForSong(song: Song): Promise<Blob | null> {
+      if (typeof indexedDB === 'undefined') return null
+      const id = String(song.id)
+      try {
+        const downloaded = await downloadedMusicDB.getAll()
+        const match = downloaded.find(item => String(item.id) === id)
+        if (match?.file) return match.file
+      } catch {}
+      try {
+        const local = await localMusicDB.getAll()
+        const match = local.find(item => String(item.id) === id)
+        if (match?.file) return match.file
+      } catch {}
+      return null
+    },
+
+    /** 为失效的本地/下载歌曲重新创建 Blob URL；失败时清理当前歌曲并提示 */
+    async _restoreBlobUrlForSong(song: Song): Promise<boolean> {
+      if (!this._isStaleBlobUrl(song)) return true
+      const blob = await this._findBlobForSong(song)
+      if (!blob) {
+        this._handleMissingLocalFile(song)
+        return false
+      }
+      const newUrl = URL.createObjectURL(blob)
+      song.url = newUrl
+      const idx = this.audio.playlist.findIndex((item: Song) => String(item.id) === String(song.id))
+      if (idx !== -1) {
+        this.audio.playlist[idx].url = newUrl
+        this.audio.playlist[idx].isLocal = true
+      }
+      if (this.audio.currentSong && String(this.audio.currentSong.id) === String(song.id)) {
+        this.audio.currentSong.url = newUrl
+      }
+      restoredBlobUrls.add(newUrl)
+      return true
+    },
+
+    /** 恢复持久化的当前歌曲；blob 源失效时重建，取不到则清除 */
+    async restoreCurrentSongSource() {
+      const song = this.audio.currentSong
+      if (!song || !song.url?.startsWith('blob:')) return
+      const restored = await this._restoreBlobUrlForSong(song)
+      if (!restored) return
+      if (this.audio.audio && this.audio.currentSong && this.audio.currentSong.url) {
+        this.audio.audio.src = this.audio.currentSong.url
+        this.audio.audio.load()
+      }
+    },
+
+    /** 本地/下载文件已被删除或 IndexedDB 不可用 */
+    _handleMissingLocalFile(song: Song) {
+      this.audio.isPlaying = false
+      this.audio.isLoading = false
+      if (this.audio.audio) {
+        this.audio.audio.pause()
+        this.audio.audio.removeAttribute('src')
+        this.audio.audio.load()
+      }
+      const idx = this.audio.playlist.findIndex((item: Song) => String(item.id) === String(song.id))
+      if (idx !== -1) {
+        this.audio.playlist.splice(idx, 1)
+        if (idx < this.audio.currentIndex) {
+          this.audio.currentIndex -= 1
+        }
+      }
+      if (this.audio.currentSong && String(this.audio.currentSong.id) === String(song.id)) {
+        this.audio.currentSong = null
+        this.audio.currentIndex = -1
+      }
+      useToastStore().show({
+        message: i18n.global.t('player.localFileMissing'),
+        type: 'warning',
+        duration: 6000,
+      })
     },
 
     // 设置音频事件监听
@@ -169,6 +291,7 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isPlaying = true
         this.audio.isPaused = false
         this.audio.error = null
+        this._dismissPlaybackErrorToast()
       })
 
       // 播放暂停
@@ -237,9 +360,10 @@ export const useAudioStore = defineStore('audio', {
 
       // 错误处理
       audio.addEventListener('error', (e: any) => {
-        this.audio.error = '播放出错，请重试'
         this.audio.isLoading = false
         this.audio.isPlaying = false
+        if (switchingQuality) return
+        this._reportPlaybackError(audio.error || e)
         console.error('Audio error:', e)
         // 触发一次刷新播放地址并重试，10秒内同一歌曲仅重试一次
         const now = Date.now()
@@ -256,6 +380,12 @@ export const useAudioStore = defineStore('audio', {
     /** 播放歌曲（自动获取缺失的播放地址） */
     async playSong(song?: Song, index?: number, force = false) {
       this.initAudio()
+
+      const targetSong = song || this.audio.currentSong
+      if (targetSong && targetSong.url?.startsWith('blob:')) {
+        const restored = await this._restoreBlobUrlForSong(targetSong)
+        if (!restored) return
+      }
 
       const prevSong = this.audio.currentSong
       const prevIndex = this.audio.currentIndex
@@ -387,8 +517,8 @@ export const useAudioStore = defineStore('audio', {
         // 添加到播放历史
         this.addToHistory(this.audio.currentSong)
       } catch (error: any) {
-        this.audio.error = '播放失败，请检查网络连接'
         this.audio.isPlaying = false
+        this._reportPlaybackError(error)
         console.error('Play error:', error)
         // 播放失败时也尝试刷新 URL 后重试
         const id = this.audio.currentSong?.id ?? null
@@ -417,6 +547,7 @@ export const useAudioStore = defineStore('audio', {
         this.audio.error = null
       } catch (e) {
         console.error('Refresh url failed:', e)
+        this._reportPlaybackError(e as Error)
       } finally {
         this.audio.isLoading = false
       }
@@ -664,16 +795,56 @@ export const useAudioStore = defineStore('audio', {
       }
     },
 
-    /** 切换当前播放歌曲的音质等级并平滑无缝恢复播放进度 */
-    async switchQuality(targetLevel: string) {
-      if (!this.audio.currentSong || !this.audio.audio) return
-      if (this.audio.currentSong.isLocal) return
+    /** 等待新音源可播放；error 事件视为切换失败 */
+    _waitForAudioReady(audio: HTMLAudioElement, timeout = 15000): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        let settled = false
+        const cleanup = () => {
+          audio.removeEventListener('loadedmetadata', onReady)
+          audio.removeEventListener('canplay', onReady)
+          audio.removeEventListener('error', onError)
+          clearTimeout(timer)
+        }
+        const finish = (fn: () => void) => {
+          if (settled) return
+          settled = true
+          cleanup()
+          fn()
+        }
+        const onReady = () => finish(resolve)
+        const onError = () =>
+          finish(() => reject(audio.error || new Error('Audio source unavailable')))
+        const timer = setTimeout(
+          () => finish(() => reject(new Error('Switch quality timeout'))),
+          timeout
+        )
+        audio.addEventListener('loadedmetadata', onReady)
+        audio.addEventListener('canplay', onReady)
+        audio.addEventListener('error', onError)
+      })
+    },
 
-      const currentTime = this.audio.audio.currentTime || 0
+    /** 切换当前播放歌曲的音质等级；失败回滚旧音源并向上抛出 */
+    async switchQuality(targetLevel: string) {
+      const song = this.audio.currentSong
+      const audio = this.audio.audio
+      if (!song || !audio) return
+      if (song.isLocal) return
+
+      const currentTime = audio.currentTime || 0
       const wasPlaying = this.audio.isPlaying
+      const oldUrl = song.url || ''
+      const oldBadge = song.qualityBadge
+      const idx = this.audio.currentIndex
+      const oldPlaylistUrl =
+        idx >= 0 && idx < this.audio.playlist.length ? this.audio.playlist[idx].url : undefined
+      const oldPlaylistBadge =
+        idx >= 0 && idx < this.audio.playlist.length
+          ? this.audio.playlist[idx].qualityBadge
+          : undefined
 
       // 查找对应音质配置
-      const qualityOpt = this.audio.currentSong.qualities?.find(q => q.level === targetLevel)
+      const qualityOpt = song.qualities?.find((q: { level: string }) => q.level === targetLevel)
       let newUrl = qualityOpt?.streamUrl || ''
 
       const brMap: Record<string, string> = {
@@ -684,36 +855,58 @@ export const useAudioStore = defineStore('audio', {
       const br = brMap[targetLevel] || '320'
 
       if (!newUrl) {
-        newUrl = `/api/music/stream?id=${encodeURIComponent(String(this.audio.currentSong.id))}&source=netease&br=${br}&title=${encodeURIComponent(this.audio.currentSong.name || '')}&artist=${encodeURIComponent(this.audio.currentSong.artist || '')}`
+        newUrl = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease&br=${br}&title=${encodeURIComponent(song.name || '')}&artist=${encodeURIComponent(song.artist || '')}`
       }
 
-      this.audio.currentSong.url = newUrl
       const badgeMap: Record<string, string> = {
         lossless: 'SQ',
         exhigh: 'HQ',
         standard: '标准',
       }
-      if (badgeMap[targetLevel]) {
-        this.audio.currentSong.qualityBadge = badgeMap[targetLevel]
-      }
+      const nextBadge = badgeMap[targetLevel] || oldBadge
 
-      // 同步到播放列表
-      const idx = this.audio.currentIndex
-      if (idx >= 0 && idx < this.audio.playlist.length) {
-        this.audio.playlist[idx].url = newUrl
-        this.audio.playlist[idx].qualityBadge = this.audio.currentSong.qualityBadge
-      }
-
+      switchingQuality = true
       this.audio.isLoading = true
       try {
-        this._loadAudioSrc(newUrl)
-        this.audio.audio.currentTime = currentTime
+        this._loadAudioSrc(newUrl, true)
+        await this._waitForAudioReady(audio)
+        try {
+          audio.currentTime = Math.min(currentTime, audio.duration || currentTime)
+        } catch {}
         if (wasPlaying) {
-          await this.audio.audio.play()
+          await audio.play()
         }
+
+        // 新音源确认可用后才提交状态
+        song.url = newUrl
+        song.qualityBadge = nextBadge
+        if (idx >= 0 && idx < this.audio.playlist.length) {
+          this.audio.playlist[idx].url = newUrl
+          this.audio.playlist[idx].qualityBadge = nextBadge
+        }
+        this.audio.error = null
       } catch (err) {
+        // 回滚 URL、徽章与音频源，保证 UI 与实际播放状态一致
+        song.url = oldUrl
+        song.qualityBadge = oldBadge
+        if (idx >= 0 && idx < this.audio.playlist.length) {
+          this.audio.playlist[idx].url = oldPlaylistUrl
+          this.audio.playlist[idx].qualityBadge = oldPlaylistBadge
+        }
+        this._loadAudioSrc(oldUrl, true)
+        try {
+          audio.currentTime = currentTime
+        } catch {}
+        if (wasPlaying) {
+          try {
+            await audio.play()
+          } catch {}
+        }
+        this.audio.error = null
         console.error('Switch quality failed:', err)
+        throw err
       } finally {
+        switchingQuality = false
         this.audio.isLoading = false
       }
     },
@@ -848,6 +1041,40 @@ export const useAudioStore = defineStore('audio', {
       }
     },
 
+    /** 清空队列前保存快照，供撤销恢复 */
+    createQueueSnapshot() {
+      return {
+        playlist: [...this.audio.playlist],
+        originalPlaylist: [...this.audio.originalPlaylist],
+        currentSong: this.audio.currentSong,
+        currentIndex: this.audio.currentIndex,
+        currentTime: this.audio.currentTime,
+        wasPlaying: this.audio.isPlaying,
+      }
+    },
+
+    /** 恢复清空前的队列与当前歌曲；此前正在播放的会继续播放 */
+    async restoreQueueSnapshot(snapshot: {
+      playlist: Song[]
+      originalPlaylist: Song[]
+      currentSong: Song | null
+      currentIndex: number
+      currentTime: number
+      wasPlaying: boolean
+    }) {
+      this.audio.playlist = [...snapshot.playlist]
+      this.audio.originalPlaylist = [...snapshot.originalPlaylist]
+      this.audio.currentSong = snapshot.currentSong
+      this.audio.currentIndex = snapshot.currentIndex
+      this.audio.currentTime = snapshot.currentTime
+      if (snapshot.wasPlaying && snapshot.currentSong) {
+        await this.playSong(snapshot.currentSong, snapshot.currentIndex, true)
+        try {
+          if (this.audio.audio) this.audio.audio.currentTime = snapshot.currentTime
+        } catch {}
+      }
+    },
+
     // 清空播放列表
     clearPlaylist() {
       this.stop()
@@ -913,9 +1140,64 @@ export const useAudioStore = defineStore('audio', {
       this.audio.playHistory = []
     },
 
+    /** 播放失败：写入 audio.error 并弹出全局 Toast（重试/下一首），同类错误节流 10 秒 */
+    _reportPlaybackError(error?: MediaError | Error | null) {
+      const kind = classifyPlaybackError(error)
+      const message = i18n.global.t(`player.playbackError.${kind}`)
+      this.audio.error = message
+      this.audio.isLoading = false
+
+      const songId = this.audio.currentSong?.id ?? ''
+      const key = `${songId}:${kind}`
+      const now = Date.now()
+      if (lastPlaybackToastId !== null && key === lastPlaybackToastKey && now - lastPlaybackToastAt < 10000) {
+        return
+      }
+      lastPlaybackToastKey = key
+      lastPlaybackToastAt = now
+      if (lastPlaybackToastId !== null) {
+        useToastStore().dismiss(lastPlaybackToastId)
+      }
+
+      lastPlaybackToastId = useToastStore().show({
+        message,
+        type: 'error',
+        duration: 0,
+        actions: [
+          {
+            label: i18n.global.t('common.retry'),
+            primary: true,
+            handler: () => {
+              this.clearError()
+              if (this.audio.currentSong) {
+                this.playSong(this.audio.currentSong, this.audio.currentIndex, true)
+              }
+            },
+          },
+          {
+            label: i18n.global.t('player.next'),
+            handler: () => {
+              this.clearError()
+              this.nextSong()
+            },
+          },
+        ],
+      })
+    },
+
+    /** 播放恢复后关闭残留的播放错误 Toast */
+    _dismissPlaybackErrorToast() {
+      if (lastPlaybackToastId !== null) {
+        useToastStore().dismiss(lastPlaybackToastId)
+        lastPlaybackToastId = null
+        lastPlaybackToastKey = ''
+      }
+    },
+
     // 清除错误信息
     clearError() {
       this.audio.error = null
+      this._dismissPlaybackErrorToast()
     },
 
     // 销毁音频播放器

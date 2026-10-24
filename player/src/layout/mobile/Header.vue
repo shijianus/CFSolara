@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// 移动端头部：Sonic 品牌 Logo/标题，搜索与主题切换（无外部文档及登录）
+// 移动端头部：epocanvas sonic 品牌 Logo/标题，搜索与主题切换（无外部文档及登录）
 const router = useRouter()
 import { useI18n } from 'vue-i18n'
 import { useGlobalStore } from '@/stores/modules/global'
 import { storeToRefs } from 'pinia'
+import { BRAND_FULL, BRAND_PARENT, BRAND_PRODUCT } from '@/config/brand'
 
 const { t } = useI18n()
 const globalStore = useGlobalStore()
@@ -27,12 +28,15 @@ const cycleTheme = () => {
 <template>
   <header class="glass-nav m-2 flex items-center justify-between rounded-2xl px-3.5 py-2.5">
     <div class="flex items-center gap-2.5">
-      <router-link to="/" class="flex items-center gap-2.5">
-        <span class="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#8b5cf6] via-[#ec4899] to-[#3b82f6] shadow-[0_0_12px_rgba(139,92,246,0.6)]">
+      <router-link to="/" class="flex items-center gap-2.5" :aria-label="BRAND_FULL">
+        <span class="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] shadow-[0_0_12px_rgba(37,99,235,0.6)]">
           <span class="h-2 w-2 rounded-full bg-white/95"></span>
           <span class="absolute inset-0 rounded-full ring-1 ring-white/50"></span>
         </span>
-        <h1 class="text-primary text-base font-extrabold tracking-tight">Sonic</h1>
+        <div class="flex flex-col leading-none">
+          <span class="text-[8px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+          <h1 class="mt-0.5 text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</h1>
+        </div>
       </router-link>
     </div>
     <div class="flex items-center gap-1.5">

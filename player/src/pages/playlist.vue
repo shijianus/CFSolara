@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { playlistDetail, playlistTrackAll, commentNew, search } from '@/api'
 import { usePlayActions } from '@/composables/usePlayActions'
-import { PlaylistInfo, PlaylistSong, CommentItem } from '@/typings'
+import { PlaylistInfo, CommentItem } from '@/typings'
 import LazyImage from '@/components/Ui/LazyImage.vue'
 import Button from '@/components/Ui/Button.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
@@ -13,12 +13,13 @@ import {
   transformSongs,
   transformSearchPlaylists,
   type SongData,
-  type PlaylistData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const route = useRoute()
 const playlistId = route.params.id
+const libraryStore = useLibraryStore()
 
 interface SimilarPlaylist {
   id: number | string
@@ -34,7 +35,6 @@ interface PlaylistState {
   playlistInfo: PlaylistInfo
   isCollected: boolean
   songs: SongData[]
-  newComment: string
   comments: CommentItem[]
   isPageLoading: boolean
   similarPlaylists: SimilarPlaylist[]
@@ -42,6 +42,13 @@ interface PlaylistState {
   hasMoreComments: boolean
   isLoadingMoreComments: boolean
   isCommentLoadError: boolean
+  commentTotal: number
+  songTotal: number
+  hasMoreSongs: boolean
+  isLoadingMoreSongs: boolean
+  isSongLoadError: boolean
+  isPreparingFullList: boolean
+  partialPlayNotice: string
 }
 
 const state = reactive<PlaylistState>({
@@ -49,7 +56,6 @@ const state = reactive<PlaylistState>({
   playlistInfo: {} as PlaylistInfo,
   isCollected: false,
   songs: [],
-  newComment: '',
   comments: [],
   isPageLoading: true,
   similarPlaylists: [],
@@ -57,32 +63,66 @@ const state = reactive<PlaylistState>({
   hasMoreComments: true,
   isLoadingMoreComments: false,
   isCommentLoadError: false,
+  commentTotal: 0,
+  songTotal: 0,
+  hasMoreSongs: false,
+  isLoadingMoreSongs: false,
+  isSongLoadError: false,
+  isPreparingFullList: false,
+  partialPlayNotice: '',
 })
 const {
   activeTab,
   playlistInfo,
   songs,
-  newComment,
   comments,
   isPageLoading,
   similarPlaylists,
   hasMoreComments,
   isLoadingMoreComments,
   isCommentLoadError,
+  commentTotal,
+  songTotal,
+  hasMoreSongs,
+  isLoadingMoreSongs,
+  isSongLoadError,
+  isPreparingFullList,
+  partialPlayNotice,
 } = toRefs(state)
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 const { t } = useI18n()
 
-const gradients: string[] = ['from-purple-500 to-pink-500']
-const emojis: string[] = ['🎵', '🎶', '♪', '♫', '🎼']
-
+const gradients: string[] = ['from-blue-500 to-sky-500']
 const pickGradient = (): string => gradients[Math.floor(Math.random() * gradients.length)]
 
+const SONG_PAGE_SIZE = 100
+
+/** 拉取一页歌曲；reset 为 true 时覆盖，否则按 offset 追加并去重 */
+const loadSongPage = async (id: number, offset: number, reset: boolean) => {
+  const res = await playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset })
+  const page = transformSongs(res as Record<string, unknown>)
+  if (reset) {
+    state.songs = page
+  } else {
+    const seen = new Set(state.songs.map(s => String(s.id)))
+    state.songs.push(...page.filter(s => !seen.has(String(s.id))))
+  }
+  const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+  state.hasMoreSongs = !reachedTotal && page.length === SONG_PAGE_SIZE
+  state.isSongLoadError = false
+}
+
 const loadPlaylist = async (id: number) => {
+  state.songs = []
+  state.songTotal = 0
+  state.hasMoreSongs = false
+  state.isLoadingMoreSongs = false
+  state.isSongLoadError = false
+  state.partialPlayNotice = ''
   try {
     const [detailRes, tracksRes] = await Promise.all([
       playlistDetail({ id }),
-      playlistTrackAll({ id, limit: 100 }),
+      playlistTrackAll({ id, limit: SONG_PAGE_SIZE, offset: 0 }),
     ])
 
     const detail = transformPlaylistDetail(detailRes as Record<string, unknown>, t('home.playlistFallback'))
@@ -101,28 +141,106 @@ const loadPlaylist = async (id: number) => {
         gradient: pickGradient(),
         coverImgUrl: detail.coverImgUrl,
       }
+      state.songTotal = detail.songCount
+      state.isCollected = libraryStore.isPlaylistCollected(id)
     }
 
-    state.songs = transformSongs(tracksRes as Record<string, unknown>, 100)
+    state.songs = transformSongs(tracksRes as Record<string, unknown>)
+    const reachedTotal = state.songTotal > 0 && state.songs.length >= state.songTotal
+    state.hasMoreSongs = !reachedTotal && state.songs.length === SONG_PAGE_SIZE
   } catch {
+    state.isSongLoadError = true
   } finally {
     state.isPageLoading = false
   }
 }
 
+/** 追加下一页歌曲 */
+const loadMoreSongs = async () => {
+  if (state.isLoadingMoreSongs || !state.hasMoreSongs) return
+  state.isLoadingMoreSongs = true
+  try {
+    await loadSongPage(Number(route.params.id), state.songs.length, false)
+  } catch {
+    state.isSongLoadError = true
+  } finally {
+    state.isLoadingMoreSongs = false
+  }
+}
+
+/** 播放/随机前确保完整列表已入队，失败时返回 false 以便提示仅播放已加载部分 */
+const ensureAllSongsLoaded = async () => {
+  if (!state.songs.length || !state.hasMoreSongs) return true
+  state.isPreparingFullList = true
+  try {
+    while (state.hasMoreSongs) {
+      const before = state.songs.length
+      await loadSongPage(Number(route.params.id), before, false)
+      if (state.songs.length === before) break
+    }
+    return !state.hasMoreSongs
+  } catch {
+    state.isSongLoadError = true
+    return false
+  } finally {
+    state.isPreparingFullList = false
+  }
+}
+
+const handlePlayAll = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  playAllAction(state.songs)
+}
+
+const handleShufflePlay = async () => {
+  const complete = await ensureAllSongsLoaded()
+  if (!complete && state.songs.length) {
+    state.partialPlayNotice = t('playlist.partialPlayNotice', {
+      loaded: state.songs.length,
+      total: state.songTotal || state.songs.length,
+    })
+  } else {
+    state.partialPlayNotice = ''
+  }
+  shufflePlayAction(state.songs)
+}
+
+const dismissPartialPlayNotice = () => {
+  state.partialPlayNotice = ''
+}
+
+let commentRequestSeq = 0
+
+const resetCommentState = () => {
+  commentRequestSeq += 1
+  state.comments = []
+  state.commentPage = 1
+  state.hasMoreComments = true
+  state.isLoadingMoreComments = false
+  state.isCommentLoadError = false
+  state.commentTotal = 0
+}
+
 const loadComments = async (id?: number, reset = false) => {
   const targetId = id || Number(playlistId)
   if (!targetId) return
-  if (state.isLoadingMoreComments) return
-  if (!reset && !state.hasMoreComments) return
+  if (!reset && (state.isLoadingMoreComments || !state.hasMoreComments)) return
 
   if (reset) {
-    state.commentPage = 1
-    state.comments = []
-    state.hasMoreComments = true
+    resetCommentState()
   } else {
     state.isLoadingMoreComments = true
   }
+  const requestSeq = commentRequestSeq
+  const pageNo = state.commentPage
   state.isCommentLoadError = false
 
   try {
@@ -130,9 +248,10 @@ const loadComments = async (id?: number, reset = false) => {
       id: targetId,
       type: 2,
       sortType: 1,
-      pageNo: state.commentPage,
+      pageNo,
       pageSize: 20,
     })
+    if (requestSeq !== commentRequestSeq) return
     const list = (res as any)?.data?.comments || (res as any)?.comments || []
     if (Array.isArray(list)) {
       const mapped = list.map((c: any, i: number) => ({
@@ -153,18 +272,33 @@ const loadComments = async (id?: number, reset = false) => {
 
       state.comments = reset ? mapped : [...state.comments, ...mapped]
       state.hasMoreComments = list.length === 20
+      const total = Number(
+        (res as any)?.data?.total ??
+          (res as any)?.total ??
+          (res as any)?.data?.totalCount ??
+          (res as any)?.totalCount
+      )
+      if (Number.isFinite(total)) {
+        state.commentTotal = total
+      } else if (reset) {
+        state.commentTotal = mapped.length
+      }
       if (mapped.length) state.commentPage += 1
     } else {
       state.hasMoreComments = false
+      if (reset) state.commentTotal = 0
     }
   } catch {
+    if (requestSeq !== commentRequestSeq) return
     if (!reset) {
       state.isCommentLoadError = true
     } else {
       state.hasMoreComments = false
     }
   } finally {
-    state.isLoadingMoreComments = false
+    if (requestSeq === commentRequestSeq) {
+      state.isLoadingMoreComments = false
+    }
   }
 }
 
@@ -187,8 +321,9 @@ onMounted(() => {
   const idNum = Number(playlistId)
   if (!Number.isNaN(idNum) && idNum > 0) {
     state.isPageLoading = true
+    resetCommentState()
     loadPlaylist(idNum)
-    loadComments(idNum)
+    loadComments(idNum, true)
   }
 })
 
@@ -198,8 +333,9 @@ watch(
   idNum => {
     if (!Number.isNaN(idNum) && idNum > 0) {
       state.isPageLoading = true
+      resetCommentState()
       loadPlaylist(idNum)
-      loadComments(idNum)
+      loadComments(idNum, true)
     }
   }
 )
@@ -211,28 +347,18 @@ watch(
   }
 )
 
-const submitComment = () => {
-  if (!state.newComment.trim()) return
-  const comment = {
-    username: t('common.me'),
-    avatar: t('common.me'),
-    avatarGradient: 'from-pink-400 to-purple-500',
-    time: t('common.justNow'),
-    content: state.newComment,
-    likes: 0,
-    avatarUrl: '',
-    replies: [],
-  }
-  state.comments.unshift(comment)
-  state.newComment = ''
-}
-
-const playAll = () => playAllAction(state.songs)
-
-const shufflePlay = () => shufflePlayAction(state.songs)
 
 const toggleCollect = () => {
-  state.isCollected = !state.isCollected
+  if (!state.playlistInfo) return
+  const collected = libraryStore.toggleCollectPlaylist({
+    id: Number(playlistId),
+    name: state.playlistInfo.name,
+    coverImgUrl: state.playlistInfo.coverImgUrl,
+    trackCount: state.playlistInfo.songCount,
+    creator: state.playlistInfo.creator,
+    playCount: state.playlistInfo.playCount,
+  })
+  state.isCollected = collected
 }
 
 const sharePlaylist = async () => {
@@ -259,9 +385,9 @@ const tabsWithCount = computed(() =>
     ...tab,
     count:
       tab.key === 'songs'
-        ? songs.value.length
+        ? songTotal.value || songs.value.length
         : tab.key === 'comments'
-          ? comments.value.length
+          ? commentTotal.value || comments.value.length
           : similarPlaylists.value.length,
   }))
 )
@@ -306,10 +432,10 @@ const tabsWithCount = computed(() =>
                     variant="ghost"
                     size="none"
                     class="absolute! inset-0 flex items-center justify-center rounded-3xl opacity-0 transition-all duration-300 group-hover:opacity-100"
-                    @click="playAll"
+                    @click="handlePlayAll"
                   >
                     <div
-                      class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-r from-pink-500 to-purple-600 text-white shadow-2xl transition-transform hover:scale-110"
+                      class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600 text-white shadow-2xl transition-transform hover:scale-110"
                     >
                       <span class="icon-[mdi--play] h-10 w-10"></span>
                     </div>
@@ -386,8 +512,8 @@ const tabsWithCount = computed(() =>
                       variant="solid"
                       size="md"
                       rounded="full"
-                      class="px-8 py-3 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40"
-                      @click="playAll"
+                      class="px-8 py-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
+                      @click="handlePlayAll"
                     >
                       <span class="icon-[mdi--play] mr-2 h-5 w-5"></span>
                       {{ $t('actions.playAll') }}
@@ -397,7 +523,7 @@ const tabsWithCount = computed(() =>
                       size="md"
                       rounded="full"
                       class="px-6 py-3"
-                      @click="shufflePlay"
+                      @click="handleShufflePlay"
                     >
                       <span class="icon-[mdi--shuffle] mr-2 h-5 w-5"></span>
                       {{ $t('actions.shufflePlay') }}
@@ -447,44 +573,56 @@ const tabsWithCount = computed(() =>
 
         <!-- 歌曲列表 -->
         <section v-show="activeTab === 'songs'" class="h-full overflow-hidden">
+          <div
+            v-if="partialPlayNotice"
+            class="mb-3 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-primary/80"
+            role="status"
+          >
+            <span class="icon-[mdi--alert-outline] mt-0.5 h-4 w-4 shrink-0 text-amber-400"></span>
+            <span class="flex-1">{{ partialPlayNotice }}</span>
+            <button
+              type="button"
+              class="min-h-11 min-w-11 shrink-0 rounded-lg px-2 text-xs font-medium text-primary/60 hover:text-primary focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="dismissPartialPlayNotice"
+            >
+              {{ $t('playlist.dismiss') }}
+            </button>
+          </div>
           <SongList :songs="songs" :show-header="true" />
+          <div class="mt-4 flex flex-col items-center gap-2 pb-4">
+            <p v-if="songTotal" class="text-primary/50 text-xs">
+              {{ $t('playlist.loadedProgress', { loaded: songs.length, total: songTotal }) }}
+            </p>
+            <Button
+              v-if="hasMoreSongs"
+              variant="soft"
+              size="sm"
+              rounded="full"
+              class="min-h-11"
+              :loading="isLoadingMoreSongs || isPreparingFullList"
+              :disabled="isLoadingMoreSongs || isPreparingFullList"
+              @click="loadMoreSongs"
+            >
+              {{ isLoadingMoreSongs || isPreparingFullList ? $t('playlist.loadingAll') : $t('playlist.loadMore') }}
+            </Button>
+            <p v-else-if="songs.length" class="text-primary/40 text-xs">
+              {{ $t('playlist.allLoaded') }}
+            </p>
+            <button
+              v-if="isSongLoadError && !isLoadingMoreSongs"
+              type="button"
+              class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="loadMoreSongs"
+            >
+              {{ $t('playlist.retryLoad') }}
+            </button>
+          </div>
         </section>
 
         <!-- 评论区 -->
         <section v-show="activeTab === 'comments'" class="animate-fade-in">
           <div class="glass-card overflow-hidden">
-            <!-- 发表评论 -->
-            <div class="border-b border-glass p-6">
-              <div class="flex gap-4">
-                <div
-                  class="accent-gradient flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-md"
-                >
-                  {{ $t('common.me') }}
-                </div>
-                <div class="flex-1">
-                  <textarea
-                    v-model="newComment"
-                    :placeholder="$t('comments.placeholder')"
-                    class="text-primary glass-card placeholder-glass-50 w-full resize-none rounded-xl border border-glass p-4 text-sm transition-all focus:border-pink-400/50 focus:ring-2 focus:ring-pink-400/20 focus:outline-none"
-                    rows="3"
-                  ></textarea>
-                  <div class="mt-3 flex items-center justify-end">
-                    <Button
-                      variant="gradient"
-                      size="md"
-                      rounded="full"
-                      class="px-6 py-2.5 shadow-lg transition-all hover:shadow-xl"
-                      :disabled="!newComment.trim()"
-                      @click="submitComment"
-                    >
-                      {{ $t('comments.publish') }}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 评论列表 -->
+            <!-- 评论列表（只读，无后端写接口） -->
             <div v-if="comments.length" class="divide-y divide-glass">
               <div
                 v-for="(comment, index) in comments"
@@ -516,25 +654,9 @@ const tabsWithCount = computed(() =>
                       {{ comment.content }}
                     </p>
 
-                    <div class="flex items-center gap-5 text-xs">
-                      <Button
-                        variant="ghost"
-                        size="none"
-                        class="text-primary/60 hover:text-primary flex items-center gap-1.5 transition-colors"
-                        icon="icon-[mdi--thumb-up-outline]"
-                        icon-class="h-4 w-4"
-                      >
-                        <span class="font-medium">{{ comment.likes || '' }}</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="none"
-                        class="text-primary/60 hover:text-primary flex items-center gap-1.5 transition-colors"
-                        icon="icon-[mdi--reply]"
-                        icon-class="h-4 w-4"
-                      >
-                        <span class="font-medium">{{ $t('comments.reply') }}</span>
-                      </Button>
+                    <div class="flex items-center gap-1.5 text-xs text-primary/50">
+                      <span class="icon-[mdi--thumb-up-outline] h-4 w-4"></span>
+                      <span class="font-medium">{{ comment.likes || 0 }}</span>
                     </div>
 
                     <!-- 回复列表 -->
@@ -572,10 +694,11 @@ const tabsWithCount = computed(() =>
 
             <!-- 评论流式自动触底加载与超时重试 -->
             <InfiniteScroll
+              v-if="comments.length || isLoadingMoreComments || isCommentLoadError"
               :loading="isLoadingMoreComments"
               :has-more="hasMoreComments"
               :error="isCommentLoadError"
-              :empty="!comments.length"
+              :empty="false"
               :loading-text="$t('comments.loadMore')"
               :retry-text="$t('comments.loadMore')"
               @load="loadComments(undefined, false)"
@@ -625,12 +748,12 @@ const tabsWithCount = computed(() =>
                 </div>
                 <div class="p-3">
                   <p
-                    class="text-primary mb-1.5 line-clamp-2 text-sm leading-snug font-semibold transition-colors group-hover:text-pink-400"
+                    class="text-primary mb-1.5 line-clamp-2 text-sm leading-snug font-semibold transition-colors group-hover:text-sky-400"
                   >
                     {{ pl.name }}
                   </p>
                   <p class="text-primary/60 text-xs">
-                    {{ $t('commonUnits.songsShort', pl.trackCount) }}
+                    {{ $t('commonUnits.songsShort', { count: pl.trackCount || 0 }) }}
                     <span v-if="pl.creator"> • {{ pl.creator.nickname }}</span>
                   </p>
                 </div>

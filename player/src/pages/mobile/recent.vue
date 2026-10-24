@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useAudio } from '@/composables/useAudio'
 import type { Song as StoreSong } from '@/stores/interface'
 import MobileSongList from '@/components/Mobile/MobileSongList.vue'
+import { useLibraryStore } from '@/stores/modules/library'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
@@ -23,7 +24,9 @@ const creativeEffect = {
 }
 
 const { t } = useI18n()
-const { setPlaylist, play, playlist, clearPlaylist } = useAudio()
+const { setPlaylist, play, playlist, clearPlaylistWithUndo } = useAudio()
+const libraryStore = useLibraryStore()
+const likedCount = computed(() => libraryStore.likedSongCount)
 
 const state = reactive({
   activeTab: 0,
@@ -58,7 +61,7 @@ const playAllRecent = () => {
 }
 
 const handleClearQueue = () => {
-  clearPlaylist()
+  clearPlaylistWithUndo()
 }
 
 const tabs = computed(() => [
@@ -77,6 +80,25 @@ const tabs = computed(() => [
 
 <template>
   <div class="flex flex-1 flex-col overflow-hidden">
+    <!-- 我喜欢的音乐入口 -->
+    <div class="shrink-0 px-4 pt-1 pb-2">
+      <router-link
+        to="/likes"
+        class="glass-card flex min-h-[52px] w-full items-center gap-3 px-4 py-2 transition-all duration-200 active:scale-[0.98]"
+      >
+        <span
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-sky-500 to-blue-600"
+        >
+          <span class="icon-[mdi--heart] text-glass-contrast h-5 w-5"></span>
+        </span>
+        <span class="text-primary flex-1 text-left text-sm font-medium">
+          {{ t('likes.title') }}
+        </span>
+        <span v-if="likedCount > 0" class="text-primary/60 text-xs">{{ likedCount }}</span>
+        <span class="icon-[mdi--chevron-right] text-primary/40 h-5 w-5"></span>
+      </router-link>
+    </div>
+
     <div class="shrink-0 px-4 pb-3">
       <div class="glass-card inline-flex w-full gap-1.5 p-1.5">
         <button
@@ -204,10 +226,10 @@ const tabs = computed(() => [
 }
 
 .tab-button-active {
-  background: linear-gradient(to right, #ec4899, #8b5cf6);
+  background: linear-gradient(to right, #38bdf8, #2563eb);
   color: white;
   opacity: 1;
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 15px rgba(56,189,248, 0.3);
 }
 
 .tab-count {
@@ -239,21 +261,21 @@ const tabs = computed(() => [
 }
 
 .play-all-button {
-  background: linear-gradient(to right, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  background: linear-gradient(to right, #38bdf8, #2563eb);
+  box-shadow: 0 4px 15px rgba(56,189,248, 0.3);
 }
 
 .play-all-button:active {
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(56,189,248, 0.3);
 }
 
 .empty-icon {
-  background: linear-gradient(to bottom right, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
+  background: linear-gradient(to bottom right, rgba(56,189,248, 0.15), rgba(37,99,235, 0.15));
 }
 
 :root.dark .empty-icon,
 html.dark .empty-icon {
-  background: linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to bottom right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
 }
 
 .empty-icon-inner {

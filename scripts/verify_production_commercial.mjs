@@ -27,8 +27,8 @@ async function runAudit() {
       const htmlResp = await fetch(domain, { headers: { 'User-Agent': 'SonicAudit/2.0' } });
       const html = await htmlResp.text();
       assert(htmlResp.status === 200, 'Home page HTTP 200');
-      assert(html.includes('<title>Sonic - Cloud Music Platform</title>'), 'Page title is Sonic');
-      assert(html.includes('content="EpoCanvas"'), 'Author is EpoCanvas');
+      assert(html.includes('<title>epocanvas sonic - Cloud Music Platform</title>'), 'Page title is epocanvas sonic');
+      assert(html.includes('content="epocanvas"'), 'Author is epocanvas');
       assert(!html.includes('hm.baidu.com'), 'No Baidu analytics');
       assert(!html.includes('google-analytics.com'), 'No Google analytics');
     } catch (e) {

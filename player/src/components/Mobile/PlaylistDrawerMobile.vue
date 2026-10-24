@@ -29,7 +29,7 @@ const {
   togglePlayMode,
   play,
   removeSong,
-  clearPlaylist,
+  clearPlaylistWithUndo,
   clearHistory,
   addSong,
 } = useAudio()
@@ -91,7 +91,7 @@ const handleHistoryPlay = (song: any) => {
 // 清空当前列表（播放列表或历史记录）
 const handleClear = () => {
   if (activeTab.value === 'playlist') {
-    clearPlaylist()
+    clearPlaylistWithUndo()
   } else {
     clearHistory()
   }
@@ -178,7 +178,7 @@ const handleClear = () => {
                 <div class="flex flex-1 items-center gap-3 overflow-hidden">
                   <span
                     v-if="currentSong?.id === song.id"
-                    class="icon-[mdi--poll] h-4 w-4 text-pink-500"
+                    class="icon-[mdi--poll] h-4 w-4 text-sky-500"
                   ></span>
                   <span v-else class="text-primary/40 w-4 text-center text-xs">{{
                     index + 1
@@ -187,14 +187,14 @@ const handleClear = () => {
                   <div class="flex flex-col overflow-hidden">
                     <span
                       class="truncate text-sm font-medium"
-                      :class="currentSong?.id === song.id ? 'text-pink-500' : 'text-primary'"
+                      :class="currentSong?.id === song.id ? 'text-sky-500' : 'text-primary'"
                     >
                       {{ song.name }}
                     </span>
                     <span
                       class="truncate text-xs"
                       :class="
-                        currentSong?.id === song.id ? 'text-pink-400/70' : 'text-primary/50'
+                        currentSong?.id === song.id ? 'text-sky-400/70' : 'text-primary/50'
                       "
                     >
                       {{ song.artist }}
@@ -238,14 +238,14 @@ const handleClear = () => {
                   <div class="flex flex-col overflow-hidden">
                     <span
                       class="truncate text-sm font-medium"
-                      :class="currentSong?.id === song.id ? 'text-pink-500' : 'text-primary'"
+                      :class="currentSong?.id === song.id ? 'text-sky-500' : 'text-primary'"
                     >
                       {{ song.name }}
                     </span>
                     <span
                       class="truncate text-xs"
                       :class="
-                        currentSong?.id === song.id ? 'text-pink-400/70' : 'text-primary/50'
+                        currentSong?.id === song.id ? 'text-sky-400/70' : 'text-primary/50'
                       "
                     >
                       {{ song.artist }}

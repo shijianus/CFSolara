@@ -16,6 +16,9 @@ export default {
     clear: 'クリア',
     loading: '読み込み中',
     noData: 'データなし',
+    close: '閉じる',
+    undo: '元に戻す',
+    retry: '再試行',
     search: {
       placeholder: '楽曲・アーティスト・アルバムを検索...',
       label: '検索',
@@ -27,6 +30,8 @@ export default {
     share: 'シェア',
     collect: 'お気に入り',
     uncollect: 'お気に入り解除',
+    like: 'いいね',
+    unlike: 'いいね解除',
     me: '私',
     justNow: 'たった今',
     minutesAgo: '分前',
@@ -44,6 +49,23 @@ export default {
       favorites: 'お気に入り',
       fans: 'ファン',
     },
+  },
+  download: {
+    overwritePrompt: 'この曲の {quality} はすでにダウンロード済みです。上書きすると既存のオフラインファイルが置き換わります。',
+    overwrite: '上書きダウンロード',
+    cancelOverwrite: 'キャンセル',
+    downloading: 'ダウンロード中',
+    cancelDownload: 'ダウンロードをキャンセル',
+    completed: 'ダウンロード完了：{name}',
+    cancelled: 'ダウンロードをキャンセルしました',
+    failed: 'ダウンロード失敗：{reason}',
+    networkError: 'ネットワークエラーです。接続を確認してください。',
+    sourceUnavailable: '音源が利用できないか、著作権制限があります',
+    manualSaveRequired: 'ブラウザが自動保存を制限しました。「手動で保存」をクリックしてください。',
+    saveNow: '手動で保存',
+    saved: 'ファイルを保存しました',
+    checking: '既存のダウンロードを確認中…',
+    unavailable: 'この音質は利用できません',
   },
   search: {
     tabs: { song: '曲', playlist: 'プレイリスト', mv: 'MV' },
@@ -65,6 +87,14 @@ export default {
     official: '公式ランキング',
   },
   components: {
+    infiniteScroll: {
+      error: '読み込みに失敗しました。再試行してください。',
+      timeout: '応答が遅れています。タップして再試行してください。',
+      empty: '結果がありません',
+      reset: 'フィルターをリセット',
+      retry: '再読み込み',
+      noMore: 'すべて読み込みました',
+    },
     pagination: {
       prev: '前へ',
       next: '次へ',
@@ -133,6 +163,7 @@ export default {
       dropFilesHint: '音声ファイルをここにドラッグ＆ドロップしてアップロード',
       localMusicEmpty: 'ローカル音楽がありません。下のボタンをクリックして追加してください',
       addMusic: '音楽を追加',
+    localMusicDeleted: 'ローカル曲「{name}」を削除しました',
     },
     background: {
       common: {
@@ -191,6 +222,7 @@ export default {
       myMusic: 'マイミュージック',
       system: 'システム',
       playlists: { created: '作成したプレイリスト' },
+      collectedPlaylists: 'コレクションしたプレイリスト',
       menu: {
         home: 'ホーム',
         mv: 'MV',
@@ -207,6 +239,15 @@ export default {
     },
   },
   player: {
+    queueCleared: '再生キューをクリアしました',
+    localFileMissing: 'ローカルファイルが利用できません。現在の曲をクリアしました。',
+    next: '次の曲',
+    qualitySwitchFailed: '音質の切り替えに失敗しました。元の音質に戻しました。',
+    playbackError: {
+      network: 'ネットワークに接続できません。通信状況を確認して再試行してください。',
+      source: '音源が利用できません。別の曲をお試しください。',
+      copyright: 'この曲は著作権の制限により再生できません。',
+    },
     play: '再生',
     pause: '一時停止',
     loading: '読み込み中…',
@@ -280,7 +321,7 @@ export default {
       all: '全部',
       official: '公式',
       live: 'ライブ',
-      netease: 'Sonicオリジナル',
+      netease: 'sonic オリジナル',
     },
     actions: {
       loadMore: 'もっと見る',
@@ -301,6 +342,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: '再生可能なMVソースがありません',
+    videoError: 'MVの再生に失敗しました。再試行してください。',
     stats: {
       plays: '回再生',
       likes: 'いいね',
@@ -321,7 +364,18 @@ export default {
     },
   },
   likes: {
+    title: 'お気に入りの音楽',
+    subtitle: '保存した曲・プレイリスト・MV',
+    tabs: {
+      all: 'すべて',
+      song: '曲',
+      playlist: 'プレイリスト',
+      mv: 'MV',
+    },
     empty: 'お気に入りの曲はまだありません',
+    emptyAll: 'まだ何もありません。曲・プレイリスト・MVをいいねするとここに表示されます',
+    emptyPlaylist: 'コレクションしたプレイリストはまだありません',
+    emptyMv: 'いいねしたMVはまだありません',
   },
   recent: {
     title: '最近の再生',
@@ -364,6 +418,13 @@ export default {
   playlist: {
     tabs: { songs: '曲', comments: 'コメント', similar: '類似' },
     similarEmpty: '類似のプレイリストはありません',
+    loadMore: 'さらに曲を読み込む',
+    loadingAll: '曲リスト全体を読み込み中…',
+    loadedProgress: '{loaded} / {total} 曲を読み込み済み',
+    allLoaded: 'すべての曲を読み込みました',
+    partialPlayNotice: '完全なリストを読み込めませんでした。読み込み済みの {loaded} 曲（全 {total} 曲）のみ再生します。',
+    retryLoad: '再読み込み',
+    dismiss: '閉じる',
   },
   artistPage: {
     bioTitle: 'アーティスト紹介',
@@ -371,6 +432,11 @@ export default {
     tabs: { hotSongs: '人気曲', albums: 'アルバム' },
     stats: { songs: '曲', albums: 'アルバム', mvs: 'MV', fans: 'ファン' },
     albumsEmpty: 'アルバムはありません',
+    loadMoreSongs: 'さらに曲を読み込む',
+    loadMoreAlbums: 'さらにアルバムを読み込む',
+    loadedSongs: '{loaded} / {total} 曲を読み込み済み',
+    loadedAlbums: '{loaded} / {total} 枚を読み込み済み',
+    loadFailedRetry: '読み込みに失敗しました。タップして再試行',
   },
   albumPage: {
     alt: { cover: 'アルバムカバー' },

@@ -43,23 +43,23 @@ onUnmounted(() => document.removeEventListener('pointerdown', onDocClick))
       >
         <div class="space-y-2 text-xs">
           <div class="flex items-center gap-2">
-            <span class="icon-[mdi--music-note] h-4 w-4 text-pink-400"></span>
+            <span class="icon-[mdi--music-note] h-4 w-4 text-sky-400"></span>
             <span class="text-primary/80">{{ songCount }}首歌曲</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="icon-[mdi--heart] h-4 w-4 text-pink-400"></span>
+            <span class="icon-[mdi--heart] h-4 w-4 text-sky-400"></span>
             <span class="text-primary/80">{{ likes }}收藏</span>
           </div>
           <div v-if="playCount" class="flex items-center gap-2">
-            <span class="icon-[mdi--play] h-4 w-4 text-pink-400"></span>
+            <span class="icon-[mdi--play] h-4 w-4 text-sky-400"></span>
             <span class="text-primary/80">{{ playCount }}播放</span>
           </div>
           <div v-if="category" class="flex items-center gap-2">
-            <span class="icon-[mdi--tag] h-4 w-4 text-pink-400"></span>
+            <span class="icon-[mdi--tag] h-4 w-4 text-sky-400"></span>
             <span class="text-primary/80">{{ category }}</span>
           </div>
           <div v-if="createTime" class="flex items-center gap-2">
-            <span class="icon-[mdi--calendar] h-4 w-4 text-pink-400"></span>
+            <span class="icon-[mdi--calendar] h-4 w-4 text-sky-400"></span>
             <span class="text-primary/80">{{ createTime }}</span>
           </div>
         </div>

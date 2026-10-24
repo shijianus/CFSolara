@@ -341,7 +341,7 @@ export function useSharedElement() {
    */
   const createPulse = (
     element: HTMLElement,
-    color: string = 'rgba(236, 72, 153, 0.5)'
+    color: string = 'rgba(56,189,248, 0.5)'
   ) => {
     const rect = element.getBoundingClientRect()
     const parent = element.parentElement

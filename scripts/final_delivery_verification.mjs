@@ -78,21 +78,21 @@ async function auditHost(baseUrl) {
   // 1.1 Check <title>
   const titleMatch = html.match(/<title>(.*?)<\/title>/i);
   const title = titleMatch ? titleMatch[1].trim() : '';
-  const expectedTitle = 'Sonic - Cloud Music Platform';
+  const expectedTitle = 'epocanvas sonic - Cloud Music Platform';
   recordCheck(hostReport.htmlAudit, `Title is "${expectedTitle}"`, title === expectedTitle, { found: title, expected: expectedTitle });
 
   // 1.2 Check author
   const authorMatch = html.match(/<meta\s+name=["']author["']\s+content=["'](.*?)["']/i) ||
                       html.match(/<meta\s+content=["'](.*?)["']\s+name=["']author["']/i);
   const author = authorMatch ? authorMatch[1].trim() : '';
-  const expectedAuthor = 'EpoCanvas';
+  const expectedAuthor = 'epocanvas';
   recordCheck(hostReport.htmlAudit, `Meta Author is "${expectedAuthor}"`, author === expectedAuthor, { found: author, expected: expectedAuthor });
 
   // 1.3 Check description
   const descMatch = html.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i) ||
                     html.match(/<meta\s+content=["'](.*?)["']\s+name=["']description["']/i);
   const desc = descMatch ? descMatch[1].trim() : '';
-  const expectedDesc = 'Sonic Music Cloud Platform (by EpoCanvas)';
+  const expectedDesc = 'epocanvas sonic Music Cloud Platform';
   recordCheck(hostReport.htmlAudit, `Meta Description is "${expectedDesc}"`, desc === expectedDesc, { found: desc, expected: expectedDesc });
 
   // 1.4 Check absence of third-party tracking scripts
@@ -218,10 +218,12 @@ async function auditHost(baseUrl) {
 
     if (headerDetails.found) {
       // Brand text check
-      const hasBrand = headerDetails.text.includes('Sonic') || headerDetails.htmlContent.includes('Sonic');
+      const hasBrand =
+        (headerDetails.text.includes('epocanvas') && headerDetails.text.includes('sonic')) ||
+        headerDetails.htmlContent.includes('epocanvas sonic');
       recordCheck(
         hostReport.domHeaderAudit,
-        'Header contains "Sonic" branding',
+        'Header contains "epocanvas sonic" branding',
         hasBrand,
         { headerText: headerDetails.text }
       );
@@ -277,13 +279,13 @@ async function auditHost(baseUrl) {
     const metaRes = await fetch(`${baseUrl}/api`);
     const metaStatusOk = metaRes.status === 200;
     const metaJson = await metaRes.json();
-    const hasSonicName = metaJson.name && metaJson.name.includes('Sonic');
-    const hasEpoCanvasCopyright = metaJson.copyright && metaJson.copyright.includes('© EpoCanvas');
+    const hasBrandName = metaJson.name && metaJson.name.includes('epocanvas sonic');
+    const hasBrandCopyright = metaJson.copyright && metaJson.copyright.includes('© epocanvas');
 
     recordCheck(
       hostReport.apiGatewayAudit,
-      'GET /api returns 200 with metadata (Platform: Sonic, Copyright: © EpoCanvas)',
-      metaStatusOk && hasSonicName && hasEpoCanvasCopyright,
+      'GET /api returns 200 with metadata (Platform: epocanvas sonic, Copyright: © epocanvas)',
+      metaStatusOk && hasBrandName && hasBrandCopyright,
       { status: metaRes.status, name: metaJson.name, copyright: metaJson.copyright }
     );
   } catch (err) {

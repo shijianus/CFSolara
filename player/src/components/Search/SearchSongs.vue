@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cloudSearch } from '@/api'
 import { useAudio } from '@/composables/useAudio'
-import { transformSearchSongs, type SongData } from '@/utils/transformers'
+import { transformSearchSongs, normalizeDurationMs, type SongData } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
 
 interface Props {
@@ -54,16 +54,17 @@ const fetchSongs = async () => {
           id: t.platformId || t.id,
           name: t.title || t.name,
           artist: t.artist,
-          artistId: 0,
-          artists: [{ id: 0, name: t.artist }],
+          // 保留真实歌手 ID；缺失时留空，由列表降级为纯文本展示
+          artistId: t.artistId ?? undefined,
+          artists: t.artistId ? [{ id: t.artistId, name: t.artist || '' }] : undefined,
           album: t.album || '',
           albumId: 0,
           cover: formatCoverUrl(t.cover || t.coverUrl || t.artistPic || '', { size: 300, artist: t.artist }),
-          duration: (t.duration || 200) * 1000,
-          dt: (t.duration || 200) * 1000,
+          duration: normalizeDurationMs(t.duration),
+          dt: normalizeDurationMs(t.duration),
           url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
           sha: t.sha || '',
-          qualityBadge: t.qualityBadge || 'SQ',
+          qualityBadge: t.qualityBadge || undefined,
           qualities: t.qualities || [],
           liked: false,
         }))

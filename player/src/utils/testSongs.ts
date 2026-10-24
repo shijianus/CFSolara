@@ -11,7 +11,7 @@ export const testSongs: Song[] = [
     url: 'http://music.163.com/song/media/outer/url?id=27591651.mp3',
     cover: 'http://p4.music.126.net/9KeyafHLjadqSQTRS_tN5Q==/5741649720318487.jpg',
     emoji: '🌟',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     liked: false,
   },
   {
@@ -23,7 +23,7 @@ export const testSongs: Song[] = [
     url: 'http://music.163.com/song/media/outer/url?id=409872504.mp3',
     cover: 'http://p3.music.126.net/g7aakYG_Wfmrn1_IDfVUXA==/109951165050166241.jpg',
     emoji: '🎈',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    gradient: 'linear-gradient(135deg, #7dd3fc 0%, #f5576c 100%)',
     liked: true,
   },
   {
@@ -35,7 +35,7 @@ export const testSongs: Song[] = [
     url: 'https://www.soundjay.com/misc/sounds/magic-chime-02.mp3',
     cover: '',
     emoji: '🌾',
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    gradient: 'linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%)',
     liked: false,
   },
   {

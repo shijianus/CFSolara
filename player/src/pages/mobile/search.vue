@@ -14,6 +14,7 @@ import {
   transformSearchSongs,
   transformSearchPlaylists,
   transformSearchMVs,
+  normalizeDurationMs,
   type SongData,
   type PlaylistData,
   type MVData,
@@ -130,16 +131,17 @@ const fetchSongs = async () => {
         id: t.platformId || t.id,
         name: t.title || t.name,
         artist: t.artist,
-        artistId: 0,
-        artists: [{ id: 0, name: t.artist }],
+        // 保留真实歌手 ID；缺失时留空，由列表降级为纯文本展示
+        artistId: t.artistId ?? undefined,
+        artists: t.artistId ? [{ id: t.artistId, name: t.artist || '' }] : undefined,
         album: t.album || '',
         albumId: 0,
         cover: formatCoverUrl(t.cover || t.coverUrl || t.artistPic || '', { size: 300, artist: t.artist }),
-        duration: (t.duration || 200) * 1000,
-        dt: (t.duration || 200) * 1000,
+        duration: normalizeDurationMs(t.duration),
+        dt: normalizeDurationMs(t.duration),
         url: t.streamUrl || `/api/music/stream?id=${encodeURIComponent(t.platformId || t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`,
         sha: t.sha || '',
-        qualityBadge: t.qualityBadge || 'SQ',
+        qualityBadge: t.qualityBadge || undefined,
         qualities: t.qualities || [],
         liked: false,
       }))
@@ -612,8 +614,8 @@ watch(
 }
 
 .search-btn {
-  background: linear-gradient(to right, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  background: linear-gradient(to right, #38bdf8, #2563eb);
+  box-shadow: 0 4px 12px rgba(56,189,248, 0.3);
 }
 
 .suggest-dropdown {
@@ -636,7 +638,7 @@ watch(
 }
 
 .suggest-tag:active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
   opacity: 1;
 }
 
@@ -646,10 +648,10 @@ watch(
 }
 
 .tab-button-active {
-  background: linear-gradient(to right, #ec4899, #8b5cf6);
+  background: linear-gradient(to right, #38bdf8, #2563eb);
   color: white;
   opacity: 1;
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 15px rgba(56,189,248, 0.3);
 }
 
 .info-text {
@@ -658,21 +660,21 @@ watch(
 }
 
 .play-all-button {
-  background: linear-gradient(to right, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  background: linear-gradient(to right, #38bdf8, #2563eb);
+  box-shadow: 0 4px 15px rgba(56,189,248, 0.3);
 }
 
 .play-all-button:active {
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(56,189,248, 0.3);
 }
 
 .empty-icon {
-  background: linear-gradient(to bottom right, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
+  background: linear-gradient(to bottom right, rgba(56,189,248, 0.15), rgba(37,99,235, 0.15));
 }
 
 :root.dark .empty-icon,
 html.dark .empty-icon {
-  background: linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to bottom right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
 }
 
 .empty-title {
@@ -685,12 +687,12 @@ html.dark .empty-icon {
 }
 
 .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(to right, rgba(56,189,248, 0.2), rgba(37,99,235, 0.2));
 }
 
 :root.dark .song-item-active,
 html.dark .song-item-active {
-  background: linear-gradient(to right, rgba(236, 72, 153, 0.25), rgba(139, 92, 246, 0.25));
+  background: linear-gradient(to right, rgba(56,189,248, 0.25), rgba(37,99,235, 0.25));
 }
 
 .song-index {
@@ -747,7 +749,7 @@ html.dark .playlist-cover {
 }
 
 .playlist-play-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
   opacity: 0;
   transform: scale(0.8);
 }
@@ -794,7 +796,7 @@ html.dark .mv-cover {
 }
 
 .mv-play-btn {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(139, 92, 246, 0.9));
+  background: linear-gradient(135deg, rgba(56,189,248, 0.9), rgba(37,99,235, 0.9));
   backdrop-filter: blur(8px);
 }
 

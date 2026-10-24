@@ -16,6 +16,9 @@ export default {
     clear: '清除',
     loading: '加载中',
     noData: '暂无数据',
+    close: '关闭',
+    undo: '撤销',
+    retry: '重试',
     search: { placeholder: '搜索音乐、歌手、专辑...', label: '搜索', suggest: '搜索建议' },
     viewAll: '查看全部',
     playMV: '播放MV',
@@ -23,6 +26,8 @@ export default {
     share: '分享',
     collect: '收藏',
     uncollect: '取消收藏',
+    like: '喜欢',
+    unlike: '取消喜欢',
     me: '我',
     justNow: '刚刚',
     minutesAgo: '分钟前',
@@ -40,6 +45,23 @@ export default {
       favorites: '收藏',
       fans: '粉丝',
     },
+  },
+  download: {
+    overwritePrompt: '这首歌的 {quality} 已经下载过，覆盖会替换已有的离线文件。',
+    overwrite: '覆盖下载',
+    cancelOverwrite: '取消',
+    downloading: '正在下载',
+    cancelDownload: '取消下载',
+    completed: '下载完成：{name}',
+    cancelled: '已取消下载',
+    failed: '下载失败：{reason}',
+    networkError: '网络错误，请检查连接',
+    sourceUnavailable: '音源不可用或受版权限制',
+    manualSaveRequired: '浏览器已限制自动保存，请点击“手动保存”',
+    saveNow: '手动保存',
+    saved: '文件已保存',
+    checking: '正在检查已有下载…',
+    unavailable: '当前音质不可用',
   },
   search: {
     tabs: { song: '单曲', playlist: '歌单', mv: 'MV' },
@@ -61,6 +83,14 @@ export default {
     official: '官方榜单',
   },
   components: {
+    infiniteScroll: {
+      error: '加载失败，请稍后重试',
+      timeout: '网络响应延迟，可点击强制刷新',
+      empty: '暂无结果',
+      reset: '重置筛选',
+      retry: '重新加载',
+      noMore: '已加载全部精彩内容',
+    },
     pagination: {
       prev: '上一页',
       next: '下一页',
@@ -119,6 +149,7 @@ export default {
       dropFilesHint: '支持拖拽音频文件到此区域上传',
       localMusicEmpty: '暂无本地音乐，点击下方按钮添加',
       addMusic: '添加音乐',
+    localMusicDeleted: '已删除本地音乐「{name}」',
     },
     background: {
       common: {
@@ -183,6 +214,7 @@ export default {
       myMusic: '我的音乐',
       system: '系统',
       playlists: { created: '创建的歌单' },
+      collectedPlaylists: '收藏的歌单',
       menu: {
         home: '首页',
         mv: 'MV',
@@ -199,6 +231,15 @@ export default {
     },
   },
   player: {
+    queueCleared: '播放队列已清空',
+    localFileMissing: '本地文件已不可用，已清除当前歌曲',
+    next: '下一首',
+    qualitySwitchFailed: '音质切换失败，已恢复原音质',
+    playbackError: {
+      network: '网络连接异常，请检查网络后重试',
+      source: '音源不可用，换一首试试',
+      copyright: '该歌曲受版权限制，暂时无法播放',
+    },
     play: '播放',
     pause: '暂停',
     loading: '加载中…',
@@ -272,7 +313,7 @@ export default {
       all: '全部',
       official: '官方',
       live: '现场',
-      netease: 'Sonic 甄选',
+      netease: 'sonic 甄选',
     },
     actions: {
       loadMore: '加载更多',
@@ -292,6 +333,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: '暂无可播放的 MV 地址',
+    videoError: 'MV 播放失败，请重试',
     stats: {
       plays: '次播放',
       likes: '赞',
@@ -312,7 +355,18 @@ export default {
     },
   },
   likes: {
+    title: '我喜欢的音乐',
+    subtitle: '收藏你喜欢的歌曲、歌单与 MV',
+    tabs: {
+      all: '全部',
+      song: '单曲',
+      playlist: '歌单',
+      mv: 'MV',
+    },
     empty: '暂无喜欢的歌曲',
+    emptyAll: '还没有喜欢的内容，喜欢歌曲、收藏歌单或点赞 MV 后会显示在这里',
+    emptyPlaylist: '暂无收藏的歌单',
+    emptyMv: '暂无喜欢的 MV',
   },
   recent: {
     title: '最近播放',
@@ -355,6 +409,13 @@ export default {
   playlist: {
     tabs: { songs: '歌曲', comments: '评论', similar: '相似' },
     similarEmpty: '暂无相似歌单',
+    loadMore: '加载更多歌曲',
+    loadingAll: '正在加载完整歌曲列表…',
+    loadedProgress: '已加载 {loaded} / {total} 首',
+    allLoaded: '已加载全部歌曲',
+    partialPlayNotice: '完整列表加载失败，本次仅播放已加载的 {loaded} 首（共 {total} 首）',
+    retryLoad: '重试加载',
+    dismiss: '知道了',
   },
   artistPage: {
     bioTitle: '艺人简介',
@@ -362,6 +423,11 @@ export default {
     tabs: { hotSongs: '热门歌曲', albums: '专辑' },
     stats: { songs: '歌曲', albums: '专辑', mvs: 'MV', fans: '粉丝' },
     albumsEmpty: '暂无专辑',
+    loadMoreSongs: '加载更多歌曲',
+    loadMoreAlbums: '加载更多专辑',
+    loadedSongs: '已加载 {loaded} / {total} 首',
+    loadedAlbums: '已加载 {loaded} / {total} 张',
+    loadFailedRetry: '加载失败，点击重试',
   },
   albumPage: {
     alt: { cover: '专辑封面' },

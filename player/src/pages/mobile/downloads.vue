@@ -161,10 +161,10 @@ const formatSongTitle = (title: string, maxLen = 18) => {
 <template>
   <div class="h-full flex-1 overflow-auto px-4 pb-24 pt-3 custom-scrollbar">
     <!-- 顶部概览卡片 -->
-    <div class="mb-4 rounded-3xl border border-white/10 bg-gradient-to-br from-pink-500/15 via-purple-600/10 to-transparent p-4 backdrop-blur-xl">
+    <div class="mb-4 rounded-3xl border border-white/10 bg-gradient-to-br from-sky-500/15 via-blue-600/10 to-transparent p-4 backdrop-blur-xl">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg shadow-pink-500/30">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/30">
             <span class="icon-[mdi--tray-arrow-down] h-6 w-6 text-white"></span>
           </div>
           <div>
@@ -183,7 +183,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         <button
           v-if="downloads.length > 0"
           @click="playAll"
-          class="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-pink-500/30 active:scale-95 transition-all"
+          class="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-sky-500/30 active:scale-95 transition-all"
         >
           <span class="icon-[mdi--play] h-4 w-4"></span>
           播放全部
@@ -196,7 +196,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
           v-model="searchQuery"
           type="text"
           placeholder="搜索已下载歌曲或歌手..."
-          class="w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder-primary/40 focus:outline-none focus:border-pink-500/50"
+          class="w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pr-8 pl-8 text-xs text-primary placeholder-primary/40 focus:outline-none focus:border-sky-500/50"
         />
         <span class="icon-[mdi--magnify] absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary/40"></span>
       </div>
@@ -206,28 +206,28 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         <button
           @click="selectedQuality = 'all'"
           class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'all' ? 'bg-pink-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          :class="selectedQuality === 'all' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
         >
           全部
         </button>
         <button
           @click="selectedQuality = 'lossless'"
           class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'lossless' ? 'bg-pink-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          :class="selectedQuality === 'lossless' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
         >
           SQ 无损
         </button>
         <button
           @click="selectedQuality = 'exhigh'"
           class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'exhigh' ? 'bg-pink-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          :class="selectedQuality === 'exhigh' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
         >
           HQ 极高
         </button>
         <button
           @click="selectedQuality = 'standard'"
           class="rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all shrink-0"
-          :class="selectedQuality === 'standard' ? 'bg-pink-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
+          :class="selectedQuality === 'standard' ? 'bg-sky-500 text-white font-bold' : 'bg-white/5 text-primary/60'"
         >
           标准
         </button>
@@ -243,7 +243,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
         class="flex items-center justify-between rounded-2xl border p-2.5 transition-all active:scale-[0.99]"
         :class="[
           isCurrentPlaying(item)
-            ? 'border-pink-500/50 bg-pink-500/10 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
+            ? 'border-sky-500/50 bg-sky-500/10 shadow-[0_0_15px_rgba(56,189,248,0.15)]'
             : 'border-primary/10 bg-primary/[0.03] active:bg-primary/10'
         ]"
       >
@@ -260,9 +260,9 @@ const formatSongTitle = (title: string, maxLen = 18) => {
               class="absolute inset-0 flex items-center justify-center bg-black/40"
             >
               <div class="flex items-center gap-0.5">
-                <span class="w-0.5 h-3 bg-pink-400 rounded-full animate-pulse"></span>
-                <span class="w-0.5 h-2 bg-pink-400 rounded-full animate-pulse delay-75"></span>
-                <span class="w-0.5 h-3 bg-pink-400 rounded-full animate-pulse delay-150"></span>
+                <span class="w-0.5 h-3 bg-sky-400 rounded-full animate-pulse"></span>
+                <span class="w-0.5 h-2 bg-sky-400 rounded-full animate-pulse delay-75"></span>
+                <span class="w-0.5 h-3 bg-sky-400 rounded-full animate-pulse delay-150"></span>
               </div>
             </div>
           </div>
@@ -279,9 +279,9 @@ const formatSongTitle = (title: string, maxLen = 18) => {
                 class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium leading-none select-none whitespace-nowrap"
                 :class="[
                   getParsedMeta(item).isLossless
-                    ? 'bg-violet-600/20 text-primary border border-pink-500/40'
+                    ? 'bg-blue-600/15 text-primary border border-sky-500/50'
                     : getParsedMeta(item).displayTag.includes('320')
-                      ? 'bg-indigo-500/20 text-primary border border-indigo-500/30'
+                      ? 'bg-blue-500/15 text-primary border border-blue-500/40'
                       : 'bg-primary/10 text-primary/70 border border-primary/20'
                 ]"
               >
@@ -320,7 +320,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
     <!-- 空状态 -->
     <div v-else class="flex flex-col items-center justify-center py-20 text-center">
       <div class="mb-3 rounded-2xl bg-white/5 p-5 border border-white/5">
-        <span class="icon-[mdi--music-box-outline] h-12 w-12 text-pink-400/40"></span>
+        <span class="icon-[mdi--music-box-outline] h-12 w-12 text-sky-400/40"></span>
       </div>
       <p class="text-sm font-semibold text-primary/70">暂无离线音乐</p>
       <p class="text-xs text-primary/40 mt-1 max-w-xs leading-relaxed">
@@ -328,7 +328,7 @@ const formatSongTitle = (title: string, maxLen = 18) => {
       </p>
       <button
         @click="router.push('/search')"
-        class="mt-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-2 text-xs font-bold text-white shadow-md shadow-pink-500/25 active:scale-95 transition-all"
+        class="mt-4 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-2 text-xs font-bold text-white shadow-md shadow-sky-500/25 active:scale-95 transition-all"
       >
         去搜索歌曲
       </button>

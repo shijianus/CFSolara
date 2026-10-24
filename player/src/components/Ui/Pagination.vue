@@ -72,7 +72,7 @@ const goNext = () => {
         <button
           class="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all"
           :class="p === page
-            ? 'bg-linear-to-br from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/25'
+            ? 'bg-linear-to-br from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25'
             : 'glass-card text-primary/70 hover:bg-hover-glass hover:text-primary'"
           @click="page = p"
         >

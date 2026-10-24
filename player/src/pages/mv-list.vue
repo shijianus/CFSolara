@@ -3,10 +3,11 @@ import { useI18n } from 'vue-i18n'
 import { mvAll } from '@/api'
 import { formatCount } from '@/utils/time'
 import TabGroup from '@/components/Ui/TabGroup.vue'
-import Button from '@/components/Ui/Button.vue'
 import InfiniteScroll from '@/components/Ui/InfiniteScroll.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 const { t } = useI18n()
+const libraryStore = useLibraryStore()
 
 const state = reactive({
   categories: [
@@ -63,7 +64,12 @@ const selectCategory = (key: string) => {
 }
 
 const toggleLike = (mv: any) => {
-  mv.liked = !mv.liked
+  libraryStore.toggleLikeMv({
+    id: mv.id,
+    name: mv.title,
+    artist: mv.artist,
+    cover: mv.cover,
+  })
 }
 
 const shareMV = (mv: any) => {
@@ -106,11 +112,8 @@ const fetchList = async (reset = false) => {
     state.hasMore = mapped.length === limit
     if (mapped.length) state.page += 1
   } catch {
-    if (!reset) {
-      state.isLoadError = true
-    } else {
-      state.hasMore = false
-    }
+    state.isLoadError = true
+    state.hasMore = false
   } finally {
     if (reset) state.isPageLoading = false
     state.isLoadingMore = false
@@ -119,6 +122,10 @@ const fetchList = async (reset = false) => {
 
 const loadMore = () => {
   fetchList(false)
+}
+
+const resetFilters = () => {
+  selectCategory('all')
 }
 
 onMounted(() => {
@@ -172,7 +179,7 @@ onMounted(() => {
                 class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               >
                 <div
-                  class="flex h-14 w-14 items-center justify-center rounded-full bg-pink-500/90 text-white shadow-2xl backdrop-blur-sm"
+                  class="flex h-14 w-14 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-2xl backdrop-blur-sm"
                 >
                   <span class="icon-[mdi--play] h-8 w-8"></span>
                 </div>
@@ -192,7 +199,7 @@ onMounted(() => {
 
             <div class="p-4">
               <h3
-                class="text-primary mb-2 truncate text-base font-semibold transition-colors group-hover:text-pink-400"
+                class="text-primary mb-2 truncate text-base font-semibold transition-colors group-hover:text-sky-400"
               >
                 {{ mv.title }}
               </h3>
@@ -205,14 +212,20 @@ onMounted(() => {
                   class="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                 >
                   <button
-                    class="text-primary/50 hover:bg-hover-glass rounded-full p-1.5 transition-all hover:text-pink-400"
-                    :title="t('mvList.actions.like')"
+                    type="button"
+                    class="text-primary/50 hover:bg-hover-glass flex h-11 w-11 items-center justify-center rounded-full transition-all hover:text-sky-400 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                    :title="
+                      libraryStore.isMvLiked(mv.id) ? t('common.unlike') : t('mvList.actions.like')
+                    "
+                    :aria-pressed="libraryStore.isMvLiked(mv.id)"
                     @click.prevent.stop="toggleLike(mv)"
                   >
                     <span
                       class="h-5 w-5"
                       :class="
-                        mv.liked ? 'icon-[mdi--heart] text-pink-400' : 'icon-[mdi--heart-outline]'
+                        libraryStore.isMvLiked(mv.id)
+                          ? 'icon-[mdi--heart] text-sky-400'
+                          : 'icon-[mdi--heart-outline]'
                       "
                     ></span>
                   </button>
@@ -237,8 +250,10 @@ onMounted(() => {
           :empty="!mvList.length"
           :loading-text="t('common.loading')"
           :retry-text="t('mvList.actions.loadMore')"
+          :reset-text="$t('components.infiniteScroll.reset')"
           @load="loadMore"
           @retry="loadMore"
+          @reset="resetFilters"
         />
       </div>
     </template>

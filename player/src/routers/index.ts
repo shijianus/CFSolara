@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import { defineComponent, h, defineAsyncComponent } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import { BRAND_FULL, BRAND_TITLE } from '@/config/brand'
 
 const mode = import.meta.env.VITE_ROUTER_MODE || 'hash'
 
@@ -228,14 +229,14 @@ const routeTitles: Record<string, string> = {
 
 router.afterEach((to) => {
   if (to.name === 'search' && to.query.q) {
-    document.title = `搜索: ${to.query.q} - Sonic`
+    document.title = `搜索: ${to.query.q} - ${BRAND_FULL}`
     return
   }
   const pageTitle = (to.name && routeTitles[String(to.name)]) || (to.meta?.title as string) || ''
   if (pageTitle) {
-    document.title = `${pageTitle} - Sonic`
+    document.title = `${pageTitle} - ${BRAND_FULL}`
   } else {
-    document.title = 'Sonic - Cloud Music Platform'
+    document.title = BRAND_TITLE
   }
 })
 

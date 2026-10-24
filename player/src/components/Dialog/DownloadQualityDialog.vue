@@ -3,6 +3,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useDownloadStore, type QualityChoice } from '@/stores/modules/download'
 import { useAudioStore } from '@/stores/modules/audio'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useI18n } from 'vue-i18n'
 import {
   probeSongQualities,
   cancelSongProbe,
@@ -12,10 +13,14 @@ import {
   QUALITY_LEVELS,
 } from '@/utils/qualityProbe'
 
+const { t } = useI18n()
 const downloadStore = useDownloadStore()
 const audioStore = useAudioStore()
 const selectedLevel = ref<QualityLevel>('lossless')
 const coverLoadFailed = ref(false)
+const showOverwriteConfirm = ref(false)
+const pendingChoice = ref<QualityChoice | null>(null)
+const isConfirming = ref(false)
 
 // 与底栏使用相同的封面解析来源：优先歌曲自带封面，其次当前播放同曲封面，再回退歌手封面接口
 const dialogCoverUrl = computed(() => {
@@ -88,8 +93,8 @@ const lastProbingSongId = ref<string | null>(null)
 
 // 弹窗可见性监听
 watch(
-  () => [downloadStore.dialogVisible, downloadStore.currentDownloadSong?.id],
-  ([visible, songId], [prevVisible, prevSongId] = [false, undefined]) => {
+  () => [downloadStore.dialogVisible, downloadStore.currentDownloadSong?.id] as const,
+  ([visible, songId]) => {
     if (visible && downloadStore.currentDownloadSong) {
       coverLoadFailed.value = false
       lastProbingSongId.value = String(downloadStore.currentDownloadSong.id)
@@ -100,11 +105,16 @@ watch(
         if (idx >= 0) radioItemRefs.value[idx]?.focus()
       })
     } else if (!visible) {
-      const idToCancel = songId || prevSongId || lastProbingSongId.value
+      const idToCancel = songId || lastProbingSongId.value
       if (idToCancel) {
         cancelSongProbe(idToCancel)
       }
       isProbing.value = false
+    }
+    if (!visible) {
+      showOverwriteConfirm.value = false
+      pendingChoice.value = null
+      isConfirming.value = false
     }
   },
   { immediate: true }
@@ -144,24 +154,76 @@ const hasAnyAvailable = computed(() => {
   return choices.value.some((c) => c.isAvailable)
 })
 
+const buildChoice = (): QualityChoice => ({
+  level: currentChoice.value.level,
+  label: currentChoice.value.label,
+  bitrate: currentChoice.value.bitrateLabel,
+  format: currentChoice.value.format,
+  desc: currentChoice.value.bitrateLabel,
+  estimatedSize: currentChoice.value.sizeFormatted,
+})
+
 const handleConfirm = async () => {
   const song = downloadStore.currentDownloadSong
-  if (!song || !currentChoice.value.isAvailable || downloadStore.isDownloading) return
+  if (
+    !song ||
+    !currentChoice.value.isAvailable ||
+    downloadStore.isDownloading ||
+    isConfirming.value
+  )
+    return
 
+  const choice = buildChoice()
+  isConfirming.value = true
   try {
-    const choice: QualityChoice = {
-      level: currentChoice.value.level,
-      label: currentChoice.value.label,
-      bitrate: currentChoice.value.bitrateLabel,
-      format: currentChoice.value.format,
-      desc: currentChoice.value.bitrateLabel,
-      estimatedSize: currentChoice.value.sizeFormatted,
+    const existing = await downloadStore.findDownloadedByQuality(song.id, choice.level)
+    if (existing) {
+      pendingChoice.value = choice
+      showOverwriteConfirm.value = true
+      return
     }
     await downloadStore.startDownload(song, choice)
+  } catch (err: any) {
+    if (err?.name === 'DuplicateDownloadError') {
+      pendingChoice.value = choice
+      showOverwriteConfirm.value = true
+    }
+    // 其他错误信息已保存在 downloadStore.errorMsg
+  } finally {
+    isConfirming.value = false
+  }
+}
+
+const confirmOverwrite = async () => {
+  const song = downloadStore.currentDownloadSong
+  const choice = pendingChoice.value
+  if (!song || !choice || downloadStore.isDownloading) return
+  showOverwriteConfirm.value = false
+  pendingChoice.value = null
+  try {
+    await downloadStore.startDownload(song, choice, { overwrite: true })
   } catch {
     // 错误信息已保存在 downloadStore.errorMsg
   }
 }
+
+const cancelOverwrite = () => {
+  showOverwriteConfirm.value = false
+  pendingChoice.value = null
+}
+
+const formatBytes = (bytes: number) => {
+  if (!bytes) return '0 KB'
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const transferredText = computed(() => {
+  const loaded = downloadStore.downloadedBytes
+  if (!loaded) return ''
+  if (!downloadStore.totalBytes) return formatBytes(loaded)
+  return `${formatBytes(loaded)} / ${formatBytes(downloadStore.totalBytes)}`
+})
 
 // 歌名展示
 const displayTitle = computed(() => {
@@ -270,7 +332,7 @@ onUnmounted(() => {
         <div
           class="absolute inset-0"
           style="background-color: rgba(0, 0, 0, 0.40); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);"
-          @click="downloadStore.closeDownloadDialog"
+          @click="!downloadStore.isDownloading && downloadStore.closeDownloadDialog()"
         />
       </Transition>
 
@@ -290,8 +352,9 @@ onUnmounted(() => {
                 选择下载音质
               </h3>
               <button
+                :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
-                class="flex h-7 w-7 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-sky-200/60 hover:text-sky-100 hover:bg-sky-200/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
                 title="关闭"
                 aria-label="关闭弹窗"
               >
@@ -411,7 +474,7 @@ onUnmounted(() => {
                     class="flex h-5 w-5 items-center justify-center rounded-full border transition-all"
                     :class="[
                       selectedLevel === choice.level
-                        ? 'border-pink-400 bg-pink-500/20 text-pink-300'
+                        ? 'border-sky-400 bg-sky-500/20 text-sky-300'
                         : 'border-white/20 bg-transparent'
                     ]"
                   >
@@ -429,6 +492,51 @@ onUnmounted(() => {
               保存到离线库，并同时导出到本地文件
             </p>
 
+            <!-- 重复下载确认 -->
+            <div
+              v-if="showOverwriteConfirm"
+              class="mb-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-3"
+              role="alertdialog"
+              aria-live="assertive"
+            >
+              <p class="text-[13px] font-medium text-amber-200">
+                {{ t('download.overwritePrompt', { quality: pendingChoice?.label || '' }) }}
+              </p>
+              <div class="mt-2.5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  class="min-h-11 rounded-lg px-3 text-[13px] font-medium text-sky-200/70 hover:bg-sky-200/10 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  @click="cancelOverwrite"
+                >
+                  {{ t('download.cancelOverwrite') }}
+                </button>
+                <button
+                  type="button"
+                  class="min-h-11 rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 text-[13px] font-semibold text-amber-200 hover:bg-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-400/60"
+                  @click="confirmOverwrite"
+                >
+                  {{ t('download.overwrite') }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 下载进度 -->
+            <div v-if="downloadStore.isDownloading" class="mb-3" aria-live="polite">
+              <div class="flex items-center justify-between text-[13px] text-sky-200/80">
+                <span>{{ t('download.downloading') }}</span>
+                <span class="font-mono tabular-nums">{{ downloadStore.downloadProgress }}%</span>
+              </div>
+              <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-sky-200/10">
+                <div
+                  class="h-full rounded-full bg-sky-400 transition-[width] duration-200"
+                  :style="{ width: `${downloadStore.downloadProgress}%` }"
+                ></div>
+              </div>
+              <p v-if="transferredText" class="mt-1 text-[11px] text-sky-200/50">
+                {{ transferredText }}
+              </p>
+            </div>
+
             <!-- 错误提示（若有） -->
             <div
               v-if="downloadStore.errorMsg"
@@ -442,29 +550,46 @@ onUnmounted(() => {
             <div class="flex items-center justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="h-[40px] px-4 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="min-h-11 px-4 text-[14px] font-semibold text-sky-200/70 hover:text-sky-100 hover:bg-sky-200/10 rounded-xl transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="downloadStore.isDownloading"
                 @click="downloadStore.closeDownloadDialog"
               >
-                取消
+                {{ t('download.cancelOverwrite') }}
               </button>
 
               <button
+                v-if="downloadStore.isDownloading"
                 type="button"
-                class="download-btn-gradient h-[40px] px-5 rounded-xl text-[14px] font-semibold text-white shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60"
+                class="min-h-11 rounded-xl border border-red-400/40 bg-red-500/15 px-5 text-[14px] font-semibold text-red-200 transition-all outline-none hover:bg-red-500/25 focus-visible:ring-2 focus-visible:ring-red-400/60"
+                @click="downloadStore.cancelDownload()"
+              >
+                {{ t('download.cancelDownload') }}
+              </button>
+              <button
+                v-else
+                type="button"
+                class="download-btn-gradient min-h-11 px-5 rounded-xl text-[14px] font-semibold text-white shadow-md transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 :class="[
-                  !hasAnyAvailable || !currentChoice.isAvailable || downloadStore.isDownloading
+                  !hasAnyAvailable ||
+                  !currentChoice.isAvailable ||
+                  isConfirming ||
+                  showOverwriteConfirm
                     ? 'opacity-40 cursor-not-allowed pointer-events-none'
                     : 'cursor-pointer hover:brightness-110 active:scale-[0.98]'
                 ]"
-                :disabled="!hasAnyAvailable || !currentChoice.isAvailable || downloadStore.isDownloading"
+                :disabled="
+                  !hasAnyAvailable ||
+                  !currentChoice.isAvailable ||
+                  isConfirming ||
+                  showOverwriteConfirm
+                "
                 @click="handleConfirm"
               >
                 {{
-                  downloadStore.isDownloading
-                    ? '正在下载…'
+                  isConfirming
+                    ? t('download.checking')
                     : !currentChoice.isAvailable
-                      ? '当前音质不可用'
+                      ? t('download.unavailable')
                       : `下载 (${currentChoice.label})`
                 }}
               </button>
@@ -479,7 +604,7 @@ onUnmounted(() => {
 <style scoped>
 /* 弹窗面板：深紫玻璃底色、1px 白描边、无外发光 */
 .download-dialog-panel {
-  background-color: rgba(30, 26, 52, 0.92);
+  background-color: rgba(10,31,61, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
 }
@@ -493,7 +618,7 @@ onUnmounted(() => {
 
 /* 唯一的渐变主按钮 */
 .download-btn-gradient {
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
 }
 
 /* 选项卡片状态样式 */

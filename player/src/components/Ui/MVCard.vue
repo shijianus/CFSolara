@@ -348,7 +348,7 @@ const handleClick = async () => {
         class="absolute inset-0 flex items-center justify-center"
       >
         <div
-          class="play-button flex h-14 w-14 scale-80 items-center justify-center rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] text-white opacity-0 shadow-[0_10px_30px_rgba(139,92,246,0.65)] ring-1 ring-white/40 transition-transform hover:scale-90"
+          class="play-button flex h-14 w-14 scale-80 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] text-white opacity-0 shadow-[0_10px_30px_rgba(37,99,235,0.65)] ring-1 ring-white/40 transition-transform hover:scale-90"
         >
           <span class="play-icon icon-[mdi--play] h-7 w-7 text-white" />
         </div>
@@ -364,7 +364,7 @@ const handleClick = async () => {
       <div
         class="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style="
-          background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
+          background: linear-gradient(135deg, #2563eb, #38bdf8, #3b82f6);
           mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           mask-composite: exclude;
           padding: 2px;

@@ -3,6 +3,7 @@
 // with complete desensitization, privacy anonymization, and Edge CDN caching.
 
 import { jsonResponse } from '../http';
+import { BRAND_PRODUCT } from '../brand';
 import { SONIC_UA } from './config';
 
 const UPSTREAM_HEADERS = {
@@ -49,16 +50,16 @@ const HOT_SEARCH_LIST = [
 ];
 
 /**
- * Deep desensitize text & objects by replacing third-party provider brands with Sonic
+ * Deep desensitize text & objects by replacing third-party provider brands with the product brand
  */
 export function desensitizeData<T>(obj: T): T {
   if (!obj) return obj;
   if (typeof obj === 'string') {
     return (obj as string)
-      .replace(/网易云音乐/g, 'Sonic')
-      .replace(/网易出品/g, 'Sonic 甄选')
-      .replace(/网易/g, 'Sonic')
-      .replace(/NetEase/gi, 'Sonic') as unknown as T;
+      .replace(/网易云音乐/g, BRAND_PRODUCT)
+      .replace(/网易出品/g, `${BRAND_PRODUCT} 甄选`)
+      .replace(/网易/g, BRAND_PRODUCT)
+      .replace(/NetEase/gi, BRAND_PRODUCT) as unknown as T;
   }
   if (Array.isArray(obj)) {
     return obj.map((item) => desensitizeData(item)) as unknown as T;
@@ -123,7 +124,7 @@ export async function handleUpstreamEndpoint(
             ...b,
             targetId: tid,
             url: internalPath, // 替换为纯净的站内路由，绝不泄漏任何 orpheus:// 或外站 URL
-            typeTitle: `Sonic ${cleanTitle}`,
+            typeTitle: `${BRAND_PRODUCT} ${cleanTitle}`,
           };
         });
 
@@ -147,7 +148,7 @@ export async function handleUpstreamEndpoint(
       const data: any = await resp.json();
       const playlists = (data.playlists || []).map((p: any) => ({
         ...p,
-        copywriter: 'Sonic 甄选歌单',
+        copywriter: `${BRAND_PRODUCT} 甄选歌单`,
       }));
       return jsonResponse(
         {
@@ -238,7 +239,7 @@ export async function handleUpstreamEndpoint(
     const offset = url.searchParams.get('offset') || '0';
     const order = url.searchParams.get('order') || '最新';
     let type = url.searchParams.get('type') || '';
-    if (type === 'Sonic出品' || type === 'Sonic 甄选' || type === 'netease') type = '网易出品';
+    if (['Sonic出品', 'sonic出品', 'Sonic 甄选', 'sonic 甄选', 'netease'].includes(type)) type = '网易出品';
 
     try {
       const upstreamUrl = `https://music.163.com/api/mv/all?limit=${limit}&offset=${offset}&order=${encodeURIComponent(order)}${type ? `&type=${encodeURIComponent(type)}` : ''}`;
@@ -404,13 +405,21 @@ export async function handleUpstreamEndpoint(
   }
 
   // 13. Artist Detail & Artist Top Song & Albums
-  if (normEndpoint === 'artist/detail' || normEndpoint === 'artist/top/song' || normEndpoint === 'artist/album') {
+  if (
+    normEndpoint === 'artist/detail' ||
+    normEndpoint === 'artist/top/song' ||
+    normEndpoint === 'artist/album' ||
+    normEndpoint === 'artist/songs'
+  ) {
     const id = url.searchParams.get('id') || '6452';
+    const limit = Math.min(200, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10) || 20));
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
     if (normEndpoint === 'artist/album') {
       try {
-        const resp = await fetch(`https://music.163.com/api/artist/albums/${encodeURIComponent(id)}?limit=20`, {
-          headers: UPSTREAM_HEADERS,
-        });
+        const resp = await fetch(
+          `https://music.163.com/api/artist/albums/${encodeURIComponent(id)}?limit=${limit}&offset=${offset}`,
+          { headers: UPSTREAM_HEADERS },
+        );
         const data: any = await resp.json();
         return jsonResponse(
           { code: 200, brand: 'Sonic', hotAlbums: desensitizeData(data.hotAlbums || []), more: data.more ?? false },
@@ -418,6 +427,21 @@ export async function handleUpstreamEndpoint(
         );
       } catch {}
       return jsonResponse({ code: 200, brand: 'Sonic', hotAlbums: [] });
+    }
+    if (normEndpoint === 'artist/songs') {
+      const order = url.searchParams.get('order') === 'time' ? 'time' : 'hot';
+      try {
+        const resp = await fetch(
+          `https://music.163.com/api/artist/songs?id=${encodeURIComponent(id)}&limit=${limit}&offset=${offset}&order=${order}`,
+          { headers: UPSTREAM_HEADERS },
+        );
+        const data: any = await resp.json();
+        return jsonResponse(
+          { code: 200, brand: 'Sonic', songs: desensitizeData(data.songs || []), more: data.more ?? false },
+          { headers: { 'Cache-Control': 'public, max-age=3600' } },
+        );
+      } catch {}
+      return jsonResponse({ code: 200, brand: 'Sonic', songs: [], more: false });
     }
 
     try {
@@ -593,7 +617,7 @@ export async function handleUpstreamEndpoint(
         name: t.title || t.name,
         ar: [{ id: 0, name: t.artist }],
         al: { id: 0, name: t.album, picUrl: t.cover || t.coverUrl },
-        dt: (t.duration || 200) * 1000,
+        dt: t.duration ? Math.round(Number(t.duration) * 1000) : 0,
         mv: 0,
         sha: t.sha,
         qualityBadge: t.qualityBadge,

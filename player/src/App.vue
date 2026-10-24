@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import DownloadQualityDialog from '@/components/Dialog/DownloadQualityDialog.vue'
+import GlobalToast from '@/components/Ui/GlobalToast.vue'
 
 onMounted(() => {
   try {
@@ -15,4 +16,5 @@ onMounted(() => {
 <template>
   <RouterView />
   <DownloadQualityDialog />
+  <GlobalToast />
 </template>

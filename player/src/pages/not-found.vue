@@ -18,7 +18,7 @@ const goBack = () => {
 <template>
   <div class="flex h-full w-full flex-col items-center justify-center p-6 text-center select-none">
     <div class="relative mb-6 flex h-32 w-32 items-center justify-center">
-      <div class="absolute inset-0 rounded-full bg-linear-to-tr from-[#8b5cf6]/30 via-[#ec4899]/20 to-transparent blur-2xl animate-pulse"></div>
+      <div class="absolute inset-0 rounded-full bg-linear-to-tr from-[#2563eb]/30 via-[#38bdf8]/20 to-transparent blur-2xl animate-pulse"></div>
       <span class="icon-[mdi--music-off] relative h-20 w-20 text-primary/40"></span>
     </div>
     
@@ -33,7 +33,7 @@ const goBack = () => {
         variant="gradient"
         size="md"
         rounded="full"
-        class="gap-2 px-6 shadow-lg shadow-purple-500/20"
+        class="gap-2 px-6 shadow-lg shadow-blue-500/20"
         @click="router.push('/')"
       >
         <span class="icon-[mdi--home] h-4 w-4"></span>

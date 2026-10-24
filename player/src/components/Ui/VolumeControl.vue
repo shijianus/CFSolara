@@ -175,8 +175,8 @@ const previewVolumeText = computed(() => {
 }
 
 .progress-fill {
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  box-shadow: 0 0 10px rgba(236, 72, 153, 0.25);
+  background: linear-gradient(90deg, #38bdf8, #2563eb);
+  box-shadow: 0 0 10px rgba(56,189,248, 0.25);
   transition: width 0.05s linear;
 }
 

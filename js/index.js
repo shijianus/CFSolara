@@ -391,7 +391,7 @@ function buildAudioProxyUrl(url) {
 }
 
 const SOURCE_OPTIONS = [
-    { value: "nexus", label: "Sonic 全网聚合" },
+    { value: "nexus", label: "sonic 全网聚合" },
     { value: "netease", label: "网易云音乐" },
     { value: "qq", label: "QQ音乐" },
     { value: "kugou", label: "酷狗音乐" },
@@ -4529,7 +4529,7 @@ function showNotification(message, type = "success") {
             if (parsed && parsed.apiKey) {
                 saveSession(parsed);
                 window.history.replaceState(null, "", window.location.pathname);
-                showNotification("EpoMail OAuth 验证成功，Sonic API Key 已就绪！", "success");
+                showNotification("EpoMail OAuth 验证成功，epocanvas sonic API Key 已就绪！", "success");
             }
         } catch (e) {
             console.warn("Failed to parse session from hash", e);
@@ -4546,13 +4546,13 @@ function showNotification(message, type = "success") {
             if (userAvatar && session.avatar) userAvatar.src = session.avatar;
             if (loginBtn) {
                 loginBtn.classList.add("is-authenticated");
-                loginBtn.title = "已登录: " + session.email + " (点击查看 Sonic API 连结凭证)";
+                loginBtn.title = "已登录: " + session.email + " (点击查看 epocanvas sonic API 连结凭证)";
             }
         } else {
             if (userLabel) userLabel.textContent = "EpoMail 登录";
             if (loginBtn) {
                 loginBtn.classList.remove("is-authenticated");
-                loginBtn.title = "使用 EpoMail 账号统一接入与获取 Sonic API Key";
+                loginBtn.title = "使用 EpoMail 账号统一接入与获取 epocanvas sonic API Key";
             }
         }
     }

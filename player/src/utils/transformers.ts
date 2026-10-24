@@ -3,6 +3,7 @@
  * 统一处理各种 API 响应格式的数据转换
  */
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { BRAND_PRODUCT } from '@/config/brand'
 
 // ============ 类型定义 ============
 
@@ -126,6 +127,17 @@ export function extractArray<T = unknown>(
 // ============ 转换器 ============
 
 /**
+ * 将时长统一归一化为毫秒
+ * 部分接口（如搜索 nexus 网关）返回秒级时长；小于 1 小时毫秒数（3,600,000ms）的值
+ * 不可能是真实曲目，按秒级输入换算为毫秒，保证 formatDuration 等调用点单位一致
+ */
+export function normalizeDurationMs(value: unknown): number {
+  const n = typeof value === 'number' && Number.isFinite(value) ? value : 0
+  if (n > 0 && n < 3600) return Math.round(n * 1000)
+  return n
+}
+
+/**
  * 转换 Banner 数据
  * 严格屏蔽纯外部商业活动，并将单曲/专辑等引导至站内闭环播放与浏览
  */
@@ -166,7 +178,7 @@ export function transformBanner(item: Record<string, unknown>): BannerData | nul
 
   return {
     coverImgUrl: (item?.pic as string) || (item?.imageUrl as string) || (item?.bigImageUrl as string) || '',
-    title: (item?.typeTitle as string) || 'Sonic 独家推荐',
+    title: (item?.typeTitle as string) || `${BRAND_PRODUCT} 独家推荐`,
     description: (item?.title as string) || '',
     targetId,
     targetType,
@@ -276,7 +288,7 @@ export function transformSong(item: Record<string, unknown>): SongData {
     (item?.coverUrl as string) ||
     (song?.cover as string) ||
     (song?.coverUrl as string) ||
-    ((item?.artistPic || item?.artists?.[0]?.img1v1Url || albumData?.artist?.img1v1Url) as string) ||
+    ((item?.artistPic || (item?.artists as any[])?.[0]?.img1v1Url || (albumData?.artist as any)?.img1v1Url) as string) ||
     ''
 
   const cover = formatCoverUrl(rawCover, {
@@ -293,38 +305,15 @@ export function transformSong(item: Record<string, unknown>): SongData {
     album: (albumData?.name as string) || '',
     albumId: (albumData?.id as number | string) || 0,
     cover,
-    duration: (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0,
+    duration: normalizeDurationMs(
+      (item?.dt as number) ?? (item?.duration as number) ?? (song?.duration as number) ?? 0
+    ),
     liked: false,
     mvId: (item?.mv as number | string) || (item?.mvid as number | string) || 0,
     sha: (item?.sha as string) || (song?.sha as string) || '',
-    qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || 'SQ',
-    // 音质档位基础元数据（音质弹窗与规格展示已完全接入 qualityProbe.ts 真实网络探测，不包含 estimatedSize 估算字段）
-    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || [
-      {
-        level: 'lossless',
-        label: 'SQ 无损',
-        bitrate: 'FLAC',
-        format: 'flac',
-        desc: '超清无损音质 (FLAC)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=lossless`,
-      },
-      {
-        level: 'exhigh',
-        label: 'HQ 极高',
-        bitrate: '320kbps',
-        format: 'mp3',
-        desc: '极高品质 (MP3 320k)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=320`,
-      },
-      {
-        level: 'standard',
-        label: '标准',
-        bitrate: '128kbps',
-        format: 'mp3',
-        desc: '标准流畅音质 (128kbps 快速省流)',
-        streamUrl: `/api/music/stream?id=${encodeURIComponent(String((item?.id || song?.id) || ''))}&source=netease&br=128`,
-      },
-    ],
+    // 缺失音质数据时保持为空，由展示层隐藏徽章；真实档位由 qualityProbe 网络探测补齐
+    qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || undefined,
+    qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || undefined,
     url: (item?.streamUrl as string) || (item?.url as string) || (song?.url as string) || '',
   }
 }
@@ -481,7 +470,7 @@ export function transformPlaylistDetail(
       ? new Date(detail.createTime as number).toLocaleDateString()
       : '',
     songCount: (detail?.trackCount as number) || 0,
-    playCount: detail?.playCount || 0,
+    playCount: (detail?.playCount as string | number) || 0,
     likes: (detail?.subscribedCount as number) || (detail?.bookedCount as number) || 0,
     category: tags?.[0] || fallbackCategory,
     coverImgUrl: (detail?.coverImgUrl as string) || '',

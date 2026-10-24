@@ -13,3 +13,6 @@ player/dist/
 *.zip
 temp_*
 /tmp_sonic_ui/
+
+# browser automation profile
+.zcode/

@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/modules/user'
 import { useGlobalStore } from '@/stores/modules/global'
+import { useLibraryStore } from '@/stores/modules/library'
 import { storeToRefs } from 'pinia'
 import { gsap } from 'gsap'
+import {
+  BRAND_FULL,
+  BRAND_PARENT,
+  BRAND_PRODUCT,
+  BRAND_STUDIO,
+  BRAND_TAGLINE,
+} from '@/config/brand'
 
 import { useRouter, useRoute } from 'vue-router'
 
@@ -41,6 +48,7 @@ const sections = [
   {
     titleKey: 'layout.aside.myMusic',
     items: [
+      { to: '/likes', labelKey: 'layout.aside.menu.likes', icon: 'mdi--heart-outline' },
       { to: '/my-music', labelKey: 'layout.aside.menu.recent', icon: 'mdi--music-box-multiple' },
       {
         to: '/downloads',
@@ -60,17 +68,9 @@ const sections = [
   },
 ]
 
-const state = reactive({
-  // 用户创建的歌单列表
-  userPlaylists: [
-    { id: 1, name: '我喜欢的音乐' },
-    { id: 2, name: '华语流行' },
-    { id: 3, name: '二次元音乐' },
-    { id: 4, name: '轻音乐' },
-  ],
-})
-const { userPlaylists } = toRefs(state)
-const userStore = useUserStore()
+// 收藏歌单（本地 library store，持久化）
+const libraryStore = useLibraryStore()
+const collectedPlaylists = computed(() => libraryStore.collectedPlaylists)
 
 // 活动指示器相关
 const indicatorRef = ref<HTMLElement | null>(null)
@@ -111,6 +111,7 @@ const routeChunkLoaders: Record<string, () => Promise<any>> = {
   '/new-albums': () => import('@/pages/new-albums.vue'),
   '/search': () => import('@/pages/search.vue'),
   '/my-music': () => import('@/pages/my-music.vue'),
+  '/likes': () => import('@/pages/likes.vue'),
   '/downloads': () => import('@/pages/downloads.vue'),
   '/local-music': () => import('@/pages/local-music.vue'),
   '/settings': () => import('@/pages/settings.vue'),
@@ -166,20 +167,21 @@ const isActive = (path: string) => {
   <aside class="hidden md:flex w-64 xl:w-72 shrink-0 h-full flex-col">
     <div class="sidebar relative flex h-full w-full flex-col justify-between rounded-[28px] p-4 overflow-hidden">
       <div class="flex flex-col min-h-0 flex-1">
-        <!-- 顶部：Sonic 品牌 Logo + 前进后退导航按钮 -->
-        <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-          <router-link to="/" class="group flex items-center gap-2.5">
-            <span class="relative flex h-8.5 w-8.5 items-center justify-center rounded-2xl bg-linear-to-br from-[#8b5cf6] via-[#ec4899] to-[#3b82f6] p-0.5 shadow-[0_0_16px_rgba(139,92,246,0.6)] transition-transform duration-300 group-hover:scale-105">
+        <!-- 顶部：epocanvas sonic 品牌 Logo + 前进后退导航按钮 -->
+        <div class="flex items-center justify-between pb-[4px] border-b border-white/10 shrink-0">
+          <router-link to="/" class="group flex items-center gap-2.5" :aria-label="BRAND_FULL">
+            <span class="relative flex h-8.5 w-8.5 items-center justify-center rounded-2xl bg-linear-to-br from-[#2563eb] via-[#38bdf8] to-[#3b82f6] p-0.5 shadow-[0_0_16px_rgba(37,99,235,0.6)] transition-transform duration-300 group-hover:scale-105">
               <span class="flex h-full w-full items-center justify-center rounded-[13px] bg-black/40">
                 <span class="h-2 w-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-pulse"></span>
               </span>
             </span>
-            <div class="flex flex-col">
-              <div class="flex items-center gap-1.5">
-                <span class="text-primary text-base font-extrabold tracking-tight">Sonic</span>
-                <span class="rounded bg-linear-to-r from-[#8b5cf6]/30 to-[#ec4899]/30 px-1 py-0.2 text-[8px] font-bold text-white/90 border border-white/20">STUDIO</span>
+            <div class="flex flex-col leading-none">
+              <span class="text-[9px] font-semibold tracking-[0.16em] text-primary/55">{{ BRAND_PARENT }}</span>
+              <div class="mt-0.5 flex items-center gap-1.5">
+                <span class="text-primary text-base font-extrabold tracking-tight">{{ BRAND_PRODUCT }}</span>
+                <span class="rounded bg-linear-to-r from-[#2563eb]/30 to-[#38bdf8]/30 px-1 py-0.2 text-[8px] font-bold text-white/90 border border-white/20">{{ BRAND_STUDIO }}</span>
               </div>
-              <span class="text-[9px] text-primary/40 font-semibold tracking-wider">AUDIO ENGINE</span>
+              <span class="mt-0.5 text-[9px] text-primary/40 font-semibold tracking-wider">{{ BRAND_TAGLINE }}</span>
             </div>
           </router-link>
 
@@ -205,7 +207,7 @@ const isActive = (path: string) => {
         <!-- 快速搜索框 -->
         <div class="pt-3 pb-2 shrink-0">
           <div
-            class="flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 border border-white/10 text-primary transition-all duration-200 focus-within:border-[#8b5cf6]/60 focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-[#8b5cf6]/20"
+            class="flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 border border-white/10 text-primary transition-all duration-200 focus-within:border-[#2563eb]/60 focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-[#2563eb]/20"
           >
             <span class="icon-[mdi--magnify] h-3.5 w-3.5 shrink-0 text-primary/40"></span>
             <input
@@ -250,7 +252,7 @@ const isActive = (path: string) => {
                   :to="item.to"
                   @mouseenter="prefetchRoute(item.to)"
                   @focus="prefetchRoute(item.to)"
-                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-pink-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
                   :class="{
                     'nav-link-active text-primary font-semibold': isActive(item.to),
                     'hover:bg-white/5': !isActive(item.to),
@@ -260,10 +262,35 @@ const isActive = (path: string) => {
                     class="h-4.5 w-4.5 transition-transform duration-200"
                     :class="[
                       `icon-[${item.icon}]`,
-                      isActive(item.to) ? 'text-[#8b5cf6] drop-shadow-[0_0_8px_rgba(139,92,246,0.8)] scale-110' : ''
+                      isActive(item.to) ? 'text-[#2563eb] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110' : ''
                     ]"
                   ></span>
                   <span>{{ $t(item.labelKey) }}</span>
+                </router-link>
+              </nav>
+            </div>
+
+            <!-- 收藏的歌单（本地持久化） -->
+            <div v-if="collectedPlaylists.length" class="mb-4">
+              <h3 class="text-primary/40 mb-1.5 px-2 text-[10px] font-bold tracking-[.18em] uppercase">
+                {{ $t('layout.aside.collectedPlaylists') }}
+              </h3>
+              <nav class="relative space-y-0.5">
+                <router-link
+                  v-for="pl in collectedPlaylists"
+                  :key="pl.id"
+                  :to="`/playlist/${pl.id}`"
+                  class="nav-link text-primary/70 hover:text-primary relative z-10 flex items-center space-x-2.5 rounded-2xl px-2.5 py-2 text-xs transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent"
+                  :class="{
+                    'nav-link-active text-primary font-semibold': isActive(`/playlist/${pl.id}`),
+                    'hover:bg-white/5': !isActive(`/playlist/${pl.id}`),
+                  }"
+                >
+                  <span
+                    class="h-4.5 w-4.5 shrink-0 text-[#2563eb]"
+                    :class="isActive(`/playlist/${pl.id}`) ? 'icon-[mdi--playlist-music] drop-shadow-[0_0_8px_rgba(37,99,235,0.8)] scale-110' : 'icon-[mdi--playlist-music]'"
+                  ></span>
+                  <span class="truncate">{{ pl.name }}</span>
                 </router-link>
               </nav>
             </div>
@@ -312,7 +339,7 @@ const isActive = (path: string) => {
   transition: opacity 0.2s ease;
   background-color: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.08));
   border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.12));
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.12);
+  box-shadow: 0 0 14px rgba(37,99,235, 0.12);
 }
 
 /* 导航链接悬停效果 */

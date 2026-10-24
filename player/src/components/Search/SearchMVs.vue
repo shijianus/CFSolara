@@ -95,7 +95,7 @@ watch(
           </div>
           <div class="absolute right-0 bottom-0 left-0 p-3">
             <p
-              class="truncate text-sm font-medium text-white transition-colors group-hover:text-pink-300"
+              class="truncate text-sm font-medium text-white transition-colors group-hover:text-sky-300"
             >
               {{ mv.title }}
             </p>

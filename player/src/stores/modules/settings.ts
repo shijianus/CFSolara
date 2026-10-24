@@ -117,7 +117,7 @@ export const useSettingsStore = defineStore('settings', {
     audioQuality: AudioQuality
   } => ({
     aurora: {
-      colorStops: ['#8b5cf6', '#ec4899', '#3b82f6', '#00f2fe', '#6c5ce7'],
+      colorStops: ['#2563eb', '#38bdf8', '#3b82f6', '#22d3ee', '#6c5ce7'],
       amplitude: 1.0,
       blend: 0.5,
       speed: 1.0,
@@ -138,14 +138,14 @@ export const useSettingsStore = defineStore('settings', {
       noise: 0.1,
     },
     ultimate: {
-      bg1: '#07070d',
+      bg1: '#07101f',
       bg2: '#0f0c1b',
-      color1: '#8b5cf6',
-      color2: '#ec4899',
+      color1: '#2563eb',
+      color2: '#38bdf8',
       color3: '#3b82f6',
-      color4: '#a855f7',
+      color4: '#3b82f6',
       color5: '#06b6d4',
-      interactiveColor: '#ec4899',
+      interactiveColor: '#38bdf8',
       circleSize: '80%',
       blending: 'hard-light',
     },
@@ -184,7 +184,7 @@ export const useSettingsStore = defineStore('settings', {
     /** 重置极光背景为默认值 */
     resetAurora() {
       this.aurora = {
-        colorStops: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'],
+        colorStops: ['#3b82f6', '#1d4ed8', '#7dd3fc', '#f5576c', '#38bdf8'],
         amplitude: 1.0,
         blend: 0.5,
         speed: 1.0,
@@ -205,7 +205,7 @@ export const useSettingsStore = defineStore('settings', {
     /** 重置色彩弯曲为默认值 */
     resetColorBends() {
       this.colorBends = {
-        colors: ['#ff5c7a', '#8a5cff', '#00ffd1'],
+        colors: ['#ff5c7a', '#2563eb', '#00ffd1'],
         rotation: 30,
         speed: 0.3,
         scale: 1.2,
@@ -226,14 +226,14 @@ export const useSettingsStore = defineStore('settings', {
     /** 重置终极流体为默认值 */
     resetUltimate() {
       this.ultimate = {
-        bg1: '#6C00A2',
+        bg1: '#1E40AF',
         bg2: '#001152',
-        color1: '#1271FF',
-        color2: '#DD4AFF',
+        color1: '#2563EB',
+        color2: '#3B82F6',
         color3: '#64DCFF',
         color4: '#C83232',
         color5: '#B4B432',
-        interactiveColor: '#8C64FF',
+        interactiveColor: '#2563EB',
         circleSize: '80%',
         blending: 'hard-light',
       }

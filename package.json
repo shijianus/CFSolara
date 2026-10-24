@@ -1,7 +1,7 @@
 {
   "name": "sonic",
   "version": "2.1.0",
-  "description": "Sonic Music Cloud Platform & Aggregation Gateway (by EpoCanvas)",
+  "description": "epocanvas sonic Music Cloud Platform & Aggregation Gateway",
   "private": true,
   "type": "module",
   "scripts": {

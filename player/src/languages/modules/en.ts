@@ -16,6 +16,9 @@ export default {
     clear: 'Clear',
     loading: 'Loading',
     noData: 'No Data',
+    close: 'Close',
+    undo: 'Undo',
+    retry: 'Retry',
     search: {
       placeholder: 'Search songs, artists, albums...',
       label: 'Search',
@@ -27,6 +30,8 @@ export default {
     share: 'Share',
     collect: 'Favorite',
     uncollect: 'Unfavorite',
+    like: 'Like',
+    unlike: 'Unlike',
     me: 'Me',
     justNow: 'Just now',
     minutesAgo: 'm ago',
@@ -44,6 +49,23 @@ export default {
       favorites: 'favorites',
       fans: 'fans',
     },
+  },
+  download: {
+    overwritePrompt: 'The {quality} version of this song is already downloaded. Overwriting will replace the existing offline file.',
+    overwrite: 'Overwrite',
+    cancelOverwrite: 'Cancel',
+    downloading: 'Downloading',
+    cancelDownload: 'Cancel download',
+    completed: 'Download complete: {name}',
+    cancelled: 'Download cancelled',
+    failed: 'Download failed: {reason}',
+    networkError: 'Network error. Check your connection.',
+    sourceUnavailable: 'Audio source unavailable or restricted by copyright',
+    manualSaveRequired: 'The browser blocked the automatic save. Click “Save manually”.',
+    saveNow: 'Save manually',
+    saved: 'File saved',
+    checking: 'Checking existing downloads…',
+    unavailable: 'This quality is unavailable',
   },
   search: {
     tabs: { song: 'Songs', playlist: 'Playlists', mv: 'MV' },
@@ -65,6 +87,14 @@ export default {
     official: 'Official Charts',
   },
   components: {
+    infiniteScroll: {
+      error: 'Failed to load. Please try again.',
+      timeout: 'Slow response. Tap to retry.',
+      empty: 'No results',
+      reset: 'Reset filters',
+      retry: 'Reload',
+      noMore: 'You have reached the end',
+    },
     pagination: {
       prev: 'Prev',
       next: 'Next',
@@ -129,6 +159,7 @@ export default {
       dropFilesHint: 'Drag and drop audio files here to upload',
       localMusicEmpty: 'No local music yet, click the button below to add',
       addMusic: 'Add Music',
+    localMusicDeleted: 'Local track “{name}” deleted',
     },
     background: {
       common: {
@@ -193,6 +224,7 @@ export default {
       myMusic: 'My Music',
       system: 'System',
       playlists: { created: 'Created Playlists' },
+      collectedPlaylists: 'Collected Playlists',
       menu: {
         home: 'Home',
         mv: 'MV',
@@ -209,6 +241,15 @@ export default {
     },
   },
   player: {
+    queueCleared: 'Playback queue cleared',
+    localFileMissing: 'The local file is no longer available. The current track was cleared.',
+    next: 'Next track',
+    qualitySwitchFailed: 'Failed to switch quality. The previous quality was restored.',
+    playbackError: {
+      network: 'Network error. Check your connection and try again.',
+      source: 'This audio source is unavailable. Try another track.',
+      copyright: 'This track is unavailable due to copyright restrictions.',
+    },
     play: 'Play',
     pause: 'Pause',
     loading: 'Loading…',
@@ -282,7 +323,7 @@ export default {
       all: 'All',
       official: 'Official',
       live: 'Live',
-      netease: 'Sonic Originals',
+      netease: 'sonic Originals',
     },
     actions: {
       loadMore: 'Load More',
@@ -303,6 +344,8 @@ export default {
     },
   },
   mvPlayer: {
+    videoUnavailable: 'No playable MV source available',
+    videoError: 'MV playback failed. Please retry.',
     stats: {
       plays: 'plays',
       likes: 'likes',
@@ -323,7 +366,18 @@ export default {
     },
   },
   likes: {
+    title: 'My Favorites',
+    subtitle: 'Songs, playlists and MVs you have saved',
+    tabs: {
+      all: 'All',
+      song: 'Songs',
+      playlist: 'Playlists',
+      mv: 'MVs',
+    },
     empty: 'No liked songs yet',
+    emptyAll: 'Nothing here yet. Like songs, collect playlists or MVs to see them here',
+    emptyPlaylist: 'No collected playlists yet',
+    emptyMv: 'No liked MVs yet',
   },
   recent: {
     title: 'Recently Played',
@@ -373,6 +427,13 @@ export default {
   playlist: {
     tabs: { songs: 'Songs', comments: 'Comments', similar: 'Similar' },
     similarEmpty: 'No similar playlists',
+    loadMore: 'Load more songs',
+    loadingAll: 'Loading the full track list…',
+    loadedProgress: '{loaded} / {total} loaded',
+    allLoaded: 'All songs loaded',
+    partialPlayNotice: 'Could not load the full list. Playing only the {loaded} loaded songs out of {total}.',
+    retryLoad: 'Retry',
+    dismiss: 'Got it',
   },
   artistPage: {
     bioTitle: 'Artist Bio',
@@ -380,6 +441,11 @@ export default {
     tabs: { hotSongs: 'Top Songs', albums: 'Albums' },
     stats: { songs: 'songs', albums: 'albums', mvs: 'MVs', fans: 'fans' },
     albumsEmpty: 'No albums',
+    loadMoreSongs: 'Load more songs',
+    loadMoreAlbums: 'Load more albums',
+    loadedSongs: '{loaded} / {total} songs loaded',
+    loadedAlbums: '{loaded} / {total} albums loaded',
+    loadFailedRetry: 'Load failed, tap to retry',
   },
   albumPage: {
     alt: { cover: 'Album cover' },

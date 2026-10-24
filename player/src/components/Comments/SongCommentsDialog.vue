@@ -197,7 +197,7 @@ const formatTime = (t: number | string) => {
                   </span>
                 </div>
 
-                <div class="like-btn flex shrink-0 items-center gap-1.5">
+                <div class="like-count flex shrink-0 items-center gap-1.5">
                   <span class="icon-[mdi--thumb-up-outline] h-5 w-5" />
                   <span class="text-xs font-medium">{{ c.likedCount || 0 }}</span>
                 </div>
@@ -283,8 +283,8 @@ const formatTime = (t: number | string) => {
 }
 
 .header-icon {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  box-shadow: 0 4px 14px rgba(56,189,248, 0.35);
 }
 
 .drawer-title {
@@ -318,7 +318,7 @@ const formatTime = (t: number | string) => {
 }
 
 .avatar-fallback {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.6), rgba(139, 92, 246, 0.6));
+  background: linear-gradient(135deg, rgba(56,189,248, 0.6), rgba(37,99,235, 0.6));
 }
 
 .comment-name {
@@ -331,20 +331,14 @@ const formatTime = (t: number | string) => {
   color: var(--glass-text-primary);
 }
 
-.like-btn {
+.like-count {
   color: var(--glass-text-muted);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.like-btn:hover {
-  color: #ec4899;
 }
 
 /* ═══ Reply ═══ */
 .reply-card {
   background: var(--glass-interactive-hover-muted);
-  border-left: 2px solid rgba(236, 72, 153, 0.3);
+  border-left: 2px solid rgba(56,189,248, 0.3);
 }
 
 .reply-name {

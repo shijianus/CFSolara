@@ -1,17 +1,17 @@
-# 🎶 Sonic 多源聚合音乐云平台 & 网关 (v2.1.0 稳定发行版)
+# 🎶 epocanvas sonic 多源聚合音乐云平台 & 网关 (v2.1.0 稳定发行版)
 
-> 🌐 基于 Cloudflare Pages Functions 打造的现代化网页音乐播放器与 **Sonic 多源聚合网关**。具备品牌化路由、并行多上游检索去重、多语言毫秒级真逐字歌词（中/英/日/粤/韩）与自适应插值兜底。
+> 🌐 基于 Cloudflare Pages Functions 打造的现代化网页音乐播放器与 **epocanvas sonic 多源聚合网关**。具备品牌化路由、并行多上游检索去重、多语言毫秒级真逐字歌词（中/英/日/粤/韩）与自适应插值兜底。
 > 
 > 🟢 **当前状态：v2.1.0 正式稳定发行版 (Stable Release)** —— 通过全量多语种动态时序自动化端到端测试。
 
 ---
 
-## ⚡ Sonic 多源聚合网关 (Sonic Gateway)
+## ⚡ epocanvas sonic 多源聚合网关 (Gateway)
 
-Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式与 `sonic:` 缓存前缀。
+对外品牌统一为 **epocanvas sonic**，其中 `epocanvas` 为总品牌、`sonic` 为分品牌。技术命名空间（`/api/sonic/*`、`brand: "Sonic"`、`SONIC_*` 环境变量、`_sonic_*` 缓存参数等）属于冻结的兼容契约，不随展示品牌改名。
 
 ### 统一响应结构
-所有 `/api/sonic/*` 接口遵循一致的顶层契约：
+所有 `/api/sonic/*` 接口遵循一致的顶层契约。`brand` 字段固定为 `"Sonic"`，用于兼容既有前端与第三方客户端：
 ```json
 {
   "brand": "Sonic",
@@ -31,7 +31,7 @@ Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式�
 
 ---
 
-## 📡 API 路由清单 (Sonic Routes)
+## 📡 API 路由清单 (sonic Routes)
 
 ### 1. 歌词网关 (`/api/sonic/lyrics/*`)
 
@@ -82,7 +82,7 @@ Sonic 开放服务统一采用 `Sonic` 品牌前缀、顶层标准响应格式�
 
 ## ⚙️ 环境变量配置 (`wrangler.toml` / Cloudflare Pages)
 
-所有 Sonic 开关与外链均使用 `SONIC_` 前缀，支持故障熔断与单源开关：
+所有网关开关与外链均使用 `SONIC_` 前缀（技术命名空间，保留不变），支持故障熔断与单源开关：
 
 ```toml
 [vars]
@@ -141,7 +141,7 @@ curl -s "http://localhost/api/sonic/lyrics?title=年少有为&platformId=1293886
 
 ## 💖 致谢与开源协议参考 (Credits)
 
-本专案的 Sonic 多源聚合网关借鉴并致谢以下优秀的开源专案与协议实现：
+本专案的 epocanvas sonic 多源聚合网关借鉴并致谢以下优秀的开源专案与协议实现：
 
 - **Meting**：https://github.com/metowolf/Meting
 - **Meting-API-Serverless**：https://github.com/Warma10032/Meting-API-Serverless
@@ -158,5 +158,6 @@ curl -s "http://localhost/api/sonic/lyrics?title=年少有为&platformId=1293886
 ---
 
 ## 📄 许可证与版权 (Copyright & License)
-Copyright © 2026 EpoCanvas. All rights reserved.  
+Copyright © 2026 epocanvas. All rights reserved.
+
 本项目采用 CC BY-NC-SA 协议，禁止商业化转售行为，任何衍生项目必须保留本项目地址并以相同协议开源。

@@ -10,7 +10,7 @@ const state = reactive({
   // 颜色1（HEX）
   color1: settings.colorBends.colors[0] || '#ff5c7a',
   // 颜色2（HEX）
-  color2: settings.colorBends.colors[1] || '#8a5cff',
+  color2: settings.colorBends.colors[1] || '#2563eb',
   // 颜色3（HEX）
   color3: settings.colorBends.colors[2] || '#00ffd1',
   // 旋转角度（度）

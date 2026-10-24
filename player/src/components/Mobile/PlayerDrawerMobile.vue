@@ -687,7 +687,7 @@ const playModeIcon = computed(() => {
           />
           <span
             v-if="commentCount > 0"
-            class="pointer-events-none absolute top-2 right-2 flex h-4 min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-pink-500 px-1 text-[0.6rem] font-bold text-white shadow-sm"
+            class="pointer-events-none absolute top-2 right-2 flex h-4 min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-500 px-1 text-[0.6rem] font-bold text-white shadow-sm"
           >
             {{ commentCount > 999 ? '999+' : commentCount }}
           </span>
@@ -1006,8 +1006,8 @@ const playModeIcon = computed(() => {
 }
 
 .toolbar-btn.active {
-  background: rgba(236, 72, 153, 0.3);
-  color: rgb(236, 72, 153);
+  background: rgba(56,189,248, 0.3);
+  color: rgb(37, 99, 235);
 }
 
 .time-indicator {
