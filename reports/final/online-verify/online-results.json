@@ -1,60 +1,54 @@
 {
-  "timestamp": "2026-10-24T17:58:56.177Z",
+  "timestamp": "2026-10-24T19:28:38.838Z",
   "axe": [
     {
       "route": "/",
       "serious": 0,
-      "critical": 1,
+      "critical": 0,
       "violations": [
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "nodes": 3,
-          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
-        },
         {
           "id": "landmark-unique",
           "impact": "moderate",
           "nodes": 1,
-          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+          "sample": ".mb-4[data-v-fc9eb996=\"\"]:nth-child(1) > nav"
         }
       ]
     },
     {
       "route": "/playlist/1",
       "serious": 0,
-      "critical": 1,
+      "critical": 0,
       "violations": [
         {
-          "id": "button-name",
-          "impact": "critical",
-          "nodes": 3,
-          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1,
+          "sample": "h3[title=\"CIRCLES\"]"
         },
         {
           "id": "landmark-unique",
           "impact": "moderate",
           "nodes": 1,
-          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+          "sample": ".mb-4[data-v-fc9eb996=\"\"]:nth-child(1) > nav"
         }
       ]
     },
     {
       "route": "/settings",
       "serious": 0,
-      "critical": 1,
+      "critical": 0,
       "violations": [
         {
-          "id": "button-name",
-          "impact": "critical",
-          "nodes": 3,
-          "sample": ".space-x-4.items-center[data-v-03614b52=\"\"] > .disabled\\:opacity-50.disabled\\:cursor-not-allowed.bg-transparent:nth-chil"
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1,
+          "sample": ".space-y-5.p-5.glass-card:nth-child(1) > .pb-4.border-b.border-white\\/10 > div:nth-child(2) > h3"
         },
         {
           "id": "landmark-unique",
           "impact": "moderate",
           "nodes": 1,
-          "sample": ".mb-4[data-v-bd956830=\"\"]:nth-child(1) > nav"
+          "sample": ".mb-4[data-v-fc9eb996=\"\"]:nth-child(1) > nav"
         }
       ]
     }
@@ -65,7 +59,7 @@
       "route": "/",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 12,
       "consoleErrors": []
     },
     {
@@ -81,7 +75,7 @@
       "route": "/search?q=test",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 87,
       "consoleErrors": []
     },
     {
@@ -105,7 +99,7 @@
       "route": "/",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 12,
       "consoleErrors": []
     },
     {
@@ -113,7 +107,7 @@
       "route": "/playlist/1",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 100,
       "consoleErrors": []
     },
     {
@@ -121,7 +115,7 @@
       "route": "/search?q=test",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 87,
       "consoleErrors": []
     },
     {
@@ -161,7 +155,7 @@
       "route": "/search?q=test",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 49,
       "consoleErrors": []
     },
     {
@@ -193,7 +187,7 @@
       "route": "/playlist/1",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 100,
       "consoleErrors": []
     },
     {
@@ -201,7 +195,7 @@
       "route": "/search?q=test",
       "rendered": true,
       "hOverflow": false,
-      "interactiveRows": 0,
+      "interactiveRows": 49,
       "consoleErrors": []
     },
     {
@@ -222,13 +216,11 @@
     }
   ],
   "privacy": {
-    "appLen": 0,
-    "bodyText": "",
+    "appLen": 29630,
+    "bodyText": "epocanvas\nsonic\n跟随系统\nSonic 新碟\nB\nSonic 热歌推荐\nB\nSonic 新歌\nB\nSonic 热歌推荐\nB\nSonic 新碟\n推荐歌单\n1038.3万\n\n倾吐隐秘情绪｜百位R&B歌手精选\n\n717.1万\n\n可爱",
     "hasFatalText": false,
     "songRows": 0,
-    "canInteract": false,
-    "consoleErrors": [
-      "SecurityError: Access is denied for this document."
-    ]
+    "canInteract": true,
+    "consoleErrors": []
   }
 }
