@@ -25,7 +25,7 @@ let hasPreloadedNext = false
 type PlaybackErrorKind = 'network' | 'source' | 'copyright'
 
 /** 将媒体错误/播放异常归类为网络、音源不可用或版权受限 */
-const classifyPlaybackError = (error?: MediaError | Error | null): PlaybackErrorKind => {
+export const classifyPlaybackError = (error?: MediaError | Error | null): PlaybackErrorKind => {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'network'
   const mediaError = error as MediaError | null
   if (mediaError && typeof mediaError.code === 'number') {
