@@ -1,0 +1,12 @@
+
+> sonic@2.1.0 lint:theme
+> node scripts/lint-theme.mjs
+
+✖ lint:theme found 6 new hardcoded white value(s).
+  使用主题令牌（text-primary、border-glass、--glass-*）代替。
+  player/src/layout/aside.vue:310  tailwind-white:hover:bg-white/5
+  player/src/pages/mobile/search.vue:561  tailwind-white:border-white/10
+  player/src/pages/mobile/search.vue:561  tailwind-white:bg-white/5
+  player/src/pages/mobile/search.vue:596  tailwind-white:bg-white/[0.05]
+  player/src/pages/mobile/search.vue:598  tailwind-white:bg-white/[0.05]
+  player/src/pages/mobile/search.vue:609  tailwind-white:active:bg-white/[0.04]

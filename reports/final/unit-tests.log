@@ -1,0 +1,18 @@
+
+> sonic-music-player@2.1.0 test D:\Users\Smart Kevin\OneDrive\Desktop\sonic\player
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Users/Smart Kevin/OneDrive/Desktop/sonic/player[39m
+
+ [32m✓[39m tests/libraryStore.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 110[2mms[22m[39m
+ [32m✓[39m tests/transformers.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m tests/playbackErrors.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/audioQuality.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m tests/localMusicUndo.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 43[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 22:24:15
+[2m   Duration [22m 13.61s[2m (environment 69%, import 20%, transform 10%, worker 1%)[22m
+

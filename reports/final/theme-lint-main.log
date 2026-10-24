@@ -1,0 +1,6 @@
+
+> sonic@2.1.0 lint:theme
+> node scripts/lint-theme.mjs
+
+✓ lint:theme passed: 430 existing hardcoded white occurrence(s) are covered by the baseline.
+  Baseline has 30 stale allowance(s). Run `pnpm lint:theme --update-baseline` to tighten it.

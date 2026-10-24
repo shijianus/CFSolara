@@ -1,0 +1,6 @@
+boot: viewport
+boot: nav seed
+Error: waitFor timeout: document.readyState === 'complete' && !!document.querySelector('#app')
+    at waitFor (file:///D:/Users/Smart%20Kevin/OneDrive/Desktop/sonic/reports/final/harness.mjs:317:20)
+    at async nav (file:///D:/Users/Smart%20Kevin/OneDrive/Desktop/sonic/reports/final/harness.mjs:339:5)
+    at async main (file:///D:/Users/Smart%20Kevin/OneDrive/Desktop/sonic/reports/final/harness.mjs:382:3)

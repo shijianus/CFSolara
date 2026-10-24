@@ -1,0 +1,3430 @@
+[
+  {
+    "page": "home",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Nova Fields",
+        "width": 78,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Johann Strauss II",
+        "width": 112,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 239,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 239,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 239,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 239,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 155,
+        "height": 40
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "清空离线音乐库",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "播放全部",
+        "width": 106,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "随机播放",
+        "width": 102,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "全部 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "SQ 无损 (0)",
+        "width": 90,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "HQ 极高 (0)",
+        "width": 93,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "标准 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "input",
+        "label": "搜索歌名、歌手、专辑",
+        "width": 224,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "Aria North",
+        "width": 133,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "First Light",
+        "width": 128,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "First Light",
+        "width": 66,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Nova Fields",
+        "width": 78,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "Night Drive",
+        "width": 77,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Johann Strauss II",
+        "width": 112,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "Classics",
+        "width": 51,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "1440x900",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Nova Fields",
+        "width": 78,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Johann Strauss II",
+        "width": 112,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 239,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 239,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 239,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 239,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 155,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 155,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 155,
+        "height": 40
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "清空离线音乐库",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "播放全部",
+        "width": 106,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "随机播放",
+        "width": 102,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "全部 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "SQ 无损 (0)",
+        "width": 90,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "HQ 极高 (0)",
+        "width": 93,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "标准 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "input",
+        "label": "搜索歌名、歌手、专辑",
+        "width": 224,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 32,
+        "height": 32
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "Aria North",
+        "width": 133,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "First Light",
+        "width": 128,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "First Light",
+        "width": 66,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Nova Fields",
+        "width": 78,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "Night Drive",
+        "width": 77,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Johann Strauss II",
+        "width": 112,
+        "height": 19
+      },
+      {
+        "tag": "a",
+        "label": "Classics",
+        "width": 51,
+        "height": 19
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "a",
+        "label": "Aria North",
+        "width": 71,
+        "height": 19
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "1440x900",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 184,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 92,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 92,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 92,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 92,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 57,
+        "height": 40
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "清空离线音乐库",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "播放全部",
+        "width": 106,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "随机播放",
+        "width": 102,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "全部 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "SQ 无损 (0)",
+        "width": 90,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "HQ 极高 (0)",
+        "width": 93,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "标准 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "input",
+        "label": "搜索歌名、歌手、专辑",
+        "width": 224,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "First Light",
+        "width": 128,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "820x700",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 92,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 1",
+        "width": 92,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 92,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "背景色 2",
+        "width": 92,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 1",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 2",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 3",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 4",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "颜色 5",
+        "width": 57,
+        "height": 40
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 57,
+        "height": 36
+      },
+      {
+        "tag": "input",
+        "label": "交互颜色",
+        "width": 57,
+        "height": 40
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "清空离线音乐库",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "播放全部",
+        "width": 106,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "随机播放",
+        "width": 102,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "全部 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "SQ 无损 (0)",
+        "width": 90,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "HQ 极高 (0)",
+        "width": 93,
+        "height": 28
+      },
+      {
+        "tag": "button",
+        "label": "标准 (3)",
+        "width": 68,
+        "height": 28
+      },
+      {
+        "tag": "input",
+        "label": "搜索歌名、歌手、专辑",
+        "width": 224,
+        "height": 36
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "播放歌曲",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "导出音频文件",
+        "width": 16,
+        "height": 32
+      },
+      {
+        "tag": "button",
+        "label": "从离线库删除",
+        "width": 16,
+        "height": 32
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "First Light",
+        "width": 128,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      },
+      {
+        "tag": "button",
+        "label": "分享",
+        "width": 32,
+        "height": 38
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "820x700",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 820,
+    "innerWidth": 820,
+    "horizontalOverflow": false,
+    "smallTargets": [
+      {
+        "tag": "input",
+        "label": "",
+        "width": 152,
+        "height": 17
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "播放",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "详情",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "喜欢",
+        "width": 16,
+        "height": 44
+      },
+      {
+        "tag": "button",
+        "label": "下载",
+        "width": 16,
+        "height": 44
+      }
+    ],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "844x390",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "844x390",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 844,
+    "innerWidth": 844,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "390x844",
+    "theme": "light",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "home",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "search",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "settings",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "downloads",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "song",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "not-found",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "local-music",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "playlist",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "mv-list",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  },
+  {
+    "page": "recent",
+    "viewport": "390x844",
+    "theme": "dark",
+    "lang": "zh-CN",
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "horizontalOverflow": false,
+    "smallTargets": [],
+    "smallText": []
+  }
+]

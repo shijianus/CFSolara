@@ -1,0 +1,71 @@
+build/plugins.ts(2,17): error TS2307: Cannot find module '@vitejs/plugin-vue' or its corresponding type declarations.
+  There are types at 'D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/node_modules/@vitejs/plugin-vue/dist/index.d.mts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+build/plugins.ts(3,24): error TS2307: Cannot find module 'unplugin-auto-import/vite' or its corresponding type declarations.
+  There are types at 'D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/node_modules/unplugin-auto-import/dist/vite.d.mts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+build/plugins.ts(11,1): error TS6133: 'vueDevTools' is declared but its value is never read.
+build/plugins.ts(15,35): error TS6133: 'viteEnv' is declared but its value is never read.
+src/components/Background/ColorBends.vue(130,31): error TS2694: Namespace '"three"' has no exported member 'WebGLRenderer'.
+src/components/Background/ColorBends.vue(132,31): error TS2694: Namespace '"three"' has no exported member 'ShaderMaterial'.
+src/components/Background/ColorBends.vue(197,48): error TS2694: Namespace '"three"' has no exported member 'Vector2'.
+src/components/Background/ColorBends.vue(219,45): error TS2694: Namespace '"three"' has no exported member 'Vector2'.
+src/components/Background/ColorBends.vue(225,49): error TS2694: Namespace '"three"' has no exported member 'Vector2'.
+src/components/Background/ColorBends.vue(285,61): error TS2694: Namespace '"three"' has no exported member 'Vector3'.
+src/components/Background/ColorBendsSettingsPanel.vue(2,10): error TS6133: 'ref' is declared but its value is never read.
+src/components/Mobile/MiniPlayerMobile.vue(99,53): error TS18047: 'currentSong.value' is possibly 'null'.
+src/components/Mobile/PlayerDrawerMobile.vue(267,68): error TS2551: Property 'isDraggingLyrics' does not exist on type '{ isRendered: boolean; isCommentsOpen: boolean; showLyrics: boolean; showToolbar: boolean; touchStartY: number | null; lyricDragStartY: number | null; lyricDragStartTime: number | null; draggingLyrics: boolean; previewLyricTime: number | null; lyricDragMoved: boolean; }'. Did you mean 'draggingLyrics'?
+src/components/Mobile/PlayerDrawerMobile.vue(270,7): error TS2304: Cannot find name 'scrollToCurrentLyric'.
+src/components/Mobile/VolumeControlMobile.vue(11,7): error TS6133: 'popupRef' is declared but its value is never read.
+src/components/Player/VinylDisc.vue(114,9): error TS6133: 'currentRotation' is declared but its value is never read.
+src/components/PlayerDrawer.vue(443,52): error TS18047: 's' is possibly 'null'.
+src/components/Ui/AudioVisualizer.vue(42,26): error TS6133: 'barCount' is declared but its value is never read.
+src/composables/useAudioAnalyser.ts(1,15): error TS6133: 'onUnmounted' is declared but its value is never read.
+src/composables/useAudioAnalyser.ts(120,43): error TS2345: Argument of type '{ [x: number]: number; readonly BYTES_PER_ELEMENT: number; readonly buffer: { readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => ArrayBuffer; readonly [Symbol.toStringTag]: "ArrayBuffer"; } | { ...; }; ... 30 more ...; readonly [Symbol.toStringTag]: "Uint8Array"; }' is not assignable to parameter of type 'Uint8Array<ArrayBuffer>'.
+  Types of property 'buffer' are incompatible.
+    Type '{ readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => ArrayBuffer; readonly [Symbol.toStringTag]: "ArrayBuffer"; } | { ...; }' is not assignable to type 'ArrayBuffer'.
+      Type '{ readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => SharedArrayBuffer; readonly [Symbol.toStringTag]: "SharedArrayBuffer"; }' is not assignable to type 'ArrayBuffer'.
+        The types of 'slice(...)[Symbol.toStringTag]' are incompatible between these types.
+          Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
+src/composables/useAudioAnalyser.ts(123,44): error TS2345: Argument of type '{ [x: number]: number; readonly BYTES_PER_ELEMENT: number; readonly buffer: { readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => ArrayBuffer; readonly [Symbol.toStringTag]: "ArrayBuffer"; } | { ...; }; ... 30 more ...; readonly [Symbol.toStringTag]: "Uint8Array"; }' is not assignable to parameter of type 'Uint8Array<ArrayBuffer>'.
+  Types of property 'buffer' are incompatible.
+    Type '{ readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => ArrayBuffer; readonly [Symbol.toStringTag]: "ArrayBuffer"; } | { ...; }' is not assignable to type 'ArrayBuffer'.
+      Type '{ readonly byteLength: number; slice: (begin?: number | undefined, end?: number | undefined) => SharedArrayBuffer; readonly [Symbol.toStringTag]: "SharedArrayBuffer"; }' is not assignable to type 'ArrayBuffer'.
+        The types of 'slice(...)[Symbol.toStringTag]' are incompatible between these types.
+          Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
+src/composables/useGradientBackground.ts(34,27): error TS6133: 'isPlaying' is declared but its value is never read.
+src/composables/useGradientBackground.ts(34,38): error TS6133: 'isOpen' is declared but its value is never read.
+src/composables/useLyrics.ts(190,7): error TS6133: 'parseLrc' is declared but its value is never read.
+src/composables/useLyrics.ts(219,7): error TS2353: Object literal may only specify known properties, and 'words' does not exist in type 'LyricMerged'.
+src/composables/useLyrics.ts(231,14): error TS2339: Property 'words' does not exist on type 'LyricMerged'.
+src/config/nprogress.ts(1,23): error TS7016: Could not find a declaration file for module 'nprogress'. 'D:/Users/Smart Kevin/OneDrive/Desktop/sonic/player/node_modules/.pnpm/nprogress@0.2.0/node_modules/nprogress/nprogress.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/nprogress` if it exists or add a new declaration (.d.ts) file containing `declare module 'nprogress';`
+src/directives/animations.ts(435,15): error TS6133: 'glareX' is declared but its value is never read.
+src/directives/animations.ts(436,15): error TS6133: 'glareY' is declared but its value is never read.
+src/pages/mobile/index.vue(321,34): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+src/pages/mobile/search.vue(412,7): error TS6133: 'playSong' is declared but its value is never read.
+src/pages/mobile/search.vue(412,19): error TS6133: 's' is declared but its value is never read.
+src/pages/mobile/search.vue(418,7): error TS6133: 'isCurrent' is declared but its value is never read.
+src/pages/search.vue(350,44): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/stores/modules/audio.ts(65,37): error TS2345: Argument of type 'HTMLAudioElement | null' is not assignable to parameter of type 'Node'.
+  Type 'null' is not assignable to type 'Node'.
+src/stores/modules/audio.ts(602,49): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/stores/modules/localMusic.ts(55,34): error TS2322: Type 'Buffer<ArrayBufferLike>' is not assignable to type 'BlobPart'.
+  Type 'Buffer<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
+          Types of property '[Symbol.toStringTag]' are incompatible.
+            Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
+src/utils/blobMetadataParser.ts(57,7): error TS6133: 'xingBytes' is declared but its value is never read.
+src/utils/colorExtractor.ts(284,25): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/utils/http.ts(58,5): error TS2322: Type 'Promise<AxiosResponseResult<any, T, any, object>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponseResult<any, T, any, object>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponseResult<any, T, any, object>'.
+src/utils/http.ts(65,18): error TS2322: Type 'Promise<AxiosResponseResult<any, T, object, any>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponseResult<any, T, object, any>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponseResult<any, T, object, any>'.
+src/utils/http.ts(73,5): error TS2322: Type 'Promise<AxiosResponseResult<any, T, FormData, any>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponseResult<any, T, FormData, any>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponseResult<any, T, FormData, any>'.
+src/utils/lyricsWordSync.ts(329,3): error TS6133: 'currentIndex' is declared but its value is never read.
