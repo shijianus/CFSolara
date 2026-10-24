@@ -392,6 +392,11 @@ export default {
     tabs: { hotSongs: '人気曲', albums: 'アルバム' },
     stats: { songs: '曲', albums: 'アルバム', mvs: 'MV', fans: 'ファン' },
     albumsEmpty: 'アルバムはありません',
+    loadMoreSongs: 'さらに曲を読み込む',
+    loadMoreAlbums: 'さらにアルバムを読み込む',
+    loadedSongs: '{loaded} / {total} 曲を読み込み済み',
+    loadedAlbums: '{loaded} / {total} 枚を読み込み済み',
+    loadFailedRetry: '読み込みに失敗しました。タップして再試行',
   },
   albumPage: {
     alt: { cover: 'アルバムカバー' },

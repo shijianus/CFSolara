@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { artistDetail, artistTopSong, artistAlbum } from '@/api'
+import { artistDetail, artistTopSong, artistAlbum, artistSongs } from '@/api'
 import { usePlayActions } from '@/composables/usePlayActions'
 import { formatCount } from '@/utils/time'
 import TabGroup from '@/components/Ui/TabGroup.vue'
@@ -39,19 +39,38 @@ const state = reactive({
   loading: true,
   followed: false,
   activeTab: 'songs' as 'songs' | 'albums',
+  songTotal: 0,
+  hasMoreSongs: false,
+  isLoadingMoreSongs: false,
+  isSongLoadError: false,
+  albumTotal: 0,
+  hasMoreAlbums: false,
+  isLoadingMoreAlbums: false,
+  isAlbumLoadError: false,
 })
 
 const { activeTab } = toRefs(state)
 
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 
+const SONG_PAGE_SIZE = 50
+const ALBUM_PAGE_SIZE = 12
+
 const load = async (id: number) => {
   state.loading = true
+  state.songTotal = 0
+  state.hasMoreSongs = false
+  state.isLoadingMoreSongs = false
+  state.isSongLoadError = false
+  state.albumTotal = 0
+  state.hasMoreAlbums = false
+  state.isLoadingMoreAlbums = false
+  state.isAlbumLoadError = false
   try {
     const [detailRes, songsRes, albumsRes] = await Promise.all([
       artistDetail({ id }),
       artistTopSong({ id }),
-      artistAlbum({ id, limit: 12 }),
+      artistAlbum({ id, limit: ALBUM_PAGE_SIZE, offset: 0 }),
     ])
 
     const artist = transformArtistDetail(detailRes as Record<string, unknown>)
@@ -69,13 +88,68 @@ const load = async (id: number) => {
         followed: raw?.followed || false,
         fansCount: raw?.fansCnt || 0,
       }
+      state.songTotal = artist.musicSize || 0
+      state.albumTotal = artist.albumSize || 0
       state.followed = libraryStore.isArtistFollowed(artist.id) || state.info.followed
     }
 
-    state.songs = transformSongs(songsRes as Record<string, unknown>, 50)
-    state.albums = transformAlbums(albumsRes as Record<string, unknown>, 12)
+    state.songs = transformSongs(songsRes as Record<string, unknown>, SONG_PAGE_SIZE)
+    state.hasMoreSongs =
+      state.songs.length >= SONG_PAGE_SIZE &&
+      (state.songTotal === 0 || state.songs.length < state.songTotal)
+    state.albums = transformAlbums(albumsRes as Record<string, unknown>, ALBUM_PAGE_SIZE)
+    state.hasMoreAlbums =
+      state.albums.length >= ALBUM_PAGE_SIZE &&
+      (state.albumTotal === 0 || state.albums.length < state.albumTotal)
   } finally {
     state.loading = false
+  }
+}
+
+const loadMoreSongs = async () => {
+  if (state.isLoadingMoreSongs || !state.hasMoreSongs) return
+  state.isLoadingMoreSongs = true
+  state.isSongLoadError = false
+  try {
+    const res = await artistSongs({
+      id: artistId.value,
+      limit: SONG_PAGE_SIZE,
+      offset: state.songs.length,
+      order: 'hot',
+    })
+    const page = transformSongs(res as Record<string, unknown>)
+    const seen = new Set(state.songs.map(s => String(s.id)))
+    state.songs.push(...page.filter(s => !seen.has(String(s.id))))
+    state.hasMoreSongs =
+      page.length === SONG_PAGE_SIZE &&
+      (state.songTotal === 0 || state.songs.length < state.songTotal)
+  } catch {
+    state.isSongLoadError = true
+  } finally {
+    state.isLoadingMoreSongs = false
+  }
+}
+
+const loadMoreAlbums = async () => {
+  if (state.isLoadingMoreAlbums || !state.hasMoreAlbums) return
+  state.isLoadingMoreAlbums = true
+  state.isAlbumLoadError = false
+  try {
+    const res = await artistAlbum({
+      id: artistId.value,
+      limit: ALBUM_PAGE_SIZE,
+      offset: state.albums.length,
+    })
+    const page = transformAlbums(res as Record<string, unknown>)
+    const seen = new Set(state.albums.map(a => String(a.id)))
+    state.albums.push(...page.filter(a => !seen.has(String(a.id))))
+    state.hasMoreAlbums =
+      page.length === ALBUM_PAGE_SIZE &&
+      (state.albumTotal === 0 || state.albums.length < state.albumTotal)
+  } catch {
+    state.isAlbumLoadError = true
+  } finally {
+    state.isLoadingMoreAlbums = false
   }
 }
 
@@ -107,13 +181,13 @@ const tabs = computed(() => [
     key: 'songs',
     labelKey: 'artistPage.tabs.hotSongs',
     icon: 'icon-[mdi--music-note]',
-    count: state.songs.length,
+    count: state.songTotal || state.songs.length,
   },
   {
     key: 'albums',
     labelKey: 'artistPage.tabs.albums',
     icon: 'icon-[mdi--album]',
-    count: state.albums.length,
+    count: state.albumTotal || state.albums.length,
   },
 ])
 </script>
@@ -216,14 +290,6 @@ const tabs = computed(() => [
                     >
                   </div>
                   <div
-                    class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm"
-                  >
-                    <span class="icon-[mdi--video] h-5 w-5 text-blue-400"></span>
-                    <span class="text-sm"
-                      >{{ state.info.mvSize }} {{ $t('artistPage.stats.mvs') }}</span
-                    >
-                  </div>
-                  <div
                     v-if="state.info.fansCount"
                     class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm"
                   >
@@ -301,6 +367,31 @@ const tabs = computed(() => [
 
           <div v-show="state.activeTab === 'songs'" class="animate-fade-in">
             <SongList :songs="state.songs" :current-playing-index="-1" :show-header="true" />
+            <div class="mt-4 flex flex-col items-center gap-2">
+              <p v-if="state.songTotal" class="text-primary/50 text-xs">
+                {{ $t('artistPage.loadedSongs', { loaded: state.songs.length, total: state.songTotal }) }}
+              </p>
+              <Button
+                v-if="state.hasMoreSongs"
+                variant="soft"
+                size="sm"
+                rounded="full"
+                class="min-h-11"
+                :loading="state.isLoadingMoreSongs"
+                :disabled="state.isLoadingMoreSongs"
+                @click="loadMoreSongs"
+              >
+                {{ state.isLoadingMoreSongs ? $t('common.loading') : $t('artistPage.loadMoreSongs') }}
+              </Button>
+              <button
+                v-if="state.isSongLoadError && !state.isLoadingMoreSongs"
+                type="button"
+                class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                @click="loadMoreSongs"
+              >
+                {{ $t('artistPage.loadFailedRetry') }}
+              </button>
+            </div>
           </div>
 
           <div v-show="state.activeTab === 'albums'" class="animate-fade-in">
@@ -328,6 +419,31 @@ const tabs = computed(() => [
                   {{ al.publishTime }} · {{ $t('commonUnits.songsShort', { count: al.size || 0 }) }}
                 </p>
               </div>
+            </div>
+            <div class="col-span-full mt-2 flex flex-col items-center gap-2">
+              <p v-if="state.albumTotal" class="text-primary/50 text-xs">
+                {{ $t('artistPage.loadedAlbums', { loaded: state.albums.length, total: state.albumTotal }) }}
+              </p>
+              <Button
+                v-if="state.hasMoreAlbums"
+                variant="soft"
+                size="sm"
+                rounded="full"
+                class="min-h-11"
+                :loading="state.isLoadingMoreAlbums"
+                :disabled="state.isLoadingMoreAlbums"
+                @click="loadMoreAlbums"
+              >
+                {{ state.isLoadingMoreAlbums ? $t('common.loading') : $t('artistPage.loadMoreAlbums') }}
+              </Button>
+              <button
+                v-if="state.isAlbumLoadError && !state.isLoadingMoreAlbums"
+                type="button"
+                class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                @click="loadMoreAlbums"
+              >
+                {{ $t('artistPage.loadFailedRetry') }}
+              </button>
             </div>
           </div>
         </div>

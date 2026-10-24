@@ -225,6 +225,12 @@ export const artistList = (params?: {
 
 export const artistDetail = (params: { id: number }) => httpGet('/artist/detail', params)
 export const artistTopSong = (params: { id: number }) => httpGet('/artist/top/song', params)
+export const artistSongs = (params: {
+  id: number
+  limit?: number
+  offset?: number
+  order?: 'hot' | 'time'
+}) => httpGet('/artist/songs', params)
 export const artistAlbum = (params: { id: number; limit?: number; offset?: number }) =>
   httpGet('/artist/album', params)
 export const artistDesc = (params: { id: number }) => httpGet('/artist/desc', params)

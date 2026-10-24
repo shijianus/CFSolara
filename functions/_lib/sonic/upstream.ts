@@ -405,13 +405,21 @@ export async function handleUpstreamEndpoint(
   }
 
   // 13. Artist Detail & Artist Top Song & Albums
-  if (normEndpoint === 'artist/detail' || normEndpoint === 'artist/top/song' || normEndpoint === 'artist/album') {
+  if (
+    normEndpoint === 'artist/detail' ||
+    normEndpoint === 'artist/top/song' ||
+    normEndpoint === 'artist/album' ||
+    normEndpoint === 'artist/songs'
+  ) {
     const id = url.searchParams.get('id') || '6452';
+    const limit = Math.min(200, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10) || 20));
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
     if (normEndpoint === 'artist/album') {
       try {
-        const resp = await fetch(`https://music.163.com/api/artist/albums/${encodeURIComponent(id)}?limit=20`, {
-          headers: UPSTREAM_HEADERS,
-        });
+        const resp = await fetch(
+          `https://music.163.com/api/artist/albums/${encodeURIComponent(id)}?limit=${limit}&offset=${offset}`,
+          { headers: UPSTREAM_HEADERS },
+        );
         const data: any = await resp.json();
         return jsonResponse(
           { code: 200, brand: 'Sonic', hotAlbums: desensitizeData(data.hotAlbums || []), more: data.more ?? false },
@@ -419,6 +427,21 @@ export async function handleUpstreamEndpoint(
         );
       } catch {}
       return jsonResponse({ code: 200, brand: 'Sonic', hotAlbums: [] });
+    }
+    if (normEndpoint === 'artist/songs') {
+      const order = url.searchParams.get('order') === 'time' ? 'time' : 'hot';
+      try {
+        const resp = await fetch(
+          `https://music.163.com/api/artist/songs?id=${encodeURIComponent(id)}&limit=${limit}&offset=${offset}&order=${order}`,
+          { headers: UPSTREAM_HEADERS },
+        );
+        const data: any = await resp.json();
+        return jsonResponse(
+          { code: 200, brand: 'Sonic', songs: desensitizeData(data.songs || []), more: data.more ?? false },
+          { headers: { 'Cache-Control': 'public, max-age=3600' } },
+        );
+      } catch {}
+      return jsonResponse({ code: 200, brand: 'Sonic', songs: [], more: false });
     }
 
     try {

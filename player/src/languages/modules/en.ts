@@ -401,6 +401,11 @@ export default {
     tabs: { hotSongs: 'Top Songs', albums: 'Albums' },
     stats: { songs: 'songs', albums: 'albums', mvs: 'MVs', fans: 'fans' },
     albumsEmpty: 'No albums',
+    loadMoreSongs: 'Load more songs',
+    loadMoreAlbums: 'Load more albums',
+    loadedSongs: '{loaded} / {total} songs loaded',
+    loadedAlbums: '{loaded} / {total} albums loaded',
+    loadFailedRetry: 'Load failed, tap to retry',
   },
   albumPage: {
     alt: { cover: 'Album cover' },

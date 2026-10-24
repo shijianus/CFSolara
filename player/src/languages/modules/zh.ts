@@ -383,6 +383,11 @@ export default {
     tabs: { hotSongs: '热门歌曲', albums: '专辑' },
     stats: { songs: '歌曲', albums: '专辑', mvs: 'MV', fans: '粉丝' },
     albumsEmpty: '暂无专辑',
+    loadMoreSongs: '加载更多歌曲',
+    loadMoreAlbums: '加载更多专辑',
+    loadedSongs: '已加载 {loaded} / {total} 首',
+    loadedAlbums: '已加载 {loaded} / {total} 张',
+    loadFailedRetry: '加载失败，点击重试',
   },
   albumPage: {
     alt: { cover: '专辑封面' },

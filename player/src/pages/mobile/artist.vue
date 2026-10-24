@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { artistDetail, artistTopSong, artistAlbum } from '@/api'
+import { artistDetail, artistTopSong, artistAlbum, artistSongs } from '@/api'
 import { usePlayActions } from '@/composables/usePlayActions'
 import Button from '@/components/Ui/Button.vue'
 import { useI18n } from 'vue-i18n'
@@ -40,17 +40,36 @@ const state = reactive({
   loading: true,
   activeTab: 0,
   followed: false,
+  songTotal: 0,
+  hasMoreSongs: false,
+  isLoadingMoreSongs: false,
+  isSongLoadError: false,
+  albumTotal: 0,
+  hasMoreAlbums: false,
+  isLoadingMoreAlbums: false,
+  isAlbumLoadError: false,
 })
 
 const { playAll: playAllAction, shufflePlay: shufflePlayAction } = usePlayActions()
 
+const SONG_PAGE_SIZE = 50
+const ALBUM_PAGE_SIZE = 10
+
 const load = async (id: number) => {
   state.loading = true
+  state.songTotal = 0
+  state.hasMoreSongs = false
+  state.isLoadingMoreSongs = false
+  state.isSongLoadError = false
+  state.albumTotal = 0
+  state.hasMoreAlbums = false
+  state.isLoadingMoreAlbums = false
+  state.isAlbumLoadError = false
   try {
     const [detailRes, songsRes, albumsRes] = await Promise.all([
       artistDetail({ id }),
       artistTopSong({ id }),
-      artistAlbum({ id, limit: 10 }),
+      artistAlbum({ id, limit: ALBUM_PAGE_SIZE, offset: 0 }),
     ])
 
     // 歌手详情
@@ -69,16 +88,71 @@ const load = async (id: number) => {
         followed: raw?.followed || false,
         fansCount: raw?.fansCnt || 0,
       }
+      state.songTotal = artist.musicSize || 0
+      state.albumTotal = artist.albumSize || 0
       state.followed = libraryStore.isArtistFollowed(artist.id) || state.info.followed
     }
 
     // 歌曲列表
-    state.songs = transformSongs(songsRes as Record<string, unknown>, 50)
+    state.songs = transformSongs(songsRes as Record<string, unknown>, SONG_PAGE_SIZE)
+    state.hasMoreSongs =
+      state.songs.length >= SONG_PAGE_SIZE &&
+      (state.songTotal === 0 || state.songs.length < state.songTotal)
 
     // 专辑列表
-    state.albums = transformAlbums(albumsRes as Record<string, unknown>, 10)
+    state.albums = transformAlbums(albumsRes as Record<string, unknown>, ALBUM_PAGE_SIZE)
+    state.hasMoreAlbums =
+      state.albums.length >= ALBUM_PAGE_SIZE &&
+      (state.albumTotal === 0 || state.albums.length < state.albumTotal)
   } finally {
     state.loading = false
+  }
+}
+
+const loadMoreSongs = async () => {
+  if (state.isLoadingMoreSongs || !state.hasMoreSongs) return
+  state.isLoadingMoreSongs = true
+  state.isSongLoadError = false
+  try {
+    const res = await artistSongs({
+      id: artistId.value,
+      limit: SONG_PAGE_SIZE,
+      offset: state.songs.length,
+      order: 'hot',
+    })
+    const page = transformSongs(res as Record<string, unknown>)
+    const seen = new Set(state.songs.map(s => String(s.id)))
+    state.songs.push(...page.filter(s => !seen.has(String(s.id))))
+    state.hasMoreSongs =
+      page.length === SONG_PAGE_SIZE &&
+      (state.songTotal === 0 || state.songs.length < state.songTotal)
+  } catch {
+    state.isSongLoadError = true
+  } finally {
+    state.isLoadingMoreSongs = false
+  }
+}
+
+const loadMoreAlbums = async () => {
+  if (state.isLoadingMoreAlbums || !state.hasMoreAlbums) return
+  state.isLoadingMoreAlbums = true
+  state.isAlbumLoadError = false
+  try {
+    const res = await artistAlbum({
+      id: artistId.value,
+      limit: ALBUM_PAGE_SIZE,
+      offset: state.albums.length,
+    })
+    const page = transformAlbums(res as Record<string, unknown>)
+    const seen = new Set(state.albums.map(a => String(a.id)))
+    state.albums.push(...page.filter(a => !seen.has(String(a.id))))
+    state.hasMoreAlbums =
+      page.length === ALBUM_PAGE_SIZE &&
+      (state.albumTotal === 0 || state.albums.length < state.albumTotal)
+  } catch {
+    state.isAlbumLoadError = true
+  } finally {
+    state.isLoadingMoreAlbums = false
   }
 }
 
@@ -154,10 +228,6 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
                 <span class="text-base font-semibold text-accent">{{ state.info.albumSize }}</span>
                 <span>{{ $t('artistPage.stats.albums') }}</span>
               </div>
-              <div class="flex flex-col items-center">
-                <span class="text-base font-semibold text-accent">{{ state.info.mvSize }}</span>
-                <span>{{ $t('artistPage.stats.mvs') }}</span>
-              </div>
               <div v-if="state.info.fansCount" class="flex flex-col items-center">
                 <span class="text-base font-semibold text-accent">{{
                   formatCount(state.info.fansCount)
@@ -229,6 +299,31 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
       <div class="flex-1 overflow-auto px-4 pb-6">
         <section v-if="state.activeTab === 0">
           <MobileSongList :songs="state.songs" :show-index="true" />
+          <div class="mt-3 flex flex-col items-center gap-2">
+            <p v-if="state.songTotal" class="text-[11px] text-primary/50">
+              {{ $t('artistPage.loadedSongs', { loaded: state.songs.length, total: state.songTotal }) }}
+            </p>
+            <Button
+              v-if="state.hasMoreSongs"
+              variant="glass"
+              size="sm"
+              rounded="full"
+              class="min-h-11"
+              :loading="state.isLoadingMoreSongs"
+              :disabled="state.isLoadingMoreSongs"
+              @click="loadMoreSongs"
+            >
+              {{ state.isLoadingMoreSongs ? $t('common.loading') : $t('artistPage.loadMoreSongs') }}
+            </Button>
+            <button
+              v-if="state.isSongLoadError && !state.isLoadingMoreSongs"
+              type="button"
+              class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="loadMoreSongs"
+            >
+              {{ $t('artistPage.loadFailedRetry') }}
+            </button>
+          </div>
         </section>
 
         <section v-else-if="state.activeTab === 1" class="albums-section">
@@ -256,6 +351,31 @@ const tabs = ['artistPage.tabs.hotSongs', 'artistPage.tabs.albums']
             </div>
           </div>
           <div v-if="!state.albums.length" class="empty-text py-12 text-center">{{ $t('artistPage.albumsEmpty') }}</div>
+          <div class="mt-3 flex flex-col items-center gap-2">
+            <p v-if="state.albumTotal" class="text-[11px] text-primary/50">
+              {{ $t('artistPage.loadedAlbums', { loaded: state.albums.length, total: state.albumTotal }) }}
+            </p>
+            <Button
+              v-if="state.hasMoreAlbums"
+              variant="glass"
+              size="sm"
+              rounded="full"
+              class="min-h-11"
+              :loading="state.isLoadingMoreAlbums"
+              :disabled="state.isLoadingMoreAlbums"
+              @click="loadMoreAlbums"
+            >
+              {{ state.isLoadingMoreAlbums ? $t('common.loading') : $t('artistPage.loadMoreAlbums') }}
+            </Button>
+            <button
+              v-if="state.isAlbumLoadError && !state.isLoadingMoreAlbums"
+              type="button"
+              class="min-h-11 rounded-lg px-3 text-xs font-medium text-sky-400 hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+              @click="loadMoreAlbums"
+            >
+              {{ $t('artistPage.loadFailedRetry') }}
+            </button>
+          </div>
         </section>
       </div>
     </template>
