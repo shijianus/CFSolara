@@ -97,7 +97,11 @@ onUnmounted(() => {
 <template>
   <MiniPlayerMobile @open="emit('show-player')" />
 
-  <nav ref="tabbarRef" class="fixed left-3 right-3 bottom-3 z-50 rounded-[26px] glass-container-strong border border-white/15 px-2 py-1 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]">
+  <nav
+    ref="tabbarRef"
+    class="glass-container-strong fixed right-3 left-3 z-50 rounded-[26px] border border-white/15 px-2 py-1 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.5)]"
+    style="bottom: calc(env(safe-area-inset-bottom, 0px) + 12px)"
+  >
     <div class="mx-auto flex items-center justify-around">
       <RouterLink
         v-for="it in items"

@@ -24,8 +24,8 @@ const openPlayerDrawer = () => {
       class="flex flex-1 flex-col pt-3"
       style="
         padding-bottom: calc(
-          var(--mobile-tabbar-h, 56px) + var(--mobile-miniplayer-h, 0px) +
-            env(safe-area-inset-bottom)
+          var(--mobile-tabbar-h, 56px) + 12px + var(--mobile-miniplayer-h, 0px) +
+            env(safe-area-inset-bottom, 0px)
         );
       "
     >

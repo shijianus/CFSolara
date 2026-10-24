@@ -73,7 +73,12 @@ onUnmounted(() => {
   <div
     v-if="currentSong"
     ref="rootRef"
-    class="mask-glass fixed right-0 bottom-15 left-0 z-50 backdrop-blur-md"
+    class="mask-glass fixed right-0 left-0 z-50 backdrop-blur-md"
+    style="
+      bottom: calc(
+        env(safe-area-inset-bottom, 0px) + var(--mobile-tabbar-h, 56px) + 12px
+      );
+    "
   >
     <div class="glass-card flex items-center gap-3 rounded-t-2xl rounded-tl-2xl rounded-b-none p-3">
       <div class="w-12 h-12 overflow-hidden rounded-lg shrink-0 relative" @click="$emit('open')">
