@@ -7,6 +7,7 @@
   "scripts": {
     "build": "cd player && pnpm build && cd .. && rm -rf dist && cp -r player/dist dist && cp -n favicon.png favicon.svg dist/ 2>/dev/null || true",
     "build:engine": "esbuild server/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist-server/index.mjs --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
+    "build:server": "npm run build:engine",
     "start:engine": "node dist-server/index.mjs",
     "deploy": "npm run build && (${WRANGLER_BIN:-npx wrangler} pages deploy dist --project-name=${CF_PAGES_PROJECT:-cfsolara} --branch=${CF_PAGES_BRANCH:-main} --commit-dirty=true)",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
