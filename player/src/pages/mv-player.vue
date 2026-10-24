@@ -6,9 +6,11 @@ import { MVInfo, RelatedMV, MVComment } from '@/typings'
 import { formatCount } from '@/utils/time'
 import Button from '@/components/Ui/Button.vue'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { useLibraryStore } from '@/stores/modules/library'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+const libraryStore = useLibraryStore()
 
 const formatSec = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`
@@ -62,6 +64,7 @@ const loadMV = async (id: number) => {
       url: videoUrl,
     }
 
+    state.isLiked = libraryStore.isMvLiked(state.currentMV.id)
     state.relatedMVs = (sList || []).slice(0, 10).map(
       (mv: any): RelatedMV => ({
         id: Number(mv?.id),
@@ -95,7 +98,14 @@ const loadComments = async (id: number) => {
 }
 
 const toggleLike = () => {
-  state.isLiked = !state.isLiked
+  const mv = state.currentMV
+  if (!mv.id) return
+  state.isLiked = libraryStore.toggleLikeMv({
+    id: mv.id,
+    name: mv.title,
+    artist: mv.artist,
+    cover: mv.cover,
+  })
 }
 
 const shareMV = async () => {
@@ -182,7 +192,7 @@ watch(
                   <Button
                     variant="glass"
                     size="md"
-                    class="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all"
+                    class="flex min-h-11 items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all"
                     :class="
                       state.isLiked
                         ? 'border-sky-500/30! bg-sky-500/20! text-sky-400!'

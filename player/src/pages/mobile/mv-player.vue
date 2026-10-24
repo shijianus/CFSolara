@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { mvDetail, mvUrl, simiMv } from '@/api'
 import LazyImage from '@/components/Ui/LazyImage.vue'
+import { useLibraryStore } from '@/stores/modules/library'
 
 const route = useRoute()
+const libraryStore = useLibraryStore()
 const mvId = computed(() => String(route.params.id || ''))
 
 const state = reactive({
@@ -11,6 +13,7 @@ const state = reactive({
   cover: '',
   url: '',
   loading: true,
+  liked: false,
   simis: [] as Array<{ id: number | string; name: string; cover: string; artist: string }>,
 })
 
@@ -27,11 +30,22 @@ const load = async (id: string) => {
     state.cover = d?.cover || d?.imgurl || ''
     const u = (urlRes as any)?.data || (urlRes as any)?.url || {}
     state.url = u?.url || ''
+    state.liked = libraryStore.isMvLiked(id)
     const simis = (simiRes as any)?.mvs || (simiRes as any)?.data || []
     state.simis = simis.map((m: any) => ({ id: m?.id || m?.vid || 0, name: m?.name || m?.title || '', cover: m?.cover || m?.imgurl || '', artist: m?.artistName || '' }))
   } finally {
     state.loading = false
   }
+}
+
+const toggleLike = () => {
+  if (!mvId.value) return
+  state.liked = libraryStore.toggleLikeMv({
+    id: mvId.value,
+    name: state.name,
+    artist: state.artist,
+    cover: state.cover,
+  })
 }
 
 onMounted(() => { if (mvId.value) load(mvId.value) })
@@ -46,9 +60,24 @@ onMounted(() => { if (mvId.value) load(mvId.value) })
           <Artplayer v-if="state.url" :src="state.url" class="h-48 w-full" />
           <div v-else class="flex h-48 w-full items-center justify-center rounded-2xl glass-button">{{ $t('mv.noSource') }}</div>
         </div>
-        <div class="mt-2">
-          <h1 class="truncate text-lg font-bold text-primary">{{ state.name }}</h1>
-          <p class="truncate text-xs text-primary/70">{{ state.artist }}</p>
+        <div class="mt-2 flex items-start gap-3">
+          <div class="min-w-0 flex-1">
+            <h1 class="truncate text-lg font-bold text-primary">{{ state.name }}</h1>
+            <p class="truncate text-xs text-primary/70">{{ state.artist }}</p>
+          </div>
+          <button
+            type="button"
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-primary/70 transition-colors hover:text-sky-400 focus-visible:ring-2 focus-visible:ring-sky-400/60"
+            :class="state.liked ? 'text-sky-400' : ''"
+            :title="state.liked ? $t('mvPlayer.actions.liked') : $t('mvPlayer.actions.like')"
+            :aria-pressed="state.liked"
+            @click="toggleLike"
+          >
+            <span
+              class="h-5 w-5"
+              :class="state.liked ? 'icon-[mdi--thumb-up]' : 'icon-[mdi--thumb-up-outline]'"
+            ></span>
+          </button>
         </div>
       </section>
 
