@@ -1,15 +1,18 @@
 {
   "name": "sonic",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Sonic Music Cloud Platform & Aggregation Gateway (by EpoCanvas)",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "cd player && pnpm build && cd .. && rm -rf dist && cp -r player/dist dist && cp -n favicon.png favicon.svg dist/ 2>/dev/null || true",
-    "deploy": "npm run build && /home/shijian/projects/shijianus-blog/node_modules/.bin/wrangler pages deploy dist --project-name=cfsolara --branch=main --commit-dirty=true",
+    "build:engine": "esbuild server/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist-server/index.mjs --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
+    "start:engine": "node dist-server/index.mjs",
+    "deploy": "npm run build && (${WRANGLER_BIN:-npx wrangler} pages deploy dist --project-name=${CF_PAGES_PROJECT:-cfsolara} --branch=${CF_PAGES_BRANCH:-main} --commit-dirty=true)",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
     "test:auth": "jiti scripts/test-auth-compatibility.mjs",
     "test:cover": "jiti scripts/test-cover-gateway.mjs",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs"
+    "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
+    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs"
   }
 }

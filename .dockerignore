@@ -1,0 +1,11 @@
+node_modules
+player/node_modules
+player/dist
+.git
+.env
+.env.*
+!.env.example
+.wrangler
+*.log
+coverage
+.DS_Store

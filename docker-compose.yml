@@ -1,0 +1,41 @@
+services:
+  ncm-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.ncm
+    container_name: sonic-ncm-api
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      ENABLE_UNBLOCK: "${SONIC_ENABLE_UNBLOCK:-false}"
+    networks:
+      - sonic-internal
+
+  sonic-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sonic-local-engine
+    restart: unless-stopped
+    depends_on:
+      ncm-api:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      SONIC_RUNTIME: "linux-engine"
+      PORT: "8080"
+      HOST: "0.0.0.0"
+      SONIC_NCM_API_URL: "http://ncm-api:3000"
+      SONIC_ENABLE_GDSTUDIO: "${SONIC_ENABLE_GDSTUDIO:-0}"
+      SONIC_ENABLE_LYRIVA: "${SONIC_ENABLE_LYRIVA:-0}"
+      SONIC_ENABLE_UNBLOCK: "${SONIC_ENABLE_UNBLOCK:-0}"
+    ports:
+      - "127.0.0.1:${SONIC_BIND_PORT:-8080}:8080"
+    networks:
+      - sonic-internal
+
+networks:
+  sonic-internal:
+    driver: bridge
