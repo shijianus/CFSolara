@@ -252,6 +252,7 @@ async function runTests() {
       SONIC_ENABLE_NETEASE: '0',
       SONIC_ENABLE_QQ: '0',
       SONIC_ENABLE_KUGOU: '0',
+      SONIC_ENABLE_KUWO: '0',
     };
 
     try {

@@ -4,17 +4,26 @@
   "description": "epocanvas sonic Music Cloud Platform & Aggregation Gateway",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "cd player && pnpm build && cd .. && rm -rf dist && cp -r player/dist dist && cp -n favicon.png favicon.svg dist/ 2>/dev/null || true",
     "build:engine": "esbuild server/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist-server/index.mjs --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
     "build:server": "npm run build:engine",
     "start:engine": "node dist-server/index.mjs",
     "deploy": "npm run build && (${WRANGLER_BIN:-npx wrangler} pages deploy dist --project-name=${CF_PAGES_PROJECT:-cfsolara} --branch=${CF_PAGES_BRANCH:-main} --commit-dirty=true)",
+    "test": "jiti scripts/test-auth-signature.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-rate-limit-trust.mjs && jiti scripts/test-stream-detection.mjs && jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs",
+    "test:live": "jiti scripts/test-sonic-gateway-live.mjs && jiti scripts/test-cover-gateway.mjs",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
+    "test:gateway:live": "jiti scripts/test-sonic-gateway-live.mjs",
     "test:auth": "jiti scripts/test-auth-compatibility.mjs",
     "test:cover": "jiti scripts/test-cover-gateway.mjs",
     "lint:theme": "node scripts/lint-theme.mjs",
-    "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs"
+    "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.4",
+    "jiti": "^2.7.0"
   }
 }
