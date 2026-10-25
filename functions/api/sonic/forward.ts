@@ -12,7 +12,9 @@ import {
   checkEngineAccess,
   evaluateGatewayRateLimit,
   buildRateLimitErrorResponse,
-  isBlockedSsrfHost,
+  validateSafeUrl,
+  safeFetch,
+  SONIC_ALLOWED_MUSIC_DOMAINS,
 } from '../../_lib/sonic/security';
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
@@ -36,30 +38,52 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
   // Case 1: External URL Proxy / Forwarding (e.g. lyrics URL, audio stream, covers)
   if (targetUrl) {
     try {
-      const parsedTarget = new URL(targetUrl);
-      // Security safeguard: only forward public http and https hosts
-      if (
-        (parsedTarget.protocol !== 'http:' && parsedTarget.protocol !== 'https:') ||
-        isBlockedSsrfHost(parsedTarget.hostname)
-      ) {
-        return sonicError('INVALID_TARGET', 'Only public http/https URLs are permitted', 400, { provider: 'forward' });
+      const valResult = validateSafeUrl(targetUrl, {
+        allowHttp: false,
+        allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+      });
+      if (!valResult.valid || !valResult.url) {
+        return sonicError(
+          'INVALID_TARGET',
+          valResult.error || 'Only public https URLs matching allowed music domains are permitted',
+          400,
+          { provider: 'forward' },
+        );
       }
 
       const forwardHeaders = new Headers();
       forwardHeaders.set('User-Agent', SONIC_UA);
-      const h = parsedTarget.hostname.toLowerCase();
-      if (h.includes('gtimg.cn') || h.includes('qq.com')) forwardHeaders.set('Referer', 'https://y.qq.com/');
-      else if (h.includes('126.net') || h.includes('163.com')) forwardHeaders.set('Referer', 'https://music.163.com/');
-      else if (h.includes('kugou.com')) forwardHeaders.set('Referer', 'https://www.kugou.com/');
-      else if (h.includes('kuwo.cn')) forwardHeaders.set('Referer', 'https://www.kuwo.cn/');
+      const h = valResult.url.hostname.toLowerCase();
+      if (h === 'gtimg.cn' || h.endsWith('.gtimg.cn') || h === 'qq.com' || h.endsWith('.qq.com')) {
+        forwardHeaders.set('Referer', 'https://y.qq.com/');
+      } else if (
+        h === '126.net' ||
+        h.endsWith('.126.net') ||
+        h === '163.com' ||
+        h.endsWith('.163.com')
+      ) {
+        forwardHeaders.set('Referer', 'https://music.163.com/');
+      } else if (h === 'kugou.com' || h.endsWith('.kugou.com')) {
+        forwardHeaders.set('Referer', 'https://www.kugou.com/');
+      } else if (h === 'kuwo.cn' || h.endsWith('.kuwo.cn')) {
+        forwardHeaders.set('Referer', 'https://www.kuwo.cn/');
+      }
 
       const range = request.headers.get('Range');
       if (range) forwardHeaders.set('Range', range);
 
-      const upstreamResp = await fetch(parsedTarget.toString(), {
-        headers: forwardHeaders,
-        redirect: 'follow',
-      });
+      const upstreamResp = await safeFetch(
+        valResult.url,
+        {
+          headers: forwardHeaders,
+        },
+        {
+          allowHttp: false,
+          allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+          maxRedirects: 3,
+          timeoutMs: 15000,
+        },
+      );
 
       const responseHeaders = new Headers(upstreamResp.headers);
       responseHeaders.set('Access-Control-Allow-Origin', '*');

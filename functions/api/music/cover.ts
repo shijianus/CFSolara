@@ -34,33 +34,47 @@ function svgResponse(degraded = false): Response {
   return new Response(DEFAULT_COVER_SVG, { status: 200, headers });
 }
 
+import {
+  SONIC_ALLOWED_MUSIC_DOMAINS,
+  safeFetch,
+  validateSafeUrl,
+} from '../../_lib/sonic/security';
+
 function getRefererForHost(hostname: string): string {
   const h = hostname.toLowerCase();
-  if (h.includes('gtimg.cn') || h.includes('qq.com')) return 'https://y.qq.com/';
-  if (h.includes('126.net') || h.includes('163.com')) return 'https://music.163.com/';
-  if (h.includes('kugou.com')) return 'https://www.kugou.com/';
-  if (h.includes('kuwo.cn')) return 'https://www.kuwo.cn/';
+  if (h === 'gtimg.cn' || h.endsWith('.gtimg.cn') || h === 'qq.com' || h.endsWith('.qq.com')) return 'https://y.qq.com/';
+  if (h === '126.net' || h.endsWith('.126.net') || h === '163.com' || h.endsWith('.163.com')) return 'https://music.163.com/';
+  if (h === 'kugou.com' || h.endsWith('.kugou.com')) return 'https://www.kugou.com/';
+  if (h === 'kuwo.cn' || h.endsWith('.kuwo.cn')) return 'https://www.kuwo.cn/';
   return '';
 }
 
 async function proxyImage(imageUrl: string, providerTag = 'direct'): Promise<Response | null> {
   try {
-    const parsed = new URL(imageUrl);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    const valResult = validateSafeUrl(imageUrl, {
+      allowHttp: false,
+      allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+    });
+    if (!valResult.valid || !valResult.url) return null;
 
     const headers: Record<string, string> = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     };
-    const referer = getRefererForHost(parsed.hostname);
+    const referer = getRefererForHost(valResult.url.hostname);
     if (referer) headers.Referer = referer;
 
-    const upstream = await fetch(parsed.toString(), {
-      headers,
-      signal: AbortSignal.timeout(6000),
-      redirect: 'follow',
-    });
+    const upstream = await safeFetch(
+      valResult.url,
+      { headers },
+      {
+        allowHttp: false,
+        allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+        maxRedirects: 3,
+        timeoutMs: 6000,
+      },
+    );
 
     if (!upstream.ok) return null;
 

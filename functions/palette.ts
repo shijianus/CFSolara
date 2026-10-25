@@ -1,5 +1,9 @@
 import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
-import { checkEngineAccess, isBlockedSsrfHost } from "./_lib/sonic/security";
+import {
+  checkEngineAccess,
+  validateSafeUrl,
+  SONIC_ALLOWED_MUSIC_DOMAINS,
+} from "./_lib/sonic/security";
 import type { AppEnv } from "./_lib/types";
 
 const MAX_DIMENSION = 96;
@@ -384,22 +388,22 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
     });
   }
 
-  let target: URL;
-  try {
-    target = new URL(imageParam);
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid image URL" }), {
-      status: 400,
-      headers: createJsonHeaders(400),
-    });
+  const valResult = validateSafeUrl(imageParam, {
+    allowHttp: false,
+    allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+  });
+
+  if (!valResult.valid || !valResult.url) {
+    return new Response(
+      JSON.stringify({ error: valResult.error || "Only public https image URLs matching allowed domains are permitted" }),
+      {
+        status: 400,
+        headers: createJsonHeaders(400),
+      },
+    );
   }
 
-  if ((target.protocol !== "http:" && target.protocol !== "https:") || isBlockedSsrfHost(target.hostname)) {
-    return new Response(JSON.stringify({ error: "Only public http/https image URLs are allowed" }), {
-      status: 400,
-      headers: createJsonHeaders(400),
-    });
-  }
+  const target: URL = valResult.url;
 
   const cache = typeof caches !== "undefined" ? (caches as any).default : null;
   const cacheKey = new Request(request.url, request);
@@ -424,7 +428,7 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
           format: "jpeg",
         },
       },
-    });
+    } as any);
   } catch (error) {
     console.warn("Image resizing fetch failed, falling back to original", error);
     upstream = await fetch(target.toString(), {
@@ -432,7 +436,7 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
         cacheTtl: 3600,
         cacheEverything: true,
       },
-    });
+    } as any);
   }
 
   if (!upstream.ok) {

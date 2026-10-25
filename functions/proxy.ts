@@ -4,6 +4,8 @@ import {
   buildRateLimitErrorResponse,
   checkEngineAccess,
   evaluateGatewayRateLimit,
+  isBlockedSsrfHost,
+  safeFetch,
 } from "./_lib/sonic/security";
 import type { AppEnv } from "./_lib/types";
 
@@ -22,11 +24,11 @@ const SAFE_RESPONSE_HEADERS = [
 function createCorsHeaders(init?: Headers): Headers {
   const headers = new Headers();
   if (init) {
-    for (const [key, value] of init.entries()) {
+    init.forEach((value, key) => {
       if (SAFE_RESPONSE_HEADERS.includes(key.toLowerCase())) {
         headers.set(key, value);
       }
-    }
+    });
   }
   if (!headers.has("Cache-Control")) {
     headers.set("Cache-Control", "no-store");
@@ -49,12 +51,15 @@ function handleOptions(): Response {
 
 function isAllowedKuwoHost(hostname: string): boolean {
   if (!hostname) return false;
-  return KUWO_HOST_PATTERN.test(hostname);
+  const h = hostname.toLowerCase().trim().replace(/\.+$/, '');
+  return (h === 'kuwo.cn' || h.endsWith('.kuwo.cn')) && !isBlockedSsrfHost(h);
 }
 
 function normalizeKuwoUrl(rawUrl: string): URL | null {
   try {
     const parsed = new URL(rawUrl);
+    if (parsed.username || parsed.password) return null;
+    if (parsed.port && parsed.port !== '443' && parsed.port !== '80') return null;
     if (!isAllowedKuwoHost(parsed.hostname)) {
       return null;
     }
@@ -183,7 +188,7 @@ async function proxyApiRequest(url: URL, request: Request, env?: AppEnv): Promis
     );
   }
 
-  const apiUrl = new URL(cfg.gdstudioUrl);
+  const apiUrl = new URL(cfg.upstreamGdstudio);
   url.searchParams.forEach((value, key) => {
     if (key === "target" || key === "callback") return;
     apiUrl.searchParams.set(key, value);

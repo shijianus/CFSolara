@@ -2,31 +2,30 @@ import { corsHeaders, errorResponse, handleOptions, jsonResponse } from '../../_
 import { isAllowedKuwoHost } from '../../_lib/music';
 import { resolvePlayableStream } from '../../_lib/sonic/native-protocols';
 import { getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
-import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
+import {
+  checkEngineAccess,
+  evaluateGatewayRateLimit,
+  buildRateLimitErrorResponse,
+  isBlockedSsrfHost,
+  validateSafeUrl,
+  safeFetch,
+  SONIC_ALLOWED_MUSIC_DOMAINS,
+} from '../../_lib/sonic/security';
 import { getSonicConfig } from '../../_lib/sonic/config';
 import type { AppEnv } from '../../_lib/types';
 
 function sanitizeTargetUrl(rawUrl: string): URL | null {
-  try {
-    const parsed = new URL(rawUrl);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
+  const res = validateSafeUrl(rawUrl, {
+    allowHttp: false,
+    allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+  });
+  return res.valid && res.url ? res.url : null;
 }
 
 function isAllowedDirectTargetHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  return (
-    isAllowedKuwoHost(h) ||
-    h.endsWith('.music.126.net') ||
-    h.endsWith('.163.com') ||
-    h.endsWith('.qq.com') ||
-    h.endsWith('.kugou.com')
-  );
+  const h = hostname.toLowerCase().trim().replace(/\.+$/, '');
+  if (isBlockedSsrfHost(h)) return false;
+  return SONIC_ALLOWED_MUSIC_DOMAINS.some((d) => h === d || h.endsWith('.' + d));
 }
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
@@ -216,11 +215,19 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       requestHeaders.Range = rangeHeader;
     }
 
-    const upstream = await fetch(targetUrl.toString(), {
-      method: request.method,
-      headers: requestHeaders,
-      redirect: 'follow',
-    });
+    const upstream = await safeFetch(
+      targetUrl,
+      {
+        method: request.method,
+        headers: requestHeaders,
+      },
+      {
+        allowHttp: false,
+        allowedDomains: SONIC_ALLOWED_MUSIC_DOMAINS,
+        maxRedirects: 3,
+        timeoutMs: 15000,
+      },
+    );
 
     const headers = corsHeaders();
     const forwardHeaders = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified'];
