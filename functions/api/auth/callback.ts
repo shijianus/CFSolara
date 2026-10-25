@@ -8,6 +8,7 @@ import {
   createSession,
   exchangeCode,
   fetchUserInfo,
+  getEpomailConfig,
   parseCookieHeader,
 } from '../../_lib/auth';
 import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
@@ -65,7 +66,10 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
     // The session is carried in the URL fragment: unlike a query string it is
     // not sent to the server, Referer, or access logs.
-    const targetUrl = new URL('/', url.origin);
+    // Never redirect the freshly issued key to an origin taken blindly from
+    // the request. Use the configured/allow-listed callback origin.
+    const configuredRedirect = getEpomailConfig(env, url.origin).redirectUri;
+    const targetUrl = new URL('/', new URL(configuredRedirect).origin);
     targetUrl.searchParams.set('auth', 'success');
     targetUrl.hash = `session=${encodeURIComponent(JSON.stringify({
       email: session.email,
