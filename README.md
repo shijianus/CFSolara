@@ -6,6 +6,15 @@
 
 ---
 
+> [!IMPORTANT]
+> **安全升级公告与 API Key 格式规范**：
+> 1. **全量签名机制**：API Key 全面升级为 `sonic_live_v1.<payloadB64url>.<sigB64url>`（Payload: `{ v:1, email, exp, kid }`，签名使用 HMAC-SHA256 完整 32 字节哈希并经 base64url 编码，覆盖 `v1.<payloadB64url>`）。
+> 2. **旧密钥废弃**：为杜绝无签名伪造漏洞，旧版密钥（`sonic_live_xxx_yyy` 和 `solara_live_*`）已彻底废弃拒绝。**所有用户需在上线后重新登录 Epomail 获取新版 API Key**。
+> 3. **强密钥强制校验**：服务端环境变量 `SONIC_SECRET`（及 `SONIC_ENGINE_SECRET`）**长度必须 >= 32 字符**（推荐通过 `openssl rand -base64 48` 生成）；未配置或长度不足时网关一律执行 fail-closed 策略拒绝服务。
+> 4. **Query 参数防护**：默认不再采纳 URL 查询参数 `?api_key=`，请使用请求头 `X-Sonic-Key`、`X-CFSolara-Key` 或 `Authorization: Bearer`。
+
+---
+
 ## 🏛️ 双层同构架构与数据流 (Architecture)
 
 系统采用 **控制面与数据面分离** 的同构微服务架构：Cloudflare Pages 承载用户流量入口与前端托管，高延迟的协议加密与直链反算交由 Linux VPS 本地解析引擎完成；音频数据流则由 Cloudflare 边缘节点直接向音乐 CDN 发起 `Range` 代理或 `302` 重定向，**不消耗 VPS 隧道带宽**。
@@ -184,11 +193,25 @@ docker compose ps
 
 ### 3. 环境变量参考 (`.env.example`)
 ```ini
-# 服务间通信与内部鉴权 (Pages -> VPS Engine)
+# 1. 服务间通信与内部鉴权 (Pages -> VPS Engine)
 SONIC_LOCAL_ENGINE_URL="https://engine-sonic.epocanvas.tech"
-SONIC_ENGINE_SECRET="<your_strong_random_secret>"
+SONIC_ENGINE_SECRET="<your_strong_random_secret>" # 长度必须 >= 32 字符 (openssl rand -base64 48)
 
-# 本地原生协议音源开关 (1 启用, 0 禁用)
+# 2. 用户认证与 API Key 签名密钥 (REQUIRED)
+# 采用全量 HMAC-SHA256 签名，生成方式：openssl rand -base64 48 (长度必须 >= 32 字符)
+SONIC_SECRET="<your_strong_sonic_secret>"
+# 可选旧密钥轮换（用于过渡期间验签旧 Key）：
+# SONIC_SECRET_PREV=""
+# 是否允许 URL Query 参数传递 api_key (默认 0 禁用；警告：开启后密钥会进入服务端日志与 HTTP Referer)
+SONIC_ALLOW_QUERY_KEY="0"
+
+# 3. Epomail OAuth 2.0 配置 (缺失返回 503)
+EPOMAIL_BASE_URL="https://mail.epocanvas.com"
+EPOMAIL_CLIENT_ID=""
+EPOMAIL_CLIENT_SECRET=""
+SONIC_ALLOWED_ORIGINS="https://sonic.epocanvas.tech,https://sonic.epocanvas.com"
+
+# 4. 本地原生协议音源开关 (1 启用, 0 禁用)
 SONIC_ENABLE_NETEASE="1"
 SONIC_ENABLE_QQ="1"
 SONIC_ENABLE_KUGOU="1"
@@ -197,12 +220,12 @@ SONIC_ENABLE_AMLL="1"
 SONIC_ENABLE_LRCLIB="1"
 SONIC_ENABLE_FREE_MATCH="1"
 
-# 第三方免费聚合与 VIP 解灰 (默认严格关闭)
+# 5. 第三方免费聚合与 VIP 解灰 (默认严格关闭)
 SONIC_ENABLE_GDSTUDIO="0"
 SONIC_ENABLE_LYRIVA="0"
 SONIC_ENABLE_UNBLOCK="0"
 
-# 可选用户自有会员 Cookie (仅存 VPS 服务端 .env，严禁下发前端)
+# 6. 可选用户自有会员 Cookie (仅存 VPS 服务端 .env，严禁下发前端)
 NETEASE_COOKIE=""
 QQ_COOKIE=""
 KUGOU_COOKIE=""

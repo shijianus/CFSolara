@@ -2,7 +2,10 @@
 
 > **epocanvas sonic** 现已升级为**双层分布式平台化音乐服务**，将原有的单体音乐播放器解耦为细粒度的微服务 API，并通过 **Epomail OAuth 2.0** 与 **HMAC-SHA256 API Key** 作为统一接入鉴权体系，有效防止接口被滥用，同时允许第三方独立项目（如个人博客、静态站点、桌面与移动端应用）通过安全的 API Key 连结接入。
 >
-> **兼容说明**：`CFSolara`、`solara_live_`、`X-CFSolara-Key`、`solara.epocanvas.com` 等旧命名仍作为历史兼容标识保留；新接入请使用 `sonic_live_`、`X-Sonic-Key` 与 `sonic.epocanvas.com`。
+> **安全与密钥版本说明**：
+> 1. API Key 全面升级为基于 HMAC-SHA256 的全量签名格式 `sonic_live_v1.<payloadB64url>.<sigB64url>`。
+> 2. 为防止身份伪造，旧版本无签名密钥（`sonic_live_xxx_yyy` 及历史 `solara_live_*`）已彻底废弃并一律拒绝，用户需重新登录获取新版 Key。
+> 3. 默认仅接受 HTTP 请求头（`X-Sonic-Key`、`X-CFSolara-Key`、`X-Api-Key`、`Authorization: Bearer <key>`）；URL 查询参数 `?api_key=` 默认已被禁用（可通过 `SONIC_ALLOW_QUERY_KEY=1` 显式开启，但存在进入访问日志及 Referer 头被泄露的安全风险）。
 
 ---
 
@@ -25,13 +28,13 @@
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
 2. **专案连结 API Key 与分级限流**：
-   - 登录 Epomail 后即可自动获得专案 API Key（当前签发格式为 `sonic_live_...`，同时 100% 向后兼容历史 `solara_live_...` 密钥）。
-   - 在第三方专案发起请求时，支持以下任一方式传递凭证：
+   - 登录 Epomail 后即可自动获得专案 API Key（签发格式为 `sonic_live_v1.<payload>.<sig>`，旧版 `sonic_live_xxx_yyy` 及 `solara_live_*` 废弃）。
+   - 在第三方专案发起请求时，支持以下方式传递凭据：
      ```http
-     X-Sonic-Key: sonic_live_xxxxxxxx
-     # 或向后兼容历史请求头 / Bearer / 查询参数：
-     X-CFSolara-Key: solara_live_xxxxxxxx
-     Authorization: Bearer sonic_live_xxxxxxxx
+     X-Sonic-Key: sonic_live_v1.<payload>.<sig>
+     # 或请求头：
+     X-CFSolara-Key: sonic_live_v1.<payload>.<sig>
+     Authorization: Bearer sonic_live_v1.<payload>.<sig>
      ```
    - 网关内置滑动窗口分级限流（响应头携带 `X-RateLimit-Tier`、`X-RateLimit-Limit`、`X-RateLimit-Remaining`）：
      - 匿名前端访客（`anonymous`）：默认 `240` 次/分钟（可通过 `SONIC_REQUIRE_AUTH=1` 关闭匿名访问）；
@@ -173,7 +176,7 @@
 ```typescript
 // 外部专案客户端示例
 const API_BASE = 'https://sonic.epocanvas.tech/api'; // epocanvas sonic 线上主域名（备用域 https://sonic.epocanvas.com/api）
-const API_KEY = 'sonic_live_xxxxxxxx'; // 亦兼容历史 solara_live_xxxxxxxx
+const API_KEY = 'sonic_live_v1.<payload>.<sig>'; // 新版带签名 API Key
 
 // 1. 点歌搜索 (优先使用 Sonic Nexus 聚合检索)
 async function searchSong(keyword: string) {
