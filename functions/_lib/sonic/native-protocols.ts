@@ -711,36 +711,223 @@ export function evaluateStreamTypeByRelativeBytes(
   };
 }
 
+// ── Physical stream quality: real MP3 frame-header bitrate + duration ratio ──
+// Audit fix #3: the previous relative-bytes heuristic keyed on the *nominal*
+// requested bitrate and misjudged short complete tracks, 48kbps full streams
+// and lossless requests served as 320k MP3. We now read the actual MP3 frame
+// header (via a small Range fetch) to get the real bitrate, derive the real
+// duration from total bytes, and compare it against the expected duration.
+
+const MPEG1_L3_KBPS = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0];
+const MPEG1_L2_KBPS = [0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0];
+const MPEG1_L1_KBPS = [0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0];
+const MPEG2_L1_KBPS = [0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0];
+const MPEG2_L23_KBPS = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0];
+
+export interface Mp3HeaderInfo {
+  bitrateKbps: number;
+  sampleRateHz: number;
+  mpegVersion: 1 | 2 | 25;
+  layer: 1 | 2 | 3;
+  frameOffset: number;
+}
+
+/** Parse the first MP3 frame header found in `bytes` (skipping a leading ID3v2 tag). */
+export function parseMp3FrameHeader(bytes: Uint8Array): Mp3HeaderInfo | null {
+  if (!bytes || bytes.length < 4) return null;
+  let start = 0;
+  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
+    // ID3v2 header: syncsafe 28-bit size in bytes 6..9 (excludes the 10-byte header)
+    const size = ((bytes[6] & 0x7f) << 21) | ((bytes[7] & 0x7f) << 14) | ((bytes[8] & 0x7f) << 7) | (bytes[9] & 0x7f);
+    start = 10 + size;
+    if (bytes[5] & 0x10) start += 10; // footer present
+  }
+  const end = Math.min(bytes.length - 3, start + 4096);
+  for (let i = Math.max(0, start); i < end; i++) {
+    if (bytes[i] !== 0xff || (bytes[i + 1] & 0xe0) !== 0xe0) continue;
+    const versionBits = (bytes[i + 1] >> 3) & 0x03; // 00=2.5, 01=reserved, 10=2, 11=1
+    const layerBits = (bytes[i + 1] >> 1) & 0x03; // 00=reserved, 01=III, 10=II, 11=I
+    const brIdx = (bytes[i + 2] >> 4) & 0x0f;
+    const srIdx = (bytes[i + 2] >> 2) & 0x03;
+    if (versionBits === 1 || layerBits === 0 || brIdx === 0 || brIdx === 15 || srIdx === 3) continue;
+    const mpegVersion = versionBits === 3 ? 1 : versionBits === 2 ? 2 : 25;
+    const layer = layerBits === 1 ? 3 : layerBits === 2 ? 2 : 1;
+    let table: number[];
+    if (mpegVersion === 1) {
+      table = layer === 3 ? MPEG1_L3_KBPS : layer === 2 ? MPEG1_L2_KBPS : MPEG1_L1_KBPS;
+    } else {
+      table = layer === 1 ? MPEG2_L1_KBPS : MPEG2_L23_KBPS;
+    }
+    const bitrateKbps = table[brIdx];
+    const srBase = mpegVersion === 1 ? [44100, 48000, 32000] : mpegVersion === 2 ? [22050, 24000, 16000] : [11025, 12000, 8000];
+    const sampleRateHz = srBase[srIdx];
+    if (!bitrateKbps || !sampleRateHz) continue;
+    return { bitrateKbps, sampleRateHz, mpegVersion, layer, frameOffset: i };
+  }
+  return null;
+}
+
+// Fake "region prompt" clips observed in the wild are ~11s voice prompts around
+// 181,521 bytes. Reject the exact signature fast, plus a bounded byte-range
+// whose *derived duration* is implausibly short for any real track.
+const FAKE_CLIP_EXACT_BYTES = 181_521;
+const FAKE_CLIP_BYTES_LOW = 100_000;
+const FAKE_CLIP_BYTES_HIGH = 300_000;
+const FAKE_CLIP_MAX_DURATION_SEC = 15;
+
+export interface StreamQualityAssessment {
+  streamType: 'full' | 'trial' | 'unavailable';
+  /** duration ratio (real-bitrate path) or byte ratio (fallback path) */
+  ratio: number;
+  realBitrateKbps?: number;
+  estimatedDurationSec?: number;
+  method: 'mp3-frame-header' | 'byte-ratio-fallback' | 'fake-clip-signature';
+  confidence: 'high' | 'medium' | 'low';
+  baselineBytes?: number;
+}
+
+/**
+ * Duration-based stream quality evaluation.
+ * - With a parsed MP3 frame header: realDuration = totalBytes*8/realBitrate;
+ *   full when realDuration >= 90% of the expected duration.
+ * - Without a parseable header (FLAC/other containers): conservative
+ *   byte-ratio fallback (old heuristic) with confidence:'low'.
+ * - Unknown/zero expected duration falls back to a 240s baseline at
+ *   confidence:'medium'.
+ */
+export function evaluateStreamQuality(
+  totalBytes: number,
+  expectedDurationSec: number | undefined,
+  headBytes?: Uint8Array | null,
+  nominalBitrateKbps = 320,
+): StreamQualityAssessment {
+  if (!totalBytes || totalBytes <= 0) {
+    return { streamType: 'unavailable', ratio: 0, method: 'byte-ratio-fallback', confidence: 'high' };
+  }
+  if (totalBytes === FAKE_CLIP_EXACT_BYTES) {
+    return { streamType: 'unavailable', ratio: 0, method: 'fake-clip-signature', confidence: 'high' };
+  }
+
+  const header = headBytes ? parseMp3FrameHeader(headBytes) : null;
+  if (header) {
+    const estimatedDurationSec = (totalBytes * 8) / (header.bitrateKbps * 1000);
+    // Bounded fake-clip rule: prompt-audio byte range + implausibly short runtime.
+    if (totalBytes >= FAKE_CLIP_BYTES_LOW && totalBytes <= FAKE_CLIP_BYTES_HIGH && estimatedDurationSec < FAKE_CLIP_MAX_DURATION_SEC) {
+      return {
+        streamType: 'unavailable',
+        ratio: 0,
+        realBitrateKbps: header.bitrateKbps,
+        estimatedDurationSec,
+        method: 'mp3-frame-header',
+        confidence: 'high',
+      };
+    }
+    const hasExpected = Number.isFinite(expectedDurationSec) && (expectedDurationSec ?? 0) > 0;
+    const expected = hasExpected ? (expectedDurationSec as number) : 240;
+    const ratio = estimatedDurationSec / expected;
+    return {
+      streamType: ratio >= 0.9 ? 'full' : 'trial',
+      ratio,
+      realBitrateKbps: header.bitrateKbps,
+      estimatedDurationSec,
+      method: 'mp3-frame-header',
+      confidence: hasExpected ? 'high' : 'medium',
+    };
+  }
+
+  // Header unparseable (FLAC/AAC/short body): conservative byte-ratio fallback.
+  const fallback = evaluateStreamTypeByRelativeBytes(totalBytes, expectedDurationSec, nominalBitrateKbps);
+  return {
+    streamType: fallback.streamType,
+    ratio: fallback.ratio,
+    method: 'byte-ratio-fallback',
+    confidence: 'low',
+    baselineBytes: fallback.baselineBytes,
+  };
+}
+
+export interface ProbeStreamQualityResult {
+  streamType: 'full' | 'trial' | 'unavailable';
+  totalBytes: number;
+  ratio: number;
+  realBitrateKbps?: number;
+  estimatedDurationSec?: number;
+  method?: StreamQualityAssessment['method'];
+  confidence?: StreamQualityAssessment['confidence'];
+}
+
+const PROBE_HEAD_RANGE_BYTES = 65_535; // covers typical ID3v2 tags + first frames
+
+async function readHeadBytes(res: Response, maxBytes: number): Promise<Uint8Array | null> {
+  try {
+    if (!res.body) return null;
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    while (received < maxBytes) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        received += value.length;
+      }
+      if (chunks.length >= 4) break; // first few TCP chunks carry the header
+    }
+    reader.cancel().catch(() => {});
+    if (chunks.length === 0) return null;
+    const head = new Uint8Array(Math.min(received, maxBytes));
+    let offset = 0;
+    for (const c of chunks) {
+      if (offset >= head.length) break;
+      head.set(c.subarray(0, Math.min(c.length, head.length - offset)), offset);
+      offset += Math.min(c.length, head.length - offset);
+    }
+    return head;
+  } catch {
+    return null;
+  }
+}
+
 export async function probeStreamPhysicalQuality(
   url: string,
   referer?: string,
   timeoutMs = 2000,
   expectedDurationSec?: number,
   nominalBitrateKbps = 320,
-): Promise<{ streamType: 'full' | 'trial' | 'unavailable'; totalBytes: number; ratio: number }> {
+): Promise<ProbeStreamQualityResult> {
   try {
     const headers: Record<string, string> = {
-      Range: 'bytes=0-0',
+      Range: `bytes=0-${PROBE_HEAD_RANGE_BYTES}`,
       'User-Agent': DESKTOP_UA,
     };
     if (referer) headers.Referer = referer;
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
     const cr = res.headers.get('content-range') || '';
     const cl = res.headers.get('content-length') || '';
-    res.body?.cancel?.().catch(() => {});
+    const headBytes = await readHeadBytes(res, PROBE_HEAD_RANGE_BYTES + 1);
 
     if (res.status !== 200 && res.status !== 206) {
       return { streamType: 'unavailable', totalBytes: 0, ratio: 0 };
     }
+
+    // A 206 without Content-Range tells us nothing about the total size.
+    if (res.status === 206 && !cr.includes('/')) {
+      return { streamType: 'unavailable', totalBytes: 0, ratio: 0, confidence: 'low' };
+    }
+
     const m = cr.match(/\/(\d+)$/);
     const total = m ? parseInt(m[1], 10) : parseInt(cl, 10);
     const totalBytes = isNaN(total) ? 0 : total;
 
-    const evaluation = evaluateStreamTypeByRelativeBytes(totalBytes, expectedDurationSec, nominalBitrateKbps);
+    const evaluation = evaluateStreamQuality(totalBytes, expectedDurationSec, headBytes, nominalBitrateKbps);
     return {
       streamType: evaluation.streamType,
       totalBytes,
       ratio: evaluation.ratio,
+      realBitrateKbps: evaluation.realBitrateKbps,
+      estimatedDurationSec: evaluation.estimatedDurationSec,
+      method: evaluation.method,
+      confidence: evaluation.confidence,
     };
   } catch {
     return { streamType: 'unavailable', totalBytes: 0, ratio: 0 };

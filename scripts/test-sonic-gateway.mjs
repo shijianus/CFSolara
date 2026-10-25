@@ -179,46 +179,52 @@ async function runTests() {
     assert(json.data.syncedLyrics.length === 0, `No false-positive lyrics returned (length=${json.data.syncedLyrics.length})`);
   }
 
-  // Test 12: Relative Threshold Audio Stream Evaluation (Rejects 320kbps 30~45s previews from being misidentified as full)
-  console.log('\n12. Testing Relative Threshold Stream Evaluation (evaluateStreamTypeByRelativeBytes)');
+  // Test 12: Stream quality evaluation (duration-based via real MP3 frame header)
+  console.log('\n12. Testing Stream Quality Evaluation (evaluateStreamQuality / relative fallback)');
   {
-    const { evaluateStreamTypeByRelativeBytes } = await import('../functions/_lib/sonic/native-protocols.ts');
+    const { evaluateStreamQuality, evaluateStreamTypeByRelativeBytes } = await import('../functions/_lib/sonic/native-protocols.ts');
+    const head = (brIdx) => new Uint8Array([0xff, 0xfb, brIdx << 4, 0xc0, 0x00, 0x01, 0x02, 0x03]);
+    const BR = { 128: 9, 320: 14 };
 
     // 1. 320kbps 45s trial preview (~1.8MB) on 240s song -> must be trial!
-    const trial320k_45s = evaluateStreamTypeByRelativeBytes(1_800_000, 240, 320);
-    assert(trial320k_45s.streamType === 'trial', `320k 45s preview (1.8MB) on 240s song is classified as trial (got ${trial320k_45s.streamType}, ratio=${trial320k_45s.ratio.toFixed(2)})`);
+    const trial320k_45s = evaluateStreamQuality(1_800_000, 240, head(BR[320]), 320);
+    assert(trial320k_45s.streamType === 'trial', `320k 45s preview (1.8MB) on 240s song is classified as trial (got ${trial320k_45s.streamType}, est=${trial320k_45s.estimatedDurationSec?.toFixed(0)}s)`);
 
     // 2. 320kbps 30s trial preview (~1.2MB) on 240s song -> must be trial!
-    const trial320k_30s = evaluateStreamTypeByRelativeBytes(1_200_000, 240, 320);
+    const trial320k_30s = evaluateStreamQuality(1_200_000, 240, head(BR[320]), 320);
     assert(trial320k_30s.streamType === 'trial', `320k 30s preview (1.2MB) on 240s song is classified as trial (got ${trial320k_30s.streamType})`);
 
     // 3. 320kbps 45s trial preview on short 150s song (~1.8MB) -> must be trial!
-    const trial320k_short = evaluateStreamTypeByRelativeBytes(1_800_000, 150, 320);
-    assert(trial320k_short.streamType === 'trial', `320k 45s preview (1.8MB) on 150s song is classified as trial (got ${trial320k_short.streamType}, ratio=${trial320k_short.ratio.toFixed(2)})`);
+    const trial320k_short = evaluateStreamQuality(1_800_000, 150, head(BR[320]), 320);
+    assert(trial320k_short.streamType === 'trial', `320k 45s preview (1.8MB) on 150s song is classified as trial (got ${trial320k_short.streamType})`);
 
-    // 4. 128kbps 45s trial preview (721,023 bytes) on 240s song -> must be trial!
-    const trial128k_45s = evaluateStreamTypeByRelativeBytes(721_023, 240, 128);
-    assert(trial128k_45s.streamType === 'trial', `128k 45s preview (721KB) is classified as trial`);
+    // 4. Audit counter-example: 90s COMPLETE 128kbps track requested as 320k -> full (duration-based, real bitrate)
+    const full90s = evaluateStreamQuality(90 * 16_000, 90, head(BR[128]), 320);
+    assert(full90s.streamType === 'full' && full90s.realBitrateKbps === 128, `90s complete 128kbps track is classified as full via real frame header (got ${full90s.streamType})`);
 
-    // 5. 128kbps 30s trial preview (481,115 bytes) on 240s song -> must be trial!
-    const trial128k_30s = evaluateStreamTypeByRelativeBytes(481_115, 240, 128);
-    assert(trial128k_30s.streamType === 'trial', `128k 30s preview (481KB) is classified as trial`);
+    // 5. Audit counter-example: lossless requested but 320k complete MP3 served -> full
+    const flacReq = evaluateStreamQuality(9_600_000, 240, head(BR[320]), 800);
+    assert(flacReq.streamType === 'full', `320k complete MP3 under a lossless request is classified as full (got ${flacReq.streamType})`);
 
-    // 6. Genuine full 320kbps track (9.6MB) on 240s song -> must be full!
-    const full320k = evaluateStreamTypeByRelativeBytes(9_600_000, 240, 320);
-    assert(full320k.streamType === 'full', `Full 320k track (9.6MB) is classified as full (got ${full320k.streamType}, ratio=${full320k.ratio.toFixed(2)})`);
+    // 6. Genuine full 128kbps track (3.84MB) on 240s song with header -> full
+    const full128k = evaluateStreamQuality(3_840_000, 240, head(BR[128]), 128);
+    assert(full128k.streamType === 'full', `Full 128k track is classified as full (got ${full128k.streamType})`);
 
-    // 7. Genuine full 128kbps track (3.8MB) on 240s song -> must be full!
-    const full128k = evaluateStreamTypeByRelativeBytes(3_840_000, 240, 128);
-    assert(full128k.streamType === 'full', `Full 128k track (3.8MB) is classified as full (got ${full128k.streamType}, ratio=${full128k.ratio.toFixed(2)})`);
-
-    // 8. Kuwo 181,521 bytes fake prompt audio -> must be unavailable!
-    const fakeKuwo = evaluateStreamTypeByRelativeBytes(181_521, 240, 320);
+    // 7. Kuwo 181,521 bytes fake prompt audio -> must be unavailable!
+    const fakeKuwo = evaluateStreamQuality(181_521, 240, head(BR[128]), 320);
     assert(fakeKuwo.streamType === 'unavailable', `Kuwo 181,521 bytes fake prompt is rejected as unavailable`);
 
+    // 8. Neighbouring size with real header -> unavailable via range+duration rule
+    const fakeNeighbor = evaluateStreamQuality(181_522, 240, head(BR[128]), 320);
+    assert(fakeNeighbor.streamType === 'unavailable', `181,522 bytes (~11s @128k) rejected via byte-range + short-duration rule`);
+
     // 9. Zero bytes -> unavailable
-    const zeroBytes = evaluateStreamTypeByRelativeBytes(0, 240, 320);
+    const zeroBytes = evaluateStreamQuality(0, 240, head(BR[320]), 320);
     assert(zeroBytes.streamType === 'unavailable', `0 bytes is unavailable`);
+
+    // 10. Header-unparseable payload falls back to byte-ratio heuristic with low confidence
+    const fallback = evaluateStreamQuality(3_840_000, 240, new Uint8Array([0x66, 0x4c, 0x61, 0x43, 0x00, 0x00]), 128);
+    assert(fallback.streamType === 'full' && fallback.confidence === 'low' && fallback.method === 'byte-ratio-fallback', `Unparseable header (fLaC) falls back with confidence=low (got ${fallback.confidence})`);
   }
 
 

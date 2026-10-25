@@ -10,6 +10,7 @@ import { useToastStore } from './toast'
 import i18n from '@/languages'
 import { downloadedMusicDB, localMusicDB } from '@/utils/indexedDB'
 import { inspectGatewayHeaders, markStreamFailure, gatewayHealth } from '@/utils/gatewayHealth'
+import { resolveTrialEnd } from '@/utils/trialGuard'
 import piniaPersistConfig from '../persist'
 
 /** 全局 Audio 单例（整个应用只创建一个 HTMLAudioElement） */
@@ -791,15 +792,30 @@ export const useAudioStore = defineStore('audio', {
 
     // 处理歌曲播放结束
     handleSongEnd() {
-      // 试听片段播放完毕：不静默跳歌，明确提示用户
-      if (this.audio.currentSong?.streamType === 'trial') {
-        const toastStore = useToastStore()
-        toastStore.show({
-          message: i18n.global.t('player.trialEnded'),
-          type: 'warning',
-          duration: 5000,
-        })
-        return
+      const currentSong = this.audio.currentSong
+      if (currentSong?.streamType === 'trial') {
+        // 以 audio.currentTime 为准(不受暂停影响):若实际媒体时长明显超过任何试听切片上限,
+        // 说明这是被误判为 trial 的完整流,撤销试听状态并按正常播完流程继续。
+        const played = Number(this.audio.audio?.currentTime) || 0
+        const decision = resolveTrialEnd(currentSong.streamType, played, currentSong.trialDuration)
+        if (decision.cancelTrial) {
+          currentSong.streamType = 'full'
+          delete currentSong.trialDuration
+          const idx = this.audio.playlist.indexOf(currentSong)
+          if (idx !== -1) {
+            this.audio.playlist[idx].streamType = 'full'
+            delete this.audio.playlist[idx].trialDuration
+          }
+        } else {
+          // 试听片段播放完毕：不静默跳歌，明确提示用户
+          const toastStore = useToastStore()
+          toastStore.show({
+            message: i18n.global.t('player.trialEnded'),
+            type: 'warning',
+            duration: 5000,
+          })
+          return
+        }
       }
 
       switch (this.audio.playMode) {
