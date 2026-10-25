@@ -501,6 +501,20 @@ export async function searchNexus(
 
   const finalTracks = scoredTracks.map((item) => item.track);
 
+  // Non-blocking catalog enrichment for local recommendation & smart-search index
+  if (finalTracks.length > 0) {
+    import('./recommend/memory-store')
+      .then(async ({ getRecommendStore }) => {
+        const { toCanonicalTrack } = await import('./recommend/track-canonical');
+        const store = getRecommendStore(env);
+        const canonicals = finalTracks
+          .map((t, idx) => toCanonicalTrack(t, { rank: idx }))
+          .filter((x): x is NonNullable<typeof x> => Boolean(x));
+        if (canonicals.length > 0) store.upsertTracks(canonicals);
+      })
+      .catch(() => {});
+  }
+
   return {
     data: {
       query,
