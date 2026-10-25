@@ -16,6 +16,14 @@ const VERIFIED_CACHE_MAX = 1024;
 const VERIFIED_CACHE_TTL_MS = 5 * 60_000;
 
 const encoder = new TextEncoder();
+let didLogMissingSigningSecret = false;
+
+function logMissingSigningSecretOnce(): void {
+  if (didLogMissingSigningSecret) return;
+  didLogMissingSigningSecret = true;
+  // Never log the value or a caller-supplied key.
+  console.error('[Sonic Security] API key signing secret is missing or shorter than 32 characters');
+}
 
 export class AuthConfigError extends Error {
   readonly code: string;
@@ -519,11 +527,8 @@ export async function createSession(env: AppEnv, userInfo: { email: string; name
     expiresAt,
   };
 
-  const fingerprint = `${deriveKeyId(secrets.current)}:${secrets.previous ? deriveKeyId(secrets.previous) : '-'}`;
-  const ttlMs = Math.min(VERIFIED_CACHE_TTL_MS, expiresAtSec * 1000 - now);
-  if (ttlMs > 0) {
-    cacheSet(`${fingerprint}:${apiKey}`, session, now + ttlMs, now);
-  }
+  // Do not populate the verification cache here: only an HMAC-verified key
+  // (see verifyAuth) is allowed to enter it.
   return session;
 }
 
@@ -555,6 +560,7 @@ export function extractAuthCredentials(request: Request, env?: AppEnv): { token?
 export async function verifyAuth(request: Request, env: AppEnv): Promise<{ authenticated: boolean; user?: UserSession; isRateLimited?: boolean }> {
   const secrets = getSigningSecrets(env);
   if (!secrets.current) {
+    logMissingSigningSecretOnce();
     return { authenticated: false };
   }
 
