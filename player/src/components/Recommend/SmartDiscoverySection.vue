@@ -206,6 +206,15 @@ watch([activeTab, trendingWindow, selectedGenre, explorationTemp], () => {
   loadRecommendations()
 })
 
+// 布局对路由组件 keep-alive,在设置页关闭/开启个性化后返回时组件不会重新挂载;
+// 必须监听开关变化立即重拉,否则页面仍显示旧的个性化结果,违背"关闭后立即切换纯公共模式"承诺。
+watch(
+  () => recommendStore.personalizationEnabled,
+  () => {
+    loadRecommendations()
+  }
+)
+
 onMounted(() => {
   loadRecommendations()
 })
