@@ -40,6 +40,7 @@ export interface SonicWord {
   startSec?: number;
   end?: number;
   endSec?: number;
+  endMs?: number;
   duration?: number;
   durationSec?: number;
 }
@@ -73,6 +74,10 @@ export interface SonicTtmlMetadata {
   spotifyId?: string;
   appleMusicId?: string;
   isrc?: string;
+  upstreamProvider?: string;
+  sourceId?: string;
+  matchReason?: string;
+  [key: string]: any;
 }
 
 export interface SonicLyricsData {
@@ -131,6 +136,7 @@ export interface SonicQueryParams {
   platformId?: string;
   prefer?: 'real' | 'approx' | 'auto' | 'word';
   nocache?: boolean;
+  q?: string;
 }
 
 // ── Search Gateway Types ──

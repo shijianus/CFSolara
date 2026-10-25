@@ -485,6 +485,7 @@ async function resolveNeteaseSingleStream(
 ): Promise<{
   url: string;
   isTrial: boolean;
+  trialDuration?: number;
   br?: number;
   size?: number;
   contentType?: string;

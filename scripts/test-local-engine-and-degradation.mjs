@@ -143,7 +143,7 @@ async function runTests() {
     const rlEnv = {
       SONIC_RATE_LIMIT_ANON_RPM: '10',
       SONIC_RATE_LIMIT_AUTH_RPM: '50',
-      SONIC_JWT_SECRET: 'test_jwt_secret_for_rate_limit',
+      SONIC_SECRET: 'test_super_secret_sonic_rate_limit_32chars!',
     };
 
     let lastDecision = null;
@@ -185,7 +185,7 @@ async function runTests() {
 
     let engineMode = 'healthy'; // 'healthy' | 'tunnel-530'
     let engineHits = 0;
-    const secret = 'mock_engine_secret_abc';
+    const secret = 'mock_engine_secret_abc_32chars_long_minimum!';
 
     const mockServer = http.createServer((req, res) => {
       engineHits++;
@@ -346,23 +346,20 @@ async function runTests() {
   console.log('\n7. Testing Linux Node 22 HTTP Server (createSonicServer)');
   {
     const prevSecret = process.env.SONIC_ENGINE_SECRET;
-    process.env.SONIC_ENGINE_SECRET = 'node_server_test_secret_777';
+    process.env.SONIC_ENGINE_SECRET = 'node_server_test_secret_777_long_enough_32!';
     const srv = createSonicServer();
     await new Promise((resolve) => srv.listen(0, '127.0.0.1', resolve));
     const port = srv.address().port;
 
     try {
-      // Anonymous request with Host: engine-sonic.epocanvas.tech on root `/` -> 401!
-      const rAnonRoot = await fetch(`http://127.0.0.1:${port}/`, {
-        headers: { 'X-Forwarded-Host': 'engine-sonic.epocanvas.tech' },
-      });
-      assert(rAnonRoot.status === 401, `Anonymous root request on engine-sonic returns 401 (got ${rAnonRoot.status})`);
+      // Anonymous request on `/api/sonic/engine/health` -> 401!
+      const rAnonRoot = await fetch(`http://127.0.0.1:${port}/api/sonic/engine/health`);
+      assert(rAnonRoot.status === 401, `Anonymous request on engine endpoint returns 401 (got ${rAnonRoot.status})`);
 
       // Authenticated request on `/api/sonic/engine/health` -> 200!
       const rAuthHealth = await fetch(`http://127.0.0.1:${port}/api/sonic/engine/health`, {
         headers: {
-          'X-Forwarded-Host': 'engine-sonic.epocanvas.tech',
-          'X-Sonic-Engine-Key': 'node_server_test_secret_777',
+          'X-Sonic-Engine-Key': 'node_server_test_secret_777_long_enough_32!',
         },
       });
       const jAuthHealth = await rAuthHealth.json();

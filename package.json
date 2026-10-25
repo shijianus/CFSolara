@@ -15,6 +15,7 @@
     "test:cover": "jiti scripts/test-cover-gateway.mjs",
     "lint:theme": "node scripts/lint-theme.mjs",
     "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs"
+    "test:security": "./player/node_modules/.bin/vitest run tests/security.test.ts",
+    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs && ./player/node_modules/.bin/vitest run tests/security.test.ts"
   }
 }
