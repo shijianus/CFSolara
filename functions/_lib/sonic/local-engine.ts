@@ -6,7 +6,7 @@
 
 import type { AppEnv } from '../types';
 import { getSonicConfig } from './config';
-import { extractClientIp } from './security';
+import { getPublicClientIp } from './security';
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -163,6 +163,9 @@ export async function callLocalEngineJson<T = any>(
   const effectiveTimeout = c.state === 'HALF_OPEN' ? Math.min(baseTimeout, 2500) : baseTimeout;
 
   const targetUrl = `${cfg.localEngineUrl}${pathWithQuery.startsWith('/') ? '' : '/'}${pathWithQuery}`;
+  // Build a fresh header set. Client-supplied internal headers are never
+  // copied; the gateway writes X-Sonic-Engine-Key and the trusted CF client IP
+  // itself with set semantics.
   const headers: Record<string, string> = {
     Accept: 'application/json',
     'User-Agent': 'Sonic-Edge-Gateway/2.2',
@@ -172,7 +175,7 @@ export async function callLocalEngineJson<T = any>(
     headers['X-Sonic-Engine-Key'] = cfg.engineSecret;
   }
   if (options?.request) {
-    headers['X-Sonic-Client-IP'] = extractClientIp(options.request);
+    headers['X-Sonic-Client-IP'] = getPublicClientIp(options.request);
   }
 
   const signals: AbortSignal[] = [AbortSignal.timeout(effectiveTimeout)];

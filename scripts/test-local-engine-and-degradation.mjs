@@ -13,6 +13,8 @@ import {
   evaluateGatewayRateLimit,
   resetRateLimitsForTest,
   isBlockedSsrfHost,
+  getPublicClientIp,
+  getForwardedClientIp,
 } from '../functions/_lib/sonic/security';
 import { resetLocalEngineCircuitForTest, getLocalEngineCircuitSnapshot } from '../functions/_lib/sonic/local-engine';
 import { clearSonicMemoryCacheForTest } from '../functions/_lib/sonic/cache';
@@ -110,7 +112,7 @@ async function runTests() {
     assert(wrongRes.status === 401, `Wrong engine key returns 401 (got ${wrongRes.status})`);
 
     // Missing secret on engine host MUST fail-closed 503 (never fail-open!)
-    const misconfigRes = checkEngineAccess(new Request('https://engine-sonic.epocanvas.tech/api'), {});
+    const misconfigRes = checkEngineAccess(new Request('https://engine-sonic.epocanvas.tech/api'), { SONIC_RUNTIME: 'linux-engine' });
     assert(misconfigRes && misconfigRes.status === 503, `Unconfigured secret on engine host fails closed with 503`);
 
     // Valid key succeeds 200
@@ -121,6 +123,42 @@ async function runTests() {
     assert(validRes.status === 200, `Valid X-Sonic-Engine-Key returns 200 (got ${validRes.status})`);
     const validJson = await validRes.json();
     assert(validJson.ok === true && validJson.runtime === 'linux-engine', 'Engine health payload ok=true & runtime=linux-engine');
+
+    // IP trust boundary: public callers may not choose their bucket; only a
+    // caller with the engine secret may supply X-Sonic-Client-IP.
+    const publicSpoof = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: {
+        'CF-Connecting-IP': '203.0.113.10',
+        'X-Sonic-Client-IP': '198.51.100.99',
+        'X-Forwarded-For': '198.51.100.98',
+      },
+    });
+    assert(getPublicClientIp(publicSpoof) === '203.0.113.10', 'Public IP uses CF-Connecting-IP only');
+    const publicNoCf = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: {
+        'X-Sonic-Client-IP': '198.51.100.99',
+        'X-Forwarded-For': '198.51.100.98',
+      },
+    });
+    assert(getPublicClientIp(publicNoCf) === 'unknown', 'Missing CF-Connecting-IP shares strict unknown bucket');
+    const forwardedSpoof = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: { 'X-Sonic-Client-IP': '198.51.100.99' },
+    });
+    assert(getForwardedClientIp(forwardedSpoof, engineEnv) === 'unknown', 'X-Sonic-Client-IP ignored without engine secret');
+    const forwardedValid = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: {
+        'X-Sonic-Client-IP': '198.51.100.99',
+        'X-Sonic-Engine-Key': engineEnv.SONIC_ENGINE_SECRET,
+      },
+    });
+    assert(getForwardedClientIp(forwardedValid, engineEnv) === '198.51.100.99', 'Forwarded IP trusted with valid engine secret');
+    const forwardedInvalid = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: {
+        'X-Sonic-Client-IP': 'not-an-ip',
+        'X-Sonic-Engine-Key': engineEnv.SONIC_ENGINE_SECRET,
+      },
+    });
+    assert(getForwardedClientIp(forwardedInvalid, engineEnv) === 'unknown', 'Invalid forwarded IP falls back to unknown');
 
     // SSRF guard blocks loopback, RFC1918, cloud metadata, and engine-sonic
     assert(isBlockedSsrfHost('127.0.0.1') === true, 'SSRF blocks 127.0.0.1');
@@ -143,7 +181,7 @@ async function runTests() {
     const rlEnv = {
       SONIC_RATE_LIMIT_ANON_RPM: '10',
       SONIC_RATE_LIMIT_AUTH_RPM: '50',
-      SONIC_JWT_SECRET: 'test_jwt_secret_for_rate_limit',
+      SONIC_SECRET: 'rate_limit_signing_secret_at_least_32_chars',
     };
 
     let lastDecision = null;
@@ -175,6 +213,72 @@ async function runTests() {
     );
     assert(authDecision.allowed === true && authDecision.tier === 'api-key', 'Valid sonic_live_ API Key upgrades to api-key tier');
     resetRateLimitsForTest();
+
+    // An anonymous caller rotating X-Sonic-Client-IP must still share the
+    // CF-Connecting-IP bucket.
+    let lastSpoofDecision = null;
+    for (let i = 0; i < 4; i++) {
+      lastSpoofDecision = await evaluateGatewayRateLimit(
+        new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=a', {
+          headers: {
+            'CF-Connecting-IP': '203.0.113.77',
+            'X-Sonic-Client-IP': `198.51.100.${i + 1}`,
+          },
+        }),
+        { SONIC_RATE_LIMIT_ANON_RPM: '3' },
+        'spoof-test',
+      );
+    }
+    assert(lastSpoofDecision.allowed === false, 'Rotating X-Sonic-Client-IP cannot escape the CF IP bucket');
+    resetRateLimitsForTest();
+
+    const fallbackLimit = await evaluateGatewayRateLimit(
+      new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=a', {
+        headers: { 'CF-Connecting-IP': '203.0.113.88' },
+      }),
+      { SONIC_RATE_LIMIT_ANON_RPM: '0' },
+      'fallback-test',
+    );
+    assert(fallbackLimit.limit === 240, `0 RPM falls back to the default limit (got ${fallbackLimit.limit})`);
+
+    const cappedLimit = await evaluateGatewayRateLimit(
+      new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=a', {
+        headers: { 'CF-Connecting-IP': '203.0.113.89' },
+      }),
+      { SONIC_RATE_LIMIT_ANON_RPM: '999999999' },
+      'cap-test',
+    );
+    assert(cappedLimit.limit === 100000, `Configured RPM is capped (got ${cappedLimit.limit})`);
+    resetRateLimitsForTest();
+
+    const kvStore = new Map();
+    const kv = {
+      async get(key) {
+        return kvStore.get(key) ?? null;
+      },
+      async put(key, value) {
+        kvStore.set(key, value);
+      },
+    };
+    const kvEnv = { SONIC_RATE_LIMIT_ANON_RPM: '1', SONIC_RATE_LIMIT_KV: kv };
+    const kvFirst = await evaluateGatewayRateLimit(
+      new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=a', {
+        headers: { 'CF-Connecting-IP': '203.0.113.90' },
+      }),
+      kvEnv,
+      'kv-test',
+    );
+    resetRateLimitsForTest();
+    const kvSecond = await evaluateGatewayRateLimit(
+      new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=a', {
+        headers: { 'CF-Connecting-IP': '203.0.113.90' },
+      }),
+      kvEnv,
+      'kv-test',
+    );
+    assert(kvFirst.allowed === true && kvSecond.allowed === false, 'KV-backed limiter persists across memory reset');
+    assert(kvStore.size === 1, 'KV limiter stores one windowed counter');
+    resetRateLimitsForTest();
   }
 
   // 5. Hard Problem 3: Pages -> Engine RPC + 3-State Circuit Breaker + Stale Cache + Explicit 503 Stream Degradation
@@ -185,10 +289,14 @@ async function runTests() {
 
     let engineMode = 'healthy'; // 'healthy' | 'tunnel-530'
     let engineHits = 0;
-    const secret = 'mock_engine_secret_abc';
+    let lastClientIpHeader = '';
+    let lastEngineKeyHeader = '';
+    const secret = 'mock_engine_secret_abc_0123456789abcdef';
 
     const mockServer = http.createServer((req, res) => {
       engineHits++;
+      lastClientIpHeader = String(req.headers['x-sonic-client-ip'] || '');
+      lastEngineKeyHeader = String(req.headers['x-sonic-engine-key'] || '');
       if (req.headers['x-sonic-engine-key'] !== secret) {
         res.writeHead(401, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: { code: 'ENGINE_UNAUTHORIZED' } }));
@@ -256,12 +364,20 @@ async function runTests() {
     try {
       // Step 5a: Healthy local engine -> CLOSED, populates cache, records local-engine + local-netease
       const res1 = await handleNexusSearchRequest(
-        new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=%E8%B5%B7%E9%A3%8E%E4%BA%86'),
+        new Request('https://sonic.epocanvas.tech/api/sonic/search/nexus?q=%E8%B5%B7%E9%A3%8E%E4%BA%86', {
+          headers: {
+            'CF-Connecting-IP': '203.0.113.5',
+            'X-Sonic-Client-IP': '198.51.100.66',
+            'X-Sonic-Engine-Key': 'attacker-supplied-engine-key',
+          },
+        }),
         cfEnv,
       );
       const json1 = await res1.json();
       assert(res1.status === 200, 'Healthy engine search returns 200');
       assert(res1.headers.get('X-Sonic-Degraded') === null, 'Healthy response has no X-Sonic-Degraded header');
+      assert(lastClientIpHeader === '203.0.113.5', 'Pages -> Engine forwarding sets CF client IP (does not append spoofed header)');
+      assert(lastEngineKeyHeader === secret, 'Pages -> Engine forwarding overwrites client X-Sonic-Engine-Key with the gateway secret');
       assert(json1.meta.attempts[0]?.provider === 'local-engine' && json1.meta.attempts[0]?.ok === true, 'Primary attempt is local-engine ok=true');
       assert(json1.meta.attempts.some((a) => a.provider === 'local-netease' && a.via === 'local-engine'), 'Engine sub-attempt preserves local-netease provenance');
 
@@ -346,7 +462,7 @@ async function runTests() {
   console.log('\n7. Testing Linux Node 22 HTTP Server (createSonicServer)');
   {
     const prevSecret = process.env.SONIC_ENGINE_SECRET;
-    process.env.SONIC_ENGINE_SECRET = 'node_server_test_secret_777';
+    process.env.SONIC_ENGINE_SECRET = 'node_server_test_secret_777_0123456789';
     const srv = createSonicServer();
     await new Promise((resolve) => srv.listen(0, '127.0.0.1', resolve));
     const port = srv.address().port;
@@ -362,7 +478,7 @@ async function runTests() {
       const rAuthHealth = await fetch(`http://127.0.0.1:${port}/api/sonic/engine/health`, {
         headers: {
           'X-Forwarded-Host': 'engine-sonic.epocanvas.tech',
-          'X-Sonic-Engine-Key': 'node_server_test_secret_777',
+          'X-Sonic-Engine-Key': 'node_server_test_secret_777_0123456789',
         },
       });
       const jAuthHealth = await rAuthHealth.json();

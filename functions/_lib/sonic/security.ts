@@ -1,54 +1,46 @@
 // Sonic Gateway — Inter-Service Authentication & Tiered Rate Limiter
 // Enforces:
-// 1. Mandatory constant-time X-Sonic-Engine-Key verification on `engine-sonic.*` and internal engine endpoints
-// 2. Sliding-window rate limiting at both Edge (Pages -> Engine hop protection) and Engine layers
+// 1. Constant-time X-Sonic-Engine-Key verification on engine paths/configs
+// 2. Tiered rate limiting at Edge (Pages -> Engine hop) and Engine layers
+//
+// Trust rules:
+// - Only CF-Connecting-IP is trusted for public callers.
+// - X-Sonic-Client-IP is trusted only behind a valid engine secret.
 
 import type { AppEnv } from '../types';
 import { verifyAuth } from '../auth';
 import { isEnvEnabled } from './config';
 import { jsonResponse } from '../http';
+import { constantTimeEqualStrings, sha256Hex } from './hash';
+import { isValidSecret } from '../secrets';
+import { isIpLiteral } from './net-guard';
 
-const encoder = new TextEncoder();
+export { isBlockedSsrfHost } from './net-guard';
 
 export function timingSafeEqualStr(a: string, b: string): boolean {
-  const bufA = encoder.encode(a);
-  const bufB = encoder.encode(b);
-  if (bufA.length !== bufB.length || bufA.length === 0) {
-    return false;
-  }
-  let diff = 0;
-  for (let i = 0; i < bufA.length; i++) {
-    diff |= bufA[i] ^ bufB[i];
-  }
-  return diff === 0;
+  // Hash both sides first so unequal lengths do not leak through timing.
+  return constantTimeEqualStrings(a, b);
 }
 
 export function hasValidEngineSecret(request: Request, env?: AppEnv): boolean {
   const configured = env?.SONIC_ENGINE_SECRET ? String(env.SONIC_ENGINE_SECRET).trim() : '';
-  if (!configured) return false;
+  if (!isValidSecret(configured)) return false;
   const headerKey = request.headers.get('X-Sonic-Engine-Key')?.trim() || '';
-  if (headerKey && timingSafeEqualStr(headerKey, configured)) {
-    return true;
-  }
-  return false;
+  if (!headerKey) return false;
+  return timingSafeEqualStr(headerKey, configured);
 }
 
 export function requiresEngineAuth(request: Request, env?: AppEnv): boolean {
-  if (isEnvEnabled(env?.SONIC_REQUIRE_ENGINE_AUTH, false)) {
-    return true;
-  }
-  const url = new URL(request.url);
-  const hostHeader = (request.headers.get('x-forwarded-host') || request.headers.get('host') || url.hostname || '').toLowerCase();
-  const cleanHost = hostHeader.split(':')[0];
-  const expectedEngineHost = env?.SONIC_ENGINE_HOST ? String(env.SONIC_ENGINE_HOST).toLowerCase().trim() : '';
+  if (isEnvEnabled(env?.SONIC_REQUIRE_ENGINE_AUTH, false)) return true;
 
-  if (cleanHost.startsWith('engine-sonic.') || (expectedEngineHost && cleanHost === expectedEngineHost)) {
-    return true;
-  }
-  if (url.pathname.startsWith('/api/sonic/engine/') || url.pathname.startsWith('/api/sonic/resolve/')) {
-    return true;
-  }
-  return false;
+  // Configuration-based, never derived from Host / X-Forwarded-Host headers.
+  if (String(env?.SONIC_RUNTIME || '') === 'linux-engine') return true;
+
+  const url = new URL(request.url);
+  return (
+    url.pathname.startsWith('/api/sonic/engine/') ||
+    url.pathname.startsWith('/api/sonic/resolve/')
+  );
 }
 
 export function checkEngineAccess(request: Request, env?: AppEnv): Response | null {
@@ -57,7 +49,9 @@ export function checkEngineAccess(request: Request, env?: AppEnv): Response | nu
   }
 
   const configured = env?.SONIC_ENGINE_SECRET ? String(env.SONIC_ENGINE_SECRET).trim() : '';
-  if (!configured) {
+  if (!isValidSecret(configured)) {
+    // Never include the secret (or its length) in the log or response.
+    console.error('[Sonic Security] engine secret is missing or shorter than 32 characters');
     return jsonResponse(
       {
         brand: 'Sonic',
@@ -91,6 +85,36 @@ export function checkEngineAccess(request: Request, env?: AppEnv): Response | nu
   return null;
 }
 
+// ── Client IP trust ──
+
+/**
+ * Public clients: the only trusted source is CF-Connecting-IP, which
+ * Cloudflare overwrites at the edge. Missing or malformed values share the
+ * strict "unknown" bucket. X-Forwarded-For and X-Sonic-Client-IP are ignored.
+ */
+export function getPublicClientIp(request: Request): string {
+  const raw = request.headers.get('CF-Connecting-IP')?.trim() || '';
+  if (!raw || !isIpLiteral(raw)) return 'unknown';
+  return raw;
+}
+
+/**
+ * Internal Pages -> Engine hop: trust X-Sonic-Client-IP only after the caller
+ * proves possession of SONIC_ENGINE_SECRET. Invalid values fall back to
+ * "unknown" so they cannot be used to escape a rate-limit bucket.
+ */
+export function getForwardedClientIp(request: Request, env?: AppEnv): string {
+  if (!hasValidEngineSecret(request, env)) return 'unknown';
+  const raw = request.headers.get('X-Sonic-Client-IP')?.trim() || '';
+  if (!raw || !isIpLiteral(raw)) return 'unknown';
+  return raw;
+}
+
+/** @deprecated Use getPublicClientIp() or getForwardedClientIp(). */
+export function extractClientIp(request: Request): string {
+  return getPublicClientIp(request);
+}
+
 // ── Sliding-Window Rate Limiter ──
 
 interface WindowCounter {
@@ -98,10 +122,7 @@ interface WindowCounter {
   resetAt: number;
 }
 
-const rateBuckets = new Map<string, WindowCounter>();
-const MAX_RATE_BUCKETS = 4096;
-
-export interface RateLimitDecision {
+interface RateLimitDecision {
   allowed: boolean;
   tier: 'engine' | 'api-key' | 'anonymous';
   limit: number;
@@ -109,13 +130,60 @@ export interface RateLimitDecision {
   resetSec: number;
 }
 
-export function extractClientIp(request: Request): string {
-  return (
-    request.headers.get('X-Sonic-Client-IP') ||
-    request.headers.get('CF-Connecting-IP') ||
-    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
-    '127.0.0.1'
-  );
+export type { RateLimitDecision };
+
+const rateBuckets = new Map<string, WindowCounter>();
+const MAX_RATE_BUCKETS = 4096;
+const RATE_WINDOW_MS = 60_000;
+const MAX_RPM = 100_000;
+
+function parseRpm(value: unknown, fallback: number): number {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.min(MAX_RPM, Math.max(1, parsed));
+}
+
+function incrementMemoryBucket(bucketKey: string, now: number): WindowCounter {
+  let entry = rateBuckets.get(bucketKey);
+  if (!entry || now >= entry.resetAt) {
+    if (rateBuckets.size >= MAX_RATE_BUCKETS) {
+      for (const [key, value] of rateBuckets) {
+        if (now >= value.resetAt) rateBuckets.delete(key);
+        if (rateBuckets.size < MAX_RATE_BUCKETS - 256) break;
+      }
+      while (rateBuckets.size >= MAX_RATE_BUCKETS) {
+        const oldest = rateBuckets.keys().next().value;
+        if (typeof oldest !== 'string') break;
+        rateBuckets.delete(oldest);
+      }
+    }
+    entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    rateBuckets.set(bucketKey, entry);
+  }
+  entry.count += 1;
+  return entry;
+}
+
+async function incrementKvBucket(
+  kv: any,
+  bucketKey: string,
+  now: number,
+): Promise<WindowCounter | null> {
+  if (!kv || typeof kv.get !== 'function' || typeof kv.put !== 'function') return null;
+  const windowStart = Math.floor(now / RATE_WINDOW_MS) * RATE_WINDOW_MS;
+  const key = `sonic:rl:${windowStart}:${sha256Hex(bucketKey).slice(0, 32)}`;
+  try {
+    const raw = await kv.get(key);
+    const previous = Number.parseInt(String(raw ?? '0'), 10);
+    const count = (Number.isFinite(previous) && previous > 0 ? previous : 0) + 1;
+    await kv.put(key, String(count), {
+      expirationTtl: Math.max(60, Math.ceil((RATE_WINDOW_MS * 2) / 1000)),
+    });
+    return { count, resetAt: windowStart + RATE_WINDOW_MS };
+  } catch {
+    // KV is best-effort; never fail open the request path, fall back to memory.
+    return null;
+  }
 }
 
 export async function evaluateGatewayRateLimit(
@@ -124,25 +192,23 @@ export async function evaluateGatewayRateLimit(
   scope = 'api',
 ): Promise<RateLimitDecision> {
   const now = Date.now();
-  const windowMs = 60_000;
-
-  // Trusted inter-service hop (Pages -> Engine) gets high bucket keyed by forwarded end-user IP
   const isEngineCaller = hasValidEngineSecret(request, env);
-  const ip = extractClientIp(request);
+  const ip = isEngineCaller ? getForwardedClientIp(request, env) : getPublicClientIp(request);
 
   let tier: 'engine' | 'api-key' | 'anonymous' = 'anonymous';
-  let limit = Math.max(10, parseInt(String(env?.SONIC_RATE_LIMIT_ANON_RPM || '240'), 10) || 240);
+  let limit = parseRpm(env?.SONIC_RATE_LIMIT_ANON_RPM, 240);
   let subject = `anon:${ip}`;
 
   if (isEngineCaller) {
     tier = 'engine';
-    limit = Math.max(limit * 2, 600);
+    limit = Math.min(MAX_RPM, Math.max(600, limit * 2));
     subject = `engine:${ip}`;
   } else {
     const authResult = await verifyAuth(request, env || {});
     if (authResult.authenticated && authResult.user) {
       tier = 'api-key';
-      limit = Math.max(30, parseInt(String(env?.SONIC_RATE_LIMIT_AUTH_RPM || '600'), 10) || 600);
+      limit = parseRpm(env?.SONIC_RATE_LIMIT_AUTH_RPM, 600);
+      // Use the email from the verified payload, never a caller-supplied value.
       subject = `user:${authResult.user.email}`;
     } else if (isEnvEnabled(env?.SONIC_REQUIRE_AUTH, false)) {
       return {
@@ -156,20 +222,8 @@ export async function evaluateGatewayRateLimit(
   }
 
   const bucketKey = `${scope}:${subject}`;
-  let entry = rateBuckets.get(bucketKey);
-
-  if (!entry || now >= entry.resetAt) {
-    if (rateBuckets.size >= MAX_RATE_BUCKETS) {
-      for (const [k, v] of rateBuckets) {
-        if (now >= v.resetAt) rateBuckets.delete(k);
-        if (rateBuckets.size < MAX_RATE_BUCKETS - 256) break;
-      }
-    }
-    entry = { count: 0, resetAt: now + windowMs };
-    rateBuckets.set(bucketKey, entry);
-  }
-
-  entry.count += 1;
+  const kvCounter = await incrementKvBucket(env?.SONIC_RATE_LIMIT_KV, bucketKey, now);
+  const entry = kvCounter || incrementMemoryBucket(bucketKey, now);
   const remaining = Math.max(0, limit - entry.count);
   const resetSec = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
 
@@ -209,30 +263,4 @@ export function buildRateLimitErrorResponse(decision: RateLimitDecision): Respon
 
 export function resetRateLimitsForTest(): void {
   rateBuckets.clear();
-}
-
-export function isBlockedSsrfHost(hostname: string): boolean {
-  const h = (hostname || '').toLowerCase().trim().replace(/^\[|\]$/g, '');
-  if (!h) return true;
-  if (
-    h === 'localhost' ||
-    h === '0.0.0.0' ||
-    h === '::1' ||
-    h.endsWith('.local') ||
-    h.endsWith('.internal') ||
-    h.startsWith('engine-sonic.')
-  ) {
-    return true;
-  }
-  if (/^127\./.test(h)) return true;
-  if (/^10\./.test(h)) return true;
-  if (/^192\.168\./.test(h)) return true;
-  if (/^169\.254\./.test(h)) return true;
-  const m172 = h.match(/^172\.(\d{1,3})\./);
-  if (m172) {
-    const second = parseInt(m172[1], 10);
-    if (second >= 16 && second <= 31) return true;
-  }
-  if (/^(fc|fd|fe80):/i.test(h)) return true;
-  return false;
 }
