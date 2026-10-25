@@ -1,4 +1,4 @@
-// Sonic Local Engine — Authenticated Stream URL Resolver Endpoint
+// epocanvas sonic Local Engine — Authenticated Stream URL Resolver Endpoint
 // GET /api/sonic/resolve/stream
 // Protected by mandatory `X-Sonic-Engine-Key` (rejects anonymous requests with 401)
 

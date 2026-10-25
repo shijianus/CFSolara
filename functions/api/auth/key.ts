@@ -29,7 +29,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       });
     } catch (error) {
       if (error instanceof AuthConfigError) {
-        console.error(`[Sonic Auth] key issuance unavailable (${error.code})`);
+        console.error(`[epocanvas sonic Auth] key issuance unavailable (${error.code})`);
         return errorResponse('API key signing is not configured', 503);
       }
       throw error;

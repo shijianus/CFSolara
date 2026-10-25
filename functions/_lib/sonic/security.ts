@@ -1,4 +1,4 @@
-// Sonic Gateway — Inter-Service Authentication & Tiered Rate Limiter
+// epocanvas sonic Gateway — Inter-Service Authentication & Tiered Rate Limiter
 // Enforces:
 // 1. Constant-time X-Sonic-Engine-Key verification on engine paths/configs
 // 2. Tiered rate limiting at Edge (Pages -> Engine hop) and Engine layers
@@ -51,7 +51,7 @@ export function checkEngineAccess(request: Request, env?: AppEnv): Response | nu
   const configured = env?.SONIC_ENGINE_SECRET ? String(env.SONIC_ENGINE_SECRET).trim() : '';
   if (!isValidSecret(configured)) {
     // Never include the secret (or its length) in the log or response.
-    console.error('[Sonic Security] engine secret is missing or shorter than 32 characters');
+    console.error('[epocanvas sonic Security] engine secret is missing or shorter than 32 characters');
     return jsonResponse(
       {
         brand: 'Sonic',
@@ -70,7 +70,7 @@ export function checkEngineAccess(request: Request, env?: AppEnv): Response | nu
         brand: 'Sonic',
         error: {
           code: 'ENGINE_UNAUTHORIZED',
-          message: 'Valid X-Sonic-Engine-Key header is required to access Sonic Local Engine',
+          message: 'Valid X-Sonic-Engine-Key header is required to access the epocanvas sonic local engine',
         },
       },
       {

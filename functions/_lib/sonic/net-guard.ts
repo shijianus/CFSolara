@@ -1,4 +1,4 @@
-// Sonic Gateway — Outbound URL / SSRF guard
+// epocanvas sonic Gateway — Outbound URL / SSRF guard
 // Protocol + port + hostname validation, IP literal normalization, strict
 // allow-list suffix matching, and redirect-safe fetch.
 

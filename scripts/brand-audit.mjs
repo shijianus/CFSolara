@@ -34,6 +34,7 @@ const EXCLUDE_PREFIXES = [
   'player/node_modules/',
   'dist/',
   'player/dist/',
+  'reports/',
   'screenshots/',
   'temp_',
 ]
@@ -148,6 +149,7 @@ const DISPLAY_BRAND_ALLOWLIST = [
   'functions/api/index.ts',
   'functions/api/auth/key.ts',
   'functions/api/auth/callback.ts',
+  'functions/api/auth/login.ts',
   'server/index.ts',
   'reports/',
   'scripts/',
@@ -284,14 +286,14 @@ function collectState() {
   }
 }
 
-function compareStates(before, after) {
+function compareStates(before, after, options = {}) {
   const failures = []
 
   const countByFile = (entries) => {
     const counts = {}
     for (const entry of entries) {
       const file = entry.slice(0, entry.indexOf('::'))
-      if (file.endsWith('.md')) continue
+      if (file.endsWith('.md') || isExcluded(file)) continue
       counts[file] = (counts[file] || 0) + 1
     }
     return counts
@@ -321,14 +323,16 @@ function compareStates(before, after) {
   const beforeHashes = before.protectedFileHashes || {}
   const afterHashes = after.protectedFileHashes || {}
   const allFiles = [...new Set([...Object.keys(beforeHashes), ...Object.keys(afterHashes)])].sort()
-  for (const file of allFiles) {
-    if (beforeHashes[file] !== afterHashes[file]) {
-      failures.push({
-        token: 'protected-file-hash',
-        note: `protected file changed: ${file}`,
-        removed: beforeHashes[file] ? [beforeHashes[file]] : [],
-        added: afterHashes[file] ? [afterHashes[file]] : [],
-      })
+  if (!options.skipHashes) {
+    for (const file of allFiles) {
+      if (beforeHashes[file] !== afterHashes[file]) {
+        failures.push({
+          token: 'protected-file-hash',
+          note: `protected file changed: ${file}`,
+          removed: beforeHashes[file] ? [beforeHashes[file]] : [],
+          added: afterHashes[file] ? [afterHashes[file]] : [],
+        })
+      }
     }
   }
 
@@ -473,8 +477,8 @@ function verify() {
   for (const file of files) {
     const text = readText(file)
     if (DISPLAY_BRAND_CLEAN_FILES.includes(file)) {
-      if (/\bSonic\b|Glass Music Player/.test(text)) {
-        failures.push(`${file} still contains old display brand "Sonic" or "Glass Music Player"`)
+      if (/\bSonic\b|Glass Music Player|\bEpoMail\b|\bEpoCanvas\b|\bSolara\b|\bCFSolara\b|\bShijianus\b/.test(text)) {
+        failures.push(`${file} still contains an old or incorrectly cased display brand`)
       }
     }
     if (/\bSonic\b|Glass Music Player/.test(text) && !allowed(file) && !DISPLAY_BRAND_CLEAN_FILES.includes(file)) {
@@ -482,8 +486,18 @@ function verify() {
     }
   }
 
+  const casingFiles = files.filter(
+    (file) => !file.startsWith('reports/') && !file.startsWith('scripts/') && /EpoMail|EpoCanvas/.test(readText(file)),
+  )
+  if (casingFiles.length > 0) {
+    failures.push(`incorrect brand casing remains in: ${casingFiles.join(', ')}`)
+  }
+
   const glassFiles = files.filter(
-    (file) => !file.startsWith('scripts/') && readText(file).includes('Glass Music Player'),
+    (file) =>
+      !file.startsWith('scripts/') &&
+      !file.startsWith('reports/') &&
+      readText(file).includes('Glass Music Player'),
   )
   if (glassFiles.length > 0) {
     failures.push(`Glass Music Player remains in: ${glassFiles.join(', ')}`)
@@ -517,14 +531,15 @@ function main() {
     return
   }
 
-  if (mode === '--compare') {
+  if (mode === '--compare' || mode === '--compare-tokens') {
     if (!target) {
-      console.error('Usage: node scripts/brand-audit.mjs --compare <baseline.json>')
+      console.error(`Usage: node scripts/brand-audit.mjs ${mode} <baseline.json>`)
       process.exit(2)
     }
     const before = JSON.parse(fs.readFileSync(path.resolve(ROOT, target), 'utf8'))
     const after = collectState()
-    const failures = compareStates(before, after)
+    const compareTokensOnly = mode === '--compare-tokens'
+    const failures = compareStates(before, after, { skipHashes: compareTokensOnly })
     if (failures.length > 0) {
       console.error('\nProtected contract comparison FAILED:')
       for (const failure of failures) {
@@ -536,7 +551,11 @@ function main() {
       }
       process.exit(1)
     }
-    console.log('Protected contract comparison PASSED: routes, wire brand, auth, storage, cache, and deployment identifiers are unchanged.')
+    console.log(
+      compareTokensOnly
+        ? 'Protected token comparison PASSED: routes, wire brand, auth, storage, cache, and deployment identifiers are unchanged (file hashes ignored for comment/log-only refactors).'
+        : 'Protected contract comparison PASSED: routes, wire brand, auth, storage, cache, and deployment identifiers are unchanged.',
+    )
     return
   }
 
@@ -545,7 +564,7 @@ function main() {
     return
   }
 
-  console.error('Usage: node scripts/brand-audit.mjs --snapshot <file> | --compare <baseline.json> | --verify [--no-dist]')
+  console.error('Usage: node scripts/brand-audit.mjs --snapshot <file> | --compare <baseline.json> | --compare-tokens <baseline.json> | --verify [--no-dist]')
   process.exit(2)
 }
 

@@ -14,7 +14,7 @@
 flowchart TD
   User["公网用户 / 外部应用<br/>(https://sonic.epocanvas.tech)"]
 
-  subgraph Edge["Cloudflare Pages 边缘网关 (cfsolara)"]
+  subgraph Edge["Cloudflare Pages 边缘网关 (epocanvas sonic · Pages 项目: cfsolara)"]
     PagesRouter["Pages Functions 路由与限流<br/>(X-RateLimit: 240rpm 匿名 / 600rpm Key)"]
     EdgeCache["统一缓存层 (sonic:*)<br/>(Fresh 8m / Stale 容灾)"]
     CircuitBreaker["三态熔断器<br/>(CLOSED / OPEN / HALF_OPEN)"]
@@ -170,12 +170,14 @@ npm run build
 npx wrangler pages deploy dist --project-name cfsolara
 ```
 
+> 上例中的 `cfsolara` 是现网 Cloudflare Pages 项目名（历史基础设施标识），不是产品展示品牌；产品展示名统一为 **epocanvas sonic**。如已新建品牌化项目，可用 `CF_PAGES_PROJECT` 覆盖默认值。
+
 ### 2. Linux VPS 本地解析引擎部署
 ```bash
 # 1. 构建本地引擎单文件
 npm run build:server
 
-# 2. 在 VPS /data/workspace/CFSolara 启动 Docker Compose 栈
+# 2. 在 VPS 现有部署目录（历史路径 /data/workspace/CFSolara）启动 Docker Compose 栈
 docker compose up -d --build
 
 # 3. 检查容器健康状态

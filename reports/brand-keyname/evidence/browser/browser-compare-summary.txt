@@ -1,0 +1,24 @@
+{
+  "allPostStepsPassed": true,
+  "allTitlesEndWithFullBrand": true,
+  "noLegacyDisplayBrand": true,
+  "allBrandTextStable": true,
+  "allStorageKeysStable": true,
+  "legacyStatic": {
+    "pre": {
+      "title": "epocanvas sonic",
+      "epoMailCount": 2,
+      "epomailCount": 0,
+      "modalEpoMailCount": 2,
+      "modalEpomailCount": 0
+    },
+    "post": {
+      "title": "epocanvas sonic",
+      "epoMailCount": 0,
+      "epomailCount": 2,
+      "modalEpoMailCount": 0,
+      "modalEpomailCount": 2
+    },
+    "legacyBrandHitsPost": []
+  }
+}

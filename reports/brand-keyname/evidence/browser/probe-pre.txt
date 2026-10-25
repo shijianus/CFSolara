@@ -1,0 +1,222 @@
+=== HOME ===
+{
+  "title": "首页 - epocanvas sonic",
+  "url": "http://127.0.0.1:8791/#/",
+  "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 选择一首歌开始",
+  "inputs": [
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "placeholder": "搜索音乐、歌手、专辑...",
+      "value": "",
+      "aria": null,
+      "name": "",
+      "cls": "w-full bg-transparent text-[11px] font-medium outline-none placeholder:text-primary/35"
+    }
+  ],
+  "buttons": [
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "返回",
+      "title": "返回",
+      "cls": "flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "前进",
+      "title": "前进",
+      "cls": "flex h-11 w-11 items-center justify-center rounded-full text-primary/60 hover:text-primary hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "暗黑模式",
+      "title": "暗黑模式",
+      "cls": "flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all text-primary/40 hover:text-primary",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "浅色模式",
+      "title": "浅色模式",
+      "cls": "flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all text-primary/40 hover:text-primary",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "跟随系统",
+      "title": "跟随系统",
+      "cls": "flex-1 h-11 rounded-full grid place-items-center text-xs font-semibold transition-all bg-white/15 text-primary shadow-sm",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "打开播放器",
+      "title": "打开播放器",
+      "cls": "cover-inner flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-cover shadow-lg ring-1 ring-white/15 transition-all duration-300 outline-none hover:shadow-xl hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-400/70",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "上一首",
+      "title": "上一首",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none text-primary/70 hover:text-primary bg-transparent p-0 p-0 rounded-xl overflow-hidden flex h-11 w-11 items-center justify-center",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "播放",
+      "title": "播放",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none play-btn h-12 w-12 p-0 justify-center rounded-full overflow-hidden btn-3d play-btn-glow",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "下一首",
+      "title": "下一首",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none text-primary/70 hover:text-primary bg-transparent p-0 p-0 rounded-xl overflow-hidden flex h-11 w-11 items-center justify-center",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "列表循环",
+      "title": "列表循环",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none text-primary/70 hover:text-primary bg-transparent p-0 p-0 rounded-xl overflow-hidden flex h-11 w-11 items-center justify-center",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "静音",
+      "title": "静音",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none text-primary/70 hover:text-primary bg-transparent hover:bg-white/5 h-11 w-11 p-0 justify-center rounded-full overflow-hidden text-primary/70 hover:text-primary flex items-center transition-colors",
+      "testid": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "播放列表",
+      "title": "播放列表",
+      "cls": "inline-flex items-center font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none text-primary/70 hover:text-primary bg-transparent p-0 p-0 rounded-xl overflow-hidden text-primary/70 hover:text-primary flex h-11 w-11 items-center justify-center transition-colors",
+      "testid": null
+    }
+  ],
+  "links": [
+    {
+      "text": "epocanvas sonic STUDIO AUDIO ENGINE",
+      "href": "#/"
+    },
+    {
+      "text": "首页",
+      "href": "#/"
+    },
+    {
+      "text": "MV",
+      "href": "#/mv-list"
+    },
+    {
+      "text": "排行榜",
+      "href": "#/charts"
+    },
+    {
+      "text": "歌手",
+      "href": "#/artists"
+    },
+    {
+      "text": "新碟上架",
+      "href": "#/new-albums"
+    },
+    {
+      "text": "搜索",
+      "href": "#/search"
+    },
+    {
+      "text": "我喜欢的",
+      "href": "#/likes"
+    },
+    {
+      "text": "最近播放",
+      "href": "#/recent"
+    },
+    {
+      "text": "下载列表",
+      "href": "#/downloads"
+    },
+    {
+      "text": "本地音乐",
+      "href": "#/local-music"
+    },
+    {
+      "text": "设置",
+      "href": "#/settings"
+    }
+  ],
+  "asides": [
+    "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置"
+  ],
+  "headings": [
+    "探索",
+    "我的音乐",
+    "系统"
+  ],
+  "testIds": [],
+  "audio": [
+    {
+      "src": "",
+      "paused": true,
+      "currentTime": 0,
+      "duration": null
+    }
+  ]
+}
+=== SEARCH ===
+{
+  "title": "页面不存在 - epocanvas sonic",
+  "url": "http://127.0.0.1:8791/search",
+  "bodyText": "EPOCANVAS SONIC 页面不存在 你访问的资源不存在或已被更新，请返回首页重新进入。 返回首页",
+  "inputs": [],
+  "buttons": [],
+  "links": [
+    {
+      "text": "返回首页",
+      "href": "/"
+    }
+  ],
+  "asides": [],
+  "headings": [
+    "页面不存在"
+  ],
+  "testIds": [],
+  "audio": []
+}
+=== SETTINGS ===
+{
+  "title": "页面不存在 - epocanvas sonic",
+  "url": "http://127.0.0.1:8791/settings",
+  "bodyText": "EPOCANVAS SONIC 页面不存在 你访问的资源不存在或已被更新，请返回首页重新进入。 返回首页",
+  "inputs": [],
+  "buttons": [],
+  "links": [
+    {
+      "text": "返回首页",
+      "href": "/"
+    }
+  ],
+  "asides": [],
+  "headings": [
+    "页面不存在"
+  ],
+  "testIds": [],
+  "audio": []
+}

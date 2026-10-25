@@ -1,5 +1,5 @@
 /**
- * Sonic Karaoke Syllable-Level Alignment & Highlight Engine
+ * epocanvas sonic Karaoke Syllable-Level Alignment & Highlight Engine
  * 继承原本的毫秒级语言感知分词、声学权重分配、间奏隔离保护与 60fps 显式切片逐字追随算法
  */
 

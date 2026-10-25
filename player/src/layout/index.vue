@@ -117,7 +117,7 @@ const onRouteLeave = (el: Element, done: () => void) => {
       </transition>
     </div>
 
-    <!-- Sonic 风格氛围光晕流光层 (Ambient Glowing Drift Blobs) -->
+    <!-- epocanvas sonic 风格氛围光晕流光层 (Ambient Glowing Drift Blobs) -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
       <div class="absolute -top-[15%] -left-[10%] size-[65vmax] rounded-full blur-[110px] animate-drift-a opacity-35 dark:opacity-40" style="background: #2563eb;"></div>
       <div class="absolute -bottom-[20%] -right-[15%] size-[60vmax] rounded-full blur-[120px] animate-drift-b opacity-30 dark:opacity-35" style="background: #38bdf8;"></div>

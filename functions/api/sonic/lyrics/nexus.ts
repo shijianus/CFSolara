@@ -1,6 +1,6 @@
-// Sonic Gateway — Nexus Lyrics Aggregation Endpoint
+// epocanvas sonic Gateway — Nexus Lyrics Aggregation Endpoint
 // GET /api/sonic/lyrics/nexus
-// Brand: Sonic (声波 / Sonic Lyrics Nexus)
+// Brand: epocanvas sonic (声波 / epocanvas sonic Lyrics Nexus)
 
 import type { AppEnv } from '../../../_lib/types';
 import type { SonicLyricsResponse } from '../../../_lib/sonic/types';
@@ -136,7 +136,7 @@ export async function handleNexusLyricsRequest(
       ),
     });
   } catch (err: any) {
-    console.error('[Sonic Nexus Lyrics Error]', err);
+    console.error('[epocanvas sonic Nexus Lyrics Error]', err);
     return sonicError('INTERNAL_ERROR', sanitizeErrorForClient(err, 'Failed to resolve nexus lyrics'), 502, {
       latencyMs: Date.now() - startTime,
       provider: 'nexus',

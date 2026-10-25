@@ -1,0 +1,72 @@
+ M .env.example
+ M .gitignore
+ M API.md
+ M README.md
+ M functions/_lib/auth.ts
+ M functions/_lib/secrets.ts
+ M functions/_lib/sonic-providers.ts
+ M functions/_lib/sonic-types.ts
+ M functions/_lib/sonic/cache.ts
+ M functions/_lib/sonic/config.ts
+ M functions/_lib/sonic/crypto.ts
+ M functions/_lib/sonic/hash.ts
+ M functions/_lib/sonic/index.ts
+ M functions/_lib/sonic/local-engine.ts
+ M functions/_lib/sonic/native-protocols.ts
+ M functions/_lib/sonic/net-guard.ts
+ M functions/_lib/sonic/nexus-lyrics.ts
+ M functions/_lib/sonic/nexus-search.ts
+ M functions/_lib/sonic/providers/adapter.ts
+ M functions/_lib/sonic/route-helpers.ts
+ M functions/_lib/sonic/security.ts
+ M functions/_lib/sonic/types.ts
+ M functions/_lib/sonic/upstream.ts
+ M functions/_lib/sonic/utils.ts
+ M functions/_lib/types.ts
+ M functions/api/auth/callback.ts
+ M functions/api/auth/key.ts
+ M functions/api/auth/login.ts
+ M functions/api/music/lyric.ts
+ M functions/api/music/random.ts
+ M functions/api/music/search.ts
+ M functions/api/music/stream.ts
+ M functions/api/sonic/engine/health.ts
+ M functions/api/sonic/forward.ts
+ M functions/api/sonic/lyrics/index.ts
+ M functions/api/sonic/lyrics/lyriva.ts
+ M functions/api/sonic/lyrics/nexus.ts
+ M functions/api/sonic/lyrics/sync.ts
+ M functions/api/sonic/resolve/stream.ts
+ M index.html
+ M js/index.js
+ M player/public/logo.svg
+ M player/src/components/Search/SearchSongs.vue
+ M player/src/composables/useLyrics.ts
+ M player/src/layout/index.vue
+ M player/src/pages/mobile/search.vue
+ M player/src/utils/imageUrl.ts
+ M player/src/utils/lyricsWordSync.ts
+ M scripts/brand-audit.mjs
+ M server/index.ts
+?? reports/brand-keyname/evidence/api/
+?? reports/brand-keyname/evidence/browser/browser-compare-summary.txt
+?? reports/brand-keyname/evidence/browser/browser-pre-vs-post.json
+?? reports/brand-keyname/evidence/browser/compare.mjs
+?? reports/brand-keyname/evidence/browser/final-browser-compare-summary.txt
+?? reports/brand-keyname/evidence/browser/final-journey-post.log
+?? reports/brand-keyname/evidence/browser/final-legacy-post.log
+?? reports/brand-keyname/evidence/browser/journey-post.log
+?? reports/brand-keyname/evidence/browser/journey-pre.log
+?? reports/brand-keyname/evidence/browser/journey.mjs
+?? reports/brand-keyname/evidence/browser/legacy-post.log
+?? reports/brand-keyname/evidence/browser/legacy-pre.log
+?? reports/brand-keyname/evidence/browser/legacy-static.mjs
+?? reports/brand-keyname/evidence/browser/legacy/
+?? reports/brand-keyname/evidence/browser/post/
+?? reports/brand-keyname/evidence/browser/pre/
+?? reports/brand-keyname/evidence/browser/probe-pre.txt
+?? reports/brand-keyname/evidence/browser/probe.mjs
+?? reports/brand-keyname/evidence/post/
+?? reports/brand-keyname/evidence/pre/
+?? reports/brand-keyname/final-branding-report.md
+?? reports/security-audit-2026-10-25/

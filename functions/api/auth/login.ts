@@ -45,13 +45,13 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     return new Response(null, { status: 302, headers });
   } catch (error) {
     if (error instanceof AuthConfigError) {
-      console.error(`[Sonic Auth] login unavailable (${error.code})`);
+      console.error(`[epocanvas sonic Auth] login unavailable (${error.code})`);
       return jsonResponse(
         { brand: 'Sonic', error: { code: 'AUTH_UNAVAILABLE', message: 'Authentication service is not configured' } },
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
-    console.error('[Sonic Auth] login failed');
+    console.error('[epocanvas sonic Auth] login failed');
     return jsonResponse(
       { brand: 'Sonic', error: { code: 'AUTH_UNAVAILABLE', message: 'Authentication service is unavailable' } },
       { status: 503, headers: { 'Cache-Control': 'no-store' } },

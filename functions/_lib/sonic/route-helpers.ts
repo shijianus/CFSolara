@@ -1,4 +1,4 @@
-// Sonic Gateway — Route Helpers for Pages Functions & Linux Local Engine
+// epocanvas sonic Gateway — Route Helpers for Pages Functions & Linux Local Engine
 // Unified HTTP handling, engine auth, rate-limiting, `sonic:` multi-tier caching, and graceful degradation
 
 import type { SonicQueryParams, SonicMeta, SonicErrorResponse } from './types';

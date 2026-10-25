@@ -1,5 +1,5 @@
 // GET /api/sonic/lyrics/sync
-// Sonic Gateway — High-Precision Synchronized Lyrics Endpoint for Blogs & External Widgets
+// epocanvas sonic Gateway — High-Precision Synchronized Lyrics Endpoint for Blogs & External Widgets
 // Supports format: 'sonic' (default), 'lrc', 'ttml', 'json'
 
 import type { SonicLyricsResponse } from '../../../_lib/sonic/types';

@@ -1,4 +1,4 @@
-// Sonic Local Engine — Authenticated Health & Diagnostics Endpoint
+// epocanvas sonic Local Engine — Authenticated Health & Diagnostics Endpoint
 // GET /api/sonic/engine/health
 // Protected by mandatory `X-Sonic-Engine-Key` (rejects anonymous requests with 401; never exposes secrets/cookies)
 

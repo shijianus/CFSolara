@@ -1,0 +1,84 @@
+
+> sonic@2.2.0 test:gateway
+> jiti scripts/test-sonic-gateway.mjs
+
+=== Running Sonic Gateway Test Suite ===
+
+1. Testing GET /api/sonic/lyrics/nexus (with platformId)
+[epocanvas sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic (got Sonic)
+  ✓ Data object exists
+  ✓ Meta object exists
+  ✓ Meta.attempts is an array
+  ✓ LatencyMs is number (2377ms)
+  ✓ Netease attempt recorded
+
+2. Testing GET /api/sonic/lyrics/nexus (title only)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta.attempts recorded (1 attempts)
+
+3. Testing GET /api/sonic/lyrics/apple & ytmusic (disabled without keys)
+  ✓ Apple returns 501 Not Implemented (got 501)
+  ✓ Apple error code is PROVIDER_DISABLED
+  ✓ Brand is Sonic
+  ✓ YouTube Music returns 501 Not Implemented (got 501)
+  ✓ YouTube Music error code is PROVIDER_DISABLED
+
+4. Testing GET /api/sonic/lyrics/netease
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Provider is netease
+  ✓ Attempts logged
+
+5. Testing GET /api/sonic/search/nexus
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Tracks array returned (7 tracks)
+  ✓ Meta.attempts logged (3 attempts)
+  ✓ Track has title: "海阔天空"
+  ✓ Track has artist: "Beyond"
+  ✓ Track has platform: "sonic"
+  ✓ Track has platformId: "28875146"
+  ✓ Track has sources[]: [{"platform":"netease","platformId":"1357375695","duration":240},{"platform":"netease","platformId":"1357374736","duration":240},{"platform":"netease","platformId":"347230","duration":326},{"platform":"netease","platformId":"28875146","duration":369},{"platform":"qq","platformId":"001yS0N33yPm1B","duration":324},{"platform":"kugou","platformId":"c41e80a18d1448fa47086372999c7f43","duration":324},{"platform":"kugou","platformId":"e5c40a31c3c16ba461f650035734c123","duration":239}]
+
+6. Testing GET /api/sonic/search/gdstudio (disabled by default)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta provider is gdstudio
+  ✓ GDStudio is disabled by default (got true)
+  ✓ Disabled GDStudio returns 0 tracks
+
+7. Testing Upstream Timeout Isolation (1ms timeout)
+  ✓ Search returns 200 despite timeouts (got 200)
+  ✓ Brand is Sonic
+  ✓ Attempts logged with timeout errors
+
+8. Testing GET /api/sonic/search/qq (u.y.qq.com modern API)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ QQ returned 3 tracks
+
+9. Testing Native NetEase/Kugou Search & meta.attempts Provenance
+  ✓ NetEase Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Native NetEase returned 3 tracks
+  ✓ NetEase did not call gdstudio
+  ✓ Nexus search excludes gdstudio by default
+  ✓ Every attempt records truthful source & via
+
+10. Testing GET /api/sonic/search/kuwo (registered provider)
+  ✓ Status is 200, NOT 404 (got 200)
+  ✓ Brand is Sonic
+
+11. Testing Random String Lyrics (Must NOT return false-positive song)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Level is 'none' for gibberish (got 'none')
+  ✓ No false-positive lyrics returned (length=0)
+
+========================================
+Test Results: 51 passed, 0 failed
+========================================
+

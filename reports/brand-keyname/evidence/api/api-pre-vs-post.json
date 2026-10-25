@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-10-25T13:44:02.078Z",
+  "checks": {
+    "apiIndexDeepEqualIgnoringOrigin": true,
+    "apiIndexBranding": {
+      "parent": "epocanvas",
+      "product": "sonic",
+      "full": "epocanvas sonic",
+      "wireBrand": "Sonic"
+    },
+    "engineHealthDeepEqual": true,
+    "optionsStatusEqual": true,
+    "optionsCorsEqual": true,
+    "musicSearchCoreEqual": {
+      "ok": true,
+      "source": true,
+      "query": true,
+      "count": true,
+      "tracks": true,
+      "first": true
+    },
+    "searchNexusCoreEqual": true
+  },
+  "searchNexus": {
+    "pre": {
+      "brand": "Sonic",
+      "dataKeys": [
+        "count",
+        "page",
+        "query",
+        "total",
+        "tracks"
+      ],
+      "metaKeys": [
+        "attempts",
+        "cacheLevel",
+        "cached",
+        "degraded",
+        "latencyMs",
+        "provider"
+      ],
+      "trackKeys": [
+        "album",
+        "artist",
+        "artistPic",
+        "cover",
+        "coverUrl",
+        "duration",
+        "id",
+        "lyricId",
+        "name",
+        "platform",
+        "platformId",
+        "qualities",
+        "qualityBadge",
+        "sha",
+        "source",
+        "sources",
+        "streamUrl",
+        "title",
+        "urlId"
+      ],
+      "firstTitle": "晴天",
+      "firstArtist": "周杰伦",
+      "firstPlatform": "sonic",
+      "countPositive": true
+    },
+    "post": {
+      "brand": "Sonic",
+      "dataKeys": [
+        "count",
+        "page",
+        "query",
+        "total",
+        "tracks"
+      ],
+      "metaKeys": [
+        "attempts",
+        "cacheLevel",
+        "cached",
+        "degraded",
+        "latencyMs",
+        "provider"
+      ],
+      "trackKeys": [
+        "album",
+        "artist",
+        "artistPic",
+        "cover",
+        "coverUrl",
+        "duration",
+        "id",
+        "lyricId",
+        "name",
+        "platform",
+        "platformId",
+        "qualities",
+        "qualityBadge",
+        "sha",
+        "source",
+        "sources",
+        "streamUrl",
+        "title",
+        "urlId"
+      ],
+      "firstTitle": "晴天",
+      "firstArtist": "周杰伦",
+      "firstPlatform": "sonic",
+      "countPositive": true
+    },
+    "postAttempts": [
+      {
+        "provider": "netease",
+        "ok": true,
+        "ms": 659
+      },
+      {
+        "provider": "kugou",
+        "ok": true,
+        "ms": 3593
+      },
+      {
+        "provider": "qq",
+        "ok": true,
+        "ms": 4015
+      }
+    ]
+  },
+  "statuses": {
+    "apiIndex": {
+      "pre": "HTTP/1.1 200 OK",
+      "post": "HTTP/1.1 200 OK"
+    },
+    "options": {
+      "pre": "HTTP/1.1 204 No Content",
+      "post": "HTTP/1.1 204 No Content"
+    },
+    "engineHealth": {
+      "pre": "HTTP/1.1 503 Service Unavailable",
+      "post": "HTTP/1.1 503 Service Unavailable"
+    },
+    "musicSearch": {
+      "pre": "HTTP/1.1 200 OK",
+      "post": "HTTP/1.1 200 OK"
+    },
+    "searchNexus": {
+      "pre": "HTTP/1.1 200 OK",
+      "post": "HTTP/1.1 200 OK"
+    }
+  },
+  "pass": true
+}

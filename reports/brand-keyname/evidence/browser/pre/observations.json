@@ -1,0 +1,231 @@
+{
+  "startedAt": "2026-10-25T12:34:19.103Z",
+  "base": "http://127.0.0.1:8791",
+  "out": "pre",
+  "steps": [
+    {
+      "name": "desktop-home-clean",
+      "ok": true,
+      "ms": 20428,
+      "title": "首页 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/",
+      "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 选择一首歌开始",
+      "brandText": "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "songItems": [],
+      "audio": [
+        {
+          "src": "",
+          "paused": true,
+          "currentTime": 0,
+          "duration": null,
+          "readyState": 0
+        }
+      ],
+      "localStorageKeys": [
+        "audio"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "desktop-home.png"
+    },
+    {
+      "name": "desktop-search-by-typing",
+      "ok": true,
+      "ms": 3406,
+      "title": "搜索：周杰伦 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/search?q=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+      "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 搜索 \"周杰伦\" 共找到 52 条结果 单曲 歌单 MV 播放全部 1 / 2 # 歌曲 歌手 专辑 时长 操作 选择一首歌开始",
+      "brandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "songItems": [
+        "1布布拉格广场蔡依林 / 周杰伦蔡依林 / 周杰伦看我72变4:55",
+        "2刀刀马旦李玟 / 周杰伦李玟 / 周杰伦Promise3:12",
+        "3晴晴天周杰伦周杰伦叶惠美4:29",
+        "4发发如雪周杰伦周杰伦十一月的萧邦4:59",
+        "5骑骑士精神蔡依林 / 周杰伦蔡依林 / 周杰伦看我72变4:18",
+        "6搁搁浅周杰伦周杰伦七里香4:00",
+        "7稻稻香周杰伦周杰伦魔杰座3:43",
+        "8海海盗蔡依林 / 周杰伦蔡依林 / 周杰伦城堡4:37"
+      ],
+      "audio": [
+        {
+          "src": "",
+          "paused": true,
+          "currentTime": 0,
+          "duration": null,
+          "readyState": 0
+        }
+      ],
+      "localStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "desktop-search-results.png"
+    },
+    {
+      "name": "desktop-play-first-result",
+      "ok": true,
+      "ms": 6629,
+      "title": "搜索：周杰伦 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/search?q=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+      "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 搜索 \"周杰伦\" 共找到 52 条结果 单曲 歌单 MV 播放全部 1 / 2 # 歌曲 歌手 专辑 时长 操作 布拉格广场 蔡依林 / 周杰伦 看我72变 4:55 2 刀马旦 李玟 / 周杰伦 Promise 3:12 3 晴天 周杰伦 叶惠美 4:29 4 发如雪 周杰伦 十一月的萧邦 4:59 5 骑士精神 蔡依林 / 周杰伦 看我72变 4:18 6 搁浅 周杰伦 七里香 4:00 7 稻香 周杰伦 魔杰座 3:43 8 海盗 蔡依林 / 周杰伦 城堡 4:37 9 七 七里香 周杰伦 七里香 4:59 10 青 青花瓷 周杰伦 我很忙 3:59 11 告 告白气球 周杰伦 周杰伦的床边故事 3:35 12 一 一路向北 周杰伦 J III MP3 Player 4:54 13 夜 夜曲 周杰伦 十一月的萧邦 3:46 14 枫 枫 周杰伦 十一月的萧邦 4:35 15 屋 屋顶 周杰伦 / 温岚 / 吴宗宪 男女情歌对唱冠军全记录 5:19 16 蒲 蒲公英的约定 周杰伦 我很忙 4:07 17 刀 刀马旦 周杰伦 / 李玟 男女情歌对唱冠军全记录 3:12 18 红 红尘客栈 周杰伦 十二新作 4:34 19 兰 兰亭序 周杰伦 魔杰座 4:13 20 我 我落泪情绪零碎 周杰伦 跨时代 4:18 21 花 花海 周杰伦 魔杰座 4:24 22 说 说好的幸福呢 周杰伦 魔杰座 4:16 23 退 退后 周杰伦 依然范特西 4:21 24 明 明明就 周杰伦 十二新作 4:20 25 我 我不配 周杰伦 我很忙 4:48 26 半 半岛铁盒 周杰伦 八度空间 5:17 布拉格广场 蔡依林 / 周杰伦 琴键上 透着光 MP3 123k 00:00 03:22",
+      "brandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "songItems": [
+        "布拉格广场 蔡依林 / 周杰伦 看我72变 4:55",
+        "2 刀马旦 李玟 / 周杰伦 Promise 3:12",
+        "3 晴天 周杰伦 叶惠美 4:29",
+        "4 发如雪 周杰伦 十一月的萧邦 4:59",
+        "5 骑士精神 蔡依林 / 周杰伦 看我72变 4:18",
+        "6 搁浅 周杰伦 七里香 4:00",
+        "7 稻香 周杰伦 魔杰座 3:43",
+        "8 海盗 蔡依林 / 周杰伦 城堡 4:37"
+      ],
+      "audio": [
+        {
+          "src": "http://127.0.0.1:8791/api/music/stream?id=29393641&source=netease&title=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%B9%BF%E5%9C%BA&artist=%E8%94%A1%E4%BE%9D%E6%9E%97%20%2F%20%E5%91%A8%E6%9D%B0%E4%BC%A6",
+          "paused": false,
+          "currentTime": 0.501059,
+          "duration": 202.919184,
+          "readyState": 4
+        }
+      ],
+      "localStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "desktop-playing.png"
+    },
+    {
+      "name": "desktop-settings",
+      "ok": true,
+      "ms": 3467,
+      "title": "系统设置 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/settings",
+      "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 设置 个性化你的音乐体验 主题模式 选择界面主题 跟随系统 界面语言 选择界面语言 中文 背景类型 选择背景效果 高级 音质 选择播放音质 臻品母带 底部播放器歌词 底部歌词显示设置 显示/隐藏 显示 显示语言（最多选择两种） 原文 译文 罗马音 音频可视化 音频频谱可视化设置 底部播放器 显示 播放器抽屉 显示 可视化模式 柱状图 性能优先模式 关闭毛玻璃高斯模糊与背景流光特效，降低低配设备 CPU/GPU 负载 当前状态： 标准模式（全特效玻璃质感） 隐私与本地数据 以下数据只保存在你的浏览器中，不会上传到服务器。 浏览器本地存储 主题、语言、搜索历史、收藏、播放设置与最近播放记录。 浏览器数据库（IndexedDB） 手动导入的本地音乐文件与已下载的离线歌曲。 清除全部本地数据 Ultimate 设置 背景 颜色 参数 尺寸 混合模式 hard-light 参数与颜色实时应用到背景。 重置默认 预览 #07101f · #0f0c1b hard-light / 80% 布拉格广场 蔡依林 / 周杰伦 琴键上 透着光 MP3 123k 00:06 03:22",
+      "brandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "songItems": [],
+      "audio": [
+        {
+          "src": "http://127.0.0.1:8791/api/music/stream?id=29393641&source=netease&title=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%B9%BF%E5%9C%BA&artist=%E8%94%A1%E4%BE%9D%E6%9E%97%20%2F%20%E5%91%A8%E6%9D%B0%E4%BC%A6",
+          "paused": false,
+          "currentTime": 6.661224,
+          "duration": 202.919184,
+          "readyState": 4
+        }
+      ],
+      "localStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "desktop-settings.png"
+    },
+    {
+      "name": "desktop-404",
+      "ok": true,
+      "ms": 2089,
+      "title": "404 页面未找到 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/definitely-not-a-route",
+      "bodyText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 404 页面走丢了，音符飘散在宇宙中 您访问的链接可能已失效、不存在或已被迁移。您可以返回首页探索更多音乐，或使用搜索查找曲目。 返回首页 返回上一页 去搜索 布拉格广场 蔡依林 / 周杰伦 琴键上 透着光 MP3 123k 00:08 03:22",
+      "brandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "songItems": [],
+      "audio": [
+        {
+          "src": "http://127.0.0.1:8791/api/music/stream?id=29393641&source=netease&title=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%B9%BF%E5%9C%BA&artist=%E8%94%A1%E4%BE%9D%E6%9E%97%20%2F%20%E5%91%A8%E6%9D%B0%E4%BC%A6",
+          "paused": false,
+          "currentTime": 9.12254,
+          "duration": 202.919184,
+          "readyState": 4
+        }
+      ],
+      "localStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "desktop-404.png"
+    },
+    {
+      "name": "mobile-home",
+      "ok": true,
+      "ms": 3246,
+      "title": "首页 - epocanvas sonic",
+      "url": "http://127.0.0.1:8791/#/",
+      "bodyText": "epocanvas sonic 跟随系统 推荐歌单 热门歌手 新歌速递 推荐MV 布拉格广场 蔡依林 / 周杰伦 琴键上 透着光 00:12 03:22 首页 搜索 最近播放 设置",
+      "brandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+      "songItems": [],
+      "audio": [
+        {
+          "src": "http://127.0.0.1:8791/api/music/stream?id=29393641&source=netease&title=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%B9%BF%E5%9C%BA&artist=%E8%94%A1%E4%BE%9D%E6%9E%97%20%2F%20%E5%91%A8%E6%9D%B0%E4%BC%A6",
+          "paused": false,
+          "currentTime": 13.092963,
+          "duration": 202.919184,
+          "readyState": 4
+        }
+      ],
+      "localStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "sessionStorageKeys": [],
+      "dbNames": null,
+      "screenshot": "mobile-home.png"
+    },
+    {
+      "name": "mobile-search-and-play",
+      "ok": true,
+      "ms": 3614,
+      "before": {
+        "title": "搜索：周杰伦 - epocanvas sonic",
+        "url": "http://127.0.0.1:8791/#/search?q=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+        "bodyText": "epocanvas sonic 跟随系统 搜索 单曲 歌单 MV 共 38 条结果 播放全部 1 晴天 SQ 无损 周杰伦 - 《叶惠美》 4:29 2 发如雪 SQ 无损 周杰伦 - 《十一月的萧邦》 4:59 3 布拉格广场 SQ 无损 蔡依林 / 周杰伦 - 《看我72变》 4:55 4 搁浅 SQ 无损 周杰伦 - 《七里香》 4:00 5 稻香 SQ 无损 周杰伦 - 《魔杰座》 3:43 6 C 七里香 SQ 无损 周杰伦 - 《七里香》 4:59 7 C 青花瓷 SQ 无损 周杰伦 - 《我很忙》 3:59 8 C 告白气球 SQ 无损 周杰伦 - 《周杰伦的床边故事》 3:35 9 C 一路向北 SQ 无损 周杰伦 - 《J III MP3 Player》 4:54 10 C 夜曲 SQ 无损 周杰伦 - 《十一月的萧邦》 3:46 11 C 枫 SQ 无损 周杰伦 - 《十一月的萧邦》 4:35 12 C 屋顶 SQ 无损 周杰伦 / 温岚 / 吴宗宪 - 《男女情歌对唱冠军全记录》 5:19 13 C 蒲公英的约定 SQ 无损 周杰伦 - 《我很忙》 4:07 14 C 红尘客栈 SQ 无损 周杰伦 - 《十二新作》 4:34 15 C 兰亭序 SQ 无损 周杰伦 - 《魔杰座》 4:13 16 C 花海 SQ 无损 周杰伦 - 《魔杰座》 4:24 17 C 说好的幸福呢 SQ 无损 周杰伦 - 《魔杰座》 4:16 18 C 明明就 SQ 无损 周杰伦 - 《十二新作》 4:20 19 C 刀马旦 SQ 无损 李玟 / 周杰伦 - 《Promise》 3:12 20 C 想你就写信 (Live) SQ 无损 周杰伦 / 李硕 / 张鑫 - 《中国新歌声第二季 第13期》 3:59 21 C 恒星不忘 Forever Forever SQ 无损 周杰伦、言承旭、吴建豪、周渝民、五月天 阿信 - 《今夜让我带你高飞远走》 4:45 22 C 骑士精神 SQ 无损 蔡依林 / 周杰伦 - 《看我72变》 4:18 23 C 海盗 SQ 无损 蔡依林 / 周杰伦 - 《城堡》 4:37 24 C 我落泪情绪零碎 SQ 无损 周杰伦 - 《跨时代》 4:18 25 C 退后 SQ 无损 周杰伦 - 《依然范特西》 4:21 1 2 共 462 条结果 144 周杰伦-Jay 『sonic云精选』 34 周杰伦全免费听 32 周杰伦歌曲 | Jay经典 是青春的回忆 17 周杰伦(DJ版) 周 85 周杰伦歌曲钢琴纯音乐（好听版） 薛 144 薛之谦/周杰伦/林俊杰 《 160 《再次寻找周杰伦》-刘瑞琦 周 75 周杰伦钢琴曲纯音乐 「 73 「翻唱杰作·周杰伦经典重塑」 周 192 周杰伦写给别人的歌 稻 1 稻香（周杰伦） J 280 jay chou / 周杰伦 纯音乐伴奏集（精选版） 1 2 3 4 5 共 12 条结果 我的爱 孙燕姿 MV Levels Avicii MV T There For You (cover by J.Fla) J.Fla MV 西 西安人的歌 程渤智 MV 流 流离的时间与流离的你 傻子与白痴 MV 年 年轮说 杨丞琳 MV Y Your Man Josh Turner MV 独 独家专访 NINEONE#：说唱门槛低？不存在的！ NINEONE# MV G Ghost Au/Ra MV 一 一次就好 杨宗纬 MV 黑 黑人抬棺 白冰草莓粥 MV カ カサネテク 中村千尋 MV 布拉格广场 蔡依林 / 周杰伦 琴键上 透着光 00:14 03:22 首页 搜索 最近播放 设置",
+        "brandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+        "songItems": [],
+        "audio": [
+          {
+            "src": "http://127.0.0.1:8791/api/music/stream?id=29393641&source=netease&title=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%B9%BF%E5%9C%BA&artist=%E8%94%A1%E4%BE%9D%E6%9E%97%20%2F%20%E5%91%A8%E6%9D%B0%E4%BC%A6",
+            "paused": false,
+            "currentTime": 14.532146,
+            "duration": 202.919184,
+            "readyState": 4
+          }
+        ],
+        "localStorageKeys": [
+          "audio",
+          "global"
+        ],
+        "sessionStorageKeys": [],
+        "dbNames": null
+      },
+      "after": {
+        "title": "搜索：周杰伦 - epocanvas sonic",
+        "url": "http://127.0.0.1:8791/#/search?q=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+        "bodyText": "epocanvas sonic 跟随系统 搜索 单曲 歌单 MV 共 38 条结果 播放全部 晴天 SQ 无损 周杰伦 - 《叶惠美》 4:29 2 发如雪 SQ 无损 周杰伦 - 《十一月的萧邦》 4:59 3 布拉格广场 SQ 无损 蔡依林 / 周杰伦 - 《看我72变》 4:55 4 搁浅 SQ 无损 周杰伦 - 《七里香》 4:00 5 稻香 SQ 无损 周杰伦 - 《魔杰座》 3:43 6 C 七里香 SQ 无损 周杰伦 - 《七里香》 4:59 7 C 青花瓷 SQ 无损 周杰伦 - 《我很忙》 3:59 8 C 告白气球 SQ 无损 周杰伦 - 《周杰伦的床边故事》 3:35 9 C 一路向北 SQ 无损 周杰伦 - 《J III MP3 Player》 4:54 10 C 夜曲 SQ 无损 周杰伦 - 《十一月的萧邦》 3:46 11 C 枫 SQ 无损 周杰伦 - 《十一月的萧邦》 4:35 12 C 屋顶 SQ 无损 周杰伦 / 温岚 / 吴宗宪 - 《男女情歌对唱冠军全记录》 5:19 13 C 蒲公英的约定 SQ 无损 周杰伦 - 《我很忙》 4:07 14 C 红尘客栈 SQ 无损 周杰伦 - 《十二新作》 4:34 15 C 兰亭序 SQ 无损 周杰伦 - 《魔杰座》 4:13 16 C 花海 SQ 无损 周杰伦 - 《魔杰座》 4:24 17 C 说好的幸福呢 SQ 无损 周杰伦 - 《魔杰座》 4:16 18 C 明明就 SQ 无损 周杰伦 - 《十二新作》 4:20 19 C 刀马旦 SQ 无损 李玟 / 周杰伦 - 《Promise》 3:12 20 C 想你就写信 (Live) SQ 无损 周杰伦 / 李硕 / 张鑫 - 《中国新歌声第二季 第13期》 3:59 21 C 恒星不忘 Forever Forever SQ 无损 周杰伦、言承旭、吴建豪、周渝民、五月天 阿信 - 《今夜让我带你高飞远走》 4:45 22 C 骑士精神 SQ 无损 蔡依林 / 周杰伦 - 《看我72变》 4:18 23 C 海盗 SQ 无损 蔡依林 / 周杰伦 - 《城堡》 4:37 24 C 我落泪情绪零碎 SQ 无损 周杰伦 - 《跨时代》 4:18 25 C 退后 SQ 无损 周杰伦 - 《依然范特西》 4:21 1 2 共 462 条结果 144 周杰伦-Jay 『sonic云精选』 34 周杰伦全免费听 32 周杰伦歌曲 | Jay经典 是青春的回忆 17 周杰伦(DJ版) 周 85 周杰伦歌曲钢琴纯音乐（好听版） 薛 144 薛之谦/周杰伦/林俊杰 《 160 《再次寻找周杰伦》-刘瑞琦 周 75 周杰伦钢琴曲纯音乐 「 73 「翻唱杰作·周杰伦经典重塑」 周 192 周杰伦写给别人的歌 稻 1 稻香（周杰伦） J 280 jay chou / 周杰伦 纯音乐伴奏集（精选版） 1 2 3 4 5 共 12 条结果 我的爱 孙燕姿 MV Levels Avicii MV T There For You (cover by J.Fla) J.Fla MV 西 西安人的歌 程渤智 MV 流 流离的时间与流离的你 傻子与白痴 MV 年 年轮说 杨丞琳 MV Y Your Man Josh Turner MV 独 独家专访 NINEONE#：说唱门槛低？不存在的！ NINEONE# MV G Ghost Au/Ra MV 一 一次就好 杨宗纬 MV 黑 黑人抬棺 白冰草莓粥 MV カ カサネテク 中村千尋 MV 晴天 周杰伦 故事的小黄花 00:00 02:14 首页 搜索 最近播放 设置",
+        "brandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+        "songItems": [],
+        "audio": [
+          {
+            "src": "http://127.0.0.1:8791/api/music/stream?id=0039MnYb0qxYhV&source=qq&title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+            "paused": false,
+            "currentTime": 0.46756,
+            "duration": 134.048798,
+            "readyState": 4
+          }
+        ],
+        "localStorageKeys": [
+          "audio",
+          "global"
+        ],
+        "sessionStorageKeys": [],
+        "dbNames": null
+      },
+      "screenshot": "mobile-playing.png"
+    }
+  ],
+  "finishedAt": "2026-10-25T12:35:07.741Z"
+}

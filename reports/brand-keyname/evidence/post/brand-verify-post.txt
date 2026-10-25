@@ -1,0 +1,1 @@
+Brand verification PASSED: constants, metadata, locales, and display surfaces are consistent.

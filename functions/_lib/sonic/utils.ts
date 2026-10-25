@@ -1,4 +1,4 @@
-// Sonic Gateway — Shared Utilities
+// epocanvas sonic Gateway — Shared Utilities
 
 import type { LyricLine } from '../types';
 import type { SonicSyncedLine, SonicWord, SonicLyricLevel } from './types';

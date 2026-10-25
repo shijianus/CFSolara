@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Content-Length: 14987
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: *
+Cache-Control: public, max-age=3600, s-maxage=3600
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Api-Key, X-Sonic-Engine-Key, Range
+Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+Access-Control-Expose-Headers: Content-Range, Content-Length, Accept-Ranges, X-Sonic-Cache, X-Sonic-Provider, X-Sonic-Degraded, X-Sonic-Circuit, X-Sonic-Stream-Trial, X-RateLimit-Limit, X-RateLimit-Remaining
+x-sonic-cache: MISS
+x-sonic-provider: nexus
+

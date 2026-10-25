@@ -1,4 +1,4 @@
-// Sonic Gateway — Shared Native Protocol Engine (NetEase / QQ / Kugou / Kuwo)
+// epocanvas sonic Gateway — Shared Native Protocol Engine (NetEase / QQ / Kugou / Kuwo)
 // Shared 100% between Linux Local Engine (`server/`) and Cloudflare Pages Functions (`functions/`).
 // Zero third-party aggregation API reliance by default; VIP paywall circumvention disabled by default.
 

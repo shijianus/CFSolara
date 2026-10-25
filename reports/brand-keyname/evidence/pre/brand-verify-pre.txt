@@ -1,0 +1,9 @@
+
+Brand verification FAILED:
+  - audit-recheck.md contains old brand text but is not in the functional/legacy allowlist
+  - audit-report.md contains old brand text but is not in the functional/legacy allowlist
+  - fix-report.md contains old brand text but is not in the functional/legacy allowlist
+  - functions/_lib/secrets.ts contains old brand text but is not in the functional/legacy allowlist
+  - functions/_lib/sonic/hash.ts contains old brand text but is not in the functional/legacy allowlist
+  - functions/_lib/sonic/net-guard.ts contains old brand text but is not in the functional/legacy allowlist
+  - functions/api/auth/login.ts contains old brand text but is not in the functional/legacy allowlist

@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-10-25T13:42:58.303Z",
+  "base": "http://127.0.0.1:8792",
+  "out": "post",
+  "home": {
+    "title": "epocanvas sonic",
+    "url": "http://127.0.0.1:8792/",
+    "bodyText": "epocanvas sonic © epocanvas · sonic 多源聚合音乐云平台 | 接入 Epomail OAuth 真人验证与网关 API Epomail 登录 sonic 全网聚合 搜索 选择一首歌曲开始播放 未知艺术家 播放列表 00:00 00:00 极高音质 探索雷达",
+    "epoMailCount": 0,
+    "epomailCount": 2,
+    "legacyBrandCount": 0,
+    "modalText": " epocanvas sonic 开发者专案连结 (sonic Pass) × Epomail 用户 user@epocanvas.com 您已通过 Epomail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API： 复制 Key 快速接入端点 (epocanvas sonic 网关)： GET /api/sonic/search/nexus?q={关键词} GET /api/sonic/lyrics/nexus?title={歌名}&artist={歌手} GET /api/music/stream?id={歌曲ID} 退出登录 关闭 ",
+    "modalDisplay": "none",
+    "localStorageKeys": [
+      "currentPlaybackTime",
+      "currentPlaylist",
+      "currentSong",
+      "currentTrackIndex",
+      "playMode",
+      "playbackQuality",
+      "playerVolume",
+      "playlistSongs"
+    ],
+    "screenshot": "legacy-home.png"
+  },
+  "modal": {
+    "title": "epocanvas sonic",
+    "url": "http://127.0.0.1:8792/",
+    "bodyText": "epocanvas sonic © epocanvas · sonic 多源聚合音乐云平台 | 接入 Epomail OAuth 真人验证与网关 API Brand Check epocanvas sonic 开发者专案连结 (sonic Pass) × Brand Check brand-check@epocanvas.com 您已通过 Epomail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API： 复制 Key 快速接入端点 (epocanvas sonic 网关)： GET /api/sonic/search/nexus?q={关键词} GET /api/sonic/lyrics/nexus?title={歌名}&artist={歌手} GET /api/music/stream?id={歌曲ID} 退出登录 关闭 sonic 全网聚合 搜索 选择一首歌曲开始播放 未知艺术家 播放列表 00:00 00:00 极高音质 探索雷达",
+    "epoMailCount": 0,
+    "epomailCount": 2,
+    "legacyBrandCount": 0,
+    "modalText": "epocanvas sonic 开发者专案连结 (sonic Pass) × Brand Check brand-check@epocanvas.com 您已通过 Epomail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API： 复制 Key 快速接入端点 (epocanvas sonic 网关)： GET /api/sonic/search/nexus?q={关键词} GET /api/sonic/lyrics/nexus?title={歌名}&artist={歌手} GET /api/music/stream?id={歌曲ID} 退出登录 关闭",
+    "modalDisplay": "flex",
+    "localStorageKeys": [
+      "currentPlaybackTime",
+      "currentPlaylist",
+      "currentSong",
+      "currentTrackIndex",
+      "playMode",
+      "playbackQuality",
+      "playerVolume",
+      "playlistSongs",
+      "sonic_epomail_session"
+    ],
+    "screenshot": "legacy-modal.png"
+  },
+  "finishedAt": "2026-10-25T13:42:58.307Z"
+}

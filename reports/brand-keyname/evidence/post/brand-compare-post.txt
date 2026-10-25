@@ -1,0 +1,98 @@
+
+Protected contract comparison FAILED:
+
+[api-sonic-route] public API route namespace
+  + added:   reports/brand-keyname/evidence/api/post/api-index.json (+2)
+  + added:   reports/brand-keyname/evidence/api/pre/api-index.json (+2)
+  + added:   reports/brand-keyname/evidence/browser/legacy/post/observations.json (+6)
+  + added:   reports/brand-keyname/evidence/browser/legacy/pre/observations.json (+6)
+
+[sonic-live-key] current API key prefix
+  + added:   reports/brand-keyname/evidence/browser/legacy-static.mjs (+1)
+
+[sonic-header] gateway request/response headers
+  + added:   reports/brand-keyname/evidence/api/post/api-index.json (+1)
+  + added:   reports/brand-keyname/evidence/api/pre/api-index.json (+1)
+
+[cfsolara-header] legacy auth header
+  + added:   reports/brand-keyname/evidence/api/post/api-index.json (+1)
+  + added:   reports/brand-keyname/evidence/api/pre/api-index.json (+1)
+
+[legacy-session-key] legacy auth session key
+  + added:   reports/brand-keyname/evidence/browser/legacy-static.mjs (+1)
+  + added:   reports/brand-keyname/evidence/browser/legacy/post/observations.json (+1)
+  + added:   reports/brand-keyname/evidence/browser/legacy/pre/observations.json (+1)
+
+[cfsolara-project] Cloudflare Pages project name
+  + added:   .env.example (+1)
+
+[quality-labels] quality badge/filter labels
+  + added:   reports/brand-keyname/evidence/api/pre/search-nexus.json (+16)
+
+[protected-file-hash] protected file changed: functions/_lib/auth.ts
+  - removed: cc832d3b185bdc0155c1313c7e69e35e8a50c8801e34e9a4c1640e0b36132a8e
+  + added:   da79ee58cdb2eb5c322d8b02f96d88e254e12787e3861e0792b35f7b6d13fe2c
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/config.ts
+  - removed: 01577827d325fe5b74e431e30328128489c8ba85c59732df61f12c34baa6808d
+  + added:   fc797eee70608b2fe43bbeecfd87888615d1840d230243f7743d36f1e8385fe2
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/index.ts
+  - removed: 8a210e8adfff457a03eb357626a3b2cd5d8528a2c904d14da6de6b5c61bb93bc
+  + added:   081c9ebcfe31c0ac70d29951f1fb79c28d62e1ef82e62f1a3c545e662236cc36
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/nexus-lyrics.ts
+  - removed: fe0677fd2d641b35a19da407a4e49ab63a4b0ba4facaf73f3d8c4c364f5f09bc
+  + added:   58568c8b4d69c8ad9ac3f8dd5ab6406b39e32aa3342b17b5d3650655f564e425
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/nexus-search.ts
+  - removed: ac235a21bc5a384944cdb99fd13c61e3fe258cf9ae948b88edb0d65e9d0ba4d5
+  + added:   39f6e5ce3cbb5c4f0e8f2f3e377683acdf646b431b9d59845e55ae67eeff3614
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/providers/adapter.ts
+  - removed: 4a60e977408aba946afb95976206869ad41c346c6b6bc9aba80fe355bc0deed6
+  + added:   160a73f1cbe6b126aaba63db8943d9a68f742de0678b86779c1cb25200407af6
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/route-helpers.ts
+  - removed: ed214e7654953bc04ecb8dac43e0215ebba59107a156ae4306cd5c77e8ddef38
+  + added:   c7b9a2f127673254b26366d246401a2ab645c37fb4a18e85874a20f444ca4218
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/types.ts
+  - removed: 1d9c90e8244910aea579ddbee67ac343025460823513f6ca486a2a2f80574207
+  + added:   82a55e23c505a5e3d29e0f6eaf8a74876a39412f49945b12c7412f0323dbf9fb
+
+[protected-file-hash] protected file changed: functions/_lib/sonic/utils.ts
+  - removed: a46d20410d1565f6c533c240af36c27730e99e6ebb5a4065332b023d835b2bd4
+  + added:   a5c8da8770bb169a8629f2e6b7389572102f565e707e09dcc7111e84003cfc0a
+
+[protected-file-hash] protected file changed: functions/_lib/types.ts
+  - removed: 5f8a4994563e555f4a569f65a6c35b9d6ca299c244a2a3b7988980684a462ba2
+  + added:   72d60704254be5d41454b44b14871e0aa8768ceff9d9b4297f1573be2cf3d354
+
+[protected-file-hash] protected file changed: functions/api/sonic/engine/health.ts
+  - removed: 48253c13efef1ad9ce05f01352fafb53ce0e516bf65a5d3d4d1df32a73f2750c
+  + added:   321463d95c69d53784702bf42d52a9c30c22523d27489630167073a2bbb16bb0
+
+[protected-file-hash] protected file changed: functions/api/sonic/forward.ts
+  - removed: 47586ee8de5230dca32b9361e323eb92249d799dd4400c9d997a0042ba6f0b7d
+  + added:   e482c2fad163b2c870a181911f91b659418b629d47d094dabe32da5cab6c7707
+
+[protected-file-hash] protected file changed: functions/api/sonic/lyrics/index.ts
+  - removed: 82011ddde34687eb881c9155e0a7c10336403032a45033f1f41d74f120cd3bbe
+  + added:   cac57f88171a78cdb772944e348db2e6f0bb118fc2eb8ce7f036f998a0802663
+
+[protected-file-hash] protected file changed: functions/api/sonic/lyrics/nexus.ts
+  - removed: dd1b9586b82b3d847c8d3515dece2f9c18e8e9d4f33cd5e14ab486fa4b188f96
+  + added:   c5f9ad3564bff82f9cc9e621a05914937620dd12bc4b804290d401c426a606d4
+
+[protected-file-hash] protected file changed: functions/api/sonic/lyrics/sync.ts
+  - removed: de95fd9f1ff7567cebdf9b9f7c1d29b6f461cf2d44dc31e3fd008987b8b777d8
+  + added:   a61bf2a857954a886c1e4052583721f26d89e735e5a14d2263144f030d2964b0
+
+[protected-file-hash] protected file changed: functions/api/sonic/resolve/stream.ts
+  - removed: 7fc7ce46ee41c669626d79f046a73c99fb473755a016e01a37abf102328fd1eb
+  + added:   6d9d9ae4b6b7f23077bf5043c39243205f185acd254ac5e0f31df34fdb982e7c
+
+[protected-file-hash] protected file changed: player/src/composables/useLyrics.ts
+  - removed: 9d100a9091ad3fb782b4226160e19acb13d4d9d1b9963d967246f4b571dc18bb
+  + added:   7091a3be06abfa916038e515b17703a9df9fd90860489ada212770fe99538e89

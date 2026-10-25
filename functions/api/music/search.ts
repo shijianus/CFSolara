@@ -77,7 +77,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       headers,
     );
   } catch (err: any) {
-    console.error('[Sonic Music Search Error]', err);
+    console.error('[epocanvas sonic Music Search Error]', err);
     return errorResponse(sanitizeErrorForClient(err, '搜索曲库失败'), 502);
   }
 }

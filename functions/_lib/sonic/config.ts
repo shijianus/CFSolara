@@ -1,4 +1,4 @@
-// Sonic Gateway — Configuration & Environment Parser
+// epocanvas sonic Gateway — Configuration & Environment Parser
 // Prefix: SONIC_
 
 import type { AppEnv } from '../types';

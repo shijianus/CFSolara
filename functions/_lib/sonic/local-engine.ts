@@ -1,4 +1,4 @@
-// Sonic Gateway — Pages -> Linux Local Engine Client & 3-State Circuit Breaker
+// epocanvas sonic Gateway — Pages -> Linux Local Engine Client & 3-State Circuit Breaker
 // State Machine:
 //   CLOSED (Healthy) ──[>= threshold errors or Argo 530/52x]──> OPEN (Fast-Fail 0ms)
 //   OPEN             ──[after cooldownMs]─────────────────────> HALF_OPEN (Single Probe)

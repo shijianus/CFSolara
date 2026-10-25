@@ -1,5 +1,5 @@
 // GET /api/sonic/forward
-// Sonic Gateway — Unified Aggregation Forwarding Gateway
+// epocanvas sonic Gateway — Unified Aggregation Forwarding Gateway
 // Supports multi-type forwarding: lyrics sync, search aggregation, and external asset proxying.
 
 import { parseLyricsParams, parseSearchParams, sonicError, handleOptions } from '../../_lib/sonic/route-helpers';
@@ -99,7 +99,7 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
           provider: 'forward',
         });
       }
-      console.error('[Sonic Forward] proxy error', err instanceof Error ? err.name : 'unknown');
+      console.error('[epocanvas sonic Forward] proxy error', err instanceof Error ? err.name : 'unknown');
       return sonicError('FORWARD_ERROR', 'Failed to forward request to target', 502, {
         provider: 'forward',
       });

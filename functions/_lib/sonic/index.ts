@@ -1,4 +1,4 @@
-// Sonic Gateway — Central Library Exporter
+// epocanvas sonic Gateway — Central Library Exporter
 
 export * from './types';
 export * from './config';

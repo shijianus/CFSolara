@@ -1,0 +1,257 @@
+{
+  "generatedAt": "2026-10-25T13:42:34.987Z",
+  "preFinishedAt": "2026-10-25T12:35:07.741Z",
+  "postFinishedAt": "2026-10-25T13:42:22.366Z",
+  "allPostStepsPassed": true,
+  "allTitlesEndWithFullBrand": true,
+  "noLegacyDisplayBrand": true,
+  "allBrandTextStable": true,
+  "allStorageKeysStable": true,
+  "legacyStatic": {
+    "pre": {
+      "title": "epocanvas sonic",
+      "epoMailCount": 2,
+      "epomailCount": 0,
+      "modalEpoMailCount": 2,
+      "modalEpomailCount": 0
+    },
+    "post": {
+      "title": "epocanvas sonic",
+      "epoMailCount": 0,
+      "epomailCount": 2,
+      "modalEpoMailCount": 0,
+      "modalEpomailCount": 2
+    },
+    "legacyBrandHitsPost": []
+  },
+  "steps": [
+    {
+      "name": "desktop-home-clean",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "首页 - epocanvas sonic",
+      "postTitle": "首页 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "postBrandText": "epocanvas sonic STUDIO AUDIO ENGINE ↵ 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        true
+      ],
+      "postAudioPaused": [
+        true
+      ],
+      "postAudioCurrentTime": [
+        "0.00"
+      ],
+      "preStorageKeys": [
+        "audio"
+      ],
+      "postStorageKeys": [
+        "audio"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "desktop-home.png",
+        "desktop-home.png"
+      ]
+    },
+    {
+      "name": "desktop-search-by-typing",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "搜索：周杰伦 - epocanvas sonic",
+      "postTitle": "搜索：周杰伦 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "postBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        true
+      ],
+      "postAudioPaused": [
+        true
+      ],
+      "postAudioCurrentTime": [
+        "0.00"
+      ],
+      "preStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "postStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "desktop-search-results.png",
+        "desktop-search-results.png"
+      ]
+    },
+    {
+      "name": "desktop-play-first-result",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "搜索：周杰伦 - epocanvas sonic",
+      "postTitle": "搜索：周杰伦 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "postBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        false
+      ],
+      "postAudioPaused": [
+        false
+      ],
+      "postAudioCurrentTime": [
+        "0.50"
+      ],
+      "preStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "postStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "desktop-playing.png",
+        "desktop-playing.png"
+      ]
+    },
+    {
+      "name": "desktop-settings",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "系统设置 - epocanvas sonic",
+      "postTitle": "系统设置 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "postBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        false
+      ],
+      "postAudioPaused": [
+        false
+      ],
+      "postAudioCurrentTime": [
+        "4.82"
+      ],
+      "preStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "postStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "desktop-settings.png",
+        "desktop-settings.png"
+      ]
+    },
+    {
+      "name": "desktop-404",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "404 页面未找到 - epocanvas sonic",
+      "postTitle": "404 页面未找到 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "postBrandText": "epocanvas sonic STUDIO AUDIO ENGINE 探索 首页 MV 排行榜 歌手 新碟上架 搜索 我的音乐 我喜欢的 最近播放 下载列表 本地音乐 系统 设置 | epocanvas sonic STUDIO AUDIO ENGINE",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        false
+      ],
+      "postAudioPaused": [
+        false
+      ],
+      "postAudioCurrentTime": [
+        "8.29"
+      ],
+      "preStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "postStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "desktop-404.png",
+        "desktop-404.png"
+      ]
+    },
+    {
+      "name": "mobile-home",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "首页 - epocanvas sonic",
+      "postTitle": "首页 - epocanvas sonic",
+      "titleSame": true,
+      "preBrandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+      "postBrandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        false
+      ],
+      "postAudioPaused": [
+        false
+      ],
+      "postAudioCurrentTime": [
+        "13.02"
+      ],
+      "preStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "postStorageKeys": [
+        "audio",
+        "global"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "mobile-home.png",
+        "mobile-home.png"
+      ]
+    },
+    {
+      "name": "mobile-search-and-play",
+      "preOk": true,
+      "postOk": true,
+      "preTitle": "",
+      "postTitle": "搜索：周杰伦 - epocanvas sonic",
+      "titleSame": false,
+      "preBrandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+      "postBrandText": "epocanvas sonic 跟随系统 | epocanvas sonic",
+      "brandTextSame": true,
+      "legacyHits": [],
+      "preAudioPaused": [
+        false
+      ],
+      "postAudioPaused": [
+        false
+      ],
+      "postAudioCurrentTime": [
+        "0.54"
+      ],
+      "storageKeysSame": true,
+      "screenshots": [
+        "mobile-playing.png",
+        "mobile-playing.png"
+      ]
+    }
+  ]
+}

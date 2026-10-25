@@ -1,0 +1,12 @@
+{
+  "home": {
+    "title": "epocanvas sonic",
+    "epoMailCount": 2,
+    "epomailCount": 0
+  },
+  "modal": {
+    "epoMailCount": 2,
+    "epomailCount": 0,
+    "modalText": "epocanvas sonic 开发者专案连结 (sonic Pass) × Brand Check brand-check@epocanvas.com 您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API： 复制 Key 快速接入端点 (epocan"
+  }
+}

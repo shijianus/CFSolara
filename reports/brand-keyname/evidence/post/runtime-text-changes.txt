@@ -1,0 +1,54 @@
+# Runtime / user-visible text changes (non-contract)
+
+-// Sonic Gateway — Inter-Service Authentication & Tiered Rate Limiter
++// epocanvas sonic Gateway — Inter-Service Authentication & Tiered Rate Limiter
+-    console.error('[Sonic Security] engine secret is missing or shorter than 32 characters');
++    console.error('[epocanvas sonic Security] engine secret is missing or shorter than 32 characters');
+-          message: 'Valid X-Sonic-Engine-Key header is required to access Sonic Local Engine',
++          message: 'Valid X-Sonic-Engine-Key header is required to access the epocanvas sonic local engine',
+-            <div class="warning">© epocanvas · sonic 多源聚合音乐云平台 | 接入 EpoMail OAuth 真人验证与网关 API</div>
++            <div class="warning">© epocanvas · sonic 多源聚合音乐云平台 | 接入 Epomail OAuth 真人验证与网关 API</div>
+-                <button id="epomailLoginBtn" class="epomail-auth-btn" type="button" title="EpoMail 唯一接入与 API 平台">
++                <button id="epomailLoginBtn" class="epomail-auth-btn" type="button" title="Epomail 唯一接入与 API 平台">
+-                    <span id="epomailUserLabel">EpoMail 登录</span>
++                    <span id="epomailUserLabel">Epomail 登录</span>
+-                    <p class="sonic-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
++                    <p class="sonic-modal-tip">您已通过 Epomail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
+-            debugLog(`[Sonic Search] API请求: ${url}`);
++            debugLog(`[epocanvas sonic Search] API请求: ${url}`);
+-            debugLog(`[Sonic Search] API响应: ${JSON.stringify(resp).substring(0, 200)}...`);
++            debugLog(`[epocanvas sonic Search] API响应: ${JSON.stringify(resp).substring(0, 200)}...`);
+-            debugLog(`[Sonic Search] API错误: ${error.message}，尝试传统备用通道`);
++            debugLog(`[epocanvas sonic Search] API错误: ${error.message}，尝试传统备用通道`);
+-    // Sonic Lyrics Gateway — 聚合逐字端点 (优先平台原生 → AMLL TTML → 假逐字兜底)
++    // epocanvas sonic Lyrics Gateway — 聚合逐字端点 (优先平台原生 → AMLL TTML → 假逐字兜底)
+-            // Platform native identifiers for Sonic priority chain ①
++            // Platform native identifiers for epocanvas sonic priority chain ①
+-            // AMLL TTML DB lookup identifiers for Sonic priority chain ②③
++            // AMLL TTML DB lookup identifiers for epocanvas sonic priority chain ②③
+-// Sonic 平台化: EpoMail OAuth 真人验证与开发者 API 凭证管理
++// epocanvas sonic 平台化: Epomail OAuth 真人验证与开发者 API 凭证管理
+-                showNotification("EpoMail OAuth 验证成功，epocanvas sonic API Key 已就绪！", "success");
++                showNotification("Epomail OAuth 验证成功，epocanvas sonic API Key 已就绪！", "success");
+-            if (userName) userName.textContent = session.name || "EpoMail 用户";
++            if (userName) userName.textContent = session.name || "Epomail 用户";
+-            if (userLabel) userLabel.textContent = "EpoMail 登录";
++            if (userLabel) userLabel.textContent = "Epomail 登录";
+-                loginBtn.title = "使用 EpoMail 账号统一接入与获取 epocanvas sonic API Key";
++                loginBtn.title = "使用 Epomail 账号统一接入与获取 epocanvas sonic API Key";
+-            showNotification("已退出 EpoMail 登录", "info");
++            showNotification("已退出 Epomail 登录", "info");
+-// Sonic Local Engine — Linux Node.js 22 HTTP Server
++// epocanvas sonic Local Engine — Linux Node.js 22 HTTP Server
+-      console.error(`[Sonic Engine] outbound target rejected (${result.reason})`);
++      console.error(`[epocanvas sonic Engine] outbound target rejected (${result.reason})`);
+-  // Sonic Gateway & Engine routes
++  // epocanvas sonic Gateway & Engine routes
+-    return new Response('Sonic Local Engine is running (static dist not mounted)', {
++    return new Response('epocanvas sonic Local Engine is running (static dist not mounted)', {
+-      console.error('[Sonic Engine Unhandled Error]', err);
++      console.error('[epocanvas sonic Engine Unhandled Error]', err);
+-      `[Sonic Local Engine] Listening on http://${host}:${port} (runtime=${process.env.SONIC_RUNTIME || 'linux-engine'}, ncmApi=${process.env.SONIC_NCM_API_URL || 'none'})`,
++      `[epocanvas sonic Local Engine] Listening on http://${host}:${port} (runtime=${process.env.SONIC_RUNTIME || 'linux-engine'}, ncmApi=${process.env.SONIC_NCM_API_URL || 'none'})`,
+-    console.log(`[Sonic Local Engine] Received ${sig}, shutting down gracefully...`);
++    console.log(`[epocanvas sonic Local Engine] Received ${sig}, shutting down gracefully...`);

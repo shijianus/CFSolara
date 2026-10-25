@@ -1,0 +1,104 @@
+# Brand key matrix — POST (HEAD 7030de2, working tree)
+
+## Token file counts (case-sensitive, excluding node_modules/dist/temp/reports/.git)
+epocanvas    files=89
+EpoCanvas    files=1
+sonic        files=142
+Sonic        files=70
+SONIC_       files=35
+solara       files=27
+Solara       files=16
+cfsolara     files=25
+CFSolara     files=16
+shijianus    files=12
+Shijianus    files=2
+Epomail      files=12
+EpoMail      files=1
+
+## Legacy old-brand occurrences (case-sensitive)
+API.md:5:> **鉴权变更（安全加固）**：API Key 现采用 `sonic_live_v1.<payloadB64url>.<sigB64url>` 的 HMAC-SHA256 签名格式。所有旧格式 `sonic_live_<base64(email)>_<sig>` 与 `solara_live_*` 已失效，用户需重新登录获取新 Key。请求头名称仍兼容 `X-CFSolara-Key`，但只接受新格式 Key。
+API.md:31:   - 登录 Epomail 后即可自动获得带签名的专案 API Key（格式 `sonic_live_v1.<payload>.<signature>`）。旧格式 Key（包括 `solara_live_*`）一律拒绝，需重新登录。
+API.md:36:     X-CFSolara-Key: sonic_live_v1.xxxxxxxx.xxxxxxxx
+.env.example:5:#   npx wrangler pages secret put <NAME> --project-name cfsolara
+package.json:12:    "deploy": "npm run build && (${WRANGLER_BIN:-npx wrangler} pages deploy dist --project-name=${CF_PAGES_PROJECT:-cfsolara} --branch=${CF_PAGES_BRANCH:-main} --commit-dirty=true)",
+README.md:17:  subgraph Edge["Cloudflare Pages 边缘网关 (epocanvas sonic · Pages 项目: cfsolara)"]
+README.md:170:npx wrangler pages deploy dist --project-name cfsolara
+README.md:173:> 上例中的 `cfsolara` 是现网 Cloudflare Pages 项目名（历史基础设施标识），不是产品展示品牌；产品展示名统一为 **epocanvas sonic**。如已新建品牌化项目，可用 `CF_PAGES_PROJECT` 覆盖默认值。
+README.md:180:# 2. 在 VPS 现有部署目录（历史路径 /data/workspace/CFSolara）启动 Docker Compose 栈
+README.md:196:npx wrangler pages secret put SONIC_SECRET --project-name cfsolara
+README.md:197:npx wrangler pages secret put EPOMAIL_CLIENT_ID --project-name cfsolara
+README.md:198:npx wrangler pages secret put EPOMAIL_CLIENT_SECRET --project-name cfsolara
+README.md:199:npx wrangler pages secret put SONIC_ENGINE_SECRET --project-name cfsolara
+README.md:201:npx wrangler pages secret put SONIC_SECRET_PREV --project-name cfsolara
+README.md:217:> ⚠️ **旧密钥已失效**：`sonic_live_<base64(email)>_<sig>` 与所有 `solara_live_*` Key 会被直接拒绝。旧版 Key 没有可信签名，无法安全迁移；用户必须重新登录获取新的 `sonic_live_v1.<payload>.<signature>`。曾出现在公开仓库历史中的硬编码密钥必须在部署时全部轮换为新值。
+functions\api\index.ts:41:      header: 'X-Sonic-Key: <your_key> or X-CFSolara-Key: <your_key> or Authorization: Bearer <your_key>',
+scripts\audit_independent_api.py:3:Comprehensive Independent API QA Verification Suite for CFSolara Production
+scripts\audit_independent_api.py:249:    out_file = "/home/shijian/projects/CFSolara/scripts/audit_independent_api_results.json"
+functions\_lib\auth.ts:548:    request.headers.get('x-cfsolara-key') ||
+functions\_lib\auth.ts:581:  if (apiKey.startsWith('solara_live_')) return { authenticated: false };
+functions\api\auth\key.ts:48:    instructions: '在外部专案的请求头中添加 X-Sonic-Key: <your_api_key> (亦兼容 X-CFSolara-Key 或 Authorization: Bearer <your_api_key>) 即可使用 epocanvas sonic 全量音乐 API。',
+scripts\audit_independent_dom.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\audit_independent_dom.js:27:        const baseUrl = "https://cfsolara-dho.pages.dev";
+scripts\audit_independent_dom.js:176:        const outPath = "/home/shijian/projects/CFSolara/scripts/audit_independent_dom_results.json";
+scripts\audit_independent_qa.py:3:CFSolara Independent QA & Codebase Audit Suite
+scripts\audit_independent_qa.py:13:BASE_GATEWAY = "https://cfsolara-dho.pages.dev"
+scripts\audit_independent_qa.py:259:    out_path = "/home/shijian/projects/CFSolara/scripts/audit_independent_qa_results.json"
+scripts\audit_independent_qa_final.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+functions\_lib\http.ts:5:  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Shijianus-Device-Id, Range');
+scripts\audit_independent_qa_results_final.json:53:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_first_love_sync.png"
+scripts\audit_independent_qa_results_final.json:81:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_lemon_sync.png"
+scripts\audit_independent_qa_results_final.json:112:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_qingtian_sync.png"
+scripts\audit_independent_qa_results.json:3:  "gateway": "https://cfsolara-dho.pages.dev",
+scripts\audit_independent_qa_results.json:104:        "url": "https://cfsolara-dho.pages.dev/api/sonic/lyrics/lyriva?title=晴天&artist=周杰伦&_nocache=1",
+scripts\audit_independent_qa_results.json:140:        "url": "https://cfsolara-dho.pages.dev/api/sonic/lyrics/nexus?title=晴天&artist=周杰伦&_nocache=1",
+scripts\audit_independent_qa_results.json:176:        "url": "https://cfsolara-dho.pages.dev/api/sonic/lyrics/sync?title=晴天&artist=周杰伦&format=lrc&_nocache=1",
+scripts\audit_independent_qa_results.json:191:        "url": "https://cfsolara-dho.pages.dev/api/sonic/lyrics/sync?title=晴天&artist=周杰伦&format=json&_nocache=1",
+scripts\audit_independent_qa_results.json:1543:        "url": "https://cfsolara-dho.pages.dev/api/sonic/lyrics/nexus?title=晴天&artist=周杰伦&platform=netease&platformId=186016&_nocache=1",
+scripts\audit_multilingual_dom.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\audit_multilingual_results.json:50:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_cantonese_haikuotiankong.png"
+scripts\audit_multilingual_results.json:94:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_english_adele.png"
+scripts\audit_multilingual_results.json:131:      "screenshot": "/home/shijian/projects/CFSolara/screenshots/audit_korean_iu.png"
+scripts\audit_part1.py:320:    targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"]
+scripts\audit_part2.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\audit_part2.js:337:    const targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"];
+scripts\audit_part2_e2e.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\audit_part2_e2e.js:526:    const targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"];
+scripts\audit_sonic_gateway.py:4:Target Public Domain: https://cfsolara-dho.pages.dev
+scripts\audit_sonic_gateway.py:18:TARGET_BASE_URL = "https://cfsolara-dho.pages.dev"
+scripts\brand-audit.mjs:47:  { id: 'solara-live-key', re: /\bsolara_live_/g, note: 'legacy API key prefix' },
+scripts\brand-audit.mjs:49:  { id: 'cfsolara-header', re: /\bX-CFSolara-Key\b/g, note: 'legacy auth header' },
+scripts\brand-audit.mjs:50:  { id: 'shijianus-header', re: /\bX-Shijianus-Device-Id\b/g, note: 'device auth header' },
+scripts\brand-audit.mjs:52:  { id: 'solara-secret', re: /\bSOLARA_SECRET\b/g, note: 'legacy signing-secret fallback' },
+scripts\brand-audit.mjs:63:  { id: 'cfsolara-project', re: /\bcfsolara\b/g, note: 'Cloudflare Pages project name' },
+scripts\brand-audit.mjs:239:    const displayRe = /\bSonic\b|Glass Music Player|\bEpoCanvas\b/g
+scripts\brand-audit.mjs:480:      if (/\bSonic\b|Glass Music Player|\bEpoMail\b|\bEpoCanvas\b|\bSolara\b|\bCFSolara\b|\bShijianus\b/.test(text)) {
+scripts\brand-audit.mjs:490:    (file) => !file.startsWith('reports/') && !file.startsWith('scripts/') && /EpoMail|EpoCanvas/.test(readText(file)),
+scripts\e2e_full_audit.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\e2e_full_audit.js:328:    const targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"];
+scripts\final_delivery_verification.mjs:11:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\final_delivery_verification.mjs:14:  'https://cfsolara-dho.pages.dev',
+scripts\rollback-production.sh:3:# CFSolara Production Rollback Script (Tunnel Ingress + DNS CNAME)
+scripts\rollback-production.sh:33:echo " CFSolara Production Rollback: Mode = [${MODE^^}]"
+scripts\run_part1_audit.py:389:    targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"]
+scripts\run_part2_audit.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\run_part2_audit.js:535:    const targets = ["https://sonic.epocanvas.com", "https://cfsolara-dho.pages.dev"];
+scripts\test-auth-compatibility.mjs:278:      headers: { 'X-CFSolara-Key': session.apiKey },
+scripts\test-auth-compatibility.mjs:281:    assert(legacyHeaderRes.authenticated === true, 'X-CFSolara-Key header still transports a valid new key');
+scripts\test-auth-compatibility.mjs:318:    const legacySolara = `solara_live_${emailB64}_d41d8cd98f00b204e9800998ecf8427e`;
+scripts\test-auth-compatibility.mjs:320:    assert((await verifyAuth(authRequest(legacySolara), { SONIC_SECRET: SECRET })).authenticated === false, 'Old solara_live_ format rejected');
+scripts\test-live-verified.mjs:8:  const url = 'https://8bb35652.cfsolara-dho.pages.dev';
+scripts\test-multilingual-live.mjs:1:import { chromium } from '/home/shijian/projects/shijianus-blog/node_modules/playwright/index.mjs';
+scripts\test-multilingual-live.mjs:8:  const url = 'https://ca0530df.cfsolara-dho.pages.dev';
+functions\_lib\sonic\security.ts:247:          ? 'API key is required (pass X-Sonic-Key or X-CFSolara-Key or Authorization: Bearer)'
+scripts\test_puppeteer_init.js:1:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+functions\_lib\sonic\route-helpers.ts:71:    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Api-Key, X-Sonic-Engine-Key, Range',
+scripts\verify-live-lyrics.mjs:5:const TARGET_URL = process.env.TARGET_URL || 'https://cfsolara-dho.pages.dev/';
+scripts\visual-verify-cf.mjs:6:const CF_BASE_URL = 'https://cfsolara-dho.pages.dev';
+scripts\verify-live-cf-deployment.mjs:4:const LIVE_BASE_URL = 'https://cfsolara-dho.pages.dev';
+scripts\verify_sonic_public.py:3:Official Public Production QA Audit Suite for CFSolara Sonic Multi-Source Gateway
+scripts\verify_sonic_public.py:6:  2. Cloudflare Pages Domain: https://cfsolara-dho.pages.dev
+scripts\verify_sonic_public.py:20:    ("Pages Dev Production", "https://cfsolara-dho.pages.dev"),
+scripts\verify_production_commercial.mjs:4:const DOMAINS = ['https://cfsolara-dho.pages.dev', 'https://sonic.epocanvas.com'];
+scripts\verify_lyrics_live.mjs:5:const TARGET_URL = process.env.TARGET_URL || 'https://cfsolara-dho.pages.dev/';
+scripts\verify_production_delivery.mjs:11:const puppeteer = require('/home/shijian/projects/shijianus-blog/node_modules/puppeteer');
+scripts\verify_production_delivery.mjs:14:const BACKUP_HOST = 'https://cfsolara-dho.pages.dev';

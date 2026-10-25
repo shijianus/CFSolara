@@ -1,5 +1,5 @@
-// Sonic Gateway — Unified Type Definitions
-// Brand: Sonic (声波 / Sonic Multi-Source Gateway)
+// epocanvas sonic Gateway — Unified Type Definitions
+// Brand: epocanvas sonic (wire brand value is frozen)
 
 export type SonicLyricLevel = 'word' | 'line' | 'none';
 export type SonicSourceQuality = 'real' | 'interpolated' | 'none';
@@ -160,7 +160,7 @@ export interface SonicQualityOption {
 }
 
 export interface SonicSearchTrack {
-  id: string; // for Sonic player backward compatibility
+  id: string; // for epocanvas sonic player backward compatibility
   sha?: string; // SHA hash identifying the canonical song
   title: string;
   name: string; // alias for player compatibility

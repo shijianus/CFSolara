@@ -22,7 +22,7 @@ function logMissingSigningSecretOnce(): void {
   if (didLogMissingSigningSecret) return;
   didLogMissingSigningSecret = true;
   // Never log the value or a caller-supplied key.
-  console.error('[Sonic Security] API key signing secret is missing or shorter than 32 characters');
+  console.error('[epocanvas sonic Security] API key signing secret is missing or shorter than 32 characters');
 }
 
 export class AuthConfigError extends Error {
@@ -437,18 +437,18 @@ export async function exchangeCode(
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    console.error('[Sonic Auth] token exchange network error');
+    console.error('[epocanvas sonic Auth] token exchange network error');
     throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
   }
 
   if (response.status >= 300 && response.status < 400) {
     response.body?.cancel().catch(() => {});
-    console.error('[Sonic Auth] token endpoint attempted a redirect');
+    console.error('[epocanvas sonic Auth] token endpoint attempted a redirect');
     throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
   }
   if (!response.ok) {
     // Never surface the upstream response body to the client or logs.
-    console.error(`[Sonic Auth] token exchange rejected (status=${response.status})`);
+    console.error(`[epocanvas sonic Auth] token exchange rejected (status=${response.status})`);
     response.body?.cancel().catch(() => {});
     throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
   }
@@ -476,7 +476,7 @@ export async function fetchUserInfo(env: AppEnv, accessToken: string): Promise<{
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    console.error('[Sonic Auth] userinfo network error');
+    console.error('[epocanvas sonic Auth] userinfo network error');
     throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information request failed', 502);
   }
 

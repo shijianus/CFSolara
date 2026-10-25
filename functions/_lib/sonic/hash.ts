@@ -1,4 +1,4 @@
-// Sonic Gateway — Small synchronous SHA-256 helper
+// epocanvas sonic Gateway — Small synchronous SHA-256 helper
 // Used where WebCrypto's async digest cannot be awaited (constant-time string
 // comparison, key ids). Implemented in pure TypeScript so it runs unchanged on
 // Cloudflare Workers and Node.js.

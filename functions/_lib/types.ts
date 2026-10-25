@@ -4,6 +4,7 @@ export interface AppEnv {
   EPOMAIL_CLIENT_SECRET?: string;
   EPOMAIL_REDIRECT_URI?: string;
   MUSIC_API_BASE?: string;
+  /** Legacy signing-secret alias kept read-only for deployment compatibility. */
   SOLARA_SECRET?: string;
   SONIC_SECRET?: string;
   SONIC_SECRET_PREV?: string;
@@ -11,7 +12,6 @@ export interface AppEnv {
   SONIC_ALLOWED_ORIGINS?: string;
   SONIC_ALLOW_HTTP_OUTBOUND?: string;
   SONIC_RATE_LIMIT_KV?: any;
-  SOLARA_ALLOWED_ORIGINS?: string;
   KV?: any;
   DB?: any;
   // Linux VPS Local Engine & Inter-Service Auth

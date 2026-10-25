@@ -1,0 +1,20 @@
+# Final dist brand scan
+
+## Exact legacy tokens (expect none)
+NONE
+
+## Log prefixes
+[Sonic ] count: 0
+[epocanvas sonic ] count: 3
+
+## Full brand occurrences
+epocanvas sonic count: 14
+
+## Title / OG / description
+og:site_name" content="epocanvas sonic"
+name="description" content="epocanvas sonic Music Cloud Platform"
+<title>epocanvas sonic - Cloud Music Platform</title>
+
+## 404 title/brand
+<title>页面不存在 - epocanvas sonic</title>
+class="brand">epocanvas sonic

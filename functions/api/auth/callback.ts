@@ -30,7 +30,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   const state = url.searchParams.get('state') || '';
   const cookieState = cookies[OAUTH_STATE_COOKIE] || '';
   if (!state || !cookieState || !constantTimeEqualStrings(state, cookieState)) {
-    console.error('[Sonic Auth] callback rejected: OAuth state missing or mismatched');
+    console.error('[epocanvas sonic Auth] callback rejected: OAuth state missing or mismatched');
     return fail('OAuth state validation failed', 400);
   }
 
@@ -89,13 +89,13 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     return appendSetCookies(response, clearCookies);
   } catch (err: any) {
     if (err instanceof AuthConfigError) {
-      console.error(`[Sonic Auth] callback unavailable (${err.code})`);
+      console.error(`[epocanvas sonic Auth] callback unavailable (${err.code})`);
       return fail('Authentication service is not configured', 503);
     }
     if (err instanceof AuthError) {
       return fail('OAuth login failed', err.status);
     }
-    console.error('[Sonic Auth Callback Error]', err?.name || 'unknown error');
+    console.error('[epocanvas sonic Auth Callback Error]', err?.name || 'unknown error');
     return fail('OAuth login failed', 502);
   }
 }

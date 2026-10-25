@@ -28,7 +28,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       tracks,
     });
   } catch (err: any) {
-    console.error('[Sonic Music Random Error]', err);
+    console.error('[epocanvas sonic Music Random Error]', err);
     return errorResponse(sanitizeErrorForClient(err, '获取随机推荐曲库失败'), 502);
   }
 }

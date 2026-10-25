@@ -1,5 +1,5 @@
 /**
- * Sonic Music Platform — Image URL Normalization & Resiliency Utility
+ * epocanvas sonic Music Platform — Image URL Normalization & Resiliency Utility
  * Fixes multi-channel cover loading, anti-hotlinking, and size formatting
  */
 

@@ -1,4 +1,4 @@
-// Sonic Gateway — Unified Multi-Tier Cache with `sonic:` Prefix & Stale-If-Error Support
+// epocanvas sonic Gateway — Unified Multi-Tier Cache with `sonic:` Prefix & Stale-If-Error Support
 // Works across Cloudflare Edge Cache API (`caches.default`), optional Workers KV (`env.KV`), and Linux Node 22 LRU memory.
 
 import type { AppEnv } from '../types';

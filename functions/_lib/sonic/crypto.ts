@@ -1,4 +1,4 @@
-// Sonic Gateway — Pure TypeScript Cryptographic Primitives (Zero Node/Worker Native Dependencies)
+// epocanvas sonic Gateway — Pure TypeScript Cryptographic Primitives (Zero Node/Worker Native Dependencies)
 // Works identically in Cloudflare Pages Functions (Workers V8) and Linux Node.js 22+.
 // Provides RFC 1321 MD5, FIPS 197 AES-128-ECB (PKCS#7), and NetEase linuxapi / eapi packet builders.
 

@@ -224,7 +224,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       headers,
     });
   } catch (err: any) {
-    console.error('[Sonic Stream] upstream proxy error', err instanceof Error ? err.name : 'unknown');
+    console.error('[epocanvas sonic Stream] upstream proxy error', err instanceof Error ? err.name : 'unknown');
     return errorResponse('音频数据流传输错误', 502);
   }
 }

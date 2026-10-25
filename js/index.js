@@ -508,9 +508,9 @@ const API = {
                 url = `/api/sonic/search/${encodeURIComponent(source)}?q=${encodeURIComponent(keyword)}&count=${count}&page=${page}`;
             }
 
-            debugLog(`[Sonic Search] API请求: ${url}`);
+            debugLog(`[epocanvas sonic Search] API请求: ${url}`);
             const resp = await API.fetchJson(url);
-            debugLog(`[Sonic Search] API响应: ${JSON.stringify(resp).substring(0, 200)}...`);
+            debugLog(`[epocanvas sonic Search] API响应: ${JSON.stringify(resp).substring(0, 200)}...`);
 
             if (resp && resp.brand === "Sonic" && resp.data && Array.isArray(resp.data.tracks)) {
                 return resp.data.tracks.map(track => {
@@ -563,7 +563,7 @@ const API = {
 
             throw new Error("搜索结果格式错误");
         } catch (error) {
-            debugLog(`[Sonic Search] API错误: ${error.message}，尝试传统备用通道`);
+            debugLog(`[epocanvas sonic Search] API错误: ${error.message}，尝试传统备用通道`);
             try {
                 const signature = API.generateSignature();
                 const legacySource = source === "nexus" ? "netease" : source;
@@ -684,7 +684,7 @@ const API = {
     },
 
 
-    // Sonic Lyrics Gateway — 聚合逐字端点 (优先平台原生 → AMLL TTML → 假逐字兜底)
+    // epocanvas sonic Lyrics Gateway — 聚合逐字端点 (优先平台原生 → AMLL TTML → 假逐字兜底)
     getSonicLyric: (song) => {
         const params = new URLSearchParams();
         const title = song.name || song.title;
@@ -712,10 +712,10 @@ const API = {
         const rawSongId = song.platformId || song.lyric_id || song.id;
         const songId = rawSongId ? String(rawSongId).replace(/^[a-z0-9_-]+:/i, "") : "";
         if (songId) {
-            // Platform native identifiers for Sonic priority chain ①
+            // Platform native identifiers for epocanvas sonic priority chain ①
             params.set('platform', platform);
             params.set('platformId', songId);
-            // AMLL TTML DB lookup identifiers for Sonic priority chain ②③
+            // AMLL TTML DB lookup identifiers for epocanvas sonic priority chain ②③
             if (platform === 'netease' || platform === 'ncm') {
                 params.set('ncmMusicId', songId);
             } else if (platform === 'qq' || platform === 'tencent') {
@@ -4470,7 +4470,7 @@ function showNotification(message, type = "success") {
 }
 
 // -------------------------------------------------------------
-// Sonic 平台化: EpoMail OAuth 真人验证与开发者 API 凭证管理
+// epocanvas sonic 平台化: Epomail OAuth 真人验证与开发者 API 凭证管理
 // -------------------------------------------------------------
 (function initEpomailAuth() {
     const STORAGE_KEY = "sonic_epomail_session";
@@ -4515,7 +4515,7 @@ function showNotification(message, type = "success") {
             if (parsed && parsed.apiKey) {
                 saveSession(parsed);
                 window.history.replaceState(null, "", window.location.pathname);
-                showNotification("EpoMail OAuth 验证成功，epocanvas sonic API Key 已就绪！", "success");
+                showNotification("Epomail OAuth 验证成功，epocanvas sonic API Key 已就绪！", "success");
             }
         } catch (e) {
             console.warn("Failed to parse session from hash", e);
@@ -4526,7 +4526,7 @@ function showNotification(message, type = "success") {
         const session = getSavedSession();
         if (session && session.email) {
             if (userLabel) userLabel.textContent = session.name || session.email.split("@")[0];
-            if (userName) userName.textContent = session.name || "EpoMail 用户";
+            if (userName) userName.textContent = session.name || "Epomail 用户";
             if (userEmail) userEmail.textContent = session.email;
             if (keyInput) keyInput.value = session.apiKey || "";
             if (userAvatar && session.avatar) userAvatar.src = session.avatar;
@@ -4535,10 +4535,10 @@ function showNotification(message, type = "success") {
                 loginBtn.title = "已登录: " + session.email + " (点击查看 epocanvas sonic API 连结凭证)";
             }
         } else {
-            if (userLabel) userLabel.textContent = "EpoMail 登录";
+            if (userLabel) userLabel.textContent = "Epomail 登录";
             if (loginBtn) {
                 loginBtn.classList.remove("is-authenticated");
-                loginBtn.title = "使用 EpoMail 账号统一接入与获取 epocanvas sonic API Key";
+                loginBtn.title = "使用 Epomail 账号统一接入与获取 epocanvas sonic API Key";
             }
         }
     }
@@ -4592,7 +4592,7 @@ function showNotification(message, type = "success") {
             clearSession();
             closeModal();
             renderAuthUI();
-            showNotification("已退出 EpoMail 登录", "info");
+            showNotification("已退出 Epomail 登录", "info");
         });
     }
 

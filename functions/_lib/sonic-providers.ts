@@ -1,4 +1,4 @@
-// Sonic Lyrics Gateway — Providers (Backward Compatibility Wrapper)
+// epocanvas sonic Lyrics Gateway — Providers (Backward Compatibility Wrapper)
 // Delegates to unified ./sonic library
 
 import type { SonicQueryParams } from './sonic/types';

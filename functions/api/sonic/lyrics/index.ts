@@ -1,4 +1,4 @@
-// Sonic Gateway — Backward Compatibility Handler
+// epocanvas sonic Gateway — Backward Compatibility Handler
 // GET /api/sonic/lyrics
 // Internal forward to /api/sonic/lyrics/nexus
 

@@ -29,7 +29,7 @@
   <circle cx="100" cy="100" r="76" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.5" fill="none" />
   <circle cx="100" cy="100" r="64" fill="rgba(10, 10, 20, 0.35)" />
 
-  <!-- Sonic 声学波动同心环与中心律动原点 -->
+  <!-- epocanvas sonic 声学波动同心环与中心律动原点 -->
   <g stroke="rgba(255, 255, 255, 0.9)" stroke-linecap="round" fill="none">
     <!-- 声波柱形律动 -->
     <line x1="68" y1="90" x2="68" y2="110" stroke-width="4.5" />

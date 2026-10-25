@@ -1,4 +1,4 @@
-// Sonic Local Engine — Linux Node.js 22 HTTP Server
+// epocanvas sonic Local Engine — Linux Node.js 22 HTTP Server
 // Shares 100% of protocol, lyrics (KRC/QRC/YRC/TTML), cover, palette, auth & security logic with Cloudflare Pages `functions/`.
 
 import http from 'node:http';
@@ -141,7 +141,7 @@ async function guardUntrustedTargetParams(url: URL, env: AppEnv): Promise<Respon
     }
     const result = await validateEngineOutboundTarget(candidate, env);
     if (!result.ok) {
-      console.error(`[Sonic Engine] outbound target rejected (${result.reason})`);
+      console.error(`[epocanvas sonic Engine] outbound target rejected (${result.reason})`);
       return jsonResponse(
         { brand: 'Sonic', error: { code: 'INVALID_TARGET', message: 'Outbound target is not allowed' } },
         { status: 400 },
@@ -191,7 +191,7 @@ async function dispatchFunctionRoute(request: Request, env: AppEnv): Promise<Res
   if (pathname === '/api/music/search') return handleMusicSearch({ request, env });
   if (pathname === '/api/music/stream') return handleMusicStream({ request, env });
 
-  // Sonic Gateway & Engine routes
+  // epocanvas sonic Gateway & Engine routes
   if (pathname === '/api/sonic/engine/health') return handleEngineHealth({ request, env });
   if (pathname === '/api/sonic/resolve/stream') return handleResolveStream({ request, env });
   if (pathname === '/api/sonic/forward') return handleSonicForward({ request, env, waitUntil });
@@ -266,7 +266,7 @@ async function serveStaticAsset(staticRoot: string, pathname: string, isHead: bo
     const stream = fs.createReadStream(candidate);
     return new Response(Readable.toWeb(stream) as any, { status: 200, headers });
   } catch {
-    return new Response('Sonic Local Engine is running (static dist not mounted)', {
+    return new Response('epocanvas sonic Local Engine is running (static dist not mounted)', {
       status: 200,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
@@ -307,7 +307,7 @@ export function createSonicServer(staticRoot = path.resolve(process.cwd(), 'dist
       const staticResp = await serveStaticAsset(staticRoot, url.pathname, webReq.method === 'HEAD');
       await sendWebResponse(res, staticResp, webReq.method === 'HEAD');
     } catch (err: any) {
-      console.error('[Sonic Engine Unhandled Error]', err);
+      console.error('[epocanvas sonic Engine Unhandled Error]', err);
       if (!res.headersSent) {
         res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(
@@ -338,12 +338,12 @@ if (isMain) {
 
   server.listen(port, host, () => {
     console.log(
-      `[Sonic Local Engine] Listening on http://${host}:${port} (runtime=${process.env.SONIC_RUNTIME || 'linux-engine'}, ncmApi=${process.env.SONIC_NCM_API_URL || 'none'})`,
+      `[epocanvas sonic Local Engine] Listening on http://${host}:${port} (runtime=${process.env.SONIC_RUNTIME || 'linux-engine'}, ncmApi=${process.env.SONIC_NCM_API_URL || 'none'})`,
     );
   });
 
   const shutdown = (sig: string) => {
-    console.log(`[Sonic Local Engine] Received ${sig}, shutting down gracefully...`);
+    console.log(`[epocanvas sonic Local Engine] Received ${sig}, shutting down gracefully...`);
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 5000).unref();
   };

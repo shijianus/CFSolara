@@ -1,0 +1,12 @@
+{
+  "checkedFiles": 18,
+  "changedLines": {
+    "comments": 41,
+    "logs": 14,
+    "typeOnly": 1,
+    "inlineComments": 2,
+    "total": 58
+  },
+  "violations": [],
+  "pass": true
+}

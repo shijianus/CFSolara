@@ -1,5 +1,5 @@
-// Sonic Gateway — Nexus Lyrics Orchestrator
-// Brand: Sonic (声波 / Sonic Lyrics Gateway)
+// epocanvas sonic Gateway — Nexus Lyrics Orchestrator
+// Brand: epocanvas sonic (声波 / epocanvas sonic Lyrics Gateway)
 // Priority:
 // ① Platform Native (NetEase YRC / QQ QRC / Kugou KRC)
 // ② AMLL TTML (api.amll.dev by platform ID)

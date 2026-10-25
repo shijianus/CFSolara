@@ -1,0 +1,1 @@
+Protected token comparison PASSED: routes, wire brand, auth, storage, cache, and deployment identifiers are unchanged (file hashes ignored for comment/log-only refactors).

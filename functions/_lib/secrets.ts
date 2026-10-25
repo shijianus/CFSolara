@@ -1,4 +1,4 @@
-// Sonic Gateway — Secret loading & validation
+// epocanvas sonic Gateway — Secret loading & validation
 // There are deliberately no default secrets. A missing or short secret must
 // fail closed on every signing and verification path.
 
@@ -37,5 +37,5 @@ export function logSecretConfigError(context: string, env: AppEnv | undefined): 
   const configured = Boolean(e.SONIC_SECRET || e.SOLARA_SECRET);
   const reason = configured ? `must be at least ${MIN_SECRET_LENGTH} characters` : 'is not configured';
   // Never log the value itself.
-  console.error(`[Sonic Security] ${context}: signing secret ${reason}`);
+  console.error(`[epocanvas sonic Security] ${context}: signing secret ${reason}`);
 }

@@ -1,0 +1,7 @@
+PASS desktop-home-clean (20428ms)
+PASS desktop-search-by-typing (3406ms)
+PASS desktop-play-first-result (6629ms)
+PASS desktop-settings (3467ms)
+PASS desktop-404 (2089ms)
+PASS mobile-home (3246ms)
+PASS mobile-search-and-play (3614ms)

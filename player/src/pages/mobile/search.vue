@@ -203,7 +203,7 @@ const fetchSongs = async () => {
     return
   }
 
-  // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
+  // 1. 优先调用 epocanvas sonic 统一多源 SHA 聚合与音质分级搜索网关
   try {
     const sonicRes = await fetch(
       `/api/sonic/search/nexus?q=${encodeURIComponent(term)}&page=${state.songPage}&count=${state.songPageSize}`
@@ -232,7 +232,7 @@ const fetchSongs = async () => {
       return
     }
   } catch (err) {
-    console.warn('[Sonic Mobile Search] Nexus gateway warning:', err)
+    console.warn('[epocanvas sonic Mobile Search] Nexus gateway warning:', err)
   }
 
   // 2. 备用兜底检索通道

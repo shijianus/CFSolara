@@ -1,5 +1,5 @@
-// Sonic Gateway — Nexus Search Orchestrator
-// Brand: Sonic (声波 / Sonic Multi-Source Search Gateway)
+// epocanvas sonic Gateway — Nexus Search Orchestrator
+// Brand: epocanvas sonic (声波 / epocanvas sonic Multi-Source Search Gateway)
 // Multi-source parallel search, timeout isolation, normalization & deduplication
 
 import type { AppEnv } from '../types';

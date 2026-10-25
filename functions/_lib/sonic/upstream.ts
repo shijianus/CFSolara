@@ -1,4 +1,4 @@
-// Sonic Gateway — Commercial Upstream Aggregation & Desensitization
+// epocanvas sonic Gateway — Commercial Upstream Aggregation & Desensitization
 // Bridges standard music platform requests (home, playlists, MVs, charts, artists) to high-availability upstreams,
 // with complete desensitization, privacy anonymization, and Edge CDN caching.
 

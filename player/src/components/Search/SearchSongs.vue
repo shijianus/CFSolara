@@ -41,7 +41,7 @@ const fetchSongs = async () => {
   state.isLoading = true
 
   try {
-    // 1. 优先调用 Sonic 统一多源 SHA 聚合与音质分级搜索网关
+    // 1. 优先调用 epocanvas sonic 统一多源 SHA 聚合与音质分级搜索网关
     try {
       const page = Math.floor((props.offset ?? 0) / (props.limit ?? 40)) + 1
       const count = props.limit ?? 40
@@ -73,7 +73,7 @@ const fetchSongs = async () => {
         return
       }
     } catch (err) {
-      console.warn('[Sonic Search] Nexus gateway warning:', err)
+      console.warn('[epocanvas sonic Search] Nexus gateway warning:', err)
     }
 
     // 2. 备用兜底检索通道
@@ -92,7 +92,7 @@ const fetchSongs = async () => {
         return
       }
     } catch (err) {
-      console.warn('[Sonic Search] CloudSearch fallback warning:', err)
+      console.warn('[epocanvas sonic Search] CloudSearch fallback warning:', err)
     }
 
     state.results = []

@@ -224,5 +224,5 @@ async function getSongLyrics(title: string, artist = '', platform = 'netease', p
 
 ## 🛡️ 架构独立性与多专案协作准则
 - epocanvas sonic 作为一个**独立的 Cloudflare Pages + Linux 本地解析引擎服务**运行，完全独立于任何特定博客或网站。
-- 外部专案（如 `shijianus-blog`）仅通过 HTTP RESTful API 与 epocanvas sonic 交互，保证了微服务架构的高内聚、低耦合与分布式弹性部署。
+- 外部专案（如 `example-blog`）仅通过 HTTP RESTful API 与 epocanvas sonic 交互，保证了微服务架构的高内聚、低耦合与分布式弹性部署。
 - 本项目采用 CC BY-NC-SA 协议，禁止商业化转售行为。

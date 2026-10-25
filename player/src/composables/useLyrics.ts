@@ -298,7 +298,7 @@ const fetchLyrics = async (idOrSong?: string | number | any, force = false, song
     let tran: RawLyricLine[] = []
     let roma: RawLyricLine[] = []
 
-    // ═══════ ① 优先调用 Sonic Lyrics Gateway 聚合端点 (/api/sonic/lyrics/nexus) ═══════
+    // ═══════ ① 优先调用 epocanvas sonic Lyrics Gateway 聚合端点 (/api/sonic/lyrics/nexus) ═══════
     try {
       const nexusParams = new URLSearchParams()
       if (title) nexusParams.set('title', title)

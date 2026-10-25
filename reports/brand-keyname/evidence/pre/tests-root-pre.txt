@@ -1,0 +1,401 @@
+
+> sonic@2.2.0 test
+> npm run typecheck && jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs && jiti scripts/test-security-hardening.mjs
+
+
+> sonic@2.2.0 typecheck
+> tsc --noEmit
+
+=== Running Sonic Gateway Test Suite ===
+
+1. Testing GET /api/sonic/lyrics/nexus (with platformId)
+[Sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic (got Sonic)
+  ✓ Data object exists
+  ✓ Meta object exists
+  ✓ Meta.attempts is an array
+  ✓ LatencyMs is number (649ms)
+  ✓ Netease attempt recorded
+
+2. Testing GET /api/sonic/lyrics/nexus (title only)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta.attempts recorded (1 attempts)
+
+3. Testing GET /api/sonic/lyrics/apple & ytmusic (disabled without keys)
+  ✓ Apple returns 501 Not Implemented (got 501)
+  ✓ Apple error code is PROVIDER_DISABLED
+  ✓ Brand is Sonic
+  ✓ YouTube Music returns 501 Not Implemented (got 501)
+  ✓ YouTube Music error code is PROVIDER_DISABLED
+
+4. Testing GET /api/sonic/lyrics/netease
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Provider is netease
+  ✓ Attempts logged
+
+5. Testing GET /api/sonic/search/nexus
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Tracks array returned (8 tracks)
+  ✓ Meta.attempts logged (3 attempts)
+  ✓ Track has title: "海阔天空"
+  ✓ Track has artist: "Beyond"
+  ✓ Track has platform: "sonic"
+  ✓ Track has platformId: "347230"
+  ✓ Track has sources[]: [{"platform":"netease","platformId":"1357375695","duration":240},{"platform":"netease","platformId":"1357374736","duration":240},{"platform":"netease","platformId":"347230","duration":326},{"platform":"qq","platformId":"001yS0N33yPm1B","duration":324},{"platform":"kugou","platformId":"c41e80a18d1448fa47086372999c7f43","duration":324},{"platform":"kugou","platformId":"e5c40a31c3c16ba461f650035734c123","duration":239}]
+
+6. Testing GET /api/sonic/search/gdstudio (disabled by default)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Meta provider is gdstudio
+  ✓ GDStudio is disabled by default (got true)
+  ✓ Disabled GDStudio returns 0 tracks
+
+7. Testing Upstream Timeout Isolation (1ms timeout)
+  ✓ Search returns 200 despite timeouts (got 200)
+  ✓ Brand is Sonic
+  ✓ Attempts logged with timeout errors
+
+8. Testing GET /api/sonic/search/qq (u.y.qq.com modern API)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ QQ returned 3 tracks
+
+9. Testing Native NetEase/Kugou Search & meta.attempts Provenance
+  ✓ NetEase Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Native NetEase returned 3 tracks
+  ✓ NetEase did not call gdstudio
+  ✓ Nexus search excludes gdstudio by default
+  ✓ Every attempt records truthful source & via
+
+10. Testing GET /api/sonic/search/kuwo (registered provider)
+  ✓ Status is 200, NOT 404 (got 200)
+  ✓ Brand is Sonic
+
+11. Testing Random String Lyrics (Must NOT return false-positive song)
+  ✓ Status is 200 (got 200)
+  ✓ Brand is Sonic
+  ✓ Level is 'none' for gibberish (got 'none')
+  ✓ No false-positive lyrics returned (length=0)
+
+========================================
+Test Results: 51 passed, 0 failed
+========================================
+
+=== Running Signed API Key / Auth Test Suite ===
+
+1. OAuth configuration and authorize URL
+  ✓ Base URL parsed
+  ✓ Client ID matched
+  ✓ Redirect URI matched
+  ✓ Authorize pathname is correct
+  ✓ Authorize client_id parameter matches
+  ✓ OAuth state preserved
+  ✓ PKCE challenge included
+  ✓ PKCE method is S256
+  ✓ Short/non-random OAuth state rejected
+
+1a. Redirect URI is configured, never taken blindly from Origin
+  ✓ Allowed origin builds callback URI
+  ✓ Unlisted Origin is rejected
+  ✓ Missing redirect URI and origin is rejected (no default domain fallback)
+  ✓ Plain-HTTP redirect URI rejected
+  ✓ Plain-HTTP Epomail base URL rejected
+
+1c. Login issues random state and PKCE cookies
+  ✓ Login returns authorize URL
+  ✓ Client-supplied state is ignored; random state used
+  ✓ State cookie matches authorize URL
+  ✓ OAuth cookie Path limited to /api/auth
+  ✓ OAuth cookie is HttpOnly
+  ✓ OAuth cookie is Secure
+  ✓ OAuth cookie is SameSite=Lax
+  ✓ OAuth cookie lives for 10 minutes
+  ✓ Login uses PKCE S256
+  ✓ PKCE verifier cookie issued
+  ✓ PKCE challenge is SHA-256 of verifier
+
+1d. Callback rejects missing or mismatched OAuth state
+[Sonic Auth] callback rejected: OAuth state missing or mismatched
+  ✓ Missing state returns 400 (got 400)
+[Sonic Auth] callback rejected: OAuth state missing or mismatched
+  ✓ State without cookie returns 400
+[Sonic Auth] callback rejected: OAuth state missing or mismatched
+  ✓ State mismatch returns 400
+  ✓ Rejected callback clears state cookie
+
+1b. OAuth client credentials are mandatory
+  ✓ Missing EPOMAIL_CLIENT_ID/SECRET throws AuthConfigError
+[Sonic Auth] login unavailable (OAUTH_MISCONFIGURED)
+  ✓ Login returns 503 without OAuth credentials (got 503)
+
+2. createSession issues sonic_live_v1.<payload>.<signature>
+  ✓ Provided user ID preserved
+  ✓ Email normalized to lowercase
+  ✓ Key uses sonic_live_v1 prefix
+  ✓ Key has version, payload and signature segments
+  ✓ Signature is not truncated (full HMAC-SHA256)
+  ✓ Payload v=1
+  ✓ Payload email matches
+  ✓ Payload exp is future seconds
+  ✓ Payload carries key id
+  ✓ Session expiry matches payload
+
+3. Random user id uses crypto.randomUUID (no Math.random)
+  ✓ Generated id looks like a UUID (usr_a10a346d-529a-4bf0-8521-9882b5de44e9)
+  ✓ Generated ids are unique
+
+4. Valid key authenticates through headers
+  ✓ Valid key authenticates
+  ✓ Verified user email matches
+  ✓ Verified user keeps original key
+  ✓ Bearer header authenticates
+  ✓ X-Api-Key header authenticates
+  ✓ X-CFSolara-Key header still transports a valid new key
+
+5. Forged / tampered / expired keys are rejected
+  ✓ Legacy forged sonic_live_<b64(email)>_<sig> rejected
+  ✓ Tampered email rejected
+  ✓ Tampered expiry rejected
+  ✓ Expired key rejected
+  ✓ Absurdly far-future expiry rejected
+[Sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Key rejected when SONIC_SECRET is missing
+  ✓ Key rejected when SONIC_SECRET is too short
+
+6. Legacy key formats are rejected
+  ✓ Old sonic_live_ format rejected
+  ✓ Old solara_live_ format rejected
+
+7. Secret rotation via SONIC_SECRET_PREV
+  ✓ Old key rejected after rotation without previous secret
+  ✓ Old key accepted via SONIC_SECRET_PREV
+  ✓ Rotated key preserves email
+
+8. Signing fails closed without a strong secret
+  ✓ createSession throws AuthConfigError (503) without SONIC_SECRET
+  ✓ signApiKey rejects a short secret
+
+9. Query-string keys are opt-in only
+  ✓ Query api_key rejected by default
+  ✓ Query api_key accepted only with SONIC_ALLOW_QUERY_KEY=1
+  ✓ extractAuthCredentials omits query key by default
+
+========================================
+Auth Test Results: 66 passed, 0 failed
+========================================
+
+=== Running Cover Gateway Test Suite ===
+
+1. Testing GET /api/music/cover with no params
+[Sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Status is 200 (got 200)
+  ✓ Returns SVG fallback
+  ✓ Contains valid SVG vector graphic
+
+2. Testing NetEase Song ID Cover Resolution
+  ✓ Status is 200 (got 200)
+  ✓ Content type is valid (image/jpg)
+  ✓ CORS Allow-Origin header is *
+
+3. Testing QQ Music Mid Cover Resolution
+  ✓ Status is 200 (got 200)
+  ✓ Returns valid image format (image/svg+xml;charset=utf-8)
+
+4. Testing Artist Avatar Search Fallback
+  ✓ Status is 200 (got 200)
+  ✓ Returns artist image (image/jpg)
+
+5. Testing Direct URL Proxy Mode
+  ✓ Status is 200 (got 200)
+  ✓ CORS Allow-Origin header is present on proxy
+  ✓ Image content type is preserved (len=unknown)
+
+6. Testing Invalid Target URL Fallback
+  ✓ Status is 200 (got 200)
+  ✓ Fails over to SVG fallback instead of 404
+
+========================================
+Cover Gateway Test Results: 15 passed, 0 failed
+========================================
+
+=== Running Sonic Local Engine, Security & Degradation Test Suite ===
+
+1. Testing Pure-TS MD5 & AES-128-ECB Crypto Parity
+  ✓ MD5 matches node:crypto for ""
+  ✓ MD5 matches node:crypto for "abc"
+  ✓ MD5 matches node:crypto for "nobody/api/song/enhance/"
+  ✓ MD5 matches node:crypto for "起风了 - 买辣椒也用券"
+  ✓ AES-128-ECB matches node:crypto byte-for-byte
+  ✓ buildNeteaseLinuxApiParams matches
+  ✓ buildNeteaseEapiParams generates encrypted hex
+
+2. Testing Condition 1b (Third-Party & VIP Unblock Disabled by Default + Honest Provenance)
+  ✓ SONIC_ENABLE_GDSTUDIO defaults to false
+  ✓ SONIC_ENABLE_LYRIVA defaults to false
+  ✓ SONIC_ENABLE_UNBLOCK defaults to false
+[Sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Single gdstudio search reports meta.disabled=true
+  ✓ gdstudio attempt honestly marked via=third-party, ok=false
+  ✓ Single lyriva lyrics reports meta.disabled=true
+  ✓ lyriva attempt honestly marked via=third-party, ok=false
+
+3. Testing Condition 2c (Mandatory X-Sonic-Engine-Key on engine-sonic.*)
+  ✓ Anonymous access to engine-sonic returns 401 (got 401)
+  ✓ Error code is ENGINE_UNAUTHORIZED
+  ✓ Wrong engine key returns 401 (got 401)
+[Sonic Security] engine secret is missing or shorter than 32 characters
+  ✓ Unconfigured secret on engine host fails closed with 503
+  ✓ Valid X-Sonic-Engine-Key returns 200 (got 200)
+  ✓ Engine health payload ok=true & runtime=linux-engine
+  ✓ Public IP uses CF-Connecting-IP only
+  ✓ Missing CF-Connecting-IP shares strict unknown bucket
+  ✓ X-Sonic-Client-IP ignored without engine secret
+  ✓ Forwarded IP trusted with valid engine secret
+  ✓ Invalid forwarded IP falls back to unknown
+  ✓ SSRF blocks 127.0.0.1
+  ✓ SSRF blocks cloud metadata IP 169.254.169.254
+  ✓ SSRF blocks Docker internal bridge 172.18.0.2
+  ✓ SSRF blocks engine-sonic loop
+  ✓ SSRF allows public music CDN
+  ✓ Forwarding to 127.0.0.1 rejected with 400 (got 400)
+
+4. Testing Tiered Rate Limiter (Anonymous vs API Key)
+  ✓ Anonymous burst > limit is rate-limited (got allowed=false, tier=anonymous, limit=10)
+  ✓ Valid sonic_live_ API Key upgrades to api-key tier
+  ✓ Rotating X-Sonic-Client-IP cannot escape the CF IP bucket
+  ✓ 0 RPM falls back to the default limit (got 240)
+  ✓ Configured RPM is capped (got 100000)
+  ✓ KV-backed limiter persists across memory reset
+  ✓ KV limiter stores one windowed counter
+
+5. Testing Degradation State Machine (CLOSED -> 530 OPEN -> Fast-Fail -> HALF_OPEN -> CLOSED)
+  ✓ Healthy engine search returns 200
+  ✓ Healthy response has no X-Sonic-Degraded header
+  ✓ Pages -> Engine forwarding sets CF client IP (does not append spoofed header)
+  ✓ Pages -> Engine forwarding overwrites client X-Sonic-Engine-Key with the gateway secret
+  ✓ Primary attempt is local-engine ok=true
+  ✓ Engine sub-attempt preserves local-netease provenance
+  ✓ 530 Tunnel error trips circuit breaker immediately to OPEN
+  ✓ Outage response sets X-Sonic-Degraded: 1
+  ✓ Outage response sets meta.degraded=true
+  ✓ OPEN circuit fast-fails without hitting dead tunnel
+  ✓ Fast-fail recorded in meta.attempts
+  ✓ Cached search result served immediately during outage
+  ✓ Degraded unresolvable stream returns 503 (got 503)
+  ✓ Degraded 503 stream sets X-Sonic-Degraded: 1
+  ✓ Degraded stream returns machine-readable STREAM_UNAVAILABLE_DEGRADED
+  ✓ Circuit recovers HALF_OPEN -> CLOSED after healthy probe
+  ✓ Recovered response clears degraded=false
+
+6. Testing GET /api Empty-Path Index & login/status Compatibility
+  ✓ GET /api returns 200 Sonic index
+  ✓ GET /api/login/status returns clean guest session
+
+7. Testing Linux Node 22 HTTP Server (createSonicServer)
+  ✓ Anonymous root request on engine-sonic returns 401 (got 401)
+  ✓ Authenticated engine health over HTTP returns 200
+
+========================================
+Local Engine & Degradation Test Results: 59 passed, 0 failed
+========================================
+
+=== Running SSRF / Outbound URL Hardening Tests ===
+
+1. IP literal normalization and private ranges
+  ✓ Blocks IPv4 loopback (127.0.0.1)
+  ✓ Blocks decimal IPv4 loopback (2130706433)
+  ✓ Blocks hex IPv4 loopback (0x7f.0.0.1)
+  ✓ Blocks octal IPv4 loopback (0177.0.0.1)
+  ✓ Blocks IPv4-mapped IPv6 loopback ([::ffff:127.0.0.1])
+  ✓ Blocks IPv6 loopback (::1)
+  ✓ Blocks IPv6 unspecified (::)
+  ✓ Blocks cloud metadata (169.254.169.254)
+  ✓ Blocks localhost with trailing dot (localhost.)
+  ✓ Blocks 0.0.0.0/8 (0.0.0.0)
+  ✓ Blocks CGNAT 100.64/10 (100.64.0.1)
+  ✓ Blocks 192.0.0.0/24 (192.0.0.1)
+  ✓ Blocks RFC1918 (192.168.1.1)
+  ✓ Blocks benchmark 198.18/15 (198.18.0.1)
+  ✓ Blocks multicast (224.0.0.1)
+  ✓ Blocks IPv6 ULA (fc00::1)
+  ✓ Blocks IPv6 link-local (fe80::1)
+  ✓ Blocks IPv4-mapped private (::ffff:10.0.0.1)
+  ✓ Blocks IP-echo DNS service (127.0.0.1.nip.io)
+  ✓ Blocks cloud metadata hostname (metadata.google.internal)
+  ✓ Blocks internal engine hostname (engine-sonic.epocanvas.tech)
+  ✓ Allows public host example.com
+  ✓ Allows public host m701.music.126.net
+  ✓ Allows public host y.gtimg.cn
+
+2. Protocol / port / userinfo validation
+  ✓ HTTPS target allowed
+  ✓ Plain HTTP rejected by default
+  ✓ Plain HTTP allowed only when SONIC_ALLOW_HTTP_OUTBOUND=1
+  ✓ Non-80/443 port rejected
+  ✓ Userinfo in URL rejected
+  ✓ file:// rejected
+  ✓ gopher:// rejected
+
+3. Allow-list suffix matching
+  ✓ Exact allow-list host matches
+  ✓ Dotted subdomain matches
+  ✓ evil-music.com does not match music.com
+  ✓ Suffix after host does not match
+  ✓ Empty allow-list matches nothing
+  ✓ Outbound target outside allow-list rejected
+
+4. Redirect revalidation
+  ✓ Redirect to cloud metadata rejected
+  ✓ Redirect to loopback rejected
+  ✓ HTTPS -> HTTP downgrade rejected
+  ✓ Redirect outside allow-list rejected
+
+4b. safeFetch follows redirects manually and strips credentials
+  ✓ safeFetch rejects a redirect to an internal IP
+  ✓ safeFetch enforces the redirect limit
+  ✓ safeFetch strips Cookie from proxied requests
+  ✓ safeFetch strips Authorization from proxied requests
+  ✓ safeFetch preserves allow-listed request headers
+  ✓ safeFetch enforces the response size cap
+
+5. Proxy handlers reject dangerous targets before fetch
+[Sonic Security] API key signing secret is missing or shorter than 32 characters
+  ✓ Forward to 127.0.0.1 rejected with 400 (got 400)
+  ✓ Forward to decimal loopback rejected with 400 (got 400)
+  ✓ Forward with userinfo rejected with 400 (got 400)
+  ✓ Palette with userinfo rejected with 400 (got 400)
+  ✓ Stream target loopback rejected with 400 (got 400)
+  ✓ Cover falls back to branded SVG instead of fetching loopback
+  ✓ Cover SSRF fallback marked
+
+6. Engine-side DNS resolution guard
+  ✓ Engine DNS guard rejects loopback literal
+  ✓ Engine DNS guard rejects IPv4-mapped private literal
+  ✓ Engine DNS guard allows a public IP literal
+
+7. Engine auth and upstream error redaction
+  ✓ Constant-time comparison accepts equal values
+  ✓ Constant-time comparison rejects unequal values
+  ✓ Valid engine key accepted
+  ✓ Wrong engine key rejected
+  ✓ Host/X-Forwarded-Host cannot force engine auth on a public path
+  ✓ Engine paths always require engine auth
+[Sonic Security] engine secret is missing or shorter than 32 characters
+  ✓ Short engine secret fails closed with 503
+  ✓ Authenticated engine health responds
+  ✓ Health response does not expose engine URL
+  ✓ Health response does not expose internal addresses
+[Sonic Auth] token exchange rejected (status=401)
+  ✓ exchangeCode does not echo upstream response body
+  ✓ exchangeCode error contains no internal address
+  ✓ fetchUserInfo does not echo upstream body
+
+========================================
+SSRF Hardening Test Results: 70 passed, 0 failed
+========================================
+

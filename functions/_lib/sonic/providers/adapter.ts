@@ -1,4 +1,4 @@
-// Sonic Gateway — Provider Adapter Interface
+// epocanvas sonic Gateway — Provider Adapter Interface
 
 import type { AppEnv } from '../../types';
 import type {
