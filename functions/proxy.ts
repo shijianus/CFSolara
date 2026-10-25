@@ -4,6 +4,7 @@ import {
   buildRateLimitErrorResponse,
   checkEngineAccess,
   evaluateGatewayRateLimit,
+  fetchWithRedirectGuard,
 } from "./_lib/sonic/security";
 import type { AppEnv } from "./_lib/types";
 
@@ -87,7 +88,8 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
     (init.headers as Record<string, string>)["Range"] = rangeHeader;
   }
 
-  const upstream = await fetch(normalized.toString(), init);
+  // Per-hop re-validation: a kuwo.cn URL that 302s elsewhere is not followed.
+  const upstream = await fetchWithRedirectGuard(normalized.toString(), init, (u) => isAllowedKuwoHost(u.hostname));
   const headers = createCorsHeaders(upstream.headers);
   if (!headers.has("Cache-Control")) {
     headers.set("Cache-Control", "public, max-age=3600");
@@ -183,7 +185,7 @@ async function proxyApiRequest(url: URL, request: Request, env?: AppEnv): Promis
     );
   }
 
-  const apiUrl = new URL(cfg.gdstudioUrl);
+  const apiUrl = new URL(cfg.upstreamGdstudio);
   url.searchParams.forEach((value, key) => {
     if (key === "target" || key === "callback") return;
     apiUrl.searchParams.set(key, value);

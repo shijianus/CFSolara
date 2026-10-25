@@ -13,6 +13,8 @@ import {
   evaluateGatewayRateLimit,
   buildRateLimitErrorResponse,
   isBlockedSsrfHost,
+  isAllowedMediaHost,
+  fetchWithRedirectGuard,
 } from '../../_lib/sonic/security';
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
@@ -37,12 +39,14 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
   if (targetUrl) {
     try {
       const parsedTarget = new URL(targetUrl);
-      // Security safeguard: only forward public http and https hosts
+      // Security safeguard (audit fix #6): only proxy a media-host allowlist,
+      // and re-validate EVERY redirect hop before following it.
       if (
         (parsedTarget.protocol !== 'http:' && parsedTarget.protocol !== 'https:') ||
-        isBlockedSsrfHost(parsedTarget.hostname)
+        isBlockedSsrfHost(parsedTarget.hostname) ||
+        !isAllowedMediaHost(parsedTarget.hostname)
       ) {
-        return sonicError('INVALID_TARGET', 'Only public http/https URLs are permitted', 400, { provider: 'forward' });
+        return sonicError('INVALID_TARGET', 'Only whitelisted public media http/https URLs are permitted', 400, { provider: 'forward' });
       }
 
       const forwardHeaders = new Headers();
@@ -56,10 +60,11 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
       const range = request.headers.get('Range');
       if (range) forwardHeaders.set('Range', range);
 
-      const upstreamResp = await fetch(parsedTarget.toString(), {
-        headers: forwardHeaders,
-        redirect: 'follow',
-      });
+      const upstreamResp = await fetchWithRedirectGuard(
+        parsedTarget,
+        { headers: forwardHeaders },
+        (u) => (u.protocol === 'http:' || u.protocol === 'https:') && !isBlockedSsrfHost(u.hostname) && isAllowedMediaHost(u.hostname),
+      );
 
       const responseHeaders = new Headers(upstreamResp.headers);
       responseHeaders.set('Access-Control-Allow-Origin', '*');

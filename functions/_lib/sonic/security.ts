@@ -257,3 +257,62 @@ export function isBlockedSsrfHost(hostname: string): boolean {
   if (/^(fc|fd|fe80):/i.test(h)) return true;
   return false;
 }
+
+// ── Media-host allowlist & redirect-safe fetch (audit fix #6) ──
+
+/**
+ * Suffix allowlist for hosts whose media/covers/lyrics assets the gateway
+ * proxies on behalf of API consumers. Applies to `/api/sonic/forward?url=`
+ * (previously an open proxy for ANY public host).
+ */
+export function isAllowedMediaHost(hostname: string): boolean {
+  const h = (hostname || '').toLowerCase().trim().replace(/^\[|\]$/g, '');
+  if (!h) return false;
+  const suffixes = [
+    'music.126.net',
+    '.163.com',
+    '.qq.com',
+    'gtimg.cn',
+    '.kugou.com',
+    '.kuwo.cn',
+    'lrclib.net',
+    'amll.dev',
+    'epocanvas.tech',
+    'epocanvas.com',
+  ];
+  return suffixes.some((s) => h === s || h.endsWith(`.${s.replace(/^\./, '')}`));
+}
+
+/**
+ * Fetch with per-hop re-validation. Every redirect target is re-checked with
+ * `validate` BEFORE following, so a whitelisted host can no longer bounce a
+ * request into an internal/private address (audit finding #8's TOCTOU window).
+ */
+export async function fetchWithRedirectGuard(
+  target: string | URL,
+  init: RequestInit = {},
+  validate: (u: URL) => boolean,
+  maxRedirects = 4,
+): Promise<Response> {
+  let currentUrl = typeof target === 'string' ? target : target.toString();
+  for (let hop = 0; hop <= maxRedirects; hop++) {
+    const parsed = new URL(currentUrl);
+    if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || !validate(parsed)) {
+      throw new Error(`FETCH_TARGET_BLOCKED: ${parsed.protocol}//${parsed.hostname}`);
+    }
+    const res = await fetch(parsed.toString(), { ...init, redirect: 'manual' });
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      res.body?.cancel?.().catch(() => {});
+      if (!location) return res;
+      const hopCount = hop + 1;
+      if (hopCount > maxRedirects) {
+        throw new Error('FETCH_REDIRECT_LOOP: too many redirects');
+      }
+      currentUrl = new URL(location, parsed).toString();
+      continue;
+    }
+    return res;
+  }
+  throw new Error('FETCH_REDIRECT_LOOP: too many redirects');
+}

@@ -2,7 +2,7 @@ import { corsHeaders, errorResponse, handleOptions, jsonResponse } from '../../_
 import { isAllowedKuwoHost } from '../../_lib/music';
 import { resolvePlayableStream } from '../../_lib/sonic/native-protocols';
 import { getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
-import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse, fetchWithRedirectGuard } from '../../_lib/sonic/security';
 import { getSonicConfig } from '../../_lib/sonic/config';
 import type { AppEnv } from '../../_lib/types';
 
@@ -216,11 +216,14 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       requestHeaders.Range = rangeHeader;
     }
 
-    const upstream = await fetch(targetUrl.toString(), {
-      method: request.method,
-      headers: requestHeaders,
-      redirect: 'follow',
-    });
+    const upstream = await fetchWithRedirectGuard(
+      targetUrl.toString(),
+      {
+        method: request.method,
+        headers: requestHeaders,
+      },
+      (u) => isAllowedDirectTargetHost(u.hostname),
+    );
 
     const headers = corsHeaders();
     const forwardHeaders = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified'];
