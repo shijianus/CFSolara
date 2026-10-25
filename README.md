@@ -182,11 +182,56 @@ docker compose up -d --build
 docker compose ps
 ```
 
-### 3. 环境变量参考 (`.env.example`)
+### 3. 必配密钥、环境变量与轮换
+
+> **没有任何内置默认密钥。** `SONIC_SECRET` / `SONIC_ENGINE_SECRET` 缺失或长度小于 32 字符时一律 fail closed：签发接口返回 `503`，校验路径直接拒绝。`EPOMAIL_CLIENT_ID` / `EPOMAIL_CLIENT_SECRET` 缺失时 OAuth 登录接口返回 `503`。
+
+```bash
+# 生成强随机密钥（>= 32 字符）
+openssl rand -base64 48
+
+# Cloudflare Pages 加密变量（不要写进 wrangler.toml / 仓库）
+npx wrangler pages secret put SONIC_SECRET --project-name cfsolara
+npx wrangler pages secret put EPOMAIL_CLIENT_ID --project-name cfsolara
+npx wrangler pages secret put EPOMAIL_CLIENT_SECRET --project-name cfsolara
+npx wrangler pages secret put SONIC_ENGINE_SECRET --project-name cfsolara
+# 轮换窗口内可选：用旧密钥继续验证尚未过期的 API Key
+npx wrangler pages secret put SONIC_SECRET_PREV --project-name cfsolara
+```
+
+- `SONIC_SECRET`：当前 API Key HMAC-SHA256 签名密钥，必须 ≥32 字符。
+- `SONIC_SECRET_PREV`：仅用于验签轮换前的旧 Key；旧 Key 全部过期后应立即删除。
+- `EPOMAIL_CLIENT_ID` / `EPOMAIL_CLIENT_SECRET`：Epomail OAuth 客户端凭据，无默认值。
+- `EPOMAIL_REDIRECT_URI`：必须与 Epomail 后台登记值完全一致；未配置时只允许 `SONIC_ALLOWED_ORIGINS` 白名单内的 origin 拼接，绝不直接信任请求 `Origin`。
+- `SONIC_ALLOWED_ORIGINS`：逗号分隔的精确 origin 白名单，例如 `https://sonic.epocanvas.tech,https://sonic.epocanvas.com`。
+- `SONIC_ENGINE_SECRET`：Pages → Linux Engine 的服务间密钥，必须 ≥32 字符，并在 Pages 与 VPS 两侧保持相同值。
+- `SONIC_ALLOW_QUERY_KEY`：默认 `0`。设为 `1` 后才接受 `?api_key=` / `?key=`。**风险**：查询字符串会进入访问日志、浏览器历史、`Referer` 与共享缓存，生产环境不建议开启。
+- `SONIC_ALLOW_HTTP_OUTBOUND`：默认 `0`，代理与 SSRF 防护层只允许 `https://`。仅本地开发可临时设为 `1`。
+- `SONIC_RATE_LIMIT_ANON_RPM` / `SONIC_RATE_LIMIT_AUTH_RPM`：0 或负数会回退到默认值，并设置上限，避免误配置成无限配额或全站拒绝。
+- `SONIC_RATE_LIMIT_KV`（可选）：绑定 Cloudflare KV namespace 后，限流计数可跨 isolate/实例共享（KV 最终一致，仍是近似限流）。未绑定时回退到进程内存 Map，仅对单实例有效。
+
+> ⚠️ **旧密钥已失效**：`sonic_live_<base64(email)>_<sig>` 与所有 `solara_live_*` Key 会被直接拒绝。旧版 Key 没有可信签名，无法安全迁移；用户必须重新登录获取新的 `sonic_live_v1.<payload>.<signature>`。曾出现在公开仓库历史中的硬编码密钥必须在部署时全部轮换为新值。
+
 ```ini
-# 服务间通信与内部鉴权 (Pages -> VPS Engine)
+# 服务间通信与内部鉴权 (Pages -> VPS Engine，必配)
 SONIC_LOCAL_ENGINE_URL="https://engine-sonic.epocanvas.tech"
-SONIC_ENGINE_SECRET="<your_strong_random_secret>"
+SONIC_ENGINE_SECRET="<openssl rand -base64 48>"
+
+# Epomail OAuth（必配）
+EPOMAIL_BASE_URL="https://mail.epocanvas.com"
+EPOMAIL_CLIENT_ID="<your_epomail_client_id>"
+EPOMAIL_CLIENT_SECRET="<your_epomail_client_secret>"
+EPOMAIL_REDIRECT_URI="https://sonic.epocanvas.tech/api/auth/callback"
+EPOMAIL_PKCE="1"
+
+# API Key 签名与轮换（必配）
+SONIC_SECRET="<openssl rand -base64 48>"
+SONIC_SECRET_PREV="<仅在轮换窗口内配置>"
+SONIC_ALLOWED_ORIGINS="https://sonic.epocanvas.tech,https://sonic.epocanvas.com"
+
+# 安全开关（默认关闭）
+SONIC_ALLOW_QUERY_KEY="0"
+SONIC_ALLOW_HTTP_OUTBOUND="0"
 
 # 本地原生协议音源开关 (1 启用, 0 禁用)
 SONIC_ENABLE_NETEASE="1"

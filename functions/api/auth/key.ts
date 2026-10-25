@@ -1,4 +1,4 @@
-import { createSession, verifyAuth } from '../../_lib/auth';
+import { AuthConfigError, createSession, verifyAuth } from '../../_lib/auth';
 import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
 import type { AppEnv } from '../../_lib/types';
 
@@ -12,20 +12,28 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
   // If POST, regenerate a fresh API Key
   if (request.method === 'POST') {
-    const newSession = await createSession(env, {
-      id: auth.user.id,
-      email: auth.user.email,
-      name: auth.user.name,
-      avatar: auth.user.avatar,
-      role: auth.user.role,
-    });
+    try {
+      const newSession = await createSession(env, {
+        id: auth.user.id,
+        email: auth.user.email,
+        name: auth.user.name,
+        avatar: auth.user.avatar,
+        role: auth.user.role,
+      });
 
-    return jsonResponse({
-      ok: true,
-      apiKey: newSession.apiKey,
-      expiresAt: newSession.expiresAt,
-      message: '新 API Key 生成成功，已就绪可连结至外部专案',
-    });
+      return jsonResponse({
+        ok: true,
+        apiKey: newSession.apiKey,
+        expiresAt: newSession.expiresAt,
+        message: '新 API Key 生成成功，已就绪可连结至外部专案',
+      });
+    } catch (error) {
+      if (error instanceof AuthConfigError) {
+        console.error(`[Sonic Auth] key issuance unavailable (${error.code})`);
+        return errorResponse('API key signing is not configured', 503);
+      }
+      throw error;
+    }
   }
 
   return jsonResponse({

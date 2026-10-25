@@ -2,7 +2,7 @@
 
 > **epocanvas sonic** 现已升级为**双层分布式平台化音乐服务**，将原有的单体音乐播放器解耦为细粒度的微服务 API，并通过 **Epomail OAuth 2.0** 与 **HMAC-SHA256 API Key** 作为统一接入鉴权体系，有效防止接口被滥用，同时允许第三方独立项目（如个人博客、静态站点、桌面与移动端应用）通过安全的 API Key 连结接入。
 >
-> **兼容说明**：`CFSolara`、`solara_live_`、`X-CFSolara-Key`、`solara.epocanvas.com` 等旧命名仍作为历史兼容标识保留；新接入请使用 `sonic_live_`、`X-Sonic-Key` 与 `sonic.epocanvas.com`。
+> **鉴权变更（安全加固）**：API Key 现采用 `sonic_live_v1.<payloadB64url>.<sigB64url>` 的 HMAC-SHA256 签名格式。所有旧格式 `sonic_live_<base64(email)>_<sig>` 与 `solara_live_*` 已失效，用户需重新登录获取新 Key。请求头名称仍兼容 `X-CFSolara-Key`，但只接受新格式 Key。
 
 ---
 
@@ -25,14 +25,16 @@
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
 2. **专案连结 API Key 与分级限流**：
-   - 登录 Epomail 后即可自动获得专案 API Key（当前签发格式为 `sonic_live_...`，同时 100% 向后兼容历史 `solara_live_...` 密钥）。
-   - 在第三方专案发起请求时，支持以下任一方式传递凭证：
+   - 登录 Epomail 后即可自动获得带签名的专案 API Key（格式 `sonic_live_v1.<payload>.<signature>`）。旧格式 Key（包括 `solara_live_*`）一律拒绝，需重新登录。
+   - 在第三方专案发起请求时，仅通过请求头传递凭证（默认不接受查询参数）：
      ```http
-     X-Sonic-Key: sonic_live_xxxxxxxx
-     # 或向后兼容历史请求头 / Bearer / 查询参数：
-     X-CFSolara-Key: solara_live_xxxxxxxx
-     Authorization: Bearer sonic_live_xxxxxxxx
+     X-Sonic-Key: sonic_live_v1.xxxxxxxx.xxxxxxxx
+     # 兼容请求头：
+     X-CFSolara-Key: sonic_live_v1.xxxxxxxx.xxxxxxxx
+     X-Api-Key: sonic_live_v1.xxxxxxxx.xxxxxxxx
+     Authorization: Bearer sonic_live_v1.xxxxxxxx.xxxxxxxx
      ```
+   - `?api_key=` / `?key=` 默认禁用；只有显式设置 `SONIC_ALLOW_QUERY_KEY=1` 才启用。查询字符串会进入日志、浏览器历史、`Referer` 和共享缓存，存在泄露风险，不建议在生产环境开启。
    - 网关内置滑动窗口分级限流（响应头携带 `X-RateLimit-Tier`、`X-RateLimit-Limit`、`X-RateLimit-Remaining`）：
      - 匿名前端访客（`anonymous`）：默认 `240` 次/分钟（可通过 `SONIC_REQUIRE_AUTH=1` 关闭匿名访问）；
      - 持有效 API Key 专案（`api-key`）：默认 `600` 次/分钟高配额；
@@ -173,7 +175,7 @@
 ```typescript
 // 外部专案客户端示例
 const API_BASE = 'https://sonic.epocanvas.tech/api'; // epocanvas sonic 线上主域名（备用域 https://sonic.epocanvas.com/api）
-const API_KEY = 'sonic_live_xxxxxxxx'; // 亦兼容历史 solara_live_xxxxxxxx
+const API_KEY = 'sonic_live_v1.xxxxxxxx.xxxxxxxx'; // HMAC-SHA256 签名 Key
 
 // 1. 点歌搜索 (优先使用 Sonic Nexus 聚合检索)
 async function searchSong(keyword: string) {
@@ -187,7 +189,8 @@ async function searchSong(keyword: string) {
 
 // 2. 播放音频流 (默认支持 Range 206 分段拉流)
 function getAudioStreamUrl(songId: string, source = 'netease', quality = '320') {
-  return `${API_BASE}/music/stream?id=${encodeURIComponent(songId)}&source=${source}&quality=${quality}&key=${API_KEY}`;
+  // 音频流同样通过请求头鉴权；不要使用 ?key= 查询参数。
+  return `${API_BASE}/music/stream?id=${encodeURIComponent(songId)}&source=${source}&quality=${quality}`;
 }
 
 // 3. 高精度逐字同步歌词

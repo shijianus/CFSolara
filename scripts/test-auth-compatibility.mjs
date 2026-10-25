@@ -10,6 +10,7 @@ import {
   buildAuthorizeUrl,
   getEpomailConfig,
 } from '../functions/_lib/auth.ts';
+import { onRequest as handleLogin } from '../functions/api/auth/login.ts';
 
 let passed = 0;
 let failed = 0;
@@ -73,6 +74,23 @@ async function runAuthTests() {
     assert(parsedUrl.pathname === '/oauth/authorize', 'Authorize pathname is correct');
     assert(parsedUrl.searchParams.get('client_id') === 'sonic_client_app', 'Authorize client_id parameter matches');
     assert(parsedUrl.searchParams.get('state') === 'custom_state_123', 'Custom state preserved');
+  }
+
+  console.log('\n1b. OAuth client credentials are mandatory');
+  {
+    let missingThrew = false;
+    try {
+      getEpomailConfig({}, 'https://sonic.epocanvas.com');
+    } catch (error) {
+      missingThrew = error instanceof AuthConfigError && error.code === 'OAUTH_MISCONFIGURED';
+    }
+    assert(missingThrew, 'Missing EPOMAIL_CLIENT_ID/SECRET throws AuthConfigError');
+
+    const loginRes = await handleLogin({
+      request: new Request('https://sonic.epocanvas.com/api/auth/login?mode=json'),
+      env: {},
+    });
+    assert(loginRes.status === 503, `Login returns 503 without OAuth credentials (got ${loginRes.status})`);
   }
 
   console.log('\n2. createSession issues sonic_live_v1.<payload>.<signature>');

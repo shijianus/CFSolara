@@ -4,8 +4,6 @@ import { isEnvEnabled } from './sonic/config';
 import { getSigningSecrets, MIN_SECRET_LENGTH } from './secrets';
 
 const DEFAULT_EPOMAIL_BASE = 'https://mail.epocanvas.com';
-const DEFAULT_CLIENT_ID = 'sonic_music_platform';
-const DEFAULT_CLIENT_SECRET = 'sonic_secret_2026';
 
 export const API_KEY_PREFIX = 'sonic_live_';
 const API_KEY_VERSION = 'v1';
@@ -232,8 +230,14 @@ export function clearVerifiedKeyCacheForTest(): void {
 
 export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {
   const baseUrl = (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
-  const clientId = env.EPOMAIL_CLIENT_ID || DEFAULT_CLIENT_ID;
-  const clientSecret = env.EPOMAIL_CLIENT_SECRET || DEFAULT_CLIENT_SECRET;
+  const clientId = String(env.EPOMAIL_CLIENT_ID || '').trim();
+  const clientSecret = String(env.EPOMAIL_CLIENT_SECRET || '').trim();
+  if (!clientId || !clientSecret) {
+    throw new AuthConfigError(
+      'OAUTH_MISCONFIGURED',
+      'EPOMAIL_CLIENT_ID and EPOMAIL_CLIENT_SECRET are required',
+    );
+  }
   const redirectUri = env.EPOMAIL_REDIRECT_URI || (requestOrigin ? `${requestOrigin}/api/auth/callback` : `${DEFAULT_EPOMAIL_BASE}/api/auth/callback`);
 
   return {

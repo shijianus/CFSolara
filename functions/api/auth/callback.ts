@@ -1,4 +1,4 @@
-import { createSession, exchangeCode, fetchUserInfo } from '../../_lib/auth';
+import { AuthConfigError, AuthError, createSession, exchangeCode, fetchUserInfo } from '../../_lib/auth';
 import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
 import type { AppEnv } from '../../_lib/types';
 
@@ -45,7 +45,14 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
     return Response.redirect(targetUrl.toString(), 302);
   } catch (err: any) {
-    console.error('[Sonic Auth Callback Error]', err);
-    return errorResponse(err?.message || 'OAuth 登录授权处理失败', 500);
+    if (err instanceof AuthConfigError) {
+      console.error(`[Sonic Auth] callback unavailable (${err.code})`);
+      return errorResponse('Authentication service is not configured', 503);
+    }
+    if (err instanceof AuthError && err.status === 400) {
+      return errorResponse('OAuth user information is invalid', 400);
+    }
+    console.error('[Sonic Auth Callback Error]', err?.name || 'unknown error');
+    return errorResponse('OAuth login failed', 502);
   }
 }
