@@ -305,7 +305,17 @@ function resolveRedirectUri(env: AppEnv, requestOrigin?: string): string {
 }
 
 export function getEpomailBaseUrl(env: AppEnv): string {
-  return (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
+  const baseUrl = (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new AuthConfigError('OAUTH_MISCONFIGURED', 'EPOMAIL_BASE_URL is not a valid URL');
+  }
+  if (!isSecureOrLoopback(parsed)) {
+    throw new AuthConfigError('OAUTH_MISCONFIGURED', 'EPOMAIL_BASE_URL must use HTTPS');
+  }
+  return baseUrl;
 }
 
 export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {

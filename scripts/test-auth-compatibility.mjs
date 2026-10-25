@@ -124,6 +124,14 @@ async function runAuthTests() {
       insecureRejected = error instanceof AuthConfigError && error.code === 'OAUTH_REDIRECT_INVALID';
     }
     assert(insecureRejected, 'Plain-HTTP redirect URI rejected');
+
+    let insecureBaseRejected = false;
+    try {
+      getEpomailConfig({ ...base, EPOMAIL_BASE_URL: 'http://mail.epocanvas.com' });
+    } catch (error) {
+      insecureBaseRejected = error instanceof AuthConfigError && error.code === 'OAUTH_MISCONFIGURED';
+    }
+    assert(insecureBaseRejected, 'Plain-HTTP Epomail base URL rejected');
   }
 
   console.log('\n1c. Login issues random state and PKCE cookies');
