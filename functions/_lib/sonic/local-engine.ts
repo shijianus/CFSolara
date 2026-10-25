@@ -6,7 +6,7 @@
 
 import type { AppEnv } from '../types';
 import { getSonicConfig } from './config';
-import { extractClientIp } from './security';
+import { getPublicClientIp, isValidIpLiteral } from './security';
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -107,6 +107,7 @@ export async function callLocalEngineJson<T = any>(
     request?: Request;
     timeoutMs?: number;
     signal?: AbortSignal;
+    clientIp?: string;
   },
 ): Promise<LocalEngineCallResult<T>> {
   const cfg = getSonicConfig(env);
@@ -172,7 +173,9 @@ export async function callLocalEngineJson<T = any>(
     headers['X-Sonic-Engine-Key'] = cfg.engineSecret;
   }
   if (options?.request) {
-    headers['X-Sonic-Client-IP'] = extractClientIp(options.request);
+    headers['X-Sonic-Client-IP'] = getPublicClientIp(options.request);
+  } else if (options?.clientIp && isValidIpLiteral(options.clientIp)) {
+    headers['X-Sonic-Client-IP'] = options.clientIp;
   }
 
   const signals: AbortSignal[] = [AbortSignal.timeout(effectiveTimeout)];
