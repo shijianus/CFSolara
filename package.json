@@ -13,7 +13,7 @@
     "build:server": "npm run build:engine",
     "start:engine": "node dist-server/index.mjs",
     "deploy": "npm run build && (${WRANGLER_BIN:-npx wrangler} pages deploy dist --project-name=${CF_PAGES_PROJECT:-cfsolara} --branch=${CF_PAGES_BRANCH:-main} --commit-dirty=true)",
-    "test": "jiti scripts/test-auth-signature.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-rate-limit-trust.mjs && jiti scripts/test-stream-detection.mjs && jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs",
+    "test": "jiti scripts/test-auth-signature.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-rate-limit-trust.mjs && jiti scripts/test-stream-detection.mjs && jiti scripts/test-fetch-guard.mjs && jiti scripts/test-url-length.mjs && jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs",
     "test:live": "jiti scripts/test-sonic-gateway-live.mjs && jiti scripts/test-cover-gateway.mjs",
     "test:gateway": "jiti scripts/test-sonic-gateway.mjs",
     "test:gateway:live": "jiti scripts/test-sonic-gateway-live.mjs",

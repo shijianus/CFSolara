@@ -230,6 +230,9 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
   if (!rl.allowed) return buildRateLimitErrorResponse(rl);
 
   const url = new URL(request.url);
+  if (url.href.length > 2048) {
+    return new Response("Request URL too long", { status: 414, headers: createCorsHeaders() });
+  }
   const target = url.searchParams.get("target");
 
   if (target) {

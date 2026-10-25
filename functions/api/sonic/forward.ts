@@ -32,6 +32,9 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
   if (!rl.allowed) return buildRateLimitErrorResponse(rl);
 
   const url = new URL(request.url);
+  if (url.href.length > 2048) {
+    return sonicError('URI_TOO_LONG', 'Request URL too long', 414, { provider: 'forward' });
+  }
   const type = (url.searchParams.get('type') || '').toLowerCase();
   const targetUrl = url.searchParams.get('url') || url.searchParams.get('target');
 

@@ -6,6 +6,12 @@ import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorRespons
 import { getSonicConfig } from '../../_lib/sonic/config';
 import type { AppEnv } from '../../_lib/types';
 
+const MAX_REQUEST_URL_LENGTH = 2048;
+
+function isOverlongRequestUrl(url: URL): boolean {
+  return url.href.length > MAX_REQUEST_URL_LENGTH;
+}
+
 function sanitizeTargetUrl(rawUrl: string): URL | null {
   try {
     const parsed = new URL(rawUrl);
@@ -41,6 +47,9 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   if (!rl.allowed) return buildRateLimitErrorResponse(rl);
 
   const url = new URL(request.url);
+  if (isOverlongRequestUrl(url)) {
+    return errorResponse('Request URL too long', 414);
+  }
   const targetParam = url.searchParams.get('target');
   const streamMode = (url.searchParams.get('mode') || '').toLowerCase();
   let targetUrl: URL | null = null;
