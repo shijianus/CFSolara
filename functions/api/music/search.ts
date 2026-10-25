@@ -4,6 +4,7 @@ import { getSonicConfig } from '../../_lib/sonic/config';
 import { callLocalEngineJson, getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
 import type { AppEnv } from '../../_lib/types';
+import { sanitizeErrorForClient } from '../../_lib/sonic/net-guard';
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -77,6 +78,6 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     );
   } catch (err: any) {
     console.error('[Sonic Music Search Error]', err);
-    return errorResponse(err?.message || '搜索曲库失败', 502);
+    return errorResponse(sanitizeErrorForClient(err, '搜索曲库失败'), 502);
   }
 }

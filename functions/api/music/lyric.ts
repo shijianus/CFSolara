@@ -2,6 +2,7 @@ import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
 import { getUniversalLyrics } from '../../_lib/music';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
 import type { AppEnv } from '../../_lib/types';
+import { sanitizeErrorForClient } from '../../_lib/sonic/net-guard';
 
 export async function onRequest({ request, env, waitUntil }: { request: Request; env: AppEnv; waitUntil?: (promise: Promise<any>) => void }): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -154,7 +155,7 @@ export async function onRequest({ request, env, waitUntil }: { request: Request;
     return response;
   } catch (err: any) {
     console.error('[Sonic Music Lyric Error]', err);
-    return errorResponse(err?.message || '获取歌词失败', 502, {
+    return errorResponse(sanitizeErrorForClient(err, '获取歌词失败'), 502, {
       'Cache-Control': 'public, max-age=30',
       'Access-Control-Allow-Origin': '*',
     });

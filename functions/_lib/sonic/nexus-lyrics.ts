@@ -33,6 +33,7 @@ import {
   getUniversalLyrics,
 } from '../music';
 import { callLocalEngineJson, type CircuitState } from './local-engine';
+import { sanitizeErrorForClient } from './net-guard';
 
 export interface NexusLyricsResult {
   data: SonicLyricsData;
@@ -274,7 +275,7 @@ export async function resolveNexusLyrics(
           recordAttempt(String(adapter.name), false, pStart, 'No native lyrics returned');
         }
       } catch (err: any) {
-        recordAttempt(String(adapter.name), false, pStart, err?.message || 'Platform native error');
+        recordAttempt(String(adapter.name), false, pStart, sanitizeErrorForClient(err, 'Platform native error'));
       }
     }
   }
@@ -324,7 +325,7 @@ export async function resolveNexusLyrics(
         recordAttempt('amll', false, aStart, 'Not found by ID');
       }
     } catch (err: any) {
-      recordAttempt('amll', false, aStart, err?.message || 'AMLL ID error');
+      recordAttempt('amll', false, aStart, sanitizeErrorForClient(err, 'AMLL ID error'));
     }
   }
 
@@ -373,7 +374,7 @@ export async function resolveNexusLyrics(
         recordAttempt('amll', false, sStart, 'Not found by search');
       }
     } catch (err: any) {
-      recordAttempt('amll', false, sStart, err?.message || 'AMLL search error');
+      recordAttempt('amll', false, sStart, sanitizeErrorForClient(err, 'AMLL search error'));
     }
   }
 
@@ -395,7 +396,7 @@ export async function resolveNexusLyrics(
         recordAttempt('kugou', false, kStart, 'No lyrics from Kugou');
       }
     } catch (err: any) {
-      recordAttempt('kugou', false, kStart, err?.message || 'Kugou KRC error');
+      recordAttempt('kugou', false, kStart, sanitizeErrorForClient(err, 'Kugou KRC error'));
     }
   }
 
@@ -420,7 +421,7 @@ export async function resolveNexusLyrics(
         recordAttempt('lrclib', false, lStart, 'Not found in LRCLIB');
       }
     } catch (err: any) {
-      recordAttempt('lrclib', false, lStart, err?.message || 'LRCLIB error');
+      recordAttempt('lrclib', false, lStart, sanitizeErrorForClient(err, 'LRCLIB error'));
     }
   }
 
@@ -471,7 +472,7 @@ export async function resolveNexusLyrics(
         recordAttempt('universal', false, uStart, 'Universal engine returned empty lines');
       }
     } catch (err: any) {
-      recordAttempt('universal', false, uStart, err?.message || 'Universal engine error');
+      recordAttempt('universal', false, uStart, sanitizeErrorForClient(err, 'Universal engine error'));
     }
   }
 
@@ -493,7 +494,7 @@ export async function resolveNexusLyrics(
         recordAttempt('lyriva', false, lyrivaStart, 'No synced lyrics from Lyriva', 'third-party');
       }
     } catch (err: any) {
-      recordAttempt('lyriva', false, lyrivaStart, err?.message || 'Lyriva fallback error', 'third-party');
+      recordAttempt('lyriva', false, lyrivaStart, sanitizeErrorForClient(err, 'Lyriva fallback error'), 'third-party');
     }
   }
 

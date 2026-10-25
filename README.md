@@ -210,6 +210,8 @@ npx wrangler pages secret put SONIC_SECRET_PREV --project-name cfsolara
 - `SONIC_RATE_LIMIT_ANON_RPM` / `SONIC_RATE_LIMIT_AUTH_RPM`：0 或负数会回退到默认值，并设置上限，避免误配置成无限配额或全站拒绝。
 - `SONIC_RATE_LIMIT_KV`（可选）：绑定 Cloudflare KV namespace 后，限流计数可跨 isolate/实例共享（KV 最终一致，仍是近似限流）。未绑定时回退到进程内存 Map，仅对单实例有效。
 
+> **引擎鉴权**：`checkEngineAccess` 按 `SONIC_RUNTIME=linux-engine`、`SONIC_REQUIRE_ENGINE_AUTH=1` 或固定路径 `/api/sonic/engine/*`、`/api/sonic/resolve/*` 判定，不再信任可伪造的 `Host` / `X-Forwarded-Host`。`SONIC_ENGINE_SECRET` 必须 ≥32 字符；比较前双方做 SHA-256，长度差异不会通过时序泄露。
+
 > ⚠️ **旧密钥已失效**：`sonic_live_<base64(email)>_<sig>` 与所有 `solara_live_*` Key 会被直接拒绝。旧版 Key 没有可信签名，无法安全迁移；用户必须重新登录获取新的 `sonic_live_v1.<payload>.<signature>`。曾出现在公开仓库历史中的硬编码密钥必须在部署时全部轮换为新值。
 
 ```ini

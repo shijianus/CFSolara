@@ -18,6 +18,7 @@ import { neteaseProvider } from './providers/netease';
 import { qqProvider } from './providers/qq';
 import { kugouProvider } from './providers/kugou';
 import { callLocalEngineJson, type CircuitState } from './local-engine';
+import { sanitizeErrorForClient } from './net-guard';
 
 export interface NexusSearchResult {
   data: SonicSearchData;
@@ -190,7 +191,7 @@ export async function searchNexus(
           source: via,
           ok: false,
           ms: Date.now() - pStart,
-          error: err?.message || 'Search timeout or network error',
+          error: sanitizeErrorForClient(err, 'Search timeout or network error'),
         });
         return { provider: String(provider.name), tracks: [] };
       }
@@ -242,7 +243,7 @@ export async function searchNexus(
         source: 'third-party',
         ok: false,
         ms: Date.now() - gStart,
-        error: err?.message || 'GDStudio fallback error',
+        error: sanitizeErrorForClient(err, 'GDStudio fallback error'),
       });
     }
   }

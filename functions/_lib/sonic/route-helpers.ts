@@ -7,6 +7,7 @@ import { getSonicConfig } from './config';
 import { getSonicCachedJson, putSonicCachedJson } from './cache';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from './security';
 import { callLocalEngineJson } from './local-engine';
+import { sanitizeErrorForClient } from './net-guard';
 
 export { handleOptions };
 
@@ -365,11 +366,11 @@ export async function handleSingleProviderLyricsRequest(
     });
   } catch (err: any) {
     const latencyMs = Date.now() - startTime;
-    return sonicError('PROVIDER_ERROR', err?.message || `Failed to fetch lyrics from ${p}`, 502, {
+    return sonicError('PROVIDER_ERROR', sanitizeErrorForClient(err, `Failed to fetch lyrics from ${p}`), 502, {
       provider: p,
       latencyMs,
       ...(degraded ? { degraded: true, degradedReason, circuitState } : {}),
-      attempts: [...attemptsPrefix, { provider: p, ok: false, ms: latencyMs, error: err?.message }],
+      attempts: [...attemptsPrefix, { provider: p, ok: false, ms: latencyMs, error: sanitizeErrorForClient(err, 'Provider lyrics error') }],
     });
   }
 }
@@ -477,7 +478,7 @@ export async function handleNexusSearchRequest(
     });
   } catch (err: any) {
     const latencyMs = Date.now() - startTime;
-    return sonicError('SEARCH_ERROR', err?.message || 'Nexus search failed', 502, {
+    return sonicError('SEARCH_ERROR', sanitizeErrorForClient(err, 'Nexus search failed'), 502, {
       provider: 'nexus',
       latencyMs,
     });
@@ -655,11 +656,11 @@ export async function handleSingleProviderSearchRequest(
     });
   } catch (err: any) {
     const latencyMs = Date.now() - startTime;
-    return sonicError('PROVIDER_SEARCH_ERROR', err?.message || `Search failed on ${p}`, 502, {
+    return sonicError('PROVIDER_SEARCH_ERROR', sanitizeErrorForClient(err, `Search failed on ${p}`), 502, {
       provider: p,
       latencyMs,
       ...(degraded ? { degraded: true, degradedReason, circuitState } : {}),
-      attempts: [...attemptsPrefix, { provider: p, ok: false, ms: latencyMs, error: err?.message }],
+      attempts: [...attemptsPrefix, { provider: p, ok: false, ms: latencyMs, error: sanitizeErrorForClient(err, 'Provider lyrics error') }],
     });
   }
 }

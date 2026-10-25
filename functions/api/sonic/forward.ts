@@ -13,12 +13,7 @@ import {
   evaluateGatewayRateLimit,
   buildRateLimitErrorResponse,
 } from '../../_lib/sonic/security';
-import {
-  OutboundError,
-  isHostAllowed,
-  safeFetch,
-  validateOutboundUrl,
-} from '../../_lib/sonic/net-guard';
+import { OutboundError, isHostAllowed, safeFetch, sanitizeErrorForClient, validateOutboundUrl } from '../../_lib/sonic/net-guard';
 
 const SAFE_FORWARD_RESPONSE_HEADERS = [
   'content-type',
@@ -151,7 +146,7 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
         },
       );
     } catch (err: any) {
-      return sonicError('SEARCH_ERROR', err?.message || 'Search forward failed', 502, {
+      return sonicError('SEARCH_ERROR', sanitizeErrorForClient(err, 'Search forward failed'), 502, {
         provider: 'forward',
       });
     }
@@ -290,7 +285,7 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
     return resp;
   } catch (err: any) {
     const latencyMs = Date.now() - startTime;
-    return sonicError('FORWARD_LYRICS_ERROR', err?.message || 'Lyrics forward failed', 500, {
+    return sonicError('FORWARD_LYRICS_ERROR', sanitizeErrorForClient(err, 'Lyrics forward failed'), 500, {
       provider: 'forward',
       latencyMs,
     });

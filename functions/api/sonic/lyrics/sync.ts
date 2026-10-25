@@ -8,6 +8,7 @@ import { resolveNexusLyrics } from '../../../_lib/sonic/nexus-lyrics';
 import { jsonResponse } from '../../../_lib/http';
 import { sonicLinesToLrc, sonicLinesToTtml } from '../../../_lib/sonic/utils';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../../_lib/sonic/security';
+import { sanitizeErrorForClient } from '../../../_lib/sonic/net-guard';
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -154,7 +155,7 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
     return resp;
   } catch (err: any) {
     const latencyMs = Date.now() - startTime;
-    return sonicError('SYNC_ERROR', err?.message || 'Failed to sync lyrics', 500, {
+    return sonicError('SYNC_ERROR', sanitizeErrorForClient(err, 'Failed to sync lyrics'), 500, {
       provider: 'sync',
       latencyMs,
     });

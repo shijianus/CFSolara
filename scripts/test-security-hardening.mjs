@@ -15,6 +15,14 @@ import { onRequest as handlePalette } from '../functions/palette.ts';
 import { onRequest as handleMusicStream } from '../functions/api/music/stream.ts';
 import { onRequest as handleMusicCover } from '../functions/api/music/cover.ts';
 import { validateEngineOutboundTarget } from '../server/dns-guard.ts';
+import {
+  checkEngineAccess,
+  hasValidEngineSecret,
+  requiresEngineAuth,
+  timingSafeEqualStr,
+} from '../functions/_lib/sonic/security.ts';
+import { exchangeCode, fetchUserInfo } from '../functions/_lib/auth.ts';
+import { onRequest as handleEngineHealth } from '../functions/api/sonic/engine/health.ts';
 
 let passed = 0;
 let failed = 0;
@@ -217,6 +225,75 @@ async function runTests() {
     assert(privateV6.ok === false, 'Engine DNS guard rejects IPv4-mapped private literal');
     const publicIp = await validateEngineOutboundTarget('https://1.1.1.1/', {});
     assert(publicIp.ok === true, 'Engine DNS guard allows a public IP literal');
+  }
+
+  console.log('\n7. Engine auth and upstream error redaction');
+  {
+    const engineSecret = 'engine_test_secret_0123456789abcdefghij';
+    const engineEnv = { SONIC_ENGINE_SECRET: engineSecret, SONIC_RUNTIME: 'cf-pages' };
+
+    assert(timingSafeEqualStr('same-value', 'same-value') === true, 'Constant-time comparison accepts equal values');
+    assert(timingSafeEqualStr('short', 'a-much-longer-value') === false, 'Constant-time comparison rejects unequal values');
+    assert(hasValidEngineSecret(new Request('https://x/api', { headers: { 'X-Sonic-Engine-Key': engineSecret } }), engineEnv) === true, 'Valid engine key accepted');
+    assert(hasValidEngineSecret(new Request('https://x/api', { headers: { 'X-Sonic-Engine-Key': 'wrong' } }), engineEnv) === false, 'Wrong engine key rejected');
+
+    const hostSpoof = new Request('https://sonic.epocanvas.tech/api/sonic/search', {
+      headers: { 'X-Forwarded-Host': 'engine-sonic.epocanvas.tech', Host: 'engine-sonic.epocanvas.tech' },
+    });
+    assert(requiresEngineAuth(hostSpoof, {}) === false, 'Host/X-Forwarded-Host cannot force engine auth on a public path');
+    const enginePath = new Request('https://sonic.epocanvas.tech/api/sonic/engine/health');
+    assert(requiresEngineAuth(enginePath, {}) === true, 'Engine paths always require engine auth');
+    const shortSecretDenied = checkEngineAccess(enginePath, { SONIC_ENGINE_SECRET: 'too-short', SONIC_RUNTIME: 'linux-engine' });
+    assert(shortSecretDenied?.status === 503, 'Short engine secret fails closed with 503');
+
+    const healthRes = await handleEngineHealth({
+      request: new Request('https://sonic.epocanvas.tech/api/sonic/engine/health', {
+        headers: { 'X-Sonic-Engine-Key': engineSecret },
+      }),
+      env: {
+        ...engineEnv,
+        SONIC_LOCAL_ENGINE_URL: 'https://engine-secret.internal.example',
+      },
+    });
+    const healthText = await healthRes.text();
+    assert(healthRes.status === 200, 'Authenticated engine health responds');
+    assert(!healthText.includes('engine-secret.internal.example'), 'Health response does not expose engine URL');
+    assert(!healthText.includes('127.0.0.1'), 'Health response does not expose internal addresses');
+
+    const originalFetch = globalThis.fetch;
+    try {
+      globalThis.fetch = async () =>
+        new Response('upstream body http://10.0.0.9/internal?token=secret', {
+          status: 401,
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      let exchangeErrorText = '';
+      try {
+        await exchangeCode(
+          {
+            EPOMAIL_CLIENT_ID: 'client',
+            EPOMAIL_CLIENT_SECRET: 'client-secret',
+            EPOMAIL_REDIRECT_URI: 'https://sonic.epocanvas.com/api/auth/callback',
+          },
+          'https://sonic.epocanvas.com',
+          'code',
+        );
+      } catch (error) {
+        exchangeErrorText = String(error?.message || '');
+      }
+      assert(exchangeErrorText === 'OAuth token exchange failed', 'exchangeCode does not echo upstream response body');
+      assert(!exchangeErrorText.includes('10.0.0.9'), 'exchangeCode error contains no internal address');
+
+      let userInfoErrorText = '';
+      try {
+        await fetchUserInfo({ EPOMAIL_BASE_URL: 'https://mail.epocanvas.com' }, 'token');
+      } catch (error) {
+        userInfoErrorText = String(error?.message || '');
+      }
+      assert(!userInfoErrorText.includes('10.0.0.9') && !userInfoErrorText.includes('upstream body'), 'fetchUserInfo does not echo upstream body');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   }
 
   console.log(`\n========================================`);

@@ -6,6 +6,7 @@ import { handleOptions, jsonResponse } from '../../../_lib/http';
 import { checkEngineAccess } from '../../../_lib/sonic/security';
 import { getSonicConfig } from '../../../_lib/sonic/config';
 import { getLocalEngineCircuitSnapshot } from '../../../_lib/sonic/local-engine';
+import { sanitizeErrorForClient } from '../../../_lib/sonic/net-guard';
 import type { AppEnv } from '../../../_lib/types';
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
@@ -52,7 +53,13 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
         enableUnblock: cfg.enableUnblock,
         enableFreeCrossMatch: cfg.enableFreeCrossMatch,
       },
-      circuit: getLocalEngineCircuitSnapshot(env),
+      circuit: (() => {
+        const snapshot = getLocalEngineCircuitSnapshot(env);
+        return {
+          ...snapshot,
+          lastError: snapshot.lastError ? sanitizeErrorForClient(snapshot.lastError, 'engine unavailable') : undefined,
+        };
+      })(),
     },
     { status: 200, headers: { 'Cache-Control': 'no-store' } },
   );

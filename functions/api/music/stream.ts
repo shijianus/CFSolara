@@ -2,7 +2,7 @@ import { corsHeaders, errorResponse, handleOptions, jsonResponse } from '../../_
 import { resolvePlayableStream } from '../../_lib/sonic/native-protocols';
 import { getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
-import { isHostAllowed, safeFetch, validateOutboundUrl } from '../../_lib/sonic/net-guard';
+import { isHostAllowed, safeFetch, sanitizeErrorForClient, validateOutboundUrl } from '../../_lib/sonic/net-guard';
 import { getSonicConfig } from '../../_lib/sonic/config';
 import type { AppEnv } from '../../_lib/types';
 
@@ -141,7 +141,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       degradedReason = resolved.degradedReason;
       circuitState = resolved.circuitState;
     } catch (err: any) {
-      return errorResponse(err?.message || '解析音频流失败', 502);
+      return errorResponse(sanitizeErrorForClient(err, '解析音频流失败'), 502);
     }
   }
 

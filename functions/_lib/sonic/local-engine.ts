@@ -7,6 +7,7 @@
 import type { AppEnv } from '../types';
 import { getSonicConfig } from './config';
 import { getPublicClientIp } from './security';
+import { sanitizeErrorForClient } from './net-guard';
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -42,7 +43,6 @@ function getOrCreateCircuit(engineBaseUrl: string): EndpointCircuit {
 
 export interface CircuitSnapshot {
   enabled: boolean;
-  engineUrl?: string;
   state: CircuitState;
   consecutiveFailures: number;
   lastError?: string;
@@ -76,10 +76,9 @@ export function getLocalEngineCircuitSnapshot(env?: AppEnv): CircuitSnapshot {
 
   return {
     enabled: true,
-    engineUrl: cfg.localEngineUrl,
     state: effectiveState,
     consecutiveFailures: c.consecutiveFailures,
-    lastError: c.lastError || undefined,
+    lastError: c.lastError ? sanitizeErrorForClient(c.lastError, 'engine unavailable') : undefined,
     cooldownRemainingMs,
   };
 }
@@ -143,7 +142,7 @@ export async function callLocalEngineJson<T = any>(
         latencyMs: 0,
         skippedByCircuit: true,
         circuitState: 'OPEN',
-        error: `Circuit OPEN (${c.lastError || 'engine unreachable'})`,
+        error: `Circuit OPEN (${sanitizeErrorForClient(c.lastError, 'engine unreachable')})`,
       };
     }
     c.state = 'HALF_OPEN';
@@ -231,7 +230,7 @@ export async function callLocalEngineJson<T = any>(
         latencyMs,
         skippedByCircuit: false,
         circuitState: c.state,
-        error: errPayload?.error?.message || errPayload?.error || `Engine HTTP ${resp.status}`,
+        error: sanitizeErrorForClient(errPayload?.error?.message, `Engine HTTP ${resp.status}`),
       };
     }
 
@@ -254,7 +253,7 @@ export async function callLocalEngineJson<T = any>(
     const latencyMs = Date.now() - start;
     const errMsg = err?.name === 'TimeoutError' || err?.name === 'AbortError'
       ? `Engine timeout (${effectiveTimeout}ms)`
-      : (err?.message || 'Engine network error');
+      : sanitizeErrorForClient(err, 'Engine network error');
 
     c.consecutiveFailures += 1;
     c.lastError = errMsg;

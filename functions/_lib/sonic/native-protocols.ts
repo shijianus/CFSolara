@@ -9,7 +9,7 @@ import { buildNeteaseEapiParams, buildNeteaseLinuxApiParams } from './crypto';
 import { normalizeArtistString, normalizeText } from './utils';
 import { getSonicCachedJson, putSonicCachedJson } from './cache';
 import { callLocalEngineJson, getLocalEngineCircuitSnapshot, type CircuitState } from './local-engine';
-import { safeFetch, validateOutboundUrl } from './net-guard';
+import { safeFetch, sanitizeErrorForClient, validateOutboundUrl } from './net-guard';
 
 const DESKTOP_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -931,7 +931,7 @@ export async function resolvePlayableStream(
         attempts.push({ provider: pLabel, via: viaLabel(env, 'kuwo-antiserver'), ok: false, ms: Date.now() - pStart, error: 'Restricted or rejected 181KB region prompt' });
       }
     } catch (err: any) {
-      attempts.push({ provider: pLabel, via: viaLabel(env), ok: false, ms: Date.now() - pStart, error: err?.message || 'Native stream error' });
+      attempts.push({ provider: pLabel, via: viaLabel(env), ok: false, ms: Date.now() - pStart, error: sanitizeErrorForClient(err, 'Native stream error') });
     }
   }
 
@@ -974,7 +974,7 @@ export async function resolvePlayableStream(
         }
         attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No free full-length match' });
       } catch (err: any) {
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: sanitizeErrorForClient(err, 'Provider stream error') });
       }
     }
 
@@ -1019,7 +1019,7 @@ export async function resolvePlayableStream(
         }
         attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No free privilege=0 match' });
       } catch (err: any) {
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: sanitizeErrorForClient(err, 'Provider stream error') });
       }
     }
 
@@ -1055,7 +1055,7 @@ export async function resolvePlayableStream(
         }
         attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No verified full-length free stream' });
       } catch (err: any) {
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: sanitizeErrorForClient(err, 'Provider stream error') });
       }
     }
   }
@@ -1092,7 +1092,7 @@ export async function resolvePlayableStream(
       }
       attempts.push({ provider: 'gdstudio', via: 'third-party', ok: false, ms: Date.now() - gdStart, error: `HTTP ${gdRes.status}` });
     } catch (err: any) {
-      attempts.push({ provider: 'gdstudio', via: 'third-party', ok: false, ms: Date.now() - gdStart, error: err?.message });
+      attempts.push({ provider: 'gdstudio', via: 'third-party', ok: false, ms: Date.now() - gdStart, error: sanitizeErrorForClient(err, 'Provider stream error') });
     }
   }
 
