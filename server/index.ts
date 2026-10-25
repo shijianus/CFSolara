@@ -30,10 +30,18 @@ import { onRequest as handleEngineHealth } from '../functions/api/sonic/engine/h
 import { onRequest as handleResolveStream } from '../functions/api/sonic/resolve/stream';
 import { onRequest as handleSonicForward } from '../functions/api/sonic/forward';
 import { onRequest as handleSonicSearchNexus } from '../functions/api/sonic/search/nexus';
+import { onRequest as handleSonicSearchSmart } from '../functions/api/sonic/search/smart';
 import { onRequest as handleSonicSearchPlatform } from '../functions/api/sonic/search/[platform]';
+import { onRequest as handleSonicRecommendForYou } from '../functions/api/sonic/recommend/for-you';
+import { onRequest as handleSonicRecommendTrending } from '../functions/api/sonic/recommend/trending';
+import { onRequest as handleSonicRecommendSimilar } from '../functions/api/sonic/recommend/similar';
+import { onRequest as handleSonicRecommendDiscover } from '../functions/api/sonic/recommend/discover';
+import { onRequest as handleSonicEvents } from '../functions/api/sonic/events';
 import { onRequest as handleSonicLyricsNexus } from '../functions/api/sonic/lyrics/nexus';
 import { onRequest as handleSonicLyricsSync } from '../functions/api/sonic/lyrics/sync';
 import { onRequest as handleSonicLyricsPlatform } from '../functions/api/sonic/lyrics/[platform]';
+import { createServerRecommendStore } from './recommend-sqlite';
+import type { RecommendStore } from '../functions/_lib/sonic/recommend/types';
 
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -55,10 +63,25 @@ const MIME_TYPES: Record<string, string> = {
   '.webmanifest': 'application/manifest+json',
 };
 
-function buildRuntimeEnv(): AppEnv {
-  const env: Record<string, any> = { ...process.env };
+let serverRecommendStore: RecommendStore | null = null;
+let serverRecommendDbKey = '';
+
+function getOrInitServerRecommendStore(dbPath?: string): RecommendStore {
+  const desiredKey = (dbPath ?? process.env.SONIC_RECOMMEND_DB_PATH ?? '').trim() || 'default';
+  if (!serverRecommendStore || serverRecommendDbKey !== desiredKey) {
+    serverRecommendStore = createServerRecommendStore(dbPath);
+    serverRecommendDbKey = desiredKey;
+  }
+  return serverRecommendStore;
+}
+
+function buildRuntimeEnv(overrides?: Partial<AppEnv>): AppEnv {
+  const env: Record<string, any> = { ...process.env, ...(overrides || {}) };
   if (!env.SONIC_RUNTIME) {
     env.SONIC_RUNTIME = 'linux-engine';
+  }
+  if (!env.RECOMMEND_STORE) {
+    env.RECOMMEND_STORE = getOrInitServerRecommendStore(env.SONIC_RECOMMEND_DB_PATH);
   }
   return env as AppEnv;
 }
@@ -181,6 +204,26 @@ async function dispatchFunctionRoute(request: Request, env: AppEnv): Promise<Res
   if (pathname === '/api/sonic/resolve/stream') return handleResolveStream({ request, env });
   if (pathname === '/api/sonic/forward') return handleSonicForward({ request, env, waitUntil });
 
+  // Intelligent Recommendation & Smart Search routes
+  if (pathname === '/api/sonic/recommend/for-you') {
+    return handleSonicRecommendForYou({ request, env, waitUntil });
+  }
+  if (pathname === '/api/sonic/recommend/trending') {
+    return handleSonicRecommendTrending({ request, env, waitUntil });
+  }
+  if (pathname === '/api/sonic/recommend/similar') {
+    return handleSonicRecommendSimilar({ request, env, waitUntil });
+  }
+  if (pathname === '/api/sonic/recommend/discover') {
+    return handleSonicRecommendDiscover({ request, env, waitUntil });
+  }
+  if (pathname === '/api/sonic/events') {
+    return handleSonicEvents({ request, env, waitUntil });
+  }
+  if (pathname === '/api/sonic/search/smart') {
+    return handleSonicSearchSmart({ request, env, waitUntil });
+  }
+
   if (pathname === '/api/sonic/search' || pathname === '/api/sonic/search/nexus') {
     return handleSonicSearchNexus({ request, env, waitUntil });
   }
@@ -258,11 +301,11 @@ async function serveStaticAsset(staticRoot: string, pathname: string, isHead: bo
   }
 }
 
-export function createSonicServer(staticRoot = path.resolve(process.cwd(), 'dist')) {
+export function createSonicServer(staticRoot = path.resolve(process.cwd(), 'dist'), envOverrides?: Partial<AppEnv>) {
   return http.createServer(async (req, res) => {
     try {
       const webReq = toWebRequest(req);
-      const env = buildRuntimeEnv();
+      const env = buildRuntimeEnv(envOverrides);
 
       if (webReq.method === 'OPTIONS') {
         await sendWebResponse(res, handleOptions(), false);

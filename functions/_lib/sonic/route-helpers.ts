@@ -66,8 +66,8 @@ export function parseSearchParams(url: URL): {
 export function buildGatewayHeaders(extra: Record<string, string> = {}, degraded?: boolean, circuitState?: string): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Api-Key, X-Sonic-Engine-Key, Range',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, HEAD, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Api-Key, X-Sonic-Engine-Key, X-Sonic-Anon-Id, X-Sonic-Personalization, X-Sonic-Context, Range',
     'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges, X-Sonic-Cache, X-Sonic-Provider, X-Sonic-Degraded, X-Sonic-Circuit, X-Sonic-Stream-Trial, X-RateLimit-Limit, X-RateLimit-Remaining',
     ...extra,
   };
@@ -103,7 +103,7 @@ export function sonicError(code: string, message: string, status = 400, meta?: P
   });
 }
 
-async function guardGatewayRequest(request: Request, env: any, scope: string): Promise<Response | null> {
+export async function guardGatewayRequest(request: Request, env: any, scope: string): Promise<Response | null> {
   const engineDenied = checkEngineAccess(request, env);
   if (engineDenied) return engineDenied;
   const rl = await evaluateGatewayRateLimit(request, env, scope);

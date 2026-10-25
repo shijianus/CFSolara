@@ -105,6 +105,8 @@ export async function callLocalEngineJson<T = any>(
   env?: AppEnv,
   options?: {
     request?: Request;
+    method?: 'GET' | 'POST' | 'DELETE';
+    body?: string;
     timeoutMs?: number;
     signal?: AbortSignal;
     clientIp?: string;
@@ -174,8 +176,27 @@ export async function callLocalEngineJson<T = any>(
   }
   if (options?.request) {
     headers['X-Sonic-Client-IP'] = getPublicClientIp(options.request);
+    // Forward end-user auth & privacy-safe personalization context to Linux Engine
+    const forwardHeaderNames = [
+      'authorization',
+      'x-sonic-key',
+      'x-cfsolara-key',
+      'x-api-key',
+      'x-sonic-anon-id',
+      'x-sonic-personalization',
+      'x-sonic-context',
+    ];
+    for (const hName of forwardHeaderNames) {
+      const val = options.request.headers.get(hName);
+      if (val) headers[hName] = val;
+    }
   } else if (options?.clientIp && isValidIpLiteral(options.clientIp)) {
     headers['X-Sonic-Client-IP'] = options.clientIp;
+  }
+
+  const method = options?.method || 'GET';
+  if (options?.body !== undefined && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json; charset=utf-8';
   }
 
   const signals: AbortSignal[] = [AbortSignal.timeout(effectiveTimeout)];
@@ -185,8 +206,9 @@ export async function callLocalEngineJson<T = any>(
 
   try {
     const resp = await fetch(targetUrl, {
-      method: 'GET',
+      method,
       headers,
+      body: method !== 'GET' ? options?.body : undefined,
       signal: combinedSignal,
     });
     const latencyMs = Date.now() - start;

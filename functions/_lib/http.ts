@@ -1,8 +1,11 @@
 export function corsHeaders(): Headers {
   const headers = new Headers();
   headers.set('Access-Control-Allow-Origin', '*');
-  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Shijianus-Device-Id, Range');
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD, OPTIONS');
+  headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Sonic-Key, X-CFSolara-Key, X-Api-Key, X-Sonic-Anon-Id, X-Sonic-Personalization, X-Sonic-Context, X-Shijianus-Device-Id, Range',
+  );
   headers.set('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges');
   return headers;
 }

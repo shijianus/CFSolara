@@ -6,6 +6,7 @@ import { handleOptions, jsonResponse } from '../../../_lib/http';
 import { checkEngineAccess } from '../../../_lib/sonic/security';
 import { getSonicConfig } from '../../../_lib/sonic/config';
 import { getLocalEngineCircuitSnapshot } from '../../../_lib/sonic/local-engine';
+import { getRecommendStore, isGorseEnabled, isMeilisearchEnabled } from '../../../_lib/sonic/recommend';
 import type { AppEnv } from '../../../_lib/types';
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
@@ -51,6 +52,11 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
         enableLyriva: cfg.enableLyriva,
         enableUnblock: cfg.enableUnblock,
         enableFreeCrossMatch: cfg.enableFreeCrossMatch,
+      },
+      recommendEngine: {
+        ...getRecommendStore(env).getStats(),
+        gorseConfigured: isGorseEnabled(env),
+        meilisearchConfigured: isMeilisearchEnabled(env),
       },
       circuit: getLocalEngineCircuitSnapshot(env),
     },
