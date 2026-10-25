@@ -675,38 +675,75 @@ async function resolveKuwoSingleStream(
   }
 }
 
+export function evaluateStreamTypeByRelativeBytes(
+  totalBytes: number,
+  expectedDurationSec?: number,
+  nominalBitrateKbps = 320,
+): { streamType: 'full' | 'trial' | 'unavailable'; ratio: number; baselineBytes: number } {
+  if (!totalBytes || totalBytes <= 0) {
+    return { streamType: 'unavailable', ratio: 0, baselineBytes: 0 };
+  }
+  // 1. Strict rejection of known fake prompt audio clips
+  // Kuwo fake 11s prompt audio is exactly 181,521 bytes
+  if (totalBytes === 181521) {
+    return { streamType: 'unavailable', ratio: 0, baselineBytes: 0 };
+  }
+
+  // 2. Determine effective duration: fallback to 200s if unknown or suspiciously short
+  const duration = expectedDurationSec && expectedDurationSec > 30 ? expectedDurationSec : 200;
+
+  // 3. Lowest acceptable bitrate for full audio streaming
+  // For requested/nominal bitrate (e.g. 320kbps), full track must deliver at least 55% of nominal bitrate,
+  // and never below 96kbps (12 KB/s) absolute floor.
+  const effBitrateKbps = Math.max(96, nominalBitrateKbps * 0.55);
+  const baselineBytes = Math.round(duration * ((effBitrateKbps * 1000) / 8));
+
+  const ratio = totalBytes / baselineBytes;
+
+  // If actual bytes are >= 85% of baseline bytes, it is a full stream;
+  // otherwise it is a trial preview.
+  const isFull = ratio >= 0.85;
+
+  return {
+    streamType: isFull ? 'full' : 'trial',
+    ratio,
+    baselineBytes,
+  };
+}
+
 export async function probeStreamPhysicalQuality(
   url: string,
   referer?: string,
-  timeoutMs = 1500,
-): Promise<{ streamType: 'full' | 'trial' | 'unavailable'; totalBytes: number }> {
+  timeoutMs = 2000,
+  expectedDurationSec?: number,
+  nominalBitrateKbps = 320,
+): Promise<{ streamType: 'full' | 'trial' | 'unavailable'; totalBytes: number; ratio: number }> {
   try {
     const headers: Record<string, string> = {
-      Range: 'bytes=0-1023',
+      Range: 'bytes=0-0',
       'User-Agent': DESKTOP_UA,
     };
     if (referer) headers.Referer = referer;
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
-    if (res.status === 200 || res.status === 206) {
-      const cr = res.headers.get('content-range') || '';
-      const cl = res.headers.get('content-length') || '';
-      const total = cr.includes('/') ? parseInt(cr.split('/')[1], 10) : parseInt(cl, 10);
-      const bytes = isNaN(total) ? 0 : total;
-      // Reject Kuwo fake 11s prompt audio (181,521 bytes)
-      if (bytes === 181521) {
-        return { streamType: 'unavailable', totalBytes: bytes };
-      }
-      // Official trial previews (30s~45s at 128kbps) are ~480KB - ~720KB (< 1MB)
-      if (bytes > 0 && bytes < 1000000) {
-        return { streamType: 'trial', totalBytes: bytes };
-      }
-      if (bytes >= 1000000) {
-        return { streamType: 'full', totalBytes: bytes };
-      }
+    const cr = res.headers.get('content-range') || '';
+    const cl = res.headers.get('content-length') || '';
+    res.body?.cancel?.().catch(() => {});
+
+    if (res.status !== 200 && res.status !== 206) {
+      return { streamType: 'unavailable', totalBytes: 0, ratio: 0 };
     }
-    return { streamType: 'unavailable', totalBytes: 0 };
+    const m = cr.match(/\/(\d+)$/);
+    const total = m ? parseInt(m[1], 10) : parseInt(cl, 10);
+    const totalBytes = isNaN(total) ? 0 : total;
+
+    const evaluation = evaluateStreamTypeByRelativeBytes(totalBytes, expectedDurationSec, nominalBitrateKbps);
+    return {
+      streamType: evaluation.streamType,
+      totalBytes,
+      ratio: evaluation.ratio,
+    };
   } catch {
-    return { streamType: 'unavailable', totalBytes: 0 };
+    return { streamType: 'unavailable', totalBytes: 0, ratio: 0 };
   }
 }
 
@@ -762,6 +799,7 @@ export async function resolvePlayableStream(
   if (cleanSource === 'ncm' || cleanSource === 'sonic') cleanSource = 'netease';
 
   const quality = String(opts.quality || '320').toLowerCase();
+  const nominalBr = quality === '128' ? 128 : quality === 'flac' ? 800 : 320;
   const allowTrial = opts.allowTrial !== false;
   const cacheId = `${cleanSource}:${cleanId}:${quality}:${normalizeText(opts.title || '')}:${normalizeText(opts.artist || '')}`;
 
@@ -915,7 +953,7 @@ export async function resolvePlayableStream(
       } else if (cleanSource === 'qq' && cfg.enableQq) {
         const qq = await resolveQQSingleStream(cleanId, env);
         if (qq?.url) {
-          const probe = await probeStreamPhysicalQuality(qq.url, 'https://y.qq.com/', 2000);
+          const probe = await probeStreamPhysicalQuality(qq.url, 'https://y.qq.com/', 2000, opts.durationSec, nominalBr);
           const isFull = probe.streamType === 'full';
           attempts.push({ provider: pLabel, via: qq.via, ok: true, ms: Date.now() - pStart });
           const out: ResolvedStreamInfo = {
@@ -944,8 +982,9 @@ export async function resolvePlayableStream(
       } else if (cleanSource === 'kugou' && cfg.enableKugou) {
         const kg = await resolveKugouSingleStream(cleanId, env);
         if (kg?.url) {
-          const probe = await probeStreamPhysicalQuality(kg.url, 'https://m.kugou.com/', 2000);
-          const isFull = probe.streamType === 'full' || (typeof kg.size === 'number' && kg.size >= 1000000);
+          const probe = await probeStreamPhysicalQuality(kg.url, 'https://m.kugou.com/', 2000, opts.durationSec, nominalBr);
+          const sizeEval = typeof kg.size === 'number' ? evaluateStreamTypeByRelativeBytes(kg.size, opts.durationSec, nominalBr) : null;
+          const isFull = probe.streamType === 'full' || sizeEval?.streamType === 'full';
           attempts.push({ provider: pLabel, via: kg.via, ok: true, ms: Date.now() - pStart });
           const out: ResolvedStreamInfo = {
             url: kg.url,
@@ -1021,7 +1060,7 @@ export async function resolvePlayableStream(
         if (match) {
           const neStream = await resolveNeteaseSingleStream(match.platformId, quality, env);
           if (neStream?.url && !neStream.isTrial) {
-            const probe = await probeStreamPhysicalQuality(neStream.url, undefined, 2000);
+            const probe = await probeStreamPhysicalQuality(neStream.url, undefined, 2000, match.duration || opts.durationSec, nominalBr);
             if (probe.streamType === 'full') {
               attempts.push({ provider: label, via: `${neStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
               const out: ResolvedStreamInfo = {
@@ -1072,7 +1111,7 @@ export async function resolvePlayableStream(
           if (freeItem?.hash) {
             const kgStream = await resolveKugouSingleStream(freeItem.hash, env);
             if (kgStream?.url) {
-              const probe = await probeStreamPhysicalQuality(kgStream.url, 'https://m.kugou.com/', 2000);
+              const probe = await probeStreamPhysicalQuality(kgStream.url, 'https://m.kugou.com/', 2000, freeItem.duration || opts.durationSec, nominalBr);
               if (probe.streamType === 'full') {
                 attempts.push({ provider: label, via: `${kgStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
                 const out: ResolvedStreamInfo = {
@@ -1116,7 +1155,7 @@ export async function resolvePlayableStream(
           ) {
             const kwStream = await resolveKuwoSingleStream(kt.platformId, env);
             if (kwStream?.url) {
-              const probe = await probeStreamPhysicalQuality(kwStream.url, 'https://www.kuwo.cn/', 2000);
+              const probe = await probeStreamPhysicalQuality(kwStream.url, 'https://www.kuwo.cn/', 2000, kt.duration || opts.durationSec, nominalBr);
               if (probe.streamType === 'full') {
                 attempts.push({ provider: label, via: `${kwStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
                 const out: ResolvedStreamInfo = {

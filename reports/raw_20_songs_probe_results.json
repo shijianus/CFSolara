@@ -1,0 +1,2727 @@
+[
+  {
+    "songIndex": 1,
+    "category": "中文流行",
+    "title": "起风了",
+    "artist": "买辣椒也用券",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "起风了 买辣椒也用券",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E8%B5%B7%E9%A3%8E%E4%BA%86%20%E4%B9%B0%E8%BE%A3%E6%A4%92%E4%B9%9F%E7%94%A8%E5%88%B8&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1330348068",
+          "title": "起风了",
+          "artist": "冯沁苑(买辣椒也用券)",
+          "duration": 326,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1330348068&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/13037236",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 13037236,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 325.903673,
+          "format_bit_rate": 12273
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.818,
+          "baselineBytes": 7172000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "起风了 买辣椒也用券",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E8%B5%B7%E9%A3%8E%E4%BA%86%20%E4%B9%B0%E8%BE%A3%E6%A4%92%E4%B9%9F%E7%94%A8%E5%88%B8&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0004jPDk2eB2dt",
+          "title": "起风了 (旧版)",
+          "artist": "买辣椒也用券",
+          "duration": 312,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0004jPDk2eB2dt&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "起风了 买辣椒也用券",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E8%B5%B7%E9%A3%8E%E4%BA%86%20%E4%B9%B0%E8%BE%A3%E6%A4%92%E4%B9%9F%E7%94%A8%E5%88%B8&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "27b16858279b1d0d71c80913c4b844ce",
+          "title": "起风了",
+          "artist": "买辣椒也用券",
+          "duration": 321,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=27b16858279b1d0d71c80913c4b844ce&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "起风了 买辣椒也用券",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E8%B5%B7%E9%A3%8E%E4%BA%86%20%E4%B9%B0%E8%BE%A3%E6%A4%92%E4%B9%9F%E7%94%A8%E5%88%B8&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "26445261",
+          "title": "起风了 (旧版)-原曲：《ヤキモチ》—高桥优",
+          "artist": "买辣椒也用券",
+          "duration": 312,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=26445261&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3145755
+    }
+  },
+  {
+    "songIndex": 2,
+    "category": "中文流行",
+    "title": "晴天",
+    "artist": "周杰伦",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "晴天 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E6%99%B4%E5%A4%A9%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "2652820720",
+          "title": "晴天(深情版)",
+          "artist": "Lucky小爱",
+          "duration": 279,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=2652820720&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/11161644",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 11161644,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 279.013878,
+          "format_bit_rate": 14336
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.818,
+          "baselineBytes": 6138000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "晴天 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E6%99%B4%E5%A4%A9%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0039MnYb0qxYhV",
+          "title": "晴天",
+          "artist": "周杰伦",
+          "duration": 269,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0039MnYb0qxYhV&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "晴天 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E6%99%B4%E5%A4%A9%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "b3a52a7a958bf0aed0ebfba2e9a818b7",
+          "title": "晴天",
+          "artist": "周杰伦",
+          "duration": 269,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=b3a52a7a958bf0aed0ebfba2e9a818b7&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "晴天 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E6%99%B4%E5%A4%A9%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "228908",
+          "title": "晴天",
+          "artist": "周杰伦",
+          "duration": 269,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=228908&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 2145846
+    }
+  },
+  {
+    "songIndex": 3,
+    "category": "中文流行",
+    "title": "年少有为",
+    "artist": "李荣浩",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "年少有为 李荣浩",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%B9%B4%E5%B0%91%E6%9C%89%E4%B8%BA%20%E6%9D%8E%E8%8D%A3%E6%B5%A9&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1293886117",
+          "title": "年少有为",
+          "artist": "李荣浩",
+          "duration": 279,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1293886117&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.078,
+          "baselineBytes": 6138000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "年少有为 李荣浩",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%B9%B4%E5%B0%91%E6%9C%89%E4%B8%BA%20%E6%9D%8E%E8%8D%A3%E6%B5%A9&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "004DXFlC0nsTCZ",
+          "title": "年少有为",
+          "artist": "李荣浩",
+          "duration": 279,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=004DXFlC0nsTCZ&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "年少有为 李荣浩",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%B9%B4%E5%B0%91%E6%9C%89%E4%B8%BA%20%E6%9D%8E%E8%8D%A3%E6%B5%A9&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "3a5c1d6cdabb2fda813f8f8b7e4d08b0",
+          "title": "年少有为",
+          "artist": "李荣浩",
+          "duration": 279,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=3a5c1d6cdabb2fda813f8f8b7e4d08b0&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "年少有为 李荣浩",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%B9%B4%E5%B0%91%E6%9C%89%E4%B8%BA%20%E6%9D%8E%E8%8D%A3%E6%B5%A9&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "55724544",
+          "title": "年少有为",
+          "artist": "李荣浩",
+          "duration": 279,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=55724544&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4278407
+    }
+  },
+  {
+    "songIndex": 4,
+    "category": "中文流行",
+    "title": "稻香",
+    "artist": "周杰伦",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "稻香 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E7%A8%BB%E9%A6%99%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "3381542797",
+          "title": "稻香(治愈版)",
+          "artist": "周杰伦. / 街道办GDC/欧阳耀莹.",
+          "duration": 120,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=3381542797&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/4802925",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 4802925,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 48000,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 120.048,
+          "format_bit_rate": 33320
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.819,
+          "baselineBytes": 2640000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "稻香 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E7%A8%BB%E9%A6%99%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "003aAYrm3GE0Ac",
+          "title": "稻香",
+          "artist": "周杰伦",
+          "duration": 223,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=003aAYrm3GE0Ac&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "稻香 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E7%A8%BB%E9%A6%99%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "8909e1809908cd8e3bf6cf85d98b93f0",
+          "title": "稻香",
+          "artist": "周杰伦",
+          "duration": 223,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=8909e1809908cd8e3bf6cf85d98b93f0&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "稻香 周杰伦",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E7%A8%BB%E9%A6%99%20%E5%91%A8%E6%9D%B0%E4%BC%A6&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "440613",
+          "title": "稻香",
+          "artist": "周杰伦",
+          "duration": 223,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=440613&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3519343
+    }
+  },
+  {
+    "songIndex": 5,
+    "category": "粤语经典",
+    "title": "海阔天空",
+    "artist": "Beyond",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "海阔天空 Beyond",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA%20Beyond&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1357375695",
+          "title": "海阔天空",
+          "artist": "Beyond",
+          "duration": 240,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1357375695&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg;charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.091,
+          "baselineBytes": 5280000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "海阔天空 Beyond",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA%20Beyond&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "001yS0N33yPm1B",
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "duration": 324,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=001yS0N33yPm1B&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "海阔天空 Beyond",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA%20Beyond&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "c41e80a18d1448fa47086372999c7f43",
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "duration": 324,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=c41e80a18d1448fa47086372999c7f43&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "海阔天空 Beyond",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E6%B5%B7%E9%98%94%E5%A4%A9%E7%A9%BA%20Beyond&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "5886682",
+          "title": "海阔天空-《九五2班》网络电影插曲",
+          "artist": "BEYOND",
+          "duration": 324,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=5886682&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3650733
+    }
+  },
+  {
+    "songIndex": 6,
+    "category": "粤语经典",
+    "title": "红日",
+    "artist": "李克勤",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "红日 李克勤",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E7%BA%A2%E6%97%A5%20%E6%9D%8E%E5%85%8B%E5%8B%A4&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "115502",
+          "title": "红日",
+          "artist": "李克勤",
+          "duration": 285,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=115502&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/480813",
+          "content-type": "application/octet-stream;charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 480813,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 48000,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.024,
+          "format_bit_rate": 128114
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.077,
+          "baselineBytes": 6270000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "红日 李克勤",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E7%BA%A2%E6%97%A5%20%E6%9D%8E%E5%85%8B%E5%8B%A4&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "001qy18T16r5ZO",
+          "title": "红日 (粤语)",
+          "artist": "李克勤",
+          "duration": 287,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=001qy18T16r5ZO&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "红日 李克勤",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E7%BA%A2%E6%97%A5%20%E6%9D%8E%E5%85%8B%E5%8B%A4&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "f044d961bfd1eae20f629e793f78ddfd",
+          "title": "红日",
+          "artist": "李克勤",
+          "duration": 287,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=f044d961bfd1eae20f629e793f78ddfd&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "红日 李克勤",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E7%BA%A2%E6%97%A5%20%E6%9D%8E%E5%85%8B%E5%8B%A4&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "25252076",
+          "title": "红日-《他来自天堂》电视剧主题曲",
+          "artist": "李克勤",
+          "duration": 287,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=25252076&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4658789
+    }
+  },
+  {
+    "songIndex": 7,
+    "category": "粤语经典",
+    "title": "富士山下",
+    "artist": "陈奕迅",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "富士山下 陈奕迅",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%AF%8C%E5%A3%AB%E5%B1%B1%E4%B8%8B%20%E9%99%88%E5%A5%95%E8%BF%85&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "65766",
+          "title": "富士山下",
+          "artist": "陈奕迅",
+          "duration": 259,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=65766&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.084,
+          "baselineBytes": 5698000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "富士山下 陈奕迅",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%AF%8C%E5%A3%AB%E5%B1%B1%E4%B8%8B%20%E9%99%88%E5%A5%95%E8%BF%85&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "003aAPj81VWrbL",
+          "title": "富士山下",
+          "artist": "陈奕迅",
+          "duration": 259,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=003aAPj81VWrbL&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "富士山下 陈奕迅",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%AF%8C%E5%A3%AB%E5%B1%B1%E4%B8%8B%20%E9%99%88%E5%A5%95%E8%BF%85&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0433f1a94fa162b20fb8ae576a951d6b",
+          "title": "富士山下",
+          "artist": "陈奕迅",
+          "duration": 259,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0433f1a94fa162b20fb8ae576a951d6b&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "富士山下 陈奕迅",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%AF%8C%E5%A3%AB%E5%B1%B1%E4%B8%8B%20%E9%99%88%E5%A5%95%E8%BF%85&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "28423286",
+          "title": "富士山下",
+          "artist": "陈奕迅",
+          "duration": 259,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=28423286&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4256540
+    }
+  },
+  {
+    "songIndex": 8,
+    "category": "粤语经典",
+    "title": "喜帖街",
+    "artist": "谢安琪",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "喜帖街 谢安琪",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%96%9C%E5%B8%96%E8%A1%97%20%E8%B0%A2%E5%AE%89%E7%90%AA&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "308299",
+          "title": "喜帖街",
+          "artist": "谢安琪",
+          "duration": 211,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=308299&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/480813",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 480813,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 48000,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.024,
+          "format_bit_rate": 128114
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.104,
+          "baselineBytes": 4642000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "喜帖街 谢安琪",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%96%9C%E5%B8%96%E8%A1%97%20%E8%B0%A2%E5%AE%89%E7%90%AA&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "002cW0Rt0E6HV0",
+          "title": "囍帖街",
+          "artist": "谢安琪",
+          "duration": 211,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=002cW0Rt0E6HV0&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "喜帖街 谢安琪",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%96%9C%E5%B8%96%E8%A1%97%20%E8%B0%A2%E5%AE%89%E7%90%AA&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1e5ec112600081e74525c6a740403755",
+          "title": "囍帖街",
+          "artist": "谢安琪",
+          "duration": 211,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1e5ec112600081e74525c6a740403755&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "喜帖街 谢安琪",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%96%9C%E5%B8%96%E8%A1%97%20%E8%B0%A2%E5%AE%89%E7%90%AA&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "68065615",
+          "title": "喜帖街 (Live)",
+          "artist": "谢安琪",
+          "duration": 210,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=68065615&source=kuwo&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/3361457",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-kuwo",
+          "x-sonic-via": "local-engine:kuwo-antiserver"
+        },
+        "totalBytes": 3361457,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 210.050612,
+          "format_bit_rate": 19043
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.728,
+          "baselineBytes": 4620000,
+          "isFull": false
+        },
+        "judgment": "试听流 (210s)",
+        "failReason": null
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 5377088
+    }
+  },
+  {
+    "songIndex": 9,
+    "category": "日语曲目",
+    "title": "Lemon",
+    "artist": "米津玄師",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "Lemon 米津玄師",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=Lemon%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "536622304",
+          "title": "Lemon",
+          "artist": "米津玄師",
+          "duration": 256,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=536622304&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.085,
+          "baselineBytes": 5632000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "Lemon 米津玄師",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=Lemon%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "000akynZ2Rbro5",
+          "title": "Lemon",
+          "artist": "米津玄師",
+          "duration": 256,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=000akynZ2Rbro5&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "Lemon 米津玄師",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=Lemon%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "da60f11f69affc7107adede9dd17352a",
+          "title": "Lemon",
+          "artist": "米津玄師",
+          "duration": 255,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=da60f11f69affc7107adede9dd17352a&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "Lemon 米津玄師",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=Lemon%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "40602735",
+          "title": "Lemon-《Unnatural》日剧主题曲",
+          "artist": "米津玄師",
+          "duration": 256,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=40602735&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 2670891
+    }
+  },
+  {
+    "songIndex": 10,
+    "category": "日语曲目",
+    "title": "打上花火",
+    "artist": "DAOKO",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "打上花火 DAOKO",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E6%89%93%E4%B8%8A%E8%8A%B1%E7%81%AB%20DAOKO&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "496869422",
+          "title": "打上花火",
+          "artist": "Daoko / 米津玄師",
+          "duration": 289,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=496869422&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/11575725",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 11575725,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 48000,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 289.368,
+          "format_bit_rate": 13823
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.821,
+          "baselineBytes": 6358000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "打上花火 DAOKO",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E6%89%93%E4%B8%8A%E8%8A%B1%E7%81%AB%20DAOKO&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "001p3V4c0PQdmd",
+          "title": "打上花火",
+          "artist": "Daoko / 米津玄師",
+          "duration": 289,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=001p3V4c0PQdmd&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "打上花火 DAOKO",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E6%89%93%E4%B8%8A%E8%8A%B1%E7%81%AB%20DAOKO&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "b3b5c3361be229a9787695ac5776d09b",
+          "title": "打上花火",
+          "artist": "Daoko",
+          "duration": 291,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=b3b5c3361be229a9787695ac5776d09b&source=kugou&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/4661712",
+          "content-type": "application/octet-stream",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-kugou",
+          "x-sonic-via": "local-engine:kugou-playinfo"
+        },
+        "totalBytes": 4661712,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 291.317551,
+          "format_bit_rate": 13730
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.728,
+          "baselineBytes": 6402000,
+          "isFull": false
+        },
+        "judgment": "试听流 (291s)",
+        "failReason": null
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "打上花火 DAOKO",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E6%89%93%E4%B8%8A%E8%8A%B1%E7%81%AB%20DAOKO&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "28510075",
+          "title": "打上花火-《升空的焰火，从下面看还是从侧面看？》动画电影主题曲",
+          "artist": "Daoko / 米津玄師",
+          "duration": 289,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=28510075&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kugou",
+      "via": "local-engine:kugou-playinfo:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4661712
+    }
+  },
+  {
+    "songIndex": 11,
+    "category": "日语曲目",
+    "title": "残酷な天使のテーゼ",
+    "artist": "高桥洋子",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "残酷な天使のテーゼ 高桥洋子",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E6%AE%8B%E9%85%B7%E3%81%AA%E5%A4%A9%E4%BD%BF%E3%81%AE%E3%83%86%E3%83%BC%E3%82%BC%20%E9%AB%98%E6%A1%A5%E6%B4%8B%E5%AD%90&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "657666",
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子",
+          "duration": 246,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=657666&source=netease&quality=320",
+        "streamHttpStatus": null,
+        "streamHeaders": {},
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "异常: The operation was aborted due to timeout"
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "残酷な天使のテーゼ 高桥洋子",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E6%AE%8B%E9%85%B7%E3%81%AA%E5%A4%A9%E4%BD%BF%E3%81%AE%E3%83%86%E3%83%BC%E3%82%BC%20%E9%AB%98%E6%A1%A5%E6%B4%8B%E5%AD%90&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "003cXP4n4TXFUp",
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子",
+          "duration": 245,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=003cXP4n4TXFUp&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "残酷な天使のテーゼ 高桥洋子",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E6%AE%8B%E9%85%B7%E3%81%AA%E5%A4%A9%E4%BD%BF%E3%81%AE%E3%83%86%E3%83%BC%E3%82%BC%20%E9%AB%98%E6%A1%A5%E6%B4%8B%E5%AD%90&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "584b0df051d2dcad121fd49ce846bd50",
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子",
+          "duration": 243,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=584b0df051d2dcad121fd49ce846bd50&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "残酷な天使のテーゼ 高桥洋子",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E6%AE%8B%E9%85%B7%E3%81%AA%E5%A4%A9%E4%BD%BF%E3%81%AE%E3%83%86%E3%83%BC%E3%82%BC%20%E9%AB%98%E6%A1%A5%E6%B4%8B%E5%AD%90&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "5389146",
+          "title": "残酷な天使のテーゼ-《新世纪福音战士》TV动画片头曲",
+          "artist": "高橋洋子",
+          "duration": 245,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=5389146&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 404,
+      "provider": null,
+      "via": null,
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 220
+    }
+  },
+  {
+    "songIndex": 12,
+    "category": "日语曲目",
+    "title": "夜に駆ける",
+    "artist": "YOASOBI",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "夜に駆ける YOASOBI",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%A4%9C%E3%81%AB%E9%A7%86%E3%81%91%E3%82%8B%20YOASOBI&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1409311773",
+          "title": "夜に駆ける",
+          "artist": "YOASOBI",
+          "duration": 261,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1409311773&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg;charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.084,
+          "baselineBytes": 5742000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "夜に駆ける YOASOBI",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%A4%9C%E3%81%AB%E9%A7%86%E3%81%91%E3%82%8B%20YOASOBI&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "003WFMXk4O5ywc",
+          "title": "夜に駆ける",
+          "artist": "YOASOBI",
+          "duration": 261,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=003WFMXk4O5ywc&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "夜に駆ける YOASOBI",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%A4%9C%E3%81%AB%E9%A7%86%E3%81%91%E3%82%8B%20YOASOBI&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "2131897fda53adbf58825cc3c61d0860",
+          "title": "夜に駆ける",
+          "artist": "YOASOBI",
+          "duration": 261,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=2131897fda53adbf58825cc3c61d0860&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "夜に駆ける YOASOBI",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%A4%9C%E3%81%AB%E9%A7%86%E3%81%91%E3%82%8B%20YOASOBI&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "83759543",
+          "title": "夜に駆ける",
+          "artist": "YOASOBI",
+          "duration": 261,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=83759543&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3960801
+    }
+  },
+  {
+    "songIndex": 13,
+    "category": "英文流行",
+    "title": "Shape of You",
+    "artist": "Ed Sheeran",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "Shape of You Ed Sheeran",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=Shape%20of%20You%20Ed%20Sheeran&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "451703096",
+          "title": "Shape of You",
+          "artist": "Ed Sheeran",
+          "duration": 234,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=451703096&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.093,
+          "baselineBytes": 5148000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "Shape of You Ed Sheeran",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=Shape%20of%20You%20Ed%20Sheeran&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0041gObR2QG98x",
+          "title": "Shape of You",
+          "artist": "Ed Sheeran",
+          "duration": 233,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0041gObR2QG98x&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "Shape of You Ed Sheeran",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=Shape%20of%20You%20Ed%20Sheeran&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "b6a303c9cda8e6c4c0b2fb0b23a570c6",
+          "title": "Shape of You",
+          "artist": "Ed Sheeran",
+          "duration": 233,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=b6a303c9cda8e6c4c0b2fb0b23a570c6&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "Shape of You Ed Sheeran",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=Shape%20of%20You%20Ed%20Sheeran&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "21141302",
+          "title": "Shape of You",
+          "artist": "Ed Sheeran",
+          "duration": 233,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=21141302&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 404,
+      "provider": null,
+      "via": null,
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 220
+    }
+  },
+  {
+    "songIndex": 14,
+    "category": "英文流行",
+    "title": "Rolling in the Deep",
+    "artist": "Adele",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "Rolling in the Deep Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=Rolling%20in%20the%20Deep%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "16435051",
+          "title": "Rolling in the Deep",
+          "artist": "Adele",
+          "duration": 228,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=16435051&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.096,
+          "baselineBytes": 5016000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "Rolling in the Deep Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=Rolling%20in%20the%20Deep%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0044Ostx3eJu5L",
+          "title": "Rolling in the Deep (Explicit)",
+          "artist": "Adele",
+          "duration": 228,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0044Ostx3eJu5L&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "Rolling in the Deep Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=Rolling%20in%20the%20Deep%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "453cbdd4347ccbf2f6203f37c9d9597c",
+          "title": "Rolling in the Deep (Explicit)",
+          "artist": "Adele",
+          "duration": 228,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=453cbdd4347ccbf2f6203f37c9d9597c&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "Rolling in the Deep Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=Rolling%20in%20the%20Deep%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "992506",
+          "title": "Rolling in the Deep (Explicit)",
+          "artist": "Adele",
+          "duration": 228,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=992506&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3654077
+    }
+  },
+  {
+    "songIndex": 15,
+    "category": "英文流行",
+    "title": "Blinding Lights",
+    "artist": "The Weeknd",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "Blinding Lights The Weeknd",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=Blinding%20Lights%20The%20Weeknd&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1406633327",
+          "title": "Blinding Lights",
+          "artist": "The Weeknd",
+          "duration": 200,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1406633327&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/721023",
+          "content-type": "application/octet-stream;charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 721023,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 45.035102,
+          "format_bit_rate": 88819
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.164,
+          "baselineBytes": 4400000,
+          "isFull": false
+        },
+        "judgment": "试听流 (45s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "Blinding Lights The Weeknd",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=Blinding%20Lights%20The%20Weeknd&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "000qLNqZ3SXnhg",
+          "title": "Blinding Lights",
+          "artist": "The Weeknd",
+          "duration": 200,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=000qLNqZ3SXnhg&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "Blinding Lights The Weeknd",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=Blinding%20Lights%20The%20Weeknd&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "a238ab00dbaae9c7854b883974bcb225",
+          "title": "Blinding Lights",
+          "artist": "The Weeknd",
+          "duration": 200,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=a238ab00dbaae9c7854b883974bcb225&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "Blinding Lights The Weeknd",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=Blinding%20Lights%20The%20Weeknd&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "92022392",
+          "title": "Blinding Lights",
+          "artist": "The Weeknd",
+          "duration": 200,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=92022392&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 404,
+      "provider": null,
+      "via": null,
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 220
+    }
+  },
+  {
+    "songIndex": 16,
+    "category": "英文流行",
+    "title": "Someone Like You",
+    "artist": "Adele",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "Someone Like You Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=Someone%20Like%20You%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "16435049",
+          "title": "Someone Like You",
+          "artist": "Adele",
+          "duration": 285,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=16435049&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/481115",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 481115,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 30.040816,
+          "format_bit_rate": 128123
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.077,
+          "baselineBytes": 6270000,
+          "isFull": false
+        },
+        "judgment": "试听流 (30s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "Someone Like You Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=Someone%20Like%20You%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "000gtopG1e7HB2",
+          "title": "Someone Like You",
+          "artist": "Adele",
+          "duration": 285,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=000gtopG1e7HB2&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "Someone Like You Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=Someone%20Like%20You%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "4ab0779ffd1a44c8f8d76635245f285f",
+          "title": "Someone Like You",
+          "artist": "Adele",
+          "duration": 285,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=4ab0779ffd1a44c8f8d76635245f285f&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "Someone Like You Adele",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=Someone%20Like%20You%20Adele&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "2238175",
+          "title": "Someone Like You",
+          "artist": "Adele",
+          "duration": 285,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=2238175&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4709840
+    }
+  },
+  {
+    "songIndex": 17,
+    "category": "小众民谣",
+    "title": "南山南",
+    "artist": "马頔",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "南山南 马頔",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%8D%97%E5%B1%B1%E5%8D%97%20%E9%A9%AC%E9%A0%94&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "29715551",
+          "title": "南山南",
+          "artist": "马頔",
+          "duration": 325,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=29715551&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/13005889",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 13005889,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 325.12,
+          "format_bit_rate": 12303
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.819,
+          "baselineBytes": 7150000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "南山南 马頔",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%8D%97%E5%B1%B1%E5%8D%97%20%E9%A9%AC%E9%A0%94&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "001abixR3f8L59",
+          "title": "南山南",
+          "artist": "马頔",
+          "duration": 325,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=001abixR3f8L59&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "南山南 马頔",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%8D%97%E5%B1%B1%E5%8D%97%20%E9%A9%AC%E9%A0%94&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "8bb9a34662de6e987a4dba08a2f46b1a",
+          "title": "南山南",
+          "artist": "马頔",
+          "duration": 325,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=8bb9a34662de6e987a4dba08a2f46b1a&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "南山南 马頔",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%8D%97%E5%B1%B1%E5%8D%97%20%E9%A9%AC%E9%A0%94&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "5865709",
+          "title": "南山南",
+          "artist": "马頔",
+          "duration": 325,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=5865709&source=kuwo&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/5201274",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-kuwo",
+          "x-sonic-via": "local-engine:kuwo-antiserver"
+        },
+        "totalBytes": 5201274,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 325.041633,
+          "format_bit_rate": 12306
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.727,
+          "baselineBytes": 7150000,
+          "isFull": false
+        },
+        "judgment": "试听流 (325s)",
+        "failReason": null
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 5201274
+    }
+  },
+  {
+    "songIndex": 18,
+    "category": "小众民谣",
+    "title": "安和桥",
+    "artist": "宋冬野",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "安和桥 宋冬野",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E5%AE%89%E5%92%8C%E6%A1%A5%20%E5%AE%8B%E5%86%AC%E9%87%8E&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "27646205",
+          "title": "安和桥",
+          "artist": "宋冬野",
+          "duration": 250,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=27646205&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/10007031",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 10007031,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 250.148571,
+          "format_bit_rate": 15990
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.819,
+          "baselineBytes": 5500000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "安和桥 宋冬野",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E5%AE%89%E5%92%8C%E6%A1%A5%20%E5%AE%8B%E5%86%AC%E9%87%8E&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "001fpbwS2TUTjV",
+          "title": "安和桥",
+          "artist": "宋冬野",
+          "duration": 251,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=001fpbwS2TUTjV&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "安和桥 宋冬野",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E5%AE%89%E5%92%8C%E6%A1%A5%20%E5%AE%8B%E5%86%AC%E9%87%8E&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "314a859902ca32e8888f0431d9f744b9",
+          "title": "安和桥",
+          "artist": "宋冬野",
+          "duration": 251,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=314a859902ca32e8888f0431d9f744b9&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "安和桥 宋冬野",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E5%AE%89%E5%92%8C%E6%A1%A5%20%E5%AE%8B%E5%86%AC%E9%87%8E&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "3453727",
+          "title": "安和桥",
+          "artist": "宋冬野",
+          "duration": 250,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=3453727&source=kuwo&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/4017201",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-kuwo",
+          "x-sonic-via": "local-engine:kuwo-antiserver"
+        },
+        "totalBytes": 4017201,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 251.036735,
+          "format_bit_rate": 15933
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.73,
+          "baselineBytes": 5500000,
+          "isFull": false
+        },
+        "judgment": "试听流 (251s)",
+        "failReason": null
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4017201
+    }
+  },
+  {
+    "songIndex": 19,
+    "category": "小众民谣",
+    "title": "理想三旬",
+    "artist": "陈鸿宇",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "理想三旬 陈鸿宇",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%20%E9%99%88%E9%B8%BF%E5%AE%87&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "31445772",
+          "title": "理想三旬",
+          "artist": "陈鸿宇",
+          "duration": 211,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=31445772&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/8435505",
+          "content-type": "audio/mpeg; charset=UTF-8",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 8435505,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 320000,
+          "format_name": "mp3",
+          "format_duration": 210.860408,
+          "format_bit_rate": 18969
+        },
+        "evaluation": {
+          "streamType": "full",
+          "ratio": 1.817,
+          "baselineBytes": 4642000,
+          "isFull": true
+        },
+        "judgment": "完整流",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "理想三旬 陈鸿宇",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%20%E9%99%88%E9%B8%BF%E5%AE%87&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "002Yzfab3R9lMM",
+          "title": "理想三旬",
+          "artist": "陈鸿宇",
+          "duration": 210,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=002Yzfab3R9lMM&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "理想三旬 陈鸿宇",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%20%E9%99%88%E9%B8%BF%E5%AE%87&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "8267b85e29d936ae8ffba797f64d5b0a",
+          "title": "理想三旬",
+          "artist": "陈鸿宇",
+          "duration": 210,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=8267b85e29d936ae8ffba797f64d5b0a&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "理想三旬 陈鸿宇",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%20%E9%99%88%E9%B8%BF%E5%AE%87&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "6572330",
+          "title": "理想三旬",
+          "artist": "陈鸿宇",
+          "duration": 210,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=6572330&source=kuwo&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/3374808",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-kuwo",
+          "x-sonic-via": "local-engine:kuwo-antiserver"
+        },
+        "totalBytes": 3374808,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 210.886531,
+          "format_bit_rate": 18967
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.73,
+          "baselineBytes": 4620000,
+          "isFull": false
+        },
+        "judgment": "试听流 (211s)",
+        "failReason": null
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 3374808
+    }
+  },
+  {
+    "songIndex": 20,
+    "category": "小众民谣",
+    "title": "漠河舞厅",
+    "artist": "柳爽",
+    "sources": {
+      "netease": {
+        "source": "netease",
+        "searchQuery": "漠河舞厅 柳爽",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/netease?q=%E6%BC%A0%E6%B2%B3%E8%88%9E%E5%8E%85%20%E6%9F%B3%E7%88%BD&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1430319727",
+          "title": "漠河舞厅",
+          "artist": "柳爽",
+          "duration": 334,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1430319727&source=netease&quality=320",
+        "streamHttpStatus": 206,
+        "streamHeaders": {
+          "accept-ranges": "bytes",
+          "content-length": "1024",
+          "content-range": "bytes 0-1023/721023",
+          "content-type": "audio/mpeg",
+          "x-sonic-circuit": "CLOSED",
+          "x-sonic-provider": "local-netease",
+          "x-sonic-stream-trial": "1",
+          "x-sonic-via": "local-engine:ncm-api"
+        },
+        "totalBytes": 721023,
+        "ffprobe": {
+          "ok": true,
+          "codec_name": "mp3",
+          "sample_rate": 44100,
+          "channels": 2,
+          "stream_bit_rate": 128000,
+          "format_name": "mp3",
+          "format_duration": 45.035102,
+          "format_bit_rate": 88819
+        },
+        "evaluation": {
+          "streamType": "trial",
+          "ratio": 0.098,
+          "baselineBytes": 7348000,
+          "isFull": false
+        },
+        "judgment": "试听流 (45s)",
+        "failReason": null
+      },
+      "qq": {
+        "source": "qq",
+        "searchQuery": "漠河舞厅 柳爽",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/qq?q=%E6%BC%A0%E6%B2%B3%E8%88%9E%E5%8E%85%20%E6%9F%B3%E7%88%BD&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "0043nSjv1TtpMv",
+          "title": "漠河舞厅",
+          "artist": "柳爽",
+          "duration": 334,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=0043nSjv1TtpMv&source=qq&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kugou": {
+        "source": "kugou",
+        "searchQuery": "漠河舞厅 柳爽",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kugou?q=%E6%BC%A0%E6%B2%B3%E8%88%9E%E5%8E%85%20%E6%9F%B3%E7%88%BD&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "1e843e81dcb7ac821177a5944d4ed7fb",
+          "title": "漠河舞厅",
+          "artist": "柳爽",
+          "duration": 334,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=1e843e81dcb7ac821177a5944d4ed7fb&source=kugou&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      },
+      "kuwo": {
+        "source": "kuwo",
+        "searchQuery": "漠河舞厅 柳爽",
+        "searchUrl": "https://sonic.epocanvas.tech/api/sonic/search/kuwo?q=%E6%BC%A0%E6%B2%B3%E8%88%9E%E5%8E%85%20%E6%9F%B3%E7%88%BD&count=5&nocache=1",
+        "searchHttpStatus": 200,
+        "matchedTrack": {
+          "id": "142683102",
+          "title": "漠河舞厅",
+          "artist": "柳爽",
+          "duration": 334,
+          "isVip": false
+        },
+        "streamRequestUrl": "https://sonic.epocanvas.tech/api/music/stream?id=142683102&source=kuwo&quality=320",
+        "streamHttpStatus": 404,
+        "streamHeaders": {
+          "content-length": "220",
+          "content-type": "application/json; charset=utf-8"
+        },
+        "totalBytes": 0,
+        "ffprobe": null,
+        "evaluation": null,
+        "judgment": "失败",
+        "failReason": "取流 HTTP 404"
+      }
+    },
+    "nexusMultiSource": {
+      "httpStatus": 206,
+      "provider": "local-kuwo",
+      "via": "local-engine:kuwo-antiserver:free-match",
+      "streamTypeHeader": null,
+      "isTrialHeader": null,
+      "trialDurationHeader": null,
+      "totalBytes": 4985207
+    }
+  }
+]
