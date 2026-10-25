@@ -11,6 +11,7 @@ const DEFAULT_MAX_REDIRECTS = 3;
 const BLOCKED_HOST_SUFFIXES = [
   '.localhost',
   '.local',
+  '.localdomain',
   '.internal',
   '.lan',
   '.home',
@@ -241,6 +242,11 @@ export function isBlockedIpv6Bytes(bytes: Uint8Array): boolean {
     return isBlockedIpv4Bytes(embeddedIpv4(12));
   }
 
+  // IPv4-translated ::ffff:0:a.b.c.d
+  if (bytes.slice(0, 8).every((byte) => byte === 0) && bytes[8] === 0xff && bytes[9] === 0xff) {
+    return isBlockedIpv4Bytes(embeddedIpv4(12));
+  }
+
   // NAT64 64:ff9b::/96
   if (bytes[0] === 0x00 && bytes[1] === 0x64 && bytes[2] === 0xff && bytes[3] === 0x9b && bytes.slice(4, 12).every((byte) => byte === 0)) {
     return isBlockedIpv4Bytes(embeddedIpv4(12));
@@ -267,7 +273,9 @@ export function isBlockedSsrfHost(hostname: string): boolean {
   const ipv4 = parseLooseIpv4(host);
   if (ipv4) return isBlockedIpv4Bytes(ipv4);
 
-  if (host === 'localhost') return true;
+  if (host === 'localhost' || host === 'localhost.localdomain' || host === 'ip6-localhost' || host === 'ip6-loopback') {
+    return true;
+  }
   if (host.startsWith('engine-sonic.')) return true;
   if (BLOCKED_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix))) return true;
   if (IP_ECHO_HOSTS.some((suffix) => host === suffix || host.endsWith(`.${suffix}`))) return true;

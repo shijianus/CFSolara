@@ -8,7 +8,7 @@ import {
   resolveQQCoverUrl,
 } from '../../_lib/sonic/native-protocols';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
-import { safeFetch, validateOutboundUrl } from '../../_lib/sonic/net-guard';
+import { isHostAllowed, safeFetch, validateOutboundUrl } from '../../_lib/sonic/net-guard';
 import type { AppEnv } from '../../_lib/types';
 
 const DEFAULT_COVER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
@@ -37,10 +37,10 @@ function svgResponse(degraded = false): Response {
 
 function getRefererForHost(hostname: string): string {
   const h = hostname.toLowerCase();
-  if (h.includes('gtimg.cn') || h.includes('qq.com')) return 'https://y.qq.com/';
-  if (h.includes('126.net') || h.includes('163.com')) return 'https://music.163.com/';
-  if (h.includes('kugou.com')) return 'https://www.kugou.com/';
-  if (h.includes('kuwo.cn')) return 'https://www.kuwo.cn/';
+  if (isHostAllowed(h, ['gtimg.cn', 'qq.com'])) return 'https://y.qq.com/';
+  if (isHostAllowed(h, ['126.net', '163.com'])) return 'https://music.163.com/';
+  if (isHostAllowed(h, ['kugou.com'])) return 'https://www.kugou.com/';
+  if (isHostAllowed(h, ['kuwo.cn'])) return 'https://www.kuwo.cn/';
   return '';
 }
 
