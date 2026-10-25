@@ -15,7 +15,7 @@ export function getMusicApiBase(env: AppEnv): string {
 }
 
 export function generateSignature(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return crypto.randomUUID().replace(/-/g, '');
 }
 
 export function normalizeArtist(artist: unknown): string {

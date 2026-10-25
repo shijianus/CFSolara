@@ -298,6 +298,8 @@ KUGOU_COOKIE=""
 ---
 
 ## 📄 许可证与版权 (Copyright & License)
-Copyright © 2026 epocanvas. All rights reserved.
 
-本项目采用 CC BY-NC-SA 协议，禁止商业化转售行为，任何衍生项目必须保留本项目地址并以相同协议开源。
+Copyright © 2025 akudamatata（上游 “Music-Player” 初始工程）  
+Copyright © 2026 epocanvas contributors
+
+本仓库是上述上游工程的 Fork / 延续，已在根目录 [LICENSE](./LICENSE) 中保留上游版权声明。除文件另有说明外，本项目采用 **CC BY-NC-SA 4.0** 协议（https://creativecommons.org/licenses/by-nc-sa/4.0/）：禁止商业化转售行为，任何衍生项目必须保留本项目地址并以相同协议开源。`player/` 子工程另按 MIT 协议分发，详见 `player/LICENSE`。

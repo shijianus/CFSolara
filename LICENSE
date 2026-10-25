@@ -1,0 +1,27 @@
+Sonic (epocanvas sonic) — Copyright and License Notice
+======================================================
+
+Copyright (c) 2025 akudamatata (upstream "Music-Player" project, initial
+repository history).
+
+Copyright (c) 2026 epocanvas contributors.
+
+This repository is a fork/continuation of the upstream project above. The
+upstream author's copyright notice is preserved here. Unless a file states
+otherwise, the repository is distributed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International license
+(CC BY-NC-SA 4.0):
+
+  https://creativecommons.org/licenses/by-nc-sa/4.0/
+  https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+You must give appropriate credit, provide a link to the license, and indicate
+if changes were made. You may not use the material for commercial purposes.
+If you remix, transform, or build upon the material, you must distribute your
+contributions under the same license as the original.
+
+The web player subproject in `player/` is additionally distributed under the
+MIT License; see `player/LICENSE` for its full text and copyright notice.
+
+Third-party libraries and music-platform protocol implementations retain their
+own licenses. See the acknowledgements in README.md.

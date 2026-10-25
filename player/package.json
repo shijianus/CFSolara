@@ -4,7 +4,7 @@
   "version": "2.1.0",
   "type": "module",
   "description": "epocanvas sonic Music Cloud Platform & Streaming Web Player",
-  "license": "CC BY-NC-SA",
+  "license": "MIT",
   "author": {
     "name": "epocanvas",
     "url": "https://epocanvas.com"
@@ -31,7 +31,6 @@
     "gsap": "^3.13.0",
     "hls.js": "^1.6.15",
     "lottie-web": "^5.13.0",
-    "music-metadata-browser": "^2.5.11",
     "nprogress": "^0.2.0",
     "ogl": "^1.0.11",
     "pinia": "^3.0.3",
@@ -48,7 +47,8 @@
     "vite-plugin-vue-devtools": "^8.0.3",
     "vue": "^3.5.22",
     "vue-i18n": "^11.1.12",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "music-metadata": "^12.3.0"
   },
   "devDependencies": {
     "@iconify-json/ic": "^1.2.4",
@@ -82,6 +82,12 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "@parcel/watcher"
-    ]
+    ],
+    "overrides": {
+      "braces": ">=3.0.3",
+      "micromatch": ">=4.0.8",
+      "postcss": ">=8.5.23",
+      "decode-uri-component": ">=0.5.0"
+    }
   }
 }

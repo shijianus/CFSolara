@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { localMusicDB, type LocalMusic } from '@/utils/indexedDB'
 import { Song } from '../interface'
-import * as mm from 'music-metadata-browser'
+import * as mm from 'music-metadata'
 
 export const useLocalMusicStore = defineStore('localMusic', {
   state: () => ({
