@@ -170,7 +170,7 @@ async function run() {
     assert(refused.streamType === 'unavailable', 'Connection refused -> unavailable (no throw)');
   }
 
-  server.close();
+  await new Promise((r) => server.close(r));
   console.log(`\n==== stream detection tests: ${passed} passed, ${failed} failed ====`);
   process.exit(failed > 0 ? 1 : 0);
 }

@@ -112,12 +112,12 @@ async function run() {
     assert(err === null || String(err?.message || '').startsWith('FETCH_TARGET_BLOCKED') || true, 'Relative locations handled (covered by bounce_ok)');
   }
 
-  server.close();
+  await new Promise((r) => server.close(r));
   console.log(`\n==== fetch guard tests: ${passed} passed, ${failed} failed ====`);
-  process.exit(failed > 0 ? 1 : 0);
+  process.exitCode = failed > 0 ? 1 : 0;
 }
 
 run().catch((err) => {
   console.error('Fatal test error:', err);
-  process.exit(1);
+  process.exitCode = 1;
 });
