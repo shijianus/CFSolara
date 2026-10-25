@@ -1,6 +1,8 @@
 // scripts/test-auth-compatibility.mjs
 // Signed API key format, rotation, expiry, tampering and credential transport.
 
+import crypto from 'node:crypto';
+
 import {
   AuthConfigError,
   createSession,
@@ -11,6 +13,7 @@ import {
   getEpomailConfig,
 } from '../functions/_lib/auth.ts';
 import { onRequest as handleLogin } from '../functions/api/auth/login.ts';
+import { onRequest as handleCallback } from '../functions/api/auth/callback.ts';
 
 let passed = 0;
 let failed = 0;
@@ -69,11 +72,125 @@ async function runAuthTests() {
     assert(config.clientId === 'sonic_client_app', 'Client ID matched');
     assert(config.redirectUri === 'https://sonic.epocanvas.com/api/auth/callback', 'Redirect URI matched');
 
-    const authUrl = buildAuthorizeUrl(env, 'https://sonic.epocanvas.com', 'custom_state_123');
+    const state = 'A'.repeat(43);
+    const authUrl = buildAuthorizeUrl(env, 'https://sonic.epocanvas.com', state, { codeChallenge: 'challenge_value' });
     const parsedUrl = new URL(authUrl);
     assert(parsedUrl.pathname === '/oauth/authorize', 'Authorize pathname is correct');
     assert(parsedUrl.searchParams.get('client_id') === 'sonic_client_app', 'Authorize client_id parameter matches');
-    assert(parsedUrl.searchParams.get('state') === 'custom_state_123', 'Custom state preserved');
+    assert(parsedUrl.searchParams.get('state') === state, 'OAuth state preserved');
+    assert(parsedUrl.searchParams.get('code_challenge') === 'challenge_value', 'PKCE challenge included');
+    assert(parsedUrl.searchParams.get('code_challenge_method') === 'S256', 'PKCE method is S256');
+    let shortStateRejected = false;
+    try {
+      buildAuthorizeUrl(env, 'https://sonic.epocanvas.com', 'short');
+    } catch (error) {
+      shortStateRejected = error instanceof AuthConfigError;
+    }
+    assert(shortStateRejected, 'Short/non-random OAuth state rejected');
+  }
+
+  console.log('\n1a. Redirect URI is configured, never taken blindly from Origin');
+  {
+    const base = {
+      EPOMAIL_CLIENT_ID: 'sonic_client_app',
+      EPOMAIL_CLIENT_SECRET: 'oauth_client_secret_value',
+    };
+    const allowed = getEpomailConfig(
+      { ...base, SONIC_ALLOWED_ORIGINS: 'https://sonic.epocanvas.com' },
+      'https://sonic.epocanvas.com',
+    );
+    assert(allowed.redirectUri === 'https://sonic.epocanvas.com/api/auth/callback', 'Allowed origin builds callback URI');
+
+    let evilRejected = false;
+    try {
+      getEpomailConfig({ ...base, SONIC_ALLOWED_ORIGINS: 'https://sonic.epocanvas.com' }, 'https://evil.example.net');
+    } catch (error) {
+      evilRejected = error instanceof AuthConfigError && error.code === 'OAUTH_REDIRECT_NOT_ALLOWED';
+    }
+    assert(evilRejected, 'Unlisted Origin is rejected');
+
+    let noOriginRejected = false;
+    try {
+      getEpomailConfig(base);
+    } catch (error) {
+      noOriginRejected = error instanceof AuthConfigError;
+    }
+    assert(noOriginRejected, 'Missing redirect URI and origin is rejected (no default domain fallback)');
+
+    let insecureRejected = false;
+    try {
+      getEpomailConfig({ ...base, EPOMAIL_REDIRECT_URI: 'http://sonic.epocanvas.com/api/auth/callback' });
+    } catch (error) {
+      insecureRejected = error instanceof AuthConfigError && error.code === 'OAUTH_REDIRECT_INVALID';
+    }
+    assert(insecureRejected, 'Plain-HTTP redirect URI rejected');
+  }
+
+  console.log('\n1c. Login issues random state and PKCE cookies');
+  {
+    const env = {
+      EPOMAIL_CLIENT_ID: 'sonic_client_app',
+      EPOMAIL_CLIENT_SECRET: 'oauth_client_secret_value',
+      EPOMAIL_REDIRECT_URI: 'https://sonic.epocanvas.com/api/auth/callback',
+      EPOMAIL_PKCE: '1',
+    };
+    const res = await handleLogin({
+      request: new Request('https://sonic.epocanvas.com/api/auth/login?mode=json&state=attacker_chosen_state'),
+      env,
+    });
+    const json = await res.json();
+    const setCookies = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [res.headers.get('set-cookie') || ''];
+    const combined = setCookies.join('\n');
+    assert(res.status === 200 && typeof json.authorizeUrl === 'string', 'Login returns authorize URL');
+    const authorizeUrl = new URL(json.authorizeUrl);
+    const state = authorizeUrl.searchParams.get('state') || '';
+    assert(state.length >= 32 && state !== 'attacker_chosen_state', 'Client-supplied state is ignored; random state used');
+    assert(combined.includes(`sonic_oauth_state=${state}`), 'State cookie matches authorize URL');
+    assert(combined.includes('Path=/api/auth'), 'OAuth cookie Path limited to /api/auth');
+    assert(combined.includes('HttpOnly'), 'OAuth cookie is HttpOnly');
+    assert(combined.includes('Secure'), 'OAuth cookie is Secure');
+    assert(combined.includes('SameSite=Lax'), 'OAuth cookie is SameSite=Lax');
+    assert(combined.includes('Max-Age=600'), 'OAuth cookie lives for 10 minutes');
+    assert(authorizeUrl.searchParams.get('code_challenge_method') === 'S256', 'Login uses PKCE S256');
+
+    const verifierMatch = combined.match(/sonic_oauth_pkce_verifier=([A-Za-z0-9_-]+)/);
+    assert(Boolean(verifierMatch), 'PKCE verifier cookie issued');
+    if (verifierMatch) {
+      const expectedChallenge = crypto.createHash('sha256').update(verifierMatch[1], 'ascii').digest('base64url');
+      assert(authorizeUrl.searchParams.get('code_challenge') === expectedChallenge, 'PKCE challenge is SHA-256 of verifier');
+    }
+  }
+
+  console.log('\n1d. Callback rejects missing or mismatched OAuth state');
+  {
+    const env = {
+      EPOMAIL_CLIENT_ID: 'sonic_client_app',
+      EPOMAIL_CLIENT_SECRET: 'oauth_client_secret_value',
+      EPOMAIL_REDIRECT_URI: 'https://sonic.epocanvas.com/api/auth/callback',
+    };
+    const noState = await handleCallback({
+      request: new Request('https://sonic.epocanvas.com/api/auth/callback?code=abc'),
+      env,
+    });
+    assert(noState.status === 400, `Missing state returns 400 (got ${noState.status})`);
+
+    const stateParamOnly = await handleCallback({
+      request: new Request(`https://sonic.epocanvas.com/api/auth/callback?code=abc&state=${'B'.repeat(43)}`),
+      env,
+    });
+    assert(stateParamOnly.status === 400, 'State without cookie returns 400');
+
+    const mismatch = await handleCallback({
+      request: new Request(`https://sonic.epocanvas.com/api/auth/callback?code=abc&state=${'B'.repeat(43)}`, {
+        headers: { Cookie: `sonic_oauth_state=${'C'.repeat(43)}` },
+      }),
+      env,
+    });
+    assert(mismatch.status === 400, 'State mismatch returns 400');
+    const clearCookie = typeof mismatch.headers.getSetCookie === 'function'
+      ? mismatch.headers.getSetCookie().join('\n')
+      : (mismatch.headers.get('set-cookie') || '');
+    assert(clearCookie.includes('Max-Age=0'), 'Rejected callback clears state cookie');
   }
 
   console.log('\n1b. OAuth client credentials are mandatory');

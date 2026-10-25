@@ -1,5 +1,5 @@
 import type { AppEnv, UserSession } from './types';
-import { sha256Hex } from './sonic/hash';
+import { constantTimeEqualStrings, sha256Hex } from './sonic/hash';
 import { isEnvEnabled } from './sonic/config';
 import { getSigningSecrets, MIN_SECRET_LENGTH } from './secrets';
 
@@ -228,8 +228,80 @@ export function clearVerifiedKeyCacheForTest(): void {
   verifiedKeyCache.clear();
 }
 
+export const OAUTH_STATE_COOKIE = 'sonic_oauth_state';
+export const OAUTH_VERIFIER_COOKIE = 'sonic_oauth_pkce_verifier';
+const OAUTH_COOKIE_MAX_AGE = 600;
+const OAUTH_COOKIE_PATH = '/api/auth';
+
+function isSecureOrLoopback(url: URL): boolean {
+  if (url.protocol === 'https:') return true;
+  if (url.protocol !== 'http:') return false;
+  return url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '::1' || url.hostname === '[::1]';
+}
+
+function parseAllowedOrigins(env: AppEnv): string[] {
+  const raw = String(env.SONIC_ALLOWED_ORIGINS || '').trim();
+  if (!raw) return [];
+  const origins: string[] = [];
+  for (const entry of raw.split(/[\s,]+/)) {
+    if (!entry) continue;
+    try {
+      const parsed = new URL(entry);
+      if (!isSecureOrLoopback(parsed) || parsed.username || parsed.password) continue;
+      if (!origins.includes(parsed.origin)) origins.push(parsed.origin);
+    } catch {
+      // Ignore malformed allow-list entries rather than widening access.
+    }
+  }
+  return origins;
+}
+
+function resolveRedirectUri(env: AppEnv, requestOrigin?: string): string {
+  if (env.EPOMAIL_REDIRECT_URI) {
+    let parsed: URL;
+    try {
+      parsed = new URL(String(env.EPOMAIL_REDIRECT_URI));
+    } catch {
+      throw new AuthConfigError('OAUTH_REDIRECT_INVALID', 'EPOMAIL_REDIRECT_URI is not a valid URL');
+    }
+    if (!isSecureOrLoopback(parsed) || parsed.username || parsed.password || parsed.hash) {
+      throw new AuthConfigError('OAUTH_REDIRECT_INVALID', 'EPOMAIL_REDIRECT_URI must be an HTTPS URL without credentials or fragment');
+    }
+    return parsed.toString();
+  }
+
+  if (!requestOrigin) {
+    throw new AuthConfigError(
+      'OAUTH_REDIRECT_INVALID',
+      'EPOMAIL_REDIRECT_URI or an allow-listed request origin is required',
+    );
+  }
+
+  let originUrl: URL;
+  try {
+    originUrl = new URL(requestOrigin);
+  } catch {
+    throw new AuthConfigError('OAUTH_REDIRECT_INVALID', 'Request origin is invalid');
+  }
+  if (!isSecureOrLoopback(originUrl)) {
+    throw new AuthConfigError('OAUTH_REDIRECT_INVALID', 'Request origin must use HTTPS');
+  }
+  const allowedOrigins = parseAllowedOrigins(env);
+  if (!allowedOrigins.includes(originUrl.origin)) {
+    throw new AuthConfigError(
+      'OAUTH_REDIRECT_NOT_ALLOWED',
+      'Request origin is not listed in SONIC_ALLOWED_ORIGINS',
+    );
+  }
+  return `${originUrl.origin}/api/auth/callback`;
+}
+
+export function getEpomailBaseUrl(env: AppEnv): string {
+  return (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
+}
+
 export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {
-  const baseUrl = (env.EPOMAIL_BASE_URL || DEFAULT_EPOMAIL_BASE).replace(/\/+$/, '');
+  const baseUrl = getEpomailBaseUrl(env);
   const clientId = String(env.EPOMAIL_CLIENT_ID || '').trim();
   const clientSecret = String(env.EPOMAIL_CLIENT_SECRET || '').trim();
   if (!clientId || !clientSecret) {
@@ -238,7 +310,7 @@ export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {
       'EPOMAIL_CLIENT_ID and EPOMAIL_CLIENT_SECRET are required',
     );
   }
-  const redirectUri = env.EPOMAIL_REDIRECT_URI || (requestOrigin ? `${requestOrigin}/api/auth/callback` : `${DEFAULT_EPOMAIL_BASE}/api/auth/callback`);
+  const redirectUri = resolveRedirectUri(env, requestOrigin);
 
   return {
     baseUrl,
@@ -251,41 +323,122 @@ export function getEpomailConfig(env: AppEnv, requestOrigin?: string) {
   };
 }
 
-export function buildAuthorizeUrl(env: AppEnv, origin: string, state?: string): string {
+export function generateOAuthState(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return bytesToBase64Url(bytes);
+}
+
+export async function generatePkcePair(): Promise<{ verifier: string; challenge: string }> {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const verifier = bytesToBase64Url(bytes);
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(verifier));
+  return { verifier, challenge: bytesToBase64Url(new Uint8Array(digest)) };
+}
+
+export function buildOAuthCookie(name: string, value: string): string {
+  return `${name}=${value}; Path=${OAUTH_COOKIE_PATH}; HttpOnly; Secure; SameSite=Lax; Max-Age=${OAUTH_COOKIE_MAX_AGE}`;
+}
+
+export function buildClearedOAuthCookie(name: string): string {
+  return `${name}=; Path=${OAUTH_COOKIE_PATH}; HttpOnly; Secure; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
+
+export function parseCookieHeader(header: string | null): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!header) return cookies;
+  for (const part of header.split(';')) {
+    const index = part.indexOf('=');
+    if (index <= 0) continue;
+    const name = part.slice(0, index).trim();
+    const value = part.slice(index + 1).trim();
+    if (!name) continue;
+    cookies[name] = value;
+  }
+  return cookies;
+}
+
+export function appendSetCookies(response: Response, cookies: string[]): Response {
+  for (const cookie of cookies) response.headers.append('Set-Cookie', cookie);
+  return response;
+}
+
+export function buildAuthorizeUrl(
+  env: AppEnv,
+  origin: string,
+  state: string,
+  options?: { codeChallenge?: string },
+): string {
+  if (typeof state !== 'string' || !/^[A-Za-z0-9_-]{32,128}$/.test(state)) {
+    throw new AuthConfigError('OAUTH_STATE_INVALID', 'A cryptographically random OAuth state is required');
+  }
   const config = getEpomailConfig(env, origin);
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: 'openid profile email',
-    state: state || 'sonic_auth',
+    state,
   });
+  if (options?.codeChallenge) {
+    params.set('code_challenge', options.codeChallenge);
+    params.set('code_challenge_method', 'S256');
+  }
   return `${config.authorizeUrl}?${params.toString()}`;
 }
 
-export async function exchangeCode(env: AppEnv, origin: string, code: string): Promise<{ accessToken: string; idToken?: string }> {
+export async function exchangeCode(
+  env: AppEnv,
+  origin: string,
+  code: string,
+  codeVerifier?: string,
+): Promise<{ accessToken: string; idToken?: string }> {
   const config = getEpomailConfig(env, origin);
-  const response = await fetch(config.tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code,
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
-      redirect_uri: config.redirectUri,
-    }),
-  });
+  if (!code) throw new AuthError('OAUTH_CODE_MISSING', 'Authorization code is required', 400);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Epomail token exchange failed (${response.status}): ${errorText}`);
+  const body: Record<string, string> = {
+    grant_type: 'authorization_code',
+    code,
+    client_id: config.clientId,
+    client_secret: config.clientSecret,
+    redirect_uri: config.redirectUri,
+  };
+  if (codeVerifier) body.code_verifier = codeVerifier;
+
+  let response: Response;
+  try {
+    response = await fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(body),
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    console.error('[Sonic Auth] token exchange network error');
+    throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
   }
 
-  const data = (await response.json()) as { access_token: string; id_token?: string };
+  if (response.status >= 300 && response.status < 400) {
+    response.body?.cancel().catch(() => {});
+    console.error('[Sonic Auth] token endpoint attempted a redirect');
+    throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
+  }
+  if (!response.ok) {
+    // Never surface the upstream response body to the client or logs.
+    console.error(`[Sonic Auth] token exchange rejected (status=${response.status})`);
+    response.body?.cancel().catch(() => {});
+    throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
+  }
+
+  const data = (await response.json().catch(() => null)) as { access_token?: string; id_token?: string } | null;
+  if (!data || typeof data.access_token !== 'string' || !data.access_token) {
+    throw new AuthError('OAUTH_TOKEN_EXCHANGE_FAILED', 'OAuth token exchange failed', 502);
+  }
   return {
     accessToken: data.access_token,
     idToken: data.id_token,
@@ -293,23 +446,43 @@ export async function exchangeCode(env: AppEnv, origin: string, code: string): P
 }
 
 export async function fetchUserInfo(env: AppEnv, accessToken: string): Promise<{ email: string; name: string; avatar: string; role?: string; id?: string }> {
-  const config = getEpomailConfig(env);
-  const response = await fetch(config.userInfoUrl, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Epomail userInfo request failed (${response.status})`);
+  const baseUrl = getEpomailBaseUrl(env);
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}/oauth/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    console.error('[Sonic Auth] userinfo network error');
+    throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information request failed', 502);
   }
 
-  const user = (await response.json()) as Record<string, any>;
+  if (response.status >= 300 && response.status < 400) {
+    response.body?.cancel().catch(() => {});
+    throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information request failed', 502);
+  }
+  if (!response.ok) {
+    response.body?.cancel().catch(() => {});
+    throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information request failed', 502);
+  }
+
+  const user = (await response.json().catch(() => null)) as Record<string, any> | null;
+  if (!user || typeof user !== 'object') {
+    throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information is invalid', 502);
+  }
+  const email = String(user.email || '').trim().toLowerCase();
+  if (!isValidEmail(email)) {
+    throw new AuthError('OAUTH_USERINFO_FAILED', 'OAuth user information is invalid', 502);
+  }
   return {
-    id: String(user.id || user.sub || user.email || ''),
-    email: String(user.email || '').trim().toLowerCase(),
-    name: String(user.name || user.username || user.nickname || user.email || 'Epomail User'),
+    id: String(user.id || user.sub || email),
+    email,
+    name: String(user.name || user.username || user.nickname || email),
     avatar: String(user.avatar || user.picture || ''),
     role: String(user.role || 'user'),
   };

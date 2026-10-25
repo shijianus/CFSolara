@@ -24,6 +24,9 @@
    - 授权端点：`GET /api/auth/login` （自动重定向至 Epomail 官方授权中心）
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
+   - 登录 CSRF 防护：`/api/auth/login` 由服务端生成 ≥128-bit 随机 `state`，写入 `HttpOnly; Secure; SameSite=Lax; Path=/api/auth; Max-Age=600` cookie；`/api/auth/callback` 恒定时间比对，缺失或不匹配一律 `400`。客户端传入的 `state` 参数不会被采用。
+   - PKCE：默认启用 `code_challenge_method=S256`；仅当 Epomail 部署不支持时用 `EPOMAIL_PKCE=0` 关闭。
+   - 回调地址：优先使用 `EPOMAIL_REDIRECT_URI`；未配置时只允许 `SONIC_ALLOWED_ORIGINS` 内的 origin，绝不根据请求 `Origin` 动态放行。
 2. **专案连结 API Key 与分级限流**：
    - 登录 Epomail 后即可自动获得带签名的专案 API Key（格式 `sonic_live_v1.<payload>.<signature>`）。旧格式 Key（包括 `solara_live_*`）一律拒绝，需重新登录。
    - 在第三方专案发起请求时，仅通过请求头传递凭证（默认不接受查询参数）：
