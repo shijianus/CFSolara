@@ -1,0 +1,74 @@
+{
+  "log": [
+    {
+      "tag": "B",
+      "toolbar": "epocanvas sonic",
+      "globals": {
+        "SonicMobileBridge": true,
+        "SonicDom": true,
+        "SolaraMobileBridge": false,
+        "SolaraDom": false,
+        "mobileView": true
+      },
+      "bodyBrand": {
+        "hasBrand": true,
+        "sample": "epocanvas sonic\nsonic 全网聚合\n搜索\n起风了\n周深\n极高音质\n播放列表\n起风了 - 周深\n00:02\n00:30"
+      }
+    },
+    {
+      "tag": "C",
+      "toolbar": "epocanvas sonic",
+      "globals": {
+        "SonicMobileBridge": true,
+        "SonicDom": true,
+        "SolaraMobileBridge": true,
+        "SolaraDom": true,
+        "mobileView": true
+      },
+      "bodyBrand": {
+        "hasBrand": true,
+        "sample": "epocanvas sonic\nsonic 全网聚合\n搜索\n起风了\n周深\n极高音质\n播放列表\n起风了 - 周深\n00:12\n00:30"
+      }
+    }
+  ],
+  "out": {
+    "new": {
+      "toolbar": "epocanvas sonic",
+      "globals": {
+        "SonicMobileBridge": true,
+        "SonicDom": true,
+        "SolaraMobileBridge": false,
+        "SolaraDom": false,
+        "mobileView": true
+      },
+      "bodyBrand": {
+        "hasBrand": true,
+        "sample": "epocanvas sonic\nsonic 全网聚合\n搜索\n起风了\n周深\n极高音质\n播放列表\n起风了 - 周深\n00:02\n00:30"
+      }
+    },
+    "old": {
+      "toolbar": "epocanvas sonic",
+      "globals": {
+        "SonicMobileBridge": true,
+        "SonicDom": true,
+        "SolaraMobileBridge": true,
+        "SolaraDom": true,
+        "mobileView": true
+      },
+      "bodyBrand": {
+        "hasBrand": true,
+        "sample": "epocanvas sonic\nsonic 全网聚合\n搜索\n起风了\n周深\n极高音质\n播放列表\n起风了 - 周深\n00:12\n00:30"
+      }
+    }
+  },
+  "compare": {
+    "toolbarBoth": "一致(均为 epocanvas sonic)",
+    "sonicGlobalsBoth": "一致(均有 Sonic 桥接)",
+    "solaraGlobals": {
+      "newSite": false,
+      "oldSite": true,
+      "expected": "新站应无(已清理)，旧站应有(兼容别名)"
+    },
+    "mobileViewBoth": "一致"
+  }
+}

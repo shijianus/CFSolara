@@ -1,0 +1,95 @@
+{
+  "log": [
+    {
+      "step": "A4(净用户) 单击行播放",
+      "status": "PASS",
+      "detail": {
+        "paused": false,
+        "currentTime": 0.45,
+        "src": "http://127.0.0.1:8788/api/music/stream?id=0039MnYb0qxYhV&source=qq&title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6"
+      },
+      "at": "2026-10-25T00:27:05.049Z"
+    },
+    {
+      "step": "A5(净用户) 歌词行渲染",
+      "status": "PASS",
+      "detail": {
+        "lyricLine": "故事的小黄花"
+      },
+      "at": "2026-10-25T00:27:08.946Z"
+    },
+    {
+      "step": "B 播放点击后的 audio 状态捕获",
+      "status": "PASS",
+      "detail": {
+        "audios": [
+          {
+            "paused": true,
+            "currentTime": 0,
+            "readyState": 0,
+            "networkState": 3,
+            "error": 4,
+            "src": "http://127.0.0.1:8789/api/music/stream?id=0039MnYb0qxYhV&source=sonic&quality=320"
+          }
+        ],
+        "hint": true
+      },
+      "at": "2026-10-25T00:27:19.334Z"
+    },
+    {
+      "step": "C 播放点击后的 audio 状态捕获",
+      "status": "PASS",
+      "detail": {
+        "audios": [
+          {
+            "paused": true,
+            "currentTime": 0,
+            "readyState": 0,
+            "networkState": 3,
+            "error": 4,
+            "src": "http://127.0.0.1:8790/api/music/stream?id=0039MnYb0qxYhV&source=sonic&quality=320"
+          }
+        ],
+        "hint": true
+      },
+      "at": "2026-10-25T00:27:28.197Z"
+    }
+  ],
+  "out": {
+    "player": {
+      "audio": {
+        "paused": false,
+        "currentTime": 0.452789,
+        "readyState": 4,
+        "networkState": 1,
+        "error": null,
+        "src": "http://127.0.0.1:8788/api/music/stream?id=0039MnYb0qxYhV&source=qq&title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6"
+      },
+      "lyricLine": "故事的小黄花"
+    },
+    "legacyNew": {
+      "audios": [
+        {
+          "paused": true,
+          "currentTime": 0,
+          "readyState": 0,
+          "networkState": 3,
+          "error": 4,
+          "src": "http://127.0.0.1:8789/api/music/stream?id=0039MnYb0qxYhV&source=sonic&quality=320"
+        }
+      ]
+    },
+    "legacyOld": {
+      "audios": [
+        {
+          "paused": true,
+          "currentTime": 0,
+          "readyState": 0,
+          "networkState": 3,
+          "error": 4,
+          "src": "http://127.0.0.1:8790/api/music/stream?id=0039MnYb0qxYhV&source=sonic&quality=320"
+        }
+      ]
+    }
+  }
+}

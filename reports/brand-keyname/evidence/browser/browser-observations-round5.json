@@ -1,0 +1,73 @@
+{
+  "log": [
+    {
+      "step": "A9(净用户) 移动端搜索+点播",
+      "status": "PASS",
+      "detail": {
+        "paused": false,
+        "currentTime": 0.72,
+        "src": "http://127.0.0.1:8788/api/music/stream?id=002qU5aY3Qu24y&source=qq&title=%E9%9D%92%E8%8A%B1%E7%93%B7&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6"
+      },
+      "at": "2026-10-25T00:37:30.458Z"
+    },
+    {
+      "step": "B5 netease 曲目(起风了-周深)播放成功",
+      "status": "PASS",
+      "detail": {
+        "paused": false,
+        "currentTime": 0.5,
+        "src": "http://127.0.0.1:8789/api/music/stream?id=1475596788&source=netease&quality=320"
+      },
+      "at": "2026-10-25T00:37:41.735Z"
+    },
+    {
+      "step": "C5 netease 曲目(起风了-周深)播放成功",
+      "status": "PASS",
+      "detail": {
+        "paused": false,
+        "currentTime": 0.92,
+        "src": "http://127.0.0.1:8790/api/music/stream?id=1475596788&source=netease&quality=320"
+      },
+      "at": "2026-10-25T00:37:52.273Z"
+    },
+    {
+      "step": "B/C netease 播放一致性",
+      "status": "PASS",
+      "detail": {
+        "bothPlaying": "一致",
+        "sameStreamPath": "一致"
+      },
+      "at": "2026-10-25T00:37:54.069Z"
+    }
+  ],
+  "out": {
+    "playerMobile": {
+      "audio": {
+        "paused": false,
+        "currentTime": 0.724378,
+        "readyState": 4,
+        "src": "http://127.0.0.1:8788/api/music/stream?id=002qU5aY3Qu24y&source=qq&title=%E9%9D%92%E8%8A%B1%E7%93%B7&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6"
+      }
+    },
+    "legacyNew": {
+      "audio": {
+        "paused": false,
+        "currentTime": 0.495602,
+        "readyState": 4,
+        "src": "http://127.0.0.1:8789/api/music/stream?id=1475596788&source=netease&quality=320"
+      }
+    },
+    "legacyOld": {
+      "audio": {
+        "paused": false,
+        "currentTime": 0.915255,
+        "readyState": 4,
+        "src": "http://127.0.0.1:8790/api/music/stream?id=1475596788&source=netease&quality=320"
+      }
+    }
+  },
+  "compare": {
+    "bothPlaying": "一致",
+    "sameStreamPath": "一致"
+  }
+}

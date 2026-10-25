@@ -51,6 +51,11 @@
 - 驼峰 `EpoCanvas` 错误大小写：scripts/ 活动目录清零（仅剩归档证据 16 + 审计正则 1，均合法）
 - git 改动面 = 预期清单（8 个修改/重命名 + reports/brand-keyname 证据）
 
+### CP-B 浏览器黑盒验证（真实 Chrome + CDP，详见 [browser-verification-report.md](./browser-verification-report.md)）
+- 三层部署对照：8788 生产 dist（与改动前逐字节一致）/ 8789 改动后旧静态站 / 8790 改动前旧静态站（git 提取）
+- 旅程 A（生产播放器 A1~A9）、B（新站 B1~B6）、C（旧站 C1~C6）**全部 PASS**；B/C 唯一行为差异 = Solara 兼容全局已清理（即改动设计目标），Sonic 主链路前后完全等价
+- 证据：27 张交互截图 + 5 份观察 JSON + 视觉核验 + curl 交叉复现（详见 `evidence/browser/`）
+
 ## 四、白名单残留（改后仍存在的旧品牌标识及其合法性）
 
 | 类别 | 位置 | 保留原因 |
@@ -76,4 +81,4 @@
 
 ## 七、结论
 
-**PASS**。键名品牌化收尾完成：展示层维持 epocanvas sonic 全合规，死代码中的旧品牌键名（solara 系 42 行 + 探针 1 处）全部收敛至 sonic 主名，审计盲区消除，错误大小写残留清零；冻结契约（功能链路）经令牌级对比、测试回归、产物逐字节哈希三重检查点证明**零改动、零影响**。
+**PASS**。键名品牌化收尾完成：展示层维持 epocanvas sonic 全合规，死代码中的旧品牌键名（solara 系 42 行 + 探针 1 处）全部收敛至 sonic 主名，审计盲区消除，错误大小写残留清零；冻结契约（功能链路）经令牌级对比、测试回归、产物逐字节哈希三重检查点证明**零改动、零影响**；另经真实浏览器黑盒 GUI 三部署对照验证（[browser-verification-report.md](./browser-verification-report.md)）确认**无任何功能缺失**。
