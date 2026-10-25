@@ -23,9 +23,12 @@ ENV NODE_ENV=production
 ENV SONIC_RUNTIME=linux-engine
 ENV PORT=8080
 ENV HOST=0.0.0.0
+ENV SONIC_RECOMMEND_DB_PATH=/app/data/sonic-recommend.sqlite
 
 COPY --from=builder /app/dist-server ./dist-server
 COPY dist ./dist
+
+RUN mkdir -p /app/data && chown -R node:node /app/data
 
 EXPOSE 8080
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \

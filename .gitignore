@@ -28,3 +28,11 @@ temp_*
 
 # browser automation profile
 .zcode/
+
+# local SQLite recommendation data
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-*

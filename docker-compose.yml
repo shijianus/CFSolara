@@ -31,10 +31,22 @@ services:
       SONIC_ENABLE_GDSTUDIO: "${SONIC_ENABLE_GDSTUDIO:-0}"
       SONIC_ENABLE_LYRIVA: "${SONIC_ENABLE_LYRIVA:-0}"
       SONIC_ENABLE_UNBLOCK: "${SONIC_ENABLE_UNBLOCK:-0}"
+      SONIC_RECOMMEND_DB_PATH: "${SONIC_RECOMMEND_DB_PATH:-/app/data/sonic-recommend.sqlite}"
+      SONIC_RECOMMEND_RETENTION_DAYS: "${SONIC_RECOMMEND_RETENTION_DAYS:-90}"
+      SONIC_ENABLE_LISTENBRAINZ: "${SONIC_ENABLE_LISTENBRAINZ:-0}"
+      SONIC_GORSE_URL: "${SONIC_GORSE_URL:-}"
+      SONIC_GORSE_API_KEY: "${SONIC_GORSE_API_KEY:-}"
+      SONIC_MEILISEARCH_URL: "${SONIC_MEILISEARCH_URL:-}"
+      SONIC_MEILISEARCH_KEY: "${SONIC_MEILISEARCH_KEY:-}"
+    volumes:
+      - sonic-data:/app/data
     ports:
       - "127.0.0.1:${SONIC_BIND_PORT:-8080}:8080"
     networks:
       - sonic-internal
+
+volumes:
+  sonic-data:
 
 networks:
   sonic-internal:
