@@ -203,7 +203,12 @@ export const useRecommendStore = defineStore('recommend', {
       const batch = [...pendingQueue]
       pendingQueue = []
       const headers = this.buildRequestHeaders(false)
-      await postSonicEvents(batch, headers)
+      const ok = await postSonicEvents(batch, headers)
+      if (!ok) {
+        // 发送失败(断网/网关 5xx):把整批按原顺序放回队首,等下次上报重试
+        const capacity = Math.max(0, 40 - pendingQueue.length)
+        pendingQueue = [...batch.slice(0, capacity), ...pendingQueue]
+      }
     },
 
     dislikeSong(
@@ -365,3 +370,24 @@ export const useRecommendStore = defineStore('recommend', {
     'dislikedTracks',
   ]),
 })
+
+// 页面卸载/切后台时把防抖窗口内未上报的事件立即冲刷出去。
+// postSonicEvents 使用 fetch keepalive,页面关闭后浏览器仍会完成发送。
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  const flushPendingOnHide = () => {
+    try {
+      if (pendingQueue.length === 0) return
+      const store = useRecommendStore()
+      if (!store.personalizationEnabled) return
+      const batch = [...pendingQueue]
+      pendingQueue = []
+      postSonicEvents(batch, store.buildRequestHeaders(false))
+    } catch {
+      // pinia 尚未安装(测试/SSR)时静默跳过
+    }
+  }
+  window.addEventListener('pagehide', flushPendingOnHide)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingOnHide()
+  })
+}
