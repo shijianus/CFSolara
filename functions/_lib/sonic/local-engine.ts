@@ -172,7 +172,7 @@ export async function callLocalEngineJson<T = any>(
     headers['X-Sonic-Engine-Key'] = cfg.engineSecret;
   }
   if (options?.request) {
-    headers['X-Sonic-Client-IP'] = extractClientIp(options.request);
+    headers['X-Sonic-Client-IP'] = extractClientIp(options.request, env);
   }
 
   const signals: AbortSignal[] = [AbortSignal.timeout(effectiveTimeout)];

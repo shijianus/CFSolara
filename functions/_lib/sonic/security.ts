@@ -109,13 +109,34 @@ export interface RateLimitDecision {
   resetSec: number;
 }
 
-export function extractClientIp(request: Request): string {
-  return (
-    request.headers.get('X-Sonic-Client-IP') ||
-    request.headers.get('CF-Connecting-IP') ||
-    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
-    '127.0.0.1'
-  );
+let warnedRateLimitFallback = false;
+
+/**
+ * Resolve the client IP used for rate-limit bucketing.
+ *
+ * Trust chain (audit fix #2 — client IP spoofing previously rotated buckets):
+ * 1. `X-Sonic-Client-IP` is honoured ONLY when the caller presents a valid
+ *    `X-Sonic-Engine-Key` (i.e. it is the authenticated Pages → Engine hop
+ *    forwarding the terminal user IP).
+ * 2. Otherwise `CF-Connecting-IP` (set by the Cloudflare edge, not client-writable).
+ * 3. Never `X-Forwarded-For` — client-forgeable on every hop we serve.
+ * 4. Fallback: one fixed shared bucket, logged once. Rate limiting is
+ *    per-isolate in-memory state, not a global counter (see README).
+ */
+export function extractClientIp(request: Request, env?: AppEnv): string {
+  if (hasValidEngineSecret(request, env)) {
+    const forwarded = request.headers.get('X-Sonic-Client-IP')?.trim();
+    if (forwarded) return forwarded;
+  }
+  const cfIp = request.headers.get('CF-Connecting-IP')?.trim();
+  if (cfIp) return cfIp;
+  if (!warnedRateLimitFallback) {
+    warnedRateLimitFallback = true;
+    console.warn(
+      '[Sonic Security] No CF-Connecting-IP on request; rate limiting uses one fixed fallback bucket (per-isolate memory limiter, not global).',
+    );
+  }
+  return 'fallback:no-terminal-ip';
 }
 
 export async function evaluateGatewayRateLimit(
@@ -128,7 +149,7 @@ export async function evaluateGatewayRateLimit(
 
   // Trusted inter-service hop (Pages -> Engine) gets high bucket keyed by forwarded end-user IP
   const isEngineCaller = hasValidEngineSecret(request, env);
-  const ip = extractClientIp(request);
+  const ip = extractClientIp(request, env);
 
   let tier: 'engine' | 'api-key' | 'anonymous' = 'anonymous';
   let limit = Math.max(10, parseInt(String(env?.SONIC_RATE_LIMIT_ANON_RPM || '240'), 10) || 240);

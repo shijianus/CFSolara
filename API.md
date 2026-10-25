@@ -35,6 +35,8 @@
      Authorization: Bearer sonic_live_xxxxxxxx
      ```
    - 网关内置滑动窗口分级限流（响应头携带 `X-RateLimit-Tier`、`X-RateLimit-Limit`、`X-RateLimit-Remaining`）：
+     - **限流实现如实说明**：计数保存在每个边缘 isolate 的进程内存中（`Map`），**不是全局限流**——多 isolate 并发时实际配额会按隔离数放大；引擎侧单进程无此问题。
+     - **终端 IP 信任链**：限流分桶只信任 ① 经 `X-Sonic-Engine-Key` 鉴权的内部调用方随请求转发的 `X-Sonic-Client-IP`，或 ② Cloudflare 边缘注入的 `CF-Connecting-IP`；两者皆无时落入固定兜底桶并输出一次告警日志。**从不信任客户端可伪造的 `X-Forwarded-For` 或未鉴权的 `X-Sonic-Client-IP`**（审计发现 #2 的绕过路径已封堵）。
      - 匿名前端访客（`anonymous`）：默认 `240` 次/分钟（可通过 `SONIC_REQUIRE_AUTH=1` 关闭匿名访问）；
      - 持有效 API Key 专案（`api-key`）：默认 `600` 次/分钟高配额；
      - 内部引擎入口（`engine-sonic.epocanvas.tech`）：**强制要求 `X-Sonic-Engine-Key` 服务间密钥头**，匿名访问一律返回 `401 ENGINE_UNAUTHORIZED`。
