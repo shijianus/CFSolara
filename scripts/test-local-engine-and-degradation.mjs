@@ -144,6 +144,7 @@ async function runTests() {
       SONIC_RATE_LIMIT_ANON_RPM: '10',
       SONIC_RATE_LIMIT_AUTH_RPM: '50',
       SONIC_JWT_SECRET: 'test_jwt_secret_for_rate_limit',
+      SONIC_SECRET: 'test_signing_secret_for_rate_limit',
     };
 
     let lastDecision = null;

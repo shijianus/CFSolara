@@ -64,24 +64,35 @@ async function runAuthTests() {
     assert(testSession.email === 'developer@epocanvas.com', 'User email preserved');
     assert(testSession.apiKey.startsWith('sonic_live_'), `API key has sonic_live_ prefix (got ${testSession.apiKey})`);
     
-    // Check parts: sonic_live_<encodedEmail>_<keySig>
+    // Check parts: sonic_live_<encodedEmail>_<encodedExpiry>_<signature>
     const parts = testSession.apiKey.replace('sonic_live_', '').split('_');
-    assert(parts.length >= 2, 'API key contains encodedEmail and signature');
+    assert(parts.length === 3, 'Signed API key contains email, expiry and signature parts');
     const decodedEmail = atob(parts[0].replace(/-/g, '+').replace(/_/g, '/'));
     assert(decodedEmail === 'developer@epocanvas.com', `Encoded email decodes back to original (${decodedEmail})`);
+    const decodedExpiry = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+    assert(Number.isFinite(new Date(decodedExpiry).getTime()), 'Embedded expiry decodes to a valid timestamp');
   }
 
-  // Test 3: Secret fallback chain (SONIC_SECRET -> SOLARA_SECRET -> DEFAULT)
+  // Test 3: Secret fallback chain (SONIC_SECRET -> SOLARA_SECRET, no source default)
   console.log('\n3. Testing Secret Priority & Fallback');
   {
     const user = { email: 'fallback@epocanvas.com', name: 'Fallback User', avatar: '' };
     // With SOLARA_SECRET only
     const sessionSolara = await createSession({ SOLARA_SECRET: 'solara_legacy_sec' }, user);
     assert(sessionSolara.apiKey.startsWith('sonic_live_'), 'Key generated using SOLARA_SECRET fallback has sonic_live_ prefix');
-    
+
     // With SONIC_SECRET taking precedence over SOLARA_SECRET
     const sessionBoth = await createSession({ SONIC_SECRET: 'sonic_primary', SOLARA_SECRET: 'solara_secondary' }, user);
     assert(sessionBoth.apiKey.startsWith('sonic_live_'), 'Key generated with both secrets present');
+
+    // No secret configured -> issuance must throw (fail closed, no hardcoded default)
+    let issuanceThrew = null;
+    try {
+      await createSession({}, user);
+    } catch (err) {
+      issuanceThrew = err?.message || String(err);
+    }
+    assert(Boolean(issuanceThrew), `createSession without any signing secret throws (got: ${issuanceThrew ? issuanceThrew.slice(0, 60) : 'no error'})`);
   }
 
   // Test 4: Credential extraction across all headers & parameters
@@ -123,34 +134,38 @@ async function runAuthTests() {
     const ext5 = extractAuthCredentials(req5);
     assert(ext5.apiKey === 'solara_live_bearer_05', 'Extracted legacy solara_live_ from Bearer token');
 
-    // 4.6 Query param ?api_key=...
+    // 4.6 Query param ?api_key= is no longer accepted (URLs leak into logs/cache keys)
     const req6 = new Request('https://sonic.epocanvas.com/api/test?api_key=sonic_live_query_06');
     const ext6 = extractAuthCredentials(req6);
-    assert(ext6.apiKey === 'sonic_live_query_06', 'Extracted from query param api_key');
+    assert(ext6.apiKey === undefined, 'Query param api_key is ignored');
 
-    // 4.7 Query param ?key=...
+    // 4.7 Query param ?key= is no longer accepted
     const req7 = new Request('https://sonic.epocanvas.com/api/test?key=solara_live_query_07');
     const ext7 = extractAuthCredentials(req7);
-    assert(ext7.apiKey === 'solara_live_query_07', 'Extracted from query param key');
+    assert(ext7.apiKey === undefined, 'Query param key is ignored');
 
-    // 4.8 Header precedence (X-Sonic-Key over query param)
+    // 4.8 Header extraction unaffected by presence of query params
     const req8 = new Request('https://sonic.epocanvas.com/api/test?api_key=query_key', {
       headers: { 'X-Sonic-Key': 'header_key' },
     });
     const ext8 = extractAuthCredentials(req8);
-    assert(ext8.apiKey === 'header_key', 'Header key takes precedence over query key');
+    assert(ext8.apiKey === 'header_key', 'Header key still extracted when query params present');
   }
 
-  // Test 5: In-memory session verification
+  // Test 5: In-memory session verification (signature still required)
   console.log('\n5. Testing In-Memory Session Verification');
   {
     const req = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
       headers: { 'X-Sonic-Key': testSession.apiKey },
     });
-    const res = await verifyAuth(req, {});
+    const res = await verifyAuth(req, { SONIC_SECRET: 'test_super_secret_sonic' });
     assert(res.authenticated === true, 'Session authenticated successfully via in-memory cache');
     assert(res.user?.email === 'developer@epocanvas.com', 'Session user email matches');
     assert(res.user?.apiKey === testSession.apiKey, 'Session user apiKey matches');
+
+    // Cache never bypasses signature validation: no secret configured -> unauthenticated
+    const resNoSecret = await verifyAuth(req, {});
+    assert(resNoSecret.authenticated === false, 'Cache hit without configured secret fails closed');
   }
 
   // Test 6: Cross-Header Verification for Newly Generated sonic_live_ Key
@@ -160,7 +175,7 @@ async function runAuthTests() {
     const reqSolaraHeader = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
       headers: { 'X-CFSolara-Key': testSession.apiKey },
     });
-    const resSolaraHeader = await verifyAuth(reqSolaraHeader, {});
+    const resSolaraHeader = await verifyAuth(reqSolaraHeader, { SONIC_SECRET: 'test_super_secret_sonic' });
     assert(resSolaraHeader.authenticated === true, 'New sonic_live_ key authenticated via legacy X-CFSolara-Key header');
     assert(resSolaraHeader.user?.email === 'developer@epocanvas.com', 'User email matched');
 
@@ -168,50 +183,46 @@ async function runAuthTests() {
     const reqBearer = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
       headers: { Authorization: `Bearer ${testSession.apiKey}` },
     });
-    const resBearer = await verifyAuth(reqBearer, {});
+    const resBearer = await verifyAuth(reqBearer, { SONIC_SECRET: 'test_super_secret_sonic' });
     assert(resBearer.authenticated === true, 'New sonic_live_ key authenticated via Bearer token');
 
-    // Using URL query parameter ?api_key=
+    // URL query parameter is no longer an auth channel
     const reqQuery = new Request(`https://sonic.epocanvas.com/api/music/search?api_key=${encodeURIComponent(testSession.apiKey)}`);
-    const resQuery = await verifyAuth(reqQuery, {});
-    assert(resQuery.authenticated === true, 'New sonic_live_ key authenticated via query param');
+    const resQuery = await verifyAuth(reqQuery, { SONIC_SECRET: 'test_super_secret_sonic' });
+    assert(resQuery.authenticated === false, 'API key passed via query param is ignored');
   }
 
-  // Test 7: Backward Compatibility for Legacy solara_live_ Keys (Stateless reconstruction)
-  console.log('\n7. Testing Backward Compatibility for solara_live_ Keys (Stateless verification)');
+  // Test 7: Legacy unsigned keys are rejected (audit fix: no signature -> no trust)
+  console.log('\n7. Legacy Unsigned Keys Are Rejected');
   {
-    // Construct a legacy solara_live_ key that was generated on an older system and is NOT in memory
+    // Construct a legacy solara_live_ key in the old unsigned 2-part format.
     const legacyEmail = 'legacy_tester@epocanvas.com';
     const encodedLegacyEmail = btoa(legacyEmail).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     const legacyApiKey = `solara_live_${encodedLegacyEmail}_d41d8cd98f00b204e9800998ecf8427e`;
 
-    // 7.1 Verify legacy key via X-CFSolara-Key header
     const reqSolara = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
       headers: { 'X-CFSolara-Key': legacyApiKey },
     });
-    const resSolara = await verifyAuth(reqSolara, {});
-    assert(resSolara.authenticated === true, 'Legacy solara_live_ key authenticated via X-CFSolara-Key');
-    assert(resSolara.user?.email === 'legacy_tester@epocanvas.com', 'Stateless session recovered email accurately');
-    assert(resSolara.user?.apiKey === legacyApiKey, 'Stateless session preserves original legacy apiKey');
+    const resSolara = await verifyAuth(reqSolara, { SONIC_SECRET: 'test_super_secret_sonic' });
+    assert(resSolara.authenticated === false, 'Legacy unsigned solara_live_ key rejected via X-CFSolara-Key');
 
-    // 7.2 Verify legacy key via new X-Sonic-Key header
     const reqSonic = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
       headers: { 'X-Sonic-Key': legacyApiKey },
     });
-    const resSonic = await verifyAuth(reqSonic, {});
-    assert(resSonic.authenticated === true, 'Legacy solara_live_ key authenticated via X-Sonic-Key header');
+    const resSonic = await verifyAuth(reqSonic, { SONIC_SECRET: 'test_super_secret_sonic' });
+    assert(resSonic.authenticated === false, 'Legacy unsigned solara_live_ key rejected via X-Sonic-Key');
 
-    // 7.3 Verify legacy key via Authorization: Bearer
     const reqBearerLegacy = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
       headers: { Authorization: `Bearer ${legacyApiKey}` },
     });
-    const resBearerLegacy = await verifyAuth(reqBearerLegacy, {});
-    assert(resBearerLegacy.authenticated === true, 'Legacy solara_live_ key authenticated via Bearer token');
+    const resBearerLegacy = await verifyAuth(reqBearerLegacy, { SONIC_SECRET: 'test_super_secret_sonic' });
+    assert(resBearerLegacy.authenticated === false, 'Legacy unsigned solara_live_ key rejected via Bearer');
   }
 
-  // Test 8: Stateless verification of un-cached sonic_live_ key
-  console.log('\n8. Testing Stateless Verification of Uncached sonic_live_ Key');
+  // Test 8: Stateless verification of signed keys (no cache)
+  console.log('\n8. Stateless Verification of Signed sonic_live_ Key');
   {
+    // Old unsigned format must now fail even under the correct secret.
     const freshEmail = 'fresh_user@epocanvas.com';
     const encFresh = btoa(freshEmail).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     const uncachedSonicKey = `sonic_live_${encFresh}_a1b2c3d4e5f67890123456789abcdef0`;
@@ -219,9 +230,22 @@ async function runAuthTests() {
     const req = new Request('https://sonic.epocanvas.com/api/music/search', {
       headers: { 'X-Sonic-Key': uncachedSonicKey },
     });
-    const res = await verifyAuth(req, {});
-    assert(res.authenticated === true, 'Uncached sonic_live_ key authenticated via stateless fallback');
-    assert(res.user?.email === 'fresh_user@epocanvas.com', 'Stateless fallback recovered user email');
+    const res = await verifyAuth(req, { SONIC_SECRET: 'test_super_secret_sonic' });
+    assert(res.authenticated === false, 'Unsigned 2-part sonic_live_ key rejected (was forgeable before the fix)');
+
+    // A properly signed key verifies statelessly (not present in the session store).
+    const { createHmac } = await import('node:crypto');
+    const secret = 'test_super_secret_sonic';
+    const expiresAtISO = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+    const sig = createHmac('sha256', secret).update(`${freshEmail}|${expiresAtISO}`).digest('hex').slice(0, 32);
+    const signedKey = `sonic_live_${encFresh}_${btoa(expiresAtISO).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')}_${sig}`;
+
+    const signedReq = new Request('https://sonic.epocanvas.com/api/music/search', {
+      headers: { 'X-Sonic-Key': signedKey },
+    });
+    const signedRes = await verifyAuth(signedReq, { SONIC_SECRET: secret });
+    assert(signedRes.authenticated === true, 'Signed un-cached key authenticates statelessly');
+    assert(signedRes.user?.email === freshEmail, 'Stateless verification recovered user email');
   }
 
   // Test 9: Negative & Edge Cases

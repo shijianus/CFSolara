@@ -25,12 +25,13 @@
    - 回调端点：`GET /api/auth/callback?code=...`
    - 用户信息：`GET /api/auth/user`
 2. **专案连结 API Key 与分级限流**：
-   - 登录 Epomail 后即可自动获得专案 API Key（当前签发格式为 `sonic_live_...`，同时 100% 向后兼容历史 `solara_live_...` 密钥）。
-   - 在第三方专案发起请求时，支持以下任一方式传递凭证：
+   - 登录 Epomail 后即可自动获得专案 API Key。签发格式为带签名的
+     `sonic_live_<base64url(邮箱)>_<base64url(过期时间)>_<HMAC-SHA256 签名>`（服务端以 `SONIC_SECRET` 验签并校验过期，常量时间比较）；`solara_live_` 前缀同样接受验签。**历史无签名格式的 `sonic_live_...`/`solara_live_...` 旧密钥已全部失效**，需重新登录获取。
+   - 在第三方专案发起请求时，仅支持请求头传递凭证（**不支持查询参数**，URL 中的密钥会泄漏到访问日志与缓存键）：
      ```http
      X-Sonic-Key: sonic_live_xxxxxxxx
-     # 或向后兼容历史请求头 / Bearer / 查询参数：
-     X-CFSolara-Key: solara_live_xxxxxxxx
+     # 或历史兼容请求头 / Bearer：
+     X-CFSolara-Key: sonic_live_xxxxxxxx
      Authorization: Bearer sonic_live_xxxxxxxx
      ```
    - 网关内置滑动窗口分级限流（响应头携带 `X-RateLimit-Tier`、`X-RateLimit-Limit`、`X-RateLimit-Remaining`）：
@@ -185,9 +186,14 @@ async function searchSong(keyword: string) {
   return await res.json();
 }
 
-// 2. 播放音频流 (默认支持 Range 206 分段拉流)
-function getAudioStreamUrl(songId: string, source = 'netease', quality = '320') {
-  return `${API_BASE}/music/stream?id=${encodeURIComponent(songId)}&source=${source}&quality=${quality}&key=${API_KEY}`;
+// 2. 播放音频流 (默认支持 Range 206 分段拉流;密钥只经请求头传递,不要拼进 URL)
+async function fetchAudioStream(songId: string, source = 'netease', quality = '320') {
+  const res = await fetch(`${API_BASE}/music/stream?id=${encodeURIComponent(songId)}&source=${source}&quality=${quality}`, {
+    headers: {
+      'X-Sonic-Key': API_KEY,
+    },
+  });
+  return res.body; // 音频流不支持也不需要 302 直链场景下的 key 传参
 }
 
 // 3. 高精度逐字同步歌词
