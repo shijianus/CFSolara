@@ -8,8 +8,15 @@ dist/
 !.env.example
 .dev.vars
 dist-server/
+# temporary & rollback files
 rollback-backups/
 rollback-*.json
+*.log
+/tmp/
+tmp/
+*.token
+*token*
+*.key
 screenshots/
 player/node_modules
 player/node_modules/
