@@ -39,6 +39,15 @@ const SONGS = [
 
 const SOURCES = ["netease", "qq", "kugou", "kuwo"];
 
+// 审计修复 #4:标题与歌手都必须匹配(归一化后),无匹配一律记为 not_found,
+// 绝不回退 tracks[0]。归一化:小写 + 去空白 + 去 &nbsp;。
+function normalizeText(v) {
+  return String(v || "")
+    .toLowerCase()
+    .replace(/&nbsp;/g, "")
+    .replace(/\s+/g, "");
+}
+
 function evaluateRelativeBytes(totalBytes, expectedDurationSec = 240, nominalBitrateKbps = 320) {
   if (!totalBytes || totalBytes <= 0) {
     return { streamType: "unavailable", ratio: 0, baselineBytes: 0, isFull: false };
@@ -143,15 +152,28 @@ async function runProbe() {
           continue;
         }
 
-        // 优先选取严格匹配艺术家的版本
-        let chosenTrack = tracks[0];
-        const strictMatch = tracks.find(t => {
-          const tArtist = String(t.artist || '').toLowerCase();
-          const qArtist = song.artist.toLowerCase();
-          return tArtist.includes(qArtist) || qArtist.includes(tArtist);
+        // 审计修复 #4:严格匹配 —— 标题(归一化后)完全相等 且 歌手(归一化后)包含查询歌手
+        // 或存在完全相等的歌手分片;无匹配 → matchedTrack=null / judgment='not_found',不回退 Top1。
+        const qTitle = normalizeText(song.title);
+        const qArtist = normalizeText(song.artist);
+        const strictMatch = tracks.find((t) => {
+          const tTitle = normalizeText(t.title || t.name);
+          if (tTitle !== qTitle) return false;
+          const tArtist = normalizeText(t.artist || "");
+          if (!tArtist) return false;
+          if (tArtist.includes(qArtist)) return true;
+          return tArtist
+            .split(/[/、,，&]/)
+            .some((p) => p.trim() && (p.trim() === qArtist || qArtist.includes(p.trim())));
         });
-        if (strictMatch) {
-          chosenTrack = strictMatch;
+        const chosenTrack = strictMatch || null;
+
+        if (!chosenTrack) {
+          srcResult.judgment = "not_found";
+          srcResult.failReason = "not_found: no track matching strict title+artist criteria";
+          console.log("无严格匹配结果 (not_found)");
+          songEntry.sources[src] = srcResult;
+          continue;
         }
 
         srcResult.matchedTrack = {

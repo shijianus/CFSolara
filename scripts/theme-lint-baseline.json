@@ -2,11 +2,8 @@
   "version": 1,
   "description": "Existing hardcoded white values. Run `pnpm lint:theme --update-baseline` only after confirming a new usage is on an always-dark surface.",
   "files": {
-    "player/src/components/Auth/LoginDialog.vue": {
-      "tailwind-white:bg-white": 1,
-      "tailwind-white:placeholder:text-white/30": 3,
-      "tailwind-white:ring-white/20": 1,
-      "tailwind-white:text-white": 1
+    "player/src/App.vue": {
+      "tailwind-white:border-white/15": 1
     },
     "player/src/components/Background/AuroraSettingsPanel.vue": {
       "tailwind-white:bg-white/10": 11,
@@ -36,22 +33,9 @@
     "player/src/components/Comments/SongCommentsDialog.vue": {
       "tailwind-white:text-white": 3
     },
-    "player/src/components/Dialog/DownloadQualityDialog.vue": {
-      "rgb-white:rgb(255,255,255)": 7,
-      "tailwind-white:bg-white/10": 2,
-      "tailwind-white:bg-white/5": 2,
-      "tailwind-white:border-white/[0.08]": 1,
-      "tailwind-white:border-white/10": 1,
-      "tailwind-white:border-white/20": 1,
-      "tailwind-white:hover:bg-white/10": 2,
-      "tailwind-white:hover:text-white": 2,
-      "tailwind-white:text-white": 1,
-      "tailwind-white:text-white/40": 2,
-      "tailwind-white:text-white/55": 2,
-      "tailwind-white:text-white/60": 3,
-      "tailwind-white:text-white/70": 2,
-      "tailwind-white:text-white/80": 1,
-      "tailwind-white:text-white/95": 3
+    "player/src/components/Dialog/AddToPlaylistDialog.vue": {
+      "tailwind-white:border-white/10": 3,
+      "tailwind-white:text-white": 1
     },
     "player/src/components/HomeSkeleton.vue": {
       "tailwind-white:bg-white/10": 12,
@@ -72,18 +56,11 @@
       "tailwind-white:bg-white/20": 1,
       "tailwind-white:text-white": 1
     },
-    "player/src/components/Mobile/PlaylistCommentsPopup.vue": {
-      "tailwind-white:border-white/10": 1,
-      "tailwind-white:dark:bg-white/5": 1
-    },
     "player/src/components/Mobile/PlaylistDrawerMobile.vue": {
       "tailwind-white:active:bg-white/5": 2,
       "tailwind-white:bg-white/10": 2,
       "tailwind-white:border-white/5": 1,
       "tailwind-white:hover:bg-white/5": 1
-    },
-    "player/src/components/Mobile/PlaylistInfoPopover.vue": {
-      "rgb-white:rgb(255,255,255)": 3
     },
     "player/src/components/Mobile/VolumeControlMobile.vue": {
       "tailwind-white:bg-white/10": 1,
@@ -127,7 +104,6 @@
     "player/src/components/SongList.vue": {
       "tailwind-white:bg-white/10": 9,
       "tailwind-white:bg-white/5": 1,
-      "tailwind-white:border-white/5": 1,
       "tailwind-white:hover:bg-white/10": 5,
       "tailwind-white:hover:border-white/10": 1,
       "tailwind-white:hover:text-white": 1,
@@ -160,10 +136,6 @@
       "tailwind-white:text-white": 4,
       "tailwind-white:text-white/70": 1
     },
-    "player/src/components/Ui/InfiniteScroll.vue": {
-      "tailwind-white:group-hover:text-white": 1,
-      "tailwind-white:hover:text-white": 1
-    },
     "player/src/components/Ui/LazyImage.vue": {
       "tailwind-white:bg-white/10": 1,
       "tailwind-white:border-white/10": 1,
@@ -191,8 +163,7 @@
     },
     "player/src/components/Ui/SongCard.vue": {
       "tailwind-white:hover:bg-white/10": 1,
-      "tailwind-white:ring-white/10": 1,
-      "tailwind-white:text-white": 2
+      "tailwind-white:ring-white/10": 1
     },
     "player/src/components/Ui/TabGroup.vue": {
       "tailwind-white:bg-white/10": 1,
@@ -226,19 +197,9 @@
       "tailwind-white:text-white/90": 1
     },
     "player/src/layout/footer.vue": {
-      "rgb-white:rgb(255,255,255)": 2,
       "tailwind-white:bg-white": 3,
-      "tailwind-white:bg-white/5": 1,
-      "tailwind-white:border-white/10": 2,
-      "tailwind-white:group-hover:text-white/85": 1,
-      "tailwind-white:hover:bg-white/10": 1,
-      "tailwind-white:hover:bg-white/15": 1,
-      "tailwind-white:hover:text-white": 1,
       "tailwind-white:ring-white/15": 1,
-      "tailwind-white:text-white/65": 2,
-      "tailwind-white:text-white/80": 2,
-      "tailwind-white:text-white/85": 1,
-      "tailwind-white:text-white/90": 2
+      "tailwind-white:text-white/80": 2
     },
     "player/src/layout/mobile/Header.vue": {
       "tailwind-white:bg-white/95": 1,
@@ -255,7 +216,7 @@
     },
     "player/src/pages/artist.vue": {
       "rgb-white:rgb(255,255,255)": 1,
-      "tailwind-white:bg-white/10": 4,
+      "tailwind-white:bg-white/10": 3,
       "tailwind-white:bg-white/20": 1,
       "tailwind-white:hover:bg-white/10": 1,
       "tailwind-white:ring-white/20": 1,
@@ -265,21 +226,10 @@
       "tailwind-white:hover:bg-white/10": 1,
       "tailwind-white:hover:bg-white/5": 3
     },
-    "player/src/pages/downloads.vue": {
-      "tailwind-white:border-white/20": 1,
-      "tailwind-white:hover:bg-white/10": 1
-    },
     "player/src/pages/index.vue": {
       "tailwind-white:border-white/15": 1,
       "tailwind-white:text-white": 4,
       "tailwind-white:text-white/95": 2
-    },
-    "player/src/pages/likes.vue": {
-      "rgb-white:rgb(255,255,255)": 3,
-      "tailwind-white:bg-white/10": 1,
-      "tailwind-white:bg-white/20": 1,
-      "tailwind-white:bg-white/5": 1,
-      "tailwind-white:hover:bg-white/10": 1
     },
     "player/src/pages/local-music.vue": {
       "tailwind-white:text-white": 1
@@ -288,10 +238,8 @@
       "rgb-white:rgb(255,255,255)": 1
     },
     "player/src/pages/mobile/downloads.vue": {
-      "tailwind-white:bg-white/5": 6,
-      "tailwind-white:border-white/10": 2,
-      "tailwind-white:border-white/5": 1,
-      "tailwind-white:text-white": 7
+      "tailwind-white:bg-white/5": 5,
+      "tailwind-white:border-white/10": 2
     },
     "player/src/pages/mobile/index.vue": {
       "css-white:background: white": 1,
@@ -321,7 +269,6 @@
       "tailwind-white:text-white/90": 1
     },
     "player/src/pages/mv-player.vue": {
-      "tailwind-white:bg-white/5": 1,
       "tailwind-white:hover:bg-white/10": 1,
       "tailwind-white:hover:bg-white/5": 1,
       "tailwind-white:text-white": 3
@@ -332,7 +279,7 @@
       "tailwind-white:text-white": 1
     },
     "player/src/pages/playlist.vue": {
-      "tailwind-white:text-white": 6
+      "tailwind-white:text-white": 5
     },
     "player/src/pages/recent.vue": {
       "rgb-white:rgb(255,255,255)": 1
@@ -344,7 +291,6 @@
       "tailwind-white:bg-white/5": 2,
       "tailwind-white:border-white/[0.12]": 1,
       "tailwind-white:border-white/10": 1,
-      "tailwind-white:group-hover:text-white": 1,
       "tailwind-white:hover:bg-white/[0.04]": 1,
       "tailwind-white:hover:bg-white/10": 4,
       "tailwind-white:hover:border-white/20": 1,

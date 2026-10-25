@@ -57,7 +57,7 @@ flowchart TD
 - **酷狗音乐 (`local-kugou`)**：
   - 对公开免费曲目（`privilege=0`）通过原生 `getSongInfo` 接口提取 `sharefs.kugou.com` 完整 MP3 流；KRC 歌词通过原生 XOR 解密与 Deflate 解压缩为真逐字歌词。
 - **酷我音乐 (`local-kuwo`)**：
-  - 原生提取公开曲目流，并在网关层严格拦截 `<250KB` 的 11 秒版权语音提示音假流（`/nf/resource/`）。
+  - 原生提取公开曲目流，并在网关层严格拦截 11 秒版权语音提示音假流（`/nf/resource/` 特征 + 181,521 字节精确签名 + 字节范围×派生时长双重规则）。
 - **QQ 音乐 (`local-qq`)**：
   - 搜索、高清封面与 QRC/LRC 歌词 100% 原生可用；因海外机房 IP 限制，无损直链需配置 `QQ_COOKIE`。
 
@@ -129,7 +129,7 @@ flowchart TD
 | `GET` | `/api/sonic/search/kugou` | 酷狗音乐单源搜索 | 原生检索，返回统一 Track 结构 |
 | `GET` | `/api/sonic/search/kuwo` | 酷我音乐单源搜索 | 原生检索（含 181KB 版权提示音假流过滤） |
 | `GET` | `/api/sonic/search/gdstudio` | GDStudio 第三方兜底（默认关闭） | 默认返回 `meta.disabled: true`；仅当 `SONIC_ENABLE_GDSTUDIO=1` 时启用 |
-| `GET` | `/api/sonic/forward` | 统一聚合与防盗链资源转发 | 支持搜索、歌词与受 SSRF 保护的媒体资源代理 |
+| `GET` | `/api/sonic/forward` | 统一聚合与防盗链资源转发 | 支持搜索、歌词与白名单媒体资源代理（媒体主机后缀白名单 + 逐跳重定向重校验） |
 | `GET` | `/api/sonic/resolve/stream` | 本地引擎流直链解析（内部鉴权） | 强制校验 `X-Sonic-Engine-Key`，供边缘网关缓存直链元数据 |
 | `GET` | `/api/sonic/engine/health` | 本地引擎健康与熔断诊断（内部鉴权） | 强制校验 `X-Sonic-Engine-Key`，匿名访问返回 `401` |
 

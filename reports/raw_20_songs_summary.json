@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-10-25T06:26:20.497Z",
+  "source": "reports/raw_20_songs_probe_results.json",
+  "measuredAgainst": "https://sonic.epocanvas.tech (production)",
+  "totalSongs": 20,
+  "perSource": {
+    "netease": {
+      "full": 4,
+      "trial": 10,
+      "not_found": 3,
+      "fake_clip_blocked": 0,
+      "fail": 3,
+      "missing": 0
+    },
+    "qq": {
+      "full": 0,
+      "trial": 1,
+      "not_found": 2,
+      "fake_clip_blocked": 0,
+      "fail": 17,
+      "missing": 0
+    },
+    "kugou": {
+      "full": 0,
+      "trial": 0,
+      "not_found": 1,
+      "fake_clip_blocked": 0,
+      "fail": 19,
+      "missing": 0
+    },
+    "kuwo": {
+      "full": 0,
+      "trial": 5,
+      "not_found": 5,
+      "fake_clip_blocked": 0,
+      "fail": 10,
+      "missing": 0
+    }
+  },
+  "neteasePerSong": [
+    {
+      "index": 1,
+      "title": "起风了",
+      "artist": "买辣椒也用券",
+      "verdict": "full",
+      "totalBytes": 13037236,
+      "matchedTrack": {
+        "id": "1330348068",
+        "title": "起风了",
+        "artist": "冯沁苑(买辣椒也用券)",
+        "duration": 326,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 2,
+      "title": "晴天",
+      "artist": "周杰伦",
+      "verdict": "not_found",
+      "totalBytes": 0,
+      "matchedTrack": null,
+      "failReason": "not_found: no track matching strict title+artist criteria"
+    },
+    {
+      "index": 3,
+      "title": "年少有为",
+      "artist": "李荣浩",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "1293886117",
+        "title": "年少有为",
+        "artist": "李荣浩",
+        "duration": 279,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 4,
+      "title": "稻香",
+      "artist": "周杰伦",
+      "verdict": "not_found",
+      "totalBytes": 0,
+      "matchedTrack": null,
+      "failReason": "not_found: no track matching strict title+artist criteria"
+    },
+    {
+      "index": 5,
+      "title": "海阔天空",
+      "artist": "Beyond",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "1357375695",
+        "title": "海阔天空",
+        "artist": "Beyond",
+        "duration": 240,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 6,
+      "title": "红日",
+      "artist": "李克勤",
+      "verdict": "trial",
+      "totalBytes": 480813,
+      "matchedTrack": {
+        "id": "115502",
+        "title": "红日",
+        "artist": "李克勤",
+        "duration": 285,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 7,
+      "title": "富士山下",
+      "artist": "陈奕迅",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "65766",
+        "title": "富士山下",
+        "artist": "陈奕迅",
+        "duration": 259,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 8,
+      "title": "喜帖街",
+      "artist": "谢安琪",
+      "verdict": "trial",
+      "totalBytes": 480813,
+      "matchedTrack": {
+        "id": "308299",
+        "title": "喜帖街",
+        "artist": "谢安琪",
+        "duration": 211,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 9,
+      "title": "Lemon",
+      "artist": "米津玄師",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "536622304",
+        "title": "Lemon",
+        "artist": "米津玄師",
+        "duration": 256,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 10,
+      "title": "打上花火",
+      "artist": "DAOKO",
+      "verdict": "fail",
+      "totalBytes": 0,
+      "matchedTrack": {
+        "id": "496869422",
+        "title": "打上花火",
+        "artist": "Daoko / 米津玄師",
+        "duration": 289,
+        "isVip": false
+      },
+      "failReason": "异常: The operation was aborted due to timeout"
+    },
+    {
+      "index": 11,
+      "title": "残酷な天使のテーゼ",
+      "artist": "高桥洋子",
+      "verdict": "not_found",
+      "totalBytes": 0,
+      "matchedTrack": null,
+      "failReason": "not_found: no track matching strict title+artist criteria"
+    },
+    {
+      "index": 12,
+      "title": "夜に駆ける",
+      "artist": "YOASOBI",
+      "verdict": "fail",
+      "totalBytes": 0,
+      "matchedTrack": {
+        "id": "1409311773",
+        "title": "夜に駆ける",
+        "artist": "YOASOBI",
+        "duration": 261,
+        "isVip": false
+      },
+      "failReason": "异常: The operation was aborted due to timeout"
+    },
+    {
+      "index": 13,
+      "title": "Shape of You",
+      "artist": "Ed Sheeran",
+      "verdict": "fail",
+      "totalBytes": 0,
+      "matchedTrack": {
+        "id": "451703096",
+        "title": "Shape of You",
+        "artist": "Ed Sheeran",
+        "duration": 234,
+        "isVip": false
+      },
+      "failReason": "异常: The operation was aborted due to timeout"
+    },
+    {
+      "index": 14,
+      "title": "Rolling in the Deep",
+      "artist": "Adele",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "16435051",
+        "title": "Rolling in the Deep",
+        "artist": "Adele",
+        "duration": 228,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 15,
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "verdict": "trial",
+      "totalBytes": 721023,
+      "matchedTrack": {
+        "id": "1406633327",
+        "title": "Blinding Lights",
+        "artist": "The Weeknd",
+        "duration": 200,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 16,
+      "title": "Someone Like You",
+      "artist": "Adele",
+      "verdict": "trial",
+      "totalBytes": 481115,
+      "matchedTrack": {
+        "id": "16435049",
+        "title": "Someone Like You",
+        "artist": "Adele",
+        "duration": 285,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 17,
+      "title": "南山南",
+      "artist": "马頔",
+      "verdict": "full",
+      "totalBytes": 13005889,
+      "matchedTrack": {
+        "id": "29715551",
+        "title": "南山南",
+        "artist": "马頔",
+        "duration": 325,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 18,
+      "title": "安和桥",
+      "artist": "宋冬野",
+      "verdict": "full",
+      "totalBytes": 10007031,
+      "matchedTrack": {
+        "id": "27646205",
+        "title": "安和桥",
+        "artist": "宋冬野",
+        "duration": 250,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 19,
+      "title": "理想三旬",
+      "artist": "陈鸿宇",
+      "verdict": "full",
+      "totalBytes": 8435505,
+      "matchedTrack": {
+        "id": "31445772",
+        "title": "理想三旬",
+        "artist": "陈鸿宇",
+        "duration": 211,
+        "isVip": false
+      },
+      "failReason": null
+    },
+    {
+      "index": 20,
+      "title": "漠河舞厅",
+      "artist": "柳爽",
+      "verdict": "trial",
+      "totalBytes": 721023,
+      "matchedTrack": {
+        "id": "1430319727",
+        "title": "漠河舞厅",
+        "artist": "柳爽",
+        "duration": 334,
+        "isVip": false
+      },
+      "failReason": null
+    }
+  ],
+  "crossSourceUpgrades": [],
+  "notes": [
+    "判定口径: full=完整流, trial=试听流, not_found=严格标题+歌手匹配无结果, fake_clip_blocked=假流拦截, fail=取流/检索失败。",
+    "统计由 scripts/summarize-20-songs.mjs 从原始 JSON 生成,请勿手改数字;重跑 measure-20-sample-songs-raw.mjs 后重新生成本表。"
+  ]
+}

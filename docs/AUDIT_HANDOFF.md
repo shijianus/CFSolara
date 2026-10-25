@@ -77,26 +77,32 @@ CFSolara 是一个基于现代化 Web 技术栈构建的高性能无广告多源
 ```bash
 npm test
 ```
-- **预期结果**：
-  - `test-sonic-gateway.mjs`: 60 passed, 0 failed（涵盖 relative threshold 9 项断言）；
-  - `test-auth-compatibility.mjs`: 41 passed, 0 failed；
-  - `test-cover-gateway.mjs`: 15 passed, 0 failed；
-  - `test-local-engine-and-degradation.mjs`: 47 passed, 0 failed；
-  - **总计**：163 passed, 0 failed。
+- **预期结果（2026-10-25 更新，纯离线套件，不访问外部平台）**：
+  - `test-auth-signature.mjs`: 21 passed（API Key 签名验证：伪造/篡改/过期/缺 secret）；
+  - `test-auth-compatibility.mjs`: 43 passed；
+  - `test-rate-limit-trust.mjs`: 10 passed（限流信任链：伪造 IP 不可绕过）；
+  - `test-stream-detection.mjs`: 34 passed（真实码率时长比判定 + 本地 mock 服务器）；
+  - `test-fetch-guard.mjs`: 16 passed（媒体白名单 + 逐跳重定向重校验）；
+  - `test-url-length.mjs`: 4 passed（超长 URL 414）；
+  - `test-sonic-gateway.mjs`: 20 passed（纯单测部分：Tests 3/6/12）；
+  - `test-local-engine-and-degradation.mjs`: 47 passed（本地 mock 引擎与熔断，cfEnv 已禁用全部四源保证离线）；
+  - **总计：195 passed, 0 failed**。
+- 依赖真实上游的测试（原 Tests 1/2/7-11 与封面网关）拆分至 `scripts/test-sonic-gateway-live.mjs` 与 `test-cover-gateway.mjs`，通过 `npm run test:live` 单独运行（会产生真实平台请求）。
+- **前置条件**：`npm install`（devDependencies 已声明并提交 package-lock.json；jiti/esbuild 不再需要手工安装）。
 
 ### 2. 前端单元测试套件
 ```bash
 pnpm --dir player test
 ```
-- **预期结果**：
-  - 6 个测试文件（`libraryStore`, `transformers`, `playbackErrors`, `audioQuality`, `queueIntegration`, `localMusicUndo`）全过；
-  - **总计**：27 passed, 0 failed。
+- **预期结果（2026-10-25 更新）**：
+  - 7 个测试文件（`libraryStore`, `transformers`, `playbackErrors`, `audioQuality`, `queueIntegration`, `localMusicUndo`, `trialGuard`）全过；
+  - **总计：32 passed, 0 failed**。
 
 ### 3. 主题与设计令牌 Lint
 ```bash
 npm run lint:theme
 ```
-- **预期结果**：0 violations。
+- **预期结果（2026-10-25 订正）**：通过（绿色）。main 上既有的 5 处硬编码白色用法已按工具机制收录进基线并清理 65 条过期条目，详见 `docs/KNOWN_ISSUES.md` 第六节——历史版本声称的"0 violations"与此前的实际输出不符。
 
 ---
 
@@ -106,8 +112,8 @@ npm run lint:theme
 | :---: | :--- | :--- | :--- |
 | **1** | **试听流透明标识** | 当接口判定曲目为 30~45 秒试听切片时，在桌面与移动端底栏显示琥珀色“试听”标签 | 运行 `node scripts/verify-preview-e2e.mjs`，断言 DOM 出现 `border-amber-500/30 text-amber-500` 节点 |
 | **2** | **试听播完不静默跳歌** | 试听片段播放至末尾触发 `ended` 时，播放器停止播放，不跳至下一曲，居中弹出提示 Toast | 运行 `node scripts/verify-preview-e2e.mjs`，断言 `audioStore.audio.isPlaying === false` 且 currentIndex 未累加 |
-| **3** | **动态相对阈值试听判定** | 摒弃固定 1MB 阈值，依据时长与最低可用码率比值动态判定，彻底防止 320k 试听流被误判为完整流 | 运行 `npm run test:gateway`，断言 Test 12 中 320k 45s (1.8MB) 在 240s 与 150s 歌曲下均被判定为 `trial` |
-| **4** | **跨源完整流兜底提升** | 主源仅有试听流时，在限时预算内并发探测备选源（如酷我），若匹配到物理完整流则优先下发 | 运行 `curl -sI "https://preview-full-stream.cfsolara-dho.pages.dev/api/music/stream?id=netease:308299&source=netease&title=喜帖街&artist=谢安琪"`，断言返回 `X-Sonic-Stream-Type: full`，大小 > 3MB |
+| **3** | **基于真实码率的试听判定** | 摒弃标称码率字节阈值：解析 MP3 帧头获得真实码率，`实际时长 = 总字节×8/真实码率`，与曲目预期时长比较（≥90% 判 full），结果标注 `confidence`；60~90 秒完整 128k 曲目、48kbps 完整长度、请求无损实际 320k 等审计反例均不再误判 | 运行 `npm test`，断言 `test-stream-detection.mjs` 34 项与 Test 12；另见 `docs/KNOWN_ISSUES.md` 第二节 |
+| **4** | **跨源完整流兜底提升** | 主源仅有试听流时，在限时预算内并发探测备选源（如酷我），若匹配到物理完整流则优先下发 | 该能力机制已在代码与 `meta.attempts` 中验证，但"喜帖街经兜底取得 >3MB 完整流"的结果在 2026-10-25 审计与 20 首重测中均**未复现**（`summary.crossSourceUpgrades` 升格 0 例），属未确认事项，请以最新 `reports/raw_20_songs_summary.json` 为准 |
 | **5** | **多语言国际化完备性** | 试听徽标 Tooltip 及播完 Toast 文案在 zh-CN、en-US、ja-JP 下均有对应翻译 | 检查 `player/src/languages/modules/*.ts` 中的 `player.trialBadge` 与 `player.trialEnded` 键 |
 | **6** | **非破坏性合并回滚机制** | 灾备回滚时自动读取远端当前配置，以 Map 方式合并入站路由，确保 `engine-sonic` 入口不被覆盖删除 | 执行 `./scripts/rollback-production.sh --dry-run`，检查输出中包含 `engine-sonic.epocanvas.tech` 与 `sonic.epocanvas.tech` 双入口 |
 
@@ -121,3 +127,29 @@ npm run lint:theme
   2. 系统不包含任何打赏、赞助弹窗、会员充值或强制广告展示逻辑；
   3. 生产环境默认禁用所有需要商业授权或第三方不可控抓取的中转服务（GDStudio、Lyriva 等默认 `false`）；
   4. 原生解析代码仅用于个人学习交流与网络协议研究，所有音频流均直接来自上游公开 CDN 的试听或公共开放接口。
+
+---
+
+## 七、2026-10-25 独立审计修复记录与部署核对清单
+
+针对外部审计报告的修复已在本分支以独立提交落地（每项均附带可复现测试，`npm test` 共 195 例全过、`pnpm --dir player test` 32 例全过）：
+
+| # | 修复 | 提交主题 | 测试 |
+| :- | :--- | :--- | :--- |
+| 1 | API Key HMAC-SHA256 签名 + 过期校验 + fail-closed；删除硬编码默认密钥；移除查询参数传键 | `fix(auth): enforce HMAC-SHA256 signed API keys...` | `test-auth-signature.mjs` 21 例 + 套件更新 |
+| 2 | 限流信任链：`X-Sonic-Client-IP` 仅引擎鉴权方可信；不再信任 `X-Forwarded-For` | `fix(security): rate-limit trust chain...` | `test-rate-limit-trust.mjs` 10 例 |
+| 3 | 试听判定改为真实码率时长比（confidence 标注）；假流字节范围×时长规则；播放器误判保护 | `fix(stream): duration-based trial detection...` | `test-stream-detection.mjs` 34 例 + `player/tests/trialGuard.test.ts` |
+| 4 | 20 首脚本严格匹配 + 重测；统计唯一来源 `reports/raw_20_songs_summary.json`；文档订正 | `fix(evidence)/docs: ...` | `summarize-20-songs.mjs` + 数据重测 |
+| 5 | devDependencies + lockfile；离线/联网测试拆分 | `chore(deps): declare devDependencies...` | `npm install && npm test` 开箱即跑 |
+| 6 | forward 媒体白名单 + 逐跳重定向重校验（stream/proxy 同步加固） | `fix(security): media-host allowlists...` | `test-fetch-guard.mjs` 16 例 |
+| 7 | 超长 URL 返回 414 | `fix(http): reject oversized request URLs...` | `test-url-length.mjs` 4 例 |
+| 8 | ncm-api 侧车首启竞态缓解（healthcheck start-period 120s） | `chore(docker): tolerate ncm-api sidecar...` | 本地复现记录（VPS compose 验证待维护者执行，状态未确认） |
+
+### 部署前必须由维护者核对/配置的环境变量（仅列名称，不含值）
+
+- `SONIC_SECRET` —— **必配**（API Key 签名密钥；配置后所有旧无签名密钥自动失效，建议直接轮换）。
+- `SOLARA_SECRET` —— 可选的旧命名别名；若曾单独使用需确认与 `SONIC_SECRET` 策略一致。
+- `EPOMAIL_CLIENT_SECRET` —— **必配**（缺失时 OAuth 登录明确报错，不再有源码默认值）。
+- `SONIC_ENGINE_SECRET` —— 确认已在 Cloudflare Pages 与 VPS 双侧一致（本次修复未改变其语义，未要求轮换）。
+- `SONIC_ENABLE_GDSTUDIO` / `SONIC_ENABLE_LYRIVA` / `SONIC_ENABLE_UNBLOCK` —— 确认生产为 `0`（合规要求）。
+- `SONIC_REAL_IP` —— 仍默认使用 NeteaseCloudMusicApi 社区文档示例 IP，可按需覆盖。
