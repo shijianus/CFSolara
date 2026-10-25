@@ -11,7 +11,12 @@ ENV HOST=0.0.0.0
 ENV ENABLE_UNBLOCK=false
 
 EXPOSE 3000
-HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
+# First boot may crash while the xeapi public key is fetched & cached
+# (observed in audit: transient "xeapi public key is missing", second boot OK
+# because the key persists in the container FS). restart: unless-stopped
+# recovers; a generous start-period keeps the healthcheck from declaring the
+# sidecar dead (and stalling `depends_on: service_healthy`) during that cycle.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=120s --retries=5 \
   CMD wget -qO- http://127.0.0.1:3000/inner/version >/dev/null || exit 1
 
 USER node
