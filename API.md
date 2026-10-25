@@ -203,7 +203,44 @@ async function getSongLyrics(title: string, artist = '', platform = 'netease', p
   });
   return await res.json();
 }
+
+// 4. 智能混合搜索与实时补全建议 (支持简繁/全拼/首字母/别名/拼写容错与相关性门控个性化)
+async function smartSearch(keyword: string) {
+  const res = await fetch(`${API_BASE}/sonic/search/smart?q=${encodeURIComponent(keyword)}&count=20`, {
+    headers: {
+      'X-Sonic-Key': API_KEY,
+      'X-Sonic-Anon-Id': 'anon_demo_client_001',
+    }
+  });
+  return await res.json();
+}
+
+// 5. 智能推荐 (for-you / trending / similar / discover)
+async function getRecommendations() {
+  const res = await fetch(`${API_BASE}/sonic/recommend/for-you?mode=for-you&count=12`, {
+    headers: {
+      'X-Sonic-Key': API_KEY,
+      'X-Sonic-Anon-Id': 'anon_demo_client_001',
+    }
+  });
+  return await res.json();
+}
 ```
+
+---
+
+## 🧠 智能推荐与混合搜索引擎端点 (`/api/sonic/recommend/*` & `/api/sonic/search/smart`)
+
+| 方法 | 路径 | 说明 | 核心参数 |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/sonic/recommend/for-you` | 个性化推荐 / 下一首续接 / 相似电台 | `mode=for-you\|recent\|favorites\|next\|radio`, `count`, `seedTrackId`, `diversity`, `temperature` |
+| `GET` | `/api/sonic/recommend/trending` | 站内真实趋势热榜（严格区分外部热榜） | `window=24h\|7d\|all\|surging\|new`, `genre`, `personalized=0\|1`, `count` |
+| `GET` | `/api/sonic/recommend/similar` | 内容相似度与共现相似歌曲/相似歌手 | `trackId`, `title`, `artist`, `album`, `count`, `includeSameArtist=0\|1` |
+| `GET` | `/api/sonic/recommend/discover` | 风格流派与温度控制探索雷达 | `genre`, `language`, `temperature=0.1~1.5`, `count` |
+| `GET` | `/api/sonic/search/smart` | 智能混合搜索与自动补全建议 | `q`, `mode=search\|suggest`, `page`, `count`, `personalize=0\|1` |
+| `POST / DELETE / GET` | `/api/sonic/events` | 行为反馈上报与一键清除推荐画像 | 请求体 `{ events: [...] }`；支持 `X-Sonic-Personalization: off` 隐私关闭 |
+
+完整算法公式与架构说明请参阅 [`docs/recommendation/01-audit-and-selection.md`](docs/recommendation/01-audit-and-selection.md) 与 [`docs/recommendation/02-architecture-and-algorithms.md`](docs/recommendation/02-architecture-and-algorithms.md)。
 
 ---
 

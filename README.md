@@ -133,6 +133,12 @@ flowchart TD
 | 方法 | 路径 | 说明 | 行为 |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/sonic/search/nexus` | **全网多源并行搜索（前端默认）** | 优先调用 Linux 本地引擎；降级时 `Promise.allSettled` 边缘直连，归一化合并 `sources[]` |
+| `GET` | `/api/sonic/search/smart` | **智能混合搜索与实时补全建议** | 支持简繁归一、拼音/首字母、歌手中英文别名、拼写容错、版本识别、相关性门控个性化与零结果兜底 |
+| `GET` | `/api/sonic/recommend/for-you` | **猜你喜欢 / Auto DJ / 相似电台** | 融合完播、收藏、搜索点击、内容相似与 MMR 多样性重排的可解释推荐 |
+| `GET` | `/api/sonic/recommend/trending` | **站内真实趋势热榜 (`24h`/`7d`/`surging`/`new`)** | 严格区分站内真实有效播放 (`cfsolara-internal`) 与外部榜单参考 (`external-chart`)，内置单用户对数防刷与时间衰减 |
+| `GET` | `/api/sonic/recommend/similar` | **内容相似歌曲与相似歌手推荐** | 基于歌手关系图谱、流派/语言/专辑特征余弦与会话共现图计算相似曲目 |
+| `GET` | `/api/sonic/recommend/discover` | **风格流派与温度探索雷达** | 支持流派筛选与 `temperature` 探索尺度调节 |
+| `POST/DELETE` | `/api/sonic/events` | **隐私优先的行为反馈与一键重置** | 采集播放/收藏/不喜欢信号（自动过滤网络卡顿与 30s 试听截断），支持 `DELETE` 一键清空画像 |
 | `GET` | `/api/sonic/search/netease` | 网易云单源搜索 | 原生 `ncm-api` / `linuxapi` 检索，返回统一 Track 结构 |
 | `GET` | `/api/sonic/search/qq` | QQ音乐单源搜索 | 原生 `u.y.qq.com` 检索，返回统一 Track 结构 |
 | `GET` | `/api/sonic/search/kugou` | 酷狗音乐单源搜索 | 原生检索，返回统一 Track 结构 |
