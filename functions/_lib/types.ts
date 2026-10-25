@@ -47,6 +47,17 @@ export interface AppEnv {
   SONIC_TIMEOUT_MS?: string;
   SONIC_RATE_LIMIT_ANON_RPM?: string;
   SONIC_RATE_LIMIT_AUTH_RPM?: string;
+  // Intelligent Recommendation & Smart Search Engine
+  RECOMMEND_STORE?: any;
+  SONIC_RECOMMEND_DB_PATH?: string;
+  SONIC_RECOMMEND_RETENTION_DAYS?: string;
+  SONIC_RECOMMEND_OFFLINE?: string;
+  SONIC_GORSE_URL?: string;
+  SONIC_GORSE_API_KEY?: string;
+  SONIC_MEILISEARCH_URL?: string;
+  SONIC_MEILISEARCH_KEY?: string;
+  SONIC_MEILISEARCH_INDEX?: string;
+  SONIC_ENABLE_LISTENBRAINZ?: string;
   [key: string]: any;
 }
 
