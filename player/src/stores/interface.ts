@@ -49,6 +49,12 @@ export interface Song {
   qualityBadge?: string
   /** 支持的音质等级列表 */
   qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string; format?: string; desc?: string }>
+  /** 音频流类型（full 完整版 / trial 试听切片 / unavailable 不可用） */
+  streamType?: 'full' | 'trial' | 'unavailable'
+  /** 试听时长（秒） */
+  trialDuration?: number
+  /** 候选音源列表（跨源自动兜底） */
+  sources?: Array<{ platform: string; platformId: string | number; duration?: number }>
 }
 
 /** 音频播放器 Store 状态 */

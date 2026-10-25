@@ -412,6 +412,10 @@ export default {
     localFileMissing: 'The local file is no longer available. The current track was cleared.',
     next: 'Next track',
     qualitySwitchFailed: 'Failed to switch quality. The previous quality was restored.',
+    trialBadge: 'Trial',
+    trialTooltip: 'Official trial preview (30-45s); full stream will be preferred when available',
+    trialEnded: 'The trial preview for this track has ended',
+    switchedToFull: 'Automatically switched to full stream via {source}',
     playbackError: {
       network: 'Network error. Check your connection and try again.',
       source: 'This audio source is unavailable. Try another track.',

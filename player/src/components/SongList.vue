@@ -383,6 +383,14 @@ const getQualityBadgeInfo = (song: Song) => {
                   >
                     <span class="line-clamp-1">{{ song.name }}</span>
                   </h3>
+                  <!-- 试听标记徽章 (当曲目为试听切片时透明展示) -->
+                  <span
+                    v-if="song.streamType === 'trial'"
+                    :title="$t('player.trialTooltip')"
+                    class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-sans font-medium leading-none select-none transition-all cursor-help border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-400"
+                  >
+                    {{ $t('player.trialBadge') }}
+                  </span>
                   <!-- 精炼降噪音质徽章 (全列表以SQ为主时不重复显眼刷屏，只标出例外；多音质收归进交互提示) -->
                   <span
                     v-if="getQualityBadgeInfo(song)"

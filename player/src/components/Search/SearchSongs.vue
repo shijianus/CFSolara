@@ -66,6 +66,8 @@ const fetchSongs = async () => {
           sha: t.sha || '',
           qualityBadge: t.qualityBadge || undefined,
           qualities: t.qualities || [],
+          sources: t.sources || [],
+          streamType: t.streamType || (t.platform === 'netease' && t.isVip ? 'trial' : undefined),
           liked: false,
         }))
         emit('loaded', state.results.length)

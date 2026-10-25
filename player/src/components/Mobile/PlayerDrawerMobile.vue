@@ -597,9 +597,18 @@ const playModeIcon = computed(() => {
         />
 
         <div class="w-full px-6 text-center">
-          <h2 class="text-primary line-clamp-1 text-xl font-bold">
-            {{ currentSong?.name || t('player.unknownSong') }}
-          </h2>
+          <div class="flex items-center justify-center gap-2">
+            <h2 class="text-primary line-clamp-1 text-xl font-bold">
+              {{ currentSong?.name || t('player.unknownSong') }}
+            </h2>
+            <span
+              v-if="currentSong?.streamType === 'trial'"
+              :title="t('player.trialTooltip')"
+              class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium leading-none select-none border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-400"
+            >
+              {{ t('player.trialBadge') }}
+            </span>
+          </div>
           <p class="text-primary/60 mt-2 line-clamp-1 text-base">
             {{ currentSong?.artist || t('player.unknownArtist') }}
           </p>

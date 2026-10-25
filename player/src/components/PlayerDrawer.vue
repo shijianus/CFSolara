@@ -819,11 +819,20 @@ onUnmounted(() => {
 
       <!-- 歌曲信息（两种模式共享） -->
       <div class="song-info mb-4 text-center lg:mb-6">
-        <h2
-          class="song-title text-primary mb-1 line-clamp-1 text-xl font-bold sm:text-2xl lg:text-3xl"
-        >
-          {{ currentSong?.name || t('player.unknownSong') }}
-        </h2>
+        <div class="flex items-center justify-center gap-2 mb-1">
+          <h2
+            class="song-title text-primary line-clamp-1 text-xl font-bold sm:text-2xl lg:text-3xl"
+          >
+            {{ currentSong?.name || t('player.unknownSong') }}
+          </h2>
+          <span
+            v-if="currentSong?.streamType === 'trial'"
+            :title="t('player.trialTooltip')"
+            class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium leading-none select-none border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-400"
+          >
+            {{ t('player.trialBadge') }}
+          </span>
+        </div>
         <p class="text-primary/60 text-sm sm:text-base lg:text-lg">
           {{ currentSong?.artist || t('player.unknownArtist') }}
         </p>

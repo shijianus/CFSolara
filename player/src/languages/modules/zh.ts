@@ -402,6 +402,10 @@ export default {
     localFileMissing: '本地文件已不可用，已清除当前歌曲',
     next: '下一首',
     qualitySwitchFailed: '音质切换失败，已恢复原音质',
+    trialBadge: '试听',
+    trialTooltip: '当前为官方试听切片（30~45秒），有完整流时将自动优先使用',
+    trialEnded: '当前曲目为试听片段，已播放完毕',
+    switchedToFull: '已为您自动切换至 {source} 完整音源',
     playbackError: {
       network: '网络连接异常，请检查网络后重试',
       source: '音源不可用，换一首试试',

@@ -417,6 +417,10 @@ export default {
     localFileMissing: 'ローカルファイルが利用できません。現在の曲をクリアしました。',
     next: '次の曲',
     qualitySwitchFailed: '音質の切り替えに失敗しました。元の音質に戻しました。',
+    trialBadge: '試聴',
+    trialTooltip: '公式試聴クリップ（30〜45秒）、フル音源が利用可能な場合は優先されます',
+    trialEnded: 'この楽曲は試聴クリップのため、再生が終了しました',
+    switchedToFull: '{source} のフル音源に自動切り替えました',
     playbackError: {
       network: 'ネットワークに接続できません。通信状況を確認して再試行してください。',
       source: '音源が利用できません。別の曲をお試しください。',

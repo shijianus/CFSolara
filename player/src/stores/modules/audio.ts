@@ -631,7 +631,10 @@ export const useAudioStore = defineStore('audio', {
 
       // Sonic 多源聚合网关智能兜底
       if (!url) {
-        url = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease`
+        const titleParam = song.name ? `&title=${encodeURIComponent(song.name)}` : ''
+        const artistParam = song.artist ? `&artist=${encodeURIComponent(song.artist)}` : ''
+        const durSec = song.duration ? `&duration=${Math.round(song.duration / 1000)}` : ''
+        url = `/api/music/stream?id=${encodeURIComponent(String(song.id))}&source=netease${titleParam}${artistParam}${durSec}`
       }
 
       song.url = url
@@ -639,6 +642,24 @@ export const useAudioStore = defineStore('audio', {
       const idx = this.audio.playlist.findIndex(p => p.id === song.id)
       if (idx !== -1) {
         this.audio.playlist[idx].url = url
+      }
+
+      // 异步探测流类型与试听状态响应头
+      if (url.startsWith('/api/music/stream') && !song.streamType && typeof fetch !== 'undefined') {
+        fetch(url, { method: 'HEAD' })
+          .then((res) => {
+            const streamType = res.headers.get('x-sonic-stream-type') as any
+            const trialDur = res.headers.get('x-sonic-trial-duration')
+            if (streamType === 'trial' || streamType === 'full') {
+              song.streamType = streamType
+              if (trialDur) song.trialDuration = parseInt(trialDur, 10)
+              if (idx !== -1) {
+                this.audio.playlist[idx].streamType = streamType
+                if (trialDur) this.audio.playlist[idx].trialDuration = parseInt(trialDur, 10)
+              }
+            }
+          })
+          .catch(() => {})
       }
     },
 
@@ -770,6 +791,17 @@ export const useAudioStore = defineStore('audio', {
 
     // 处理歌曲播放结束
     handleSongEnd() {
+      // 试听片段播放完毕：不静默跳歌，明确提示用户
+      if (this.audio.currentSong?.streamType === 'trial') {
+        const toastStore = useToastStore()
+        toastStore.show({
+          message: i18n.global.t('player.trialEnded'),
+          type: 'warning',
+          duration: 5000,
+        })
+        return
+      }
+
       switch (this.audio.playMode) {
         case PlayMode.SINGLE:
           // 单曲循环

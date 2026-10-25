@@ -43,6 +43,9 @@ export interface SongData {
   qualityBadge?: string
   qualities?: Array<{ level: string; label: string; bitrate: string; streamUrl?: string }>
   url?: string
+  streamType?: 'full' | 'trial' | 'unavailable'
+  trialDuration?: number
+  sources?: Array<{ platform: string; platformId: string | number; duration?: number }>
 }
 
 export interface ArtistData {
@@ -319,6 +322,9 @@ export function transformSong(item: Record<string, unknown>): SongData {
     qualityBadge: (item?.qualityBadge as string) || (song?.qualityBadge as string) || undefined,
     qualities: (item?.qualities as any[]) || (song?.qualities as any[]) || undefined,
     url: (item?.streamUrl as string) || (item?.url as string) || (song?.url as string) || '',
+    streamType: (item?.streamType as any) || (song?.streamType as any) || undefined,
+    trialDuration: (item?.trialDuration as number) || (song?.trialDuration as number) || undefined,
+    sources: (item?.sources as any[]) || (song?.sources as any[]) || undefined,
   }
 }
 
