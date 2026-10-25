@@ -16,6 +16,8 @@
     "lint:theme": "node scripts/lint-theme.mjs",
     "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
     "test:security": "./player/node_modules/.bin/vitest run tests/security.test.ts",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs && ./player/node_modules/.bin/vitest run tests/security.test.ts"
+    "test:recommend": "./player/node_modules/.bin/vitest run tests/recommendation-and-search.test.ts",
+    "eval:recommend": "jiti scripts/evaluate-recommendation.mjs",
+    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs && ./player/node_modules/.bin/vitest run tests/security.test.ts tests/recommendation-and-search.test.ts"
   }
 }
