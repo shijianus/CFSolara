@@ -6,6 +6,12 @@ export interface AppEnv {
   MUSIC_API_BASE?: string;
   SOLARA_SECRET?: string;
   SONIC_SECRET?: string;
+  SONIC_SECRET_PREV?: string;
+  SONIC_ALLOW_QUERY_KEY?: string;
+  SONIC_ALLOWED_ORIGINS?: string;
+  SONIC_ALLOW_HTTP_OUTBOUND?: string;
+  SONIC_RATE_LIMIT_KV?: any;
+  SOLARA_ALLOWED_ORIGINS?: string;
   KV?: any;
   DB?: any;
   // Linux VPS Local Engine & Inter-Service Auth

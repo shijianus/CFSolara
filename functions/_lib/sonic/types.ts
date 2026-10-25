@@ -39,6 +39,7 @@ export interface SonicWord {
   start?: number;
   startSec?: number;
   end?: number;
+  endMs?: number;
   endSec?: number;
   duration?: number;
   durationSec?: number;
@@ -73,6 +74,10 @@ export interface SonicTtmlMetadata {
   spotifyId?: string;
   appleMusicId?: string;
   isrc?: string;
+  upstreamProvider?: string;
+  sourceId?: string;
+  matchReason?: string;
+  [key: string]: unknown;
 }
 
 export interface SonicLyricsData {
@@ -119,6 +124,7 @@ export interface SonicErrorResponse {
 
 export interface SonicQueryParams {
   title?: string;
+  q?: string;
   artist?: string;
   duration?: number;
   album?: string;

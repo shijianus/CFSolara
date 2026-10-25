@@ -183,7 +183,7 @@ async function proxyApiRequest(url: URL, request: Request, env?: AppEnv): Promis
     );
   }
 
-  const apiUrl = new URL(cfg.gdstudioUrl);
+  const apiUrl = new URL(cfg.upstreamGdstudio);
   url.searchParams.forEach((value, key) => {
     if (key === "target" || key === "callback") return;
     apiUrl.searchParams.set(key, value);

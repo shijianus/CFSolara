@@ -2,7 +2,7 @@ import { errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
 import { searchTracks } from '../../_lib/music';
 import { getSonicConfig } from '../../_lib/sonic/config';
 import { callLocalEngineJson, getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
-import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse, extractClientIp } from '../../_lib/sonic/security';
+import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
 import type { AppEnv } from '../../_lib/types';
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
@@ -34,7 +34,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     const engineRes = await callLocalEngineJson<any>(
       `/api/music/search?q=${encodeURIComponent(query.trim())}&source=${encodeURIComponent(source)}&count=${count}&page=${page}`,
       env,
-      { clientIp: extractClientIp(request) },
+      { request },
     );
     if (engineRes.ok && engineRes.data && Array.isArray(engineRes.data.tracks)) {
       return jsonResponse(

@@ -16,5 +16,10 @@
     "lint:theme": "node scripts/lint-theme.mjs",
     "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
     "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "jiti": "^2.7.0",
+    "typescript": "^5.9.3"
   }
 }

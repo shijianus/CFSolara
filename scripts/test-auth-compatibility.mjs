@@ -1,9 +1,11 @@
 // scripts/test-auth-compatibility.mjs
-// Comprehensive test suite for Sonic & Solara Auth Compatibility (functions/_lib/auth.ts)
+// Signed API key format, rotation, expiry, tampering and credential transport.
 
 import {
+  AuthConfigError,
   createSession,
   extractAuthCredentials,
+  signApiKey,
   verifyAuth,
   buildAuthorizeUrl,
   getEpomailConfig,
@@ -22,19 +24,46 @@ function assert(condition, message) {
   }
 }
 
-async function runAuthTests() {
-  console.log('=== Running Sonic & Solara Auth Compatibility Test Suite ===\n');
+const SECRET = 'test_signing_secret_that_is_at_least_32_chars_long_01';
+const OLD_SECRET = 'old_signing_secret_that_is_at_least_32_chars_long_02';
+const NEW_SECRET = 'new_signing_secret_that_is_at_least_32_chars_long_03';
 
-  // Test 1: Config & OAuth URL generation
-  console.log('1. Testing OAuth Config & Authorize URL Generation');
+function decodePayload(apiKey) {
+  const rest = apiKey.slice('sonic_live_'.length);
+  const [, payloadB64] = rest.split('.');
+  return JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+}
+
+function encodePayload(payload) {
+  return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+}
+
+function resignByTampering(apiKey, mutate) {
+  const rest = apiKey.slice('sonic_live_'.length);
+  const [version, payloadB64, signatureB64] = rest.split('.');
+  const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+  mutate(payload);
+  return `sonic_live_${version}.${encodePayload(payload)}.${signatureB64}`;
+}
+
+function authRequest(key, header = 'X-Sonic-Key') {
+  return new Request('https://sonic.epocanvas.com/api/sonic/search/nexus?q=test', {
+    headers: { [header]: key },
+  });
+}
+
+async function runAuthTests() {
+  console.log('=== Running Signed API Key / Auth Test Suite ===\n');
+
+  console.log('1. OAuth configuration and authorize URL');
   {
     const env = {
       EPOMAIL_BASE_URL: 'https://mail.epocanvas.com',
       EPOMAIL_CLIENT_ID: 'sonic_client_app',
-      EPOMAIL_CLIENT_SECRET: 'sonic_secret_xyz',
+      EPOMAIL_CLIENT_SECRET: 'oauth_client_secret_value',
       EPOMAIL_REDIRECT_URI: 'https://sonic.epocanvas.com/api/auth/callback',
     };
-    const config = getEpomailConfig(env);
+    const config = getEpomailConfig(env, 'https://sonic.epocanvas.com');
     assert(config.baseUrl === 'https://mail.epocanvas.com', 'Base URL parsed');
     assert(config.clientId === 'sonic_client_app', 'Client ID matched');
     assert(config.redirectUri === 'https://sonic.epocanvas.com/api/auth/callback', 'Redirect URI matched');
@@ -46,232 +75,157 @@ async function runAuthTests() {
     assert(parsedUrl.searchParams.get('state') === 'custom_state_123', 'Custom state preserved');
   }
 
-  // Test 2: Session creation generates sonic_live_ key
-  console.log('\n2. Testing Session Creation & sonic_live_ API Key Generation');
-  let testSession;
+  console.log('\n2. createSession issues sonic_live_v1.<payload>.<signature>');
+  let session;
   {
-    const env = { SONIC_SECRET: 'test_super_secret_sonic' };
-    const userInfo = {
+    const env = { SONIC_SECRET: SECRET };
+    session = await createSession(env, {
       id: 'usr_epocanvas_001',
-      email: 'developer@epocanvas.com',
+      email: 'Developer@Epocanvas.com',
       name: 'Epo Developer',
       avatar: 'https://mail.epocanvas.com/avatar/dev.png',
       role: 'developer',
-    };
-    testSession = await createSession(env, userInfo);
+    });
 
-    assert(testSession.id === 'usr_epocanvas_001', 'User ID preserved');
-    assert(testSession.email === 'developer@epocanvas.com', 'User email preserved');
-    assert(testSession.apiKey.startsWith('sonic_live_'), `API key has sonic_live_ prefix (got ${testSession.apiKey})`);
-    
-    // Check parts: sonic_live_<encodedEmail>_<keySig>
-    const parts = testSession.apiKey.replace('sonic_live_', '').split('_');
-    assert(parts.length >= 2, 'API key contains encodedEmail and signature');
-    const decodedEmail = atob(parts[0].replace(/-/g, '+').replace(/_/g, '/'));
-    assert(decodedEmail === 'developer@epocanvas.com', `Encoded email decodes back to original (${decodedEmail})`);
+    assert(session.id === 'usr_epocanvas_001', 'Provided user ID preserved');
+    assert(session.email === 'developer@epocanvas.com', 'Email normalized to lowercase');
+    assert(session.apiKey.startsWith('sonic_live_v1.'), 'Key uses sonic_live_v1 prefix');
+    const parts = session.apiKey.slice('sonic_live_'.length).split('.');
+    assert(parts.length === 3 && parts[0] === 'v1', 'Key has version, payload and signature segments');
+    assert(parts[2].length >= 42, 'Signature is not truncated (full HMAC-SHA256)');
+
+    const payload = decodePayload(session.apiKey);
+    assert(payload.v === 1, 'Payload v=1');
+    assert(payload.email === 'developer@epocanvas.com', 'Payload email matches');
+    assert(Number.isInteger(payload.exp) && payload.exp > Math.floor(Date.now() / 1000), 'Payload exp is future seconds');
+    assert(typeof payload.kid === 'string' && payload.kid.length === 16, 'Payload carries key id');
+    assert(new Date(session.expiresAt).getTime() === payload.exp * 1000, 'Session expiry matches payload');
   }
 
-  // Test 3: Secret fallback chain (SONIC_SECRET -> SOLARA_SECRET -> DEFAULT)
-  console.log('\n3. Testing Secret Priority & Fallback');
+  console.log('\n3. Random user id uses crypto.randomUUID (no Math.random)');
   {
-    const user = { email: 'fallback@epocanvas.com', name: 'Fallback User', avatar: '' };
-    // With SOLARA_SECRET only
-    const sessionSolara = await createSession({ SOLARA_SECRET: 'solara_legacy_sec' }, user);
-    assert(sessionSolara.apiKey.startsWith('sonic_live_'), 'Key generated using SOLARA_SECRET fallback has sonic_live_ prefix');
-    
-    // With SONIC_SECRET taking precedence over SOLARA_SECRET
-    const sessionBoth = await createSession({ SONIC_SECRET: 'sonic_primary', SOLARA_SECRET: 'solara_secondary' }, user);
-    assert(sessionBoth.apiKey.startsWith('sonic_live_'), 'Key generated with both secrets present');
+    const env = { SONIC_SECRET: SECRET };
+    const a = await createSession(env, { email: 'uuid-a@epocanvas.com', name: 'A', avatar: '' });
+    const b = await createSession(env, { email: 'uuid-b@epocanvas.com', name: 'B', avatar: '' });
+    assert(/^usr_[0-9a-f-]{36}$/i.test(a.id), `Generated id looks like a UUID (${a.id})`);
+    assert(a.id !== b.id, 'Generated ids are unique');
   }
 
-  // Test 4: Credential extraction across all headers & parameters
-  console.log('\n4. Testing Credential Extraction (Headers & Query Params)');
+  console.log('\n4. Valid key authenticates through headers');
   {
-    // 4.1 X-Sonic-Key header
-    const req1 = new Request('https://sonic.epocanvas.com/api/test', {
-      headers: { 'X-Sonic-Key': 'sonic_live_key_01' },
+    const req = authRequest(session.apiKey);
+    const res = await verifyAuth(req, { SONIC_SECRET: SECRET });
+    assert(res.authenticated === true, 'Valid key authenticates');
+    assert(res.user?.email === 'developer@epocanvas.com', 'Verified user email matches');
+    assert(res.user?.apiKey === session.apiKey, 'Verified user keeps original key');
+
+    const bearerReq = new Request('https://sonic.epocanvas.com/api/sonic/search', {
+      headers: { Authorization: `Bearer ${session.apiKey}` },
     });
-    const ext1 = extractAuthCredentials(req1);
-    assert(ext1.apiKey === 'sonic_live_key_01', 'Extracted from X-Sonic-Key header');
+    const bearerRes = await verifyAuth(bearerReq, { SONIC_SECRET: SECRET });
+    assert(bearerRes.authenticated === true, 'Bearer header authenticates');
 
-    // 4.2 Legacy X-CFSolara-Key header
-    const req2 = new Request('https://sonic.epocanvas.com/api/test', {
-      headers: { 'X-CFSolara-Key': 'solara_live_key_02' },
+    const apiKeyReq = new Request('https://sonic.epocanvas.com/api/sonic/search', {
+      headers: { 'X-Api-Key': session.apiKey },
     });
-    const ext2 = extractAuthCredentials(req2);
-    assert(ext2.apiKey === 'solara_live_key_02', 'Extracted from legacy X-CFSolara-Key header');
+    const apiKeyRes = await verifyAuth(apiKeyReq, { SONIC_SECRET: SECRET });
+    assert(apiKeyRes.authenticated === true, 'X-Api-Key header authenticates');
 
-    // 4.3 Standard X-API-Key header
-    const req3 = new Request('https://sonic.epocanvas.com/api/test', {
-      headers: { 'X-Api-Key': 'sonic_live_key_03' },
+    const legacyHeaderReq = new Request('https://sonic.epocanvas.com/api/sonic/search', {
+      headers: { 'X-CFSolara-Key': session.apiKey },
     });
-    const ext3 = extractAuthCredentials(req3);
-    assert(ext3.apiKey === 'sonic_live_key_03', 'Extracted from X-Api-Key header');
-
-    // 4.4 Authorization: Bearer sonic_live_...
-    const req4 = new Request('https://sonic.epocanvas.com/api/test', {
-      headers: { Authorization: 'Bearer sonic_live_bearer_04' },
-    });
-    const ext4 = extractAuthCredentials(req4);
-    assert(ext4.apiKey === 'sonic_live_bearer_04', 'Extracted sonic_live_ from Bearer token');
-    assert(ext4.token === 'sonic_live_bearer_04', 'Bearer token string preserved');
-
-    // 4.5 Authorization: Bearer solara_live_...
-    const req5 = new Request('https://sonic.epocanvas.com/api/test', {
-      headers: { Authorization: 'Bearer solara_live_bearer_05' },
-    });
-    const ext5 = extractAuthCredentials(req5);
-    assert(ext5.apiKey === 'solara_live_bearer_05', 'Extracted legacy solara_live_ from Bearer token');
-
-    // 4.6 Query param ?api_key=...
-    const req6 = new Request('https://sonic.epocanvas.com/api/test?api_key=sonic_live_query_06');
-    const ext6 = extractAuthCredentials(req6);
-    assert(ext6.apiKey === 'sonic_live_query_06', 'Extracted from query param api_key');
-
-    // 4.7 Query param ?key=...
-    const req7 = new Request('https://sonic.epocanvas.com/api/test?key=solara_live_query_07');
-    const ext7 = extractAuthCredentials(req7);
-    assert(ext7.apiKey === 'solara_live_query_07', 'Extracted from query param key');
-
-    // 4.8 Header precedence (X-Sonic-Key over query param)
-    const req8 = new Request('https://sonic.epocanvas.com/api/test?api_key=query_key', {
-      headers: { 'X-Sonic-Key': 'header_key' },
-    });
-    const ext8 = extractAuthCredentials(req8);
-    assert(ext8.apiKey === 'header_key', 'Header key takes precedence over query key');
+    const legacyHeaderRes = await verifyAuth(legacyHeaderReq, { SONIC_SECRET: SECRET });
+    assert(legacyHeaderRes.authenticated === true, 'X-CFSolara-Key header still transports a valid new key');
   }
 
-  // Test 5: In-memory session verification
-  console.log('\n5. Testing In-Memory Session Verification');
+  console.log('\n5. Forged / tampered / expired keys are rejected');
   {
-    const req = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
-      headers: { 'X-Sonic-Key': testSession.apiKey },
+    const forgedEmail = Buffer.from('attacker@example.com', 'utf8').toString('base64url');
+    const forged = `sonic_live_${forgedEmail}_${'a'.repeat(64)}`;
+    assert((await verifyAuth(authRequest(forged), { SONIC_SECRET: SECRET })).authenticated === false, 'Legacy forged sonic_live_<b64(email)>_<sig> rejected');
+
+    const tamperedEmail = resignByTampering(session.apiKey, (payload) => {
+      payload.email = 'attacker@example.com';
     });
-    const res = await verifyAuth(req, {});
-    assert(res.authenticated === true, 'Session authenticated successfully via in-memory cache');
-    assert(res.user?.email === 'developer@epocanvas.com', 'Session user email matches');
-    assert(res.user?.apiKey === testSession.apiKey, 'Session user apiKey matches');
+    assert((await verifyAuth(authRequest(tamperedEmail), { SONIC_SECRET: SECRET })).authenticated === false, 'Tampered email rejected');
+
+    const tamperedExp = resignByTampering(session.apiKey, (payload) => {
+      payload.exp += 86400;
+    });
+    assert((await verifyAuth(authRequest(tamperedExp), { SONIC_SECRET: SECRET })).authenticated === false, 'Tampered expiry rejected');
+
+    const expiredKey = await signApiKey({ SONIC_SECRET: SECRET }, 'expired@example.com', Math.floor(Date.now() / 1000) - 10);
+    assert((await verifyAuth(authRequest(expiredKey), { SONIC_SECRET: SECRET })).authenticated === false, 'Expired key rejected');
+
+    const tooLongKey = await signApiKey(
+      { SONIC_SECRET: SECRET },
+      'future@example.com',
+      Math.floor(Date.now() / 1000) + 400 * 86400,
+    );
+    assert((await verifyAuth(authRequest(tooLongKey), { SONIC_SECRET: SECRET })).authenticated === false, 'Absurdly far-future expiry rejected');
+
+    assert((await verifyAuth(authRequest(session.apiKey), {})).authenticated === false, 'Key rejected when SONIC_SECRET is missing');
+    assert((await verifyAuth(authRequest(session.apiKey), { SONIC_SECRET: 'too-short' })).authenticated === false, 'Key rejected when SONIC_SECRET is too short');
   }
 
-  // Test 6: Cross-Header Verification for Newly Generated sonic_live_ Key
-  console.log('\n6. Testing Cross-Header Verification for sonic_live_ Key');
+  console.log('\n6. Legacy key formats are rejected');
   {
-    // Using legacy header X-CFSolara-Key with new sonic_live_ key
-    const reqSolaraHeader = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
-      headers: { 'X-CFSolara-Key': testSession.apiKey },
-    });
-    const resSolaraHeader = await verifyAuth(reqSolaraHeader, {});
-    assert(resSolaraHeader.authenticated === true, 'New sonic_live_ key authenticated via legacy X-CFSolara-Key header');
-    assert(resSolaraHeader.user?.email === 'developer@epocanvas.com', 'User email matched');
-
-    // Using Bearer token with new sonic_live_ key
-    const reqBearer = new Request('https://sonic.epocanvas.com/api/music/search?q=test', {
-      headers: { Authorization: `Bearer ${testSession.apiKey}` },
-    });
-    const resBearer = await verifyAuth(reqBearer, {});
-    assert(resBearer.authenticated === true, 'New sonic_live_ key authenticated via Bearer token');
-
-    // Using URL query parameter ?api_key=
-    const reqQuery = new Request(`https://sonic.epocanvas.com/api/music/search?api_key=${encodeURIComponent(testSession.apiKey)}`);
-    const resQuery = await verifyAuth(reqQuery, {});
-    assert(resQuery.authenticated === true, 'New sonic_live_ key authenticated via query param');
+    const emailB64 = Buffer.from('legacy@example.com', 'utf8').toString('base64url');
+    const legacySonic = `sonic_live_${emailB64}_d41d8cd98f00b204e9800998ecf8427e`;
+    const legacySolara = `solara_live_${emailB64}_d41d8cd98f00b204e9800998ecf8427e`;
+    assert((await verifyAuth(authRequest(legacySonic), { SONIC_SECRET: SECRET })).authenticated === false, 'Old sonic_live_ format rejected');
+    assert((await verifyAuth(authRequest(legacySolara), { SONIC_SECRET: SECRET })).authenticated === false, 'Old solara_live_ format rejected');
   }
 
-  // Test 7: Backward Compatibility for Legacy solara_live_ Keys (Stateless reconstruction)
-  console.log('\n7. Testing Backward Compatibility for solara_live_ Keys (Stateless verification)');
+  console.log('\n7. Secret rotation via SONIC_SECRET_PREV');
   {
-    // Construct a legacy solara_live_ key that was generated on an older system and is NOT in memory
-    const legacyEmail = 'legacy_tester@epocanvas.com';
-    const encodedLegacyEmail = btoa(legacyEmail).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-    const legacyApiKey = `solara_live_${encodedLegacyEmail}_d41d8cd98f00b204e9800998ecf8427e`;
-
-    // 7.1 Verify legacy key via X-CFSolara-Key header
-    const reqSolara = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
-      headers: { 'X-CFSolara-Key': legacyApiKey },
-    });
-    const resSolara = await verifyAuth(reqSolara, {});
-    assert(resSolara.authenticated === true, 'Legacy solara_live_ key authenticated via X-CFSolara-Key');
-    assert(resSolara.user?.email === 'legacy_tester@epocanvas.com', 'Stateless session recovered email accurately');
-    assert(resSolara.user?.apiKey === legacyApiKey, 'Stateless session preserves original legacy apiKey');
-
-    // 7.2 Verify legacy key via new X-Sonic-Key header
-    const reqSonic = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
-      headers: { 'X-Sonic-Key': legacyApiKey },
-    });
-    const resSonic = await verifyAuth(reqSonic, {});
-    assert(resSonic.authenticated === true, 'Legacy solara_live_ key authenticated via X-Sonic-Key header');
-
-    // 7.3 Verify legacy key via Authorization: Bearer
-    const reqBearerLegacy = new Request('https://sonic.epocanvas.com/api/music/stream?id=123', {
-      headers: { Authorization: `Bearer ${legacyApiKey}` },
-    });
-    const resBearerLegacy = await verifyAuth(reqBearerLegacy, {});
-    assert(resBearerLegacy.authenticated === true, 'Legacy solara_live_ key authenticated via Bearer token');
+    const oldKey = await signApiKey({ SONIC_SECRET: OLD_SECRET }, 'rotate@example.com', Math.floor(Date.now() / 1000) + 3600);
+    const onlyNew = await verifyAuth(authRequest(oldKey), { SONIC_SECRET: NEW_SECRET });
+    assert(onlyNew.authenticated === false, 'Old key rejected after rotation without previous secret');
+    const withPrev = await verifyAuth(authRequest(oldKey), { SONIC_SECRET: NEW_SECRET, SONIC_SECRET_PREV: OLD_SECRET });
+    assert(withPrev.authenticated === true, 'Old key accepted via SONIC_SECRET_PREV');
+    assert(withPrev.user?.email === 'rotate@example.com', 'Rotated key preserves email');
   }
 
-  // Test 8: Stateless verification of un-cached sonic_live_ key
-  console.log('\n8. Testing Stateless Verification of Uncached sonic_live_ Key');
+  console.log('\n8. Signing fails closed without a strong secret');
   {
-    const freshEmail = 'fresh_user@epocanvas.com';
-    const encFresh = btoa(freshEmail).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-    const uncachedSonicKey = `sonic_live_${encFresh}_a1b2c3d4e5f67890123456789abcdef0`;
+    let threw = false;
+    try {
+      await createSession({}, { email: 'no-secret@example.com', name: 'No Secret', avatar: '' });
+    } catch (error) {
+      threw = error instanceof AuthConfigError && error.status === 503;
+    }
+    assert(threw, 'createSession throws AuthConfigError (503) without SONIC_SECRET');
 
-    const req = new Request('https://sonic.epocanvas.com/api/music/search', {
-      headers: { 'X-Sonic-Key': uncachedSonicKey },
-    });
-    const res = await verifyAuth(req, {});
-    assert(res.authenticated === true, 'Uncached sonic_live_ key authenticated via stateless fallback');
-    assert(res.user?.email === 'fresh_user@epocanvas.com', 'Stateless fallback recovered user email');
+    let shortThrew = false;
+    try {
+      await signApiKey({ SONIC_SECRET: 'short' }, 'short@example.com', Math.floor(Date.now() / 1000) + 60);
+    } catch (error) {
+      shortThrew = error instanceof AuthConfigError;
+    }
+    assert(shortThrew, 'signApiKey rejects a short secret');
   }
 
-  // Test 9: Negative & Edge Cases
-  console.log('\n9. Testing Negative & Edge Cases');
+  console.log('\n9. Query-string keys are opt-in only');
   {
-    // 9.1 No auth headers or params
-    const emptyReq = new Request('https://sonic.epocanvas.com/api/music/search');
-    const emptyRes = await verifyAuth(emptyReq, {});
-    assert(emptyRes.authenticated === false, 'Request with no auth is rejected');
+    const queryReq = new Request(`https://sonic.epocanvas.com/api/sonic/search?api_key=${encodeURIComponent(session.apiKey)}`);
+    const defaultRes = await verifyAuth(queryReq, { SONIC_SECRET: SECRET });
+    assert(defaultRes.authenticated === false, 'Query api_key rejected by default');
+    const enabledRes = await verifyAuth(queryReq, { SONIC_SECRET: SECRET, SONIC_ALLOW_QUERY_KEY: '1' });
+    assert(enabledRes.authenticated === true, 'Query api_key accepted only with SONIC_ALLOW_QUERY_KEY=1');
 
-    // 9.2 Arbitrary invalid key prefix
-    const invalidPrefixReq = new Request('https://sonic.epocanvas.com/api/music/search', {
-      headers: { 'X-Sonic-Key': 'random_prefix_abc123' },
-    });
-    const invalidPrefixRes = await verifyAuth(invalidPrefixReq, {});
-    assert(invalidPrefixRes.authenticated === false, 'Invalid key prefix is rejected');
-
-    // 9.3 Malformed base64 in sonic_live_
-    const malformedKeyReq = new Request('https://sonic.epocanvas.com/api/music/search', {
-      headers: { 'X-Sonic-Key': 'sonic_live_%%%notbase64%%%_sig' },
-    });
-    const malformedKeyRes = await verifyAuth(malformedKeyReq, {});
-    assert(malformedKeyRes.authenticated === false, 'Malformed base64 email is rejected gracefully');
-
-    // 9.4 Base64 without valid email (@ symbol missing)
-    const noEmailKey = `sonic_live_${btoa('notanemail').replace(/=/g, '')}_sig123`;
-    const noEmailReq = new Request('https://sonic.epocanvas.com/api/music/search', {
-      headers: { 'X-Sonic-Key': noEmailKey },
-    });
-    const noEmailRes = await verifyAuth(noEmailReq, {});
-    assert(noEmailRes.authenticated === false, 'Base64 string without @ is rejected');
-
-    // 9.5 Key without underscore separators
-    const noUnderscoreReq = new Request('https://sonic.epocanvas.com/api/music/search', {
-      headers: { 'X-Sonic-Key': 'sonic_live_onlyonepart' },
-    });
-    const noUnderscoreRes = await verifyAuth(noUnderscoreReq, {});
-    assert(noUnderscoreRes.authenticated === false, 'Key with missing signature part is rejected');
+    const extraction = extractAuthCredentials(queryReq, { SONIC_SECRET: SECRET });
+    assert(extraction.apiKey === undefined, 'extractAuthCredentials omits query key by default');
   }
 
   console.log(`\n========================================`);
-  console.log(`Auth Compatibility Test Results: ${passed} passed, ${failed} failed`);
+  console.log(`Auth Test Results: ${passed} passed, ${failed} failed`);
   console.log(`========================================\n`);
 
-  if (failed > 0) {
-    process.exit(1);
-  }
+  if (failed > 0) process.exit(1);
 }
 
-runAuthTests().catch(err => {
+runAuthTests().catch((err) => {
   console.error('Fatal auth test error:', err);
   process.exit(1);
 });
