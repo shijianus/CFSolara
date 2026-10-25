@@ -5,9 +5,10 @@ import {
   checkEngineAccess,
   evaluateGatewayRateLimit,
 } from "./_lib/sonic/security";
+import { safeFetch, validateOutboundUrl } from "./_lib/sonic/net-guard";
 import type { AppEnv } from "./_lib/types";
 
-const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
+const KUWO_TARGET_HOSTS = ["kuwo.cn"];
 const SAFE_RESPONSE_HEADERS = [
   "content-type",
   "cache-control",
@@ -47,30 +48,9 @@ function handleOptions(): Response {
   });
 }
 
-function isAllowedKuwoHost(hostname: string): boolean {
-  if (!hostname) return false;
-  return KUWO_HOST_PATTERN.test(hostname);
-}
-
-function normalizeKuwoUrl(rawUrl: string): URL | null {
-  try {
-    const parsed = new URL(rawUrl);
-    if (!isAllowedKuwoHost(parsed.hostname)) {
-      return null;
-    }
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return null;
-    }
-    parsed.protocol = "https:";
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Response> {
-  const normalized = normalizeKuwoUrl(targetUrl);
-  if (!normalized) {
+async function proxyKuwoAudio(targetUrl: string, request: Request, env?: AppEnv): Promise<Response> {
+  const validation = validateOutboundUrl(targetUrl, env, { allowedHosts: KUWO_TARGET_HOSTS });
+  if (!validation.ok || !validation.url) {
     return new Response("Invalid target", { status: 400 });
   }
 
@@ -87,17 +67,25 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
     (init.headers as Record<string, string>)["Range"] = rangeHeader;
   }
 
-  const upstream = await fetch(normalized.toString(), init);
-  const headers = createCorsHeaders(upstream.headers);
-  if (!headers.has("Cache-Control")) {
-    headers.set("Cache-Control", "public, max-age=3600");
-  }
+  try {
+    const upstream = await safeFetch(validation.url, init, env, {
+      maxRedirects: 3,
+      timeoutMs: 60_000,
+      maxBytes: 256 * 1024 * 1024,
+    });
+    const headers = createCorsHeaders(upstream.headers);
+    if (!headers.has("Cache-Control")) {
+      headers.set("Cache-Control", "public, max-age=3600");
+    }
 
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers,
-  });
+    return new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers,
+    });
+  } catch {
+    return new Response("Upstream request failed", { status: 502 });
+  }
 }
 
 async function proxyApiRequest(url: URL, request: Request, env?: AppEnv): Promise<Response> {
@@ -231,7 +219,7 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
   const target = url.searchParams.get("target");
 
   if (target) {
-    return proxyKuwoAudio(target, request);
+    return proxyKuwoAudio(target, request, env);
   }
 
   return proxyApiRequest(url, request, env);

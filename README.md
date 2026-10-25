@@ -253,6 +253,18 @@ QQ_COOKIE=""
 KUGOU_COOKIE=""
 ```
 
+### 4. 出站代理与 SSRF 防护
+
+所有接受外部 URL 的代理（`/api/sonic/forward`、`/palette`、`/api/music/cover`、`/api/music/stream`、`/proxy`）统一走 `functions/_lib/sonic/net-guard.ts`：
+
+- **协议/端口/userinfo**：默认只允许 `https:`；端口仅 `80/443`；拒绝 `user:pass@`。确需 HTTP 时显式设置 `SONIC_ALLOW_HTTP_OUTBOUND=1`（不推荐）。
+- **主机/IP 规范化**：拒绝 `localhost`、`.local/.internal` 等内部域名，以及十进制/十六进制/八进制 IPv4、IPv4-mapped IPv6、回环、RFC1918、CGNAT、链路本地、云元数据、组播/保留地址、`nip.io` 之类 IP 回显域名。
+- **域名白名单**：音乐 CDN 目标使用精确主机或点分子域匹配（`host === d || host.endsWith('.' + d)`），不使用 `includes()`，`evil-music.com` 不会匹配 `music.com`。
+- **重定向**：`redirect: 'manual'`，最多 3 跳，每一跳重新做协议/端口/主机/白名单校验；禁止 HTTPS → HTTP 降级。
+- **请求/响应头**：代理请求只构造白名单头（UA/Referer/Range），不转发客户端 `Cookie` 或 `Authorization`；响应头只回传内容相关字段，避免上游 `Set-Cookie` 泄露。
+- **资源限制**：默认 15 秒超时；图片约 20MB、普通转发 64MB、音频流 256MB 上限（音频流超时 60 秒）。
+- **引擎侧**：Linux VPS 在分发前对 `url/target/image/id` 做 DNS 解析，任一解析结果落在内网/回环/链路本地地址即拒绝，降低 DNS rebinding 风险。注意解析与真正 `fetch` 之间仍存在极小的 TOCTOU 窗口。
+
 ### 4. 生产环境双轨回滚预案 (Rollback Guide)
 当发生极端故障需完整恢复至原始直连 VPS Tunnel 架构时，可运行内置回滚脚本：
 ```bash

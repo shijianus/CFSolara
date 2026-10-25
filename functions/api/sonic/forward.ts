@@ -12,8 +12,24 @@ import {
   checkEngineAccess,
   evaluateGatewayRateLimit,
   buildRateLimitErrorResponse,
-  isBlockedSsrfHost,
 } from '../../_lib/sonic/security';
+import {
+  OutboundError,
+  isHostAllowed,
+  safeFetch,
+  validateOutboundUrl,
+} from '../../_lib/sonic/net-guard';
+
+const SAFE_FORWARD_RESPONSE_HEADERS = [
+  'content-type',
+  'content-length',
+  'content-range',
+  'accept-ranges',
+  'etag',
+  'last-modified',
+  'expires',
+  'cache-control',
+];
 
 export async function onRequest({ request, env, waitUntil }: any): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -35,44 +51,61 @@ export async function onRequest({ request, env, waitUntil }: any): Promise<Respo
 
   // Case 1: External URL Proxy / Forwarding (e.g. lyrics URL, audio stream, covers)
   if (targetUrl) {
-    try {
-      const parsedTarget = new URL(targetUrl);
-      // Security safeguard: only forward public http and https hosts
-      if (
-        (parsedTarget.protocol !== 'http:' && parsedTarget.protocol !== 'https:') ||
-        isBlockedSsrfHost(parsedTarget.hostname)
-      ) {
-        return sonicError('INVALID_TARGET', 'Only public http/https URLs are permitted', 400, { provider: 'forward' });
-      }
+    const validation = validateOutboundUrl(targetUrl, env);
+    if (!validation.ok || !validation.url) {
+      return sonicError('INVALID_TARGET', 'Only public https URLs are permitted', 400, { provider: 'forward' });
+    }
 
+    const parsedTarget = validation.url;
+    try {
       const forwardHeaders = new Headers();
       forwardHeaders.set('User-Agent', SONIC_UA);
-      const h = parsedTarget.hostname.toLowerCase();
-      if (h.includes('gtimg.cn') || h.includes('qq.com')) forwardHeaders.set('Referer', 'https://y.qq.com/');
-      else if (h.includes('126.net') || h.includes('163.com')) forwardHeaders.set('Referer', 'https://music.163.com/');
-      else if (h.includes('kugou.com')) forwardHeaders.set('Referer', 'https://www.kugou.com/');
-      else if (h.includes('kuwo.cn')) forwardHeaders.set('Referer', 'https://www.kuwo.cn/');
+      const host = parsedTarget.hostname.toLowerCase();
+      if (isHostAllowed(host, ['gtimg.cn', 'qq.com'])) forwardHeaders.set('Referer', 'https://y.qq.com/');
+      else if (isHostAllowed(host, ['126.net', '163.com'])) forwardHeaders.set('Referer', 'https://music.163.com/');
+      else if (isHostAllowed(host, ['kugou.com'])) forwardHeaders.set('Referer', 'https://www.kugou.com/');
+      else if (isHostAllowed(host, ['kuwo.cn'])) forwardHeaders.set('Referer', 'https://www.kuwo.cn/');
 
       const range = request.headers.get('Range');
       if (range) forwardHeaders.set('Range', range);
 
-      const upstreamResp = await fetch(parsedTarget.toString(), {
-        headers: forwardHeaders,
-        redirect: 'follow',
-      });
+      // safeFetch revalidates every redirect, refuses HTTPS downgrades and
+      // strips caller cookies/authorization before contacting the target.
+      const upstreamResp = await safeFetch(
+        parsedTarget,
+        {
+          method: request.method === 'HEAD' ? 'HEAD' : 'GET',
+          headers: forwardHeaders,
+        },
+        env,
+        { maxRedirects: 3, timeoutMs: 15_000, maxBytes: 64 * 1024 * 1024 },
+      );
 
-      const responseHeaders = new Headers(upstreamResp.headers);
+      const responseHeaders = new Headers();
+      for (const name of SAFE_FORWARD_RESPONSE_HEADERS) {
+        const value = upstreamResp.headers.get(name);
+        if (value) responseHeaders.set(name, value);
+      }
       responseHeaders.set('Access-Control-Allow-Origin', '*');
       responseHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
       responseHeaders.set('X-Sonic-Forwarded', 'true');
+      if (!responseHeaders.has('Cache-Control')) {
+        responseHeaders.set('Cache-Control', 'public, max-age=300');
+      }
 
       return new Response(upstreamResp.body, {
         status: upstreamResp.status,
         statusText: upstreamResp.statusText,
         headers: responseHeaders,
       });
-    } catch (err: any) {
-      return sonicError('FORWARD_ERROR', err?.message || 'Failed to forward request to target', 502, {
+    } catch (err) {
+      if (err instanceof OutboundError) {
+        return sonicError('INVALID_TARGET', 'Target URL or redirect was rejected', 400, {
+          provider: 'forward',
+        });
+      }
+      console.error('[Sonic Forward] proxy error', err instanceof Error ? err.name : 'unknown');
+      return sonicError('FORWARD_ERROR', 'Failed to forward request to target', 502, {
         provider: 'forward',
       });
     }

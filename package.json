@@ -15,7 +15,9 @@
     "test:cover": "jiti scripts/test-cover-gateway.mjs",
     "lint:theme": "node scripts/lint-theme.mjs",
     "test:engine": "jiti scripts/test-local-engine-and-degradation.mjs",
-    "test": "jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs"
+    "test": "npm run typecheck && jiti scripts/test-sonic-gateway.mjs && jiti scripts/test-auth-compatibility.mjs && jiti scripts/test-cover-gateway.mjs && jiti scripts/test-local-engine-and-degradation.mjs && jiti scripts/test-security-hardening.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:security": "jiti scripts/test-security-hardening.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",

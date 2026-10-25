@@ -9,7 +9,8 @@ import { Readable } from 'node:stream';
 
 import type { AppEnv } from '../functions/_lib/types';
 import { checkEngineAccess } from '../functions/_lib/sonic/security';
-import { handleOptions } from '../functions/_lib/http';
+import { handleOptions, jsonResponse } from '../functions/_lib/http';
+import { validateEngineOutboundTarget } from './dns-guard';
 
 // Route handlers shared directly from `functions/`
 import { onRequest as handleProxy } from '../functions/proxy';
@@ -117,6 +118,37 @@ async function sendWebResponse(res: http.ServerResponse, webResp: Response, isHe
     res.end();
   });
   nodeStream.pipe(res);
+}
+
+const UNTRUSTED_URL_PARAM_NAMES = ['url', 'target', 'image'];
+
+async function guardUntrustedTargetParams(url: URL, env: AppEnv): Promise<Response | null> {
+  const candidates: string[] = [];
+  for (const name of UNTRUSTED_URL_PARAM_NAMES) {
+    const value = url.searchParams.get(name);
+    if (value) candidates.push(value);
+  }
+  // `/api/music/cover?id=https://...` treats the id as an image URL.
+  const id = url.searchParams.get('id');
+  if (id && /^https?:\/\//i.test(id)) candidates.push(id);
+
+  for (const candidate of candidates) {
+    if (candidate.length > 4096) {
+      return jsonResponse(
+        { brand: 'Sonic', error: { code: 'INVALID_TARGET', message: 'Outbound target is not allowed' } },
+        { status: 400 },
+      );
+    }
+    const result = await validateEngineOutboundTarget(candidate, env);
+    if (!result.ok) {
+      console.error(`[Sonic Engine] outbound target rejected (${result.reason})`);
+      return jsonResponse(
+        { brand: 'Sonic', error: { code: 'INVALID_TARGET', message: 'Outbound target is not allowed' } },
+        { status: 400 },
+      );
+    }
+  }
+  return null;
 }
 
 async function dispatchFunctionRoute(request: Request, env: AppEnv): Promise<Response | null> {
@@ -259,6 +291,12 @@ export function createSonicServer(staticRoot = path.resolve(process.cwd(), 'dist
         return;
       }
 
+      const targetDenied = await guardUntrustedTargetParams(new URL(webReq.url), env);
+      if (targetDenied) {
+        await sendWebResponse(res, targetDenied, webReq.method === 'HEAD');
+        return;
+      }
+
       const apiResp = await dispatchFunctionRoute(webReq, env);
       if (apiResp) {
         await sendWebResponse(res, apiResp, webReq.method === 'HEAD');
@@ -275,7 +313,7 @@ export function createSonicServer(staticRoot = path.resolve(process.cwd(), 'dist
         res.end(
           JSON.stringify({
             brand: 'Sonic',
-            error: { code: 'INTERNAL_ENGINE_ERROR', message: err?.message || 'Internal engine error' },
+            error: { code: 'INTERNAL_ENGINE_ERROR', message: 'Internal engine error' },
           }),
         );
       } else {

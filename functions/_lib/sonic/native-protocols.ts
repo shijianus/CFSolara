@@ -9,6 +9,7 @@ import { buildNeteaseEapiParams, buildNeteaseLinuxApiParams } from './crypto';
 import { normalizeArtistString, normalizeText } from './utils';
 import { getSonicCachedJson, putSonicCachedJson } from './cache';
 import { callLocalEngineJson, getLocalEngineCircuitSnapshot, type CircuitState } from './local-engine';
+import { safeFetch, validateOutboundUrl } from './net-guard';
 
 const DESKTOP_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -643,12 +644,19 @@ async function resolveKuwoSingleStream(
   }
 
   const finalUrl = toHttpsIfSafe(rawUrl);
+  const validation = validateOutboundUrl(finalUrl, env);
+  if (!validation.ok || !validation.url) return null;
+
   // Verify byte length via 1-byte Range probe to guarantee full-length real audio (>= 350 KB)
   try {
-    const probe = await fetch(finalUrl, {
-      headers: { Range: 'bytes=0-0', Referer: 'https://www.kuwo.cn/', 'User-Agent': DESKTOP_UA },
-      signal: AbortSignal.timeout(4000),
-    });
+    const probe = await safeFetch(
+      validation.url,
+      {
+        headers: { Range: 'bytes=0-0', Referer: 'https://www.kuwo.cn/', 'User-Agent': DESKTOP_UA },
+      },
+      env,
+      { maxRedirects: 2, timeoutMs: 4000, maxBytes: 1024 * 1024 },
+    );
     const cr = probe.headers.get('content-range') || '';
     const cl = probe.headers.get('content-length') || '';
     probe.body?.cancel?.().catch(() => {});
@@ -658,7 +666,7 @@ async function resolveKuwoSingleStream(
       return null;
     }
     return {
-      url: finalUrl,
+      url: validation.url.toString(),
       size: totalBytes,
       via: viaLabel(env, 'kuwo-antiserver'),
     };

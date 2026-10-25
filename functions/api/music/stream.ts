@@ -1,33 +1,14 @@
 import { corsHeaders, errorResponse, handleOptions, jsonResponse } from '../../_lib/http';
-import { isAllowedKuwoHost } from '../../_lib/music';
 import { resolvePlayableStream } from '../../_lib/sonic/native-protocols';
 import { getLocalEngineCircuitSnapshot } from '../../_lib/sonic/local-engine';
 import { checkEngineAccess, evaluateGatewayRateLimit, buildRateLimitErrorResponse } from '../../_lib/sonic/security';
+import { isHostAllowed, safeFetch, validateOutboundUrl } from '../../_lib/sonic/net-guard';
 import { getSonicConfig } from '../../_lib/sonic/config';
 import type { AppEnv } from '../../_lib/types';
 
-function sanitizeTargetUrl(rawUrl: string): URL | null {
-  try {
-    const parsed = new URL(rawUrl);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function isAllowedDirectTargetHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  return (
-    isAllowedKuwoHost(h) ||
-    h.endsWith('.music.126.net') ||
-    h.endsWith('.163.com') ||
-    h.endsWith('.qq.com') ||
-    h.endsWith('.kugou.com')
-  );
-}
+// Explicit allow-list for caller-supplied stream targets. Exact host or a
+// dotted subdomain matches; `includes()` is never used for security decisions.
+const STREAM_TARGET_HOSTS = ['kuwo.cn', 'music.126.net', '163.com', 'qq.com', 'kugou.com'];
 
 export async function onRequest({ request, env }: { request: Request; env: AppEnv }): Promise<Response> {
   if (request.method === 'OPTIONS') return handleOptions();
@@ -54,12 +35,13 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   let circuitState: string | undefined;
 
   if (targetParam) {
-    targetUrl = sanitizeTargetUrl(targetParam);
-    if (!targetUrl || !isAllowedDirectTargetHost(targetUrl.hostname)) {
+    const validation = validateOutboundUrl(targetParam, env, { allowedHosts: STREAM_TARGET_HOSTS });
+    if (!validation.ok || !validation.url) {
       return errorResponse('Invalid target URL', 400);
     }
-    if (targetUrl.hostname.includes('kuwo.cn')) resolvedReferer = 'https://www.kuwo.cn/';
-    if (targetUrl.hostname.includes('qq.com')) resolvedReferer = 'https://y.qq.com/';
+    targetUrl = validation.url;
+    if (isHostAllowed(targetUrl.hostname, ['kuwo.cn'])) resolvedReferer = 'https://www.kuwo.cn/';
+    if (isHostAllowed(targetUrl.hostname, ['qq.com'])) resolvedReferer = 'https://y.qq.com/';
   } else {
     const id = url.searchParams.get('id') || '';
     const source = url.searchParams.get('source') || 'netease';
@@ -144,10 +126,11 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
         );
       }
 
-      targetUrl = sanitizeTargetUrl(resolved.url);
-      if (!targetUrl) {
+      const resolvedValidation = validateOutboundUrl(resolved.url, env);
+      if (!resolvedValidation.ok || !resolvedValidation.url) {
         return errorResponse('解析到的音频流地址无效', 502);
       }
+      targetUrl = resolvedValidation.url;
 
       resolvedProvider = resolved.provider;
       resolvedVia = resolved.via;
@@ -187,9 +170,9 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     };
     if (resolvedReferer) {
       requestHeaders.Referer = resolvedReferer;
-    } else if (targetUrl.hostname.includes('kuwo.cn')) {
+    } else if (isHostAllowed(targetUrl.hostname, ['kuwo.cn'])) {
       requestHeaders.Referer = 'https://www.kuwo.cn/';
-    } else if (targetUrl.hostname.includes('qq.com')) {
+    } else if (isHostAllowed(targetUrl.hostname, ['qq.com'])) {
       requestHeaders.Referer = 'https://y.qq.com/';
     }
 
@@ -198,11 +181,15 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       requestHeaders.Range = rangeHeader;
     }
 
-    const upstream = await fetch(targetUrl.toString(), {
-      method: request.method,
-      headers: requestHeaders,
-      redirect: 'follow',
-    });
+    const upstream = await safeFetch(
+      targetUrl,
+      {
+        method: request.method,
+        headers: requestHeaders,
+      },
+      env,
+      { maxRedirects: 3, timeoutMs: 60_000, maxBytes: 256 * 1024 * 1024 },
+    );
 
     const headers = corsHeaders();
     const forwardHeaders = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified'];
@@ -237,6 +224,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
       headers,
     });
   } catch (err: any) {
-    return errorResponse(`音频数据流传输错误: ${err?.message || 'Proxy error'}`, 502);
+    console.error('[Sonic Stream] upstream proxy error', err instanceof Error ? err.name : 'unknown');
+    return errorResponse('音频数据流传输错误', 502);
   }
 }

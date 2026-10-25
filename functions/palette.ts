@@ -1,5 +1,6 @@
 import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
-import { checkEngineAccess, isBlockedSsrfHost } from "./_lib/sonic/security";
+import { checkEngineAccess } from "./_lib/sonic/security";
+import { OutboundError, safeFetch, validateOutboundUrl } from "./_lib/sonic/net-guard";
 import type { AppEnv } from "./_lib/types";
 
 const MAX_DIMENSION = 96;
@@ -384,22 +385,14 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
     });
   }
 
-  let target: URL;
-  try {
-    target = new URL(imageParam);
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid image URL" }), {
+  const validation = validateOutboundUrl(imageParam, env);
+  if (!validation.ok || !validation.url) {
+    return new Response(JSON.stringify({ error: "Only public https image URLs are allowed" }), {
       status: 400,
       headers: createJsonHeaders(400),
     });
   }
-
-  if ((target.protocol !== "http:" && target.protocol !== "https:") || isBlockedSsrfHost(target.hostname)) {
-    return new Response(JSON.stringify({ error: "Only public http/https image URLs are allowed" }), {
-      status: 400,
-      headers: createJsonHeaders(400),
-    });
-  }
+  const target = validation.url;
 
   const cache = typeof caches !== "undefined" ? (caches as any).default : null;
   const cacheKey = new Request(request.url, request);
@@ -412,27 +405,50 @@ export async function onRequest({ request, env }: { request: Request; env?: AppE
 
   let upstream: Response;
   try {
-    upstream = await fetch(target.toString(), {
-      cf: {
-        cacheTtl: 3600,
-        cacheEverything: true,
-        image: {
-          width: MAX_DIMENSION,
-          height: MAX_DIMENSION,
-          fit: "scale-down",
-          quality: 85,
-          format: "jpeg",
+    upstream = await safeFetch(
+      target,
+      {
+        cf: {
+          cacheTtl: 3600,
+          cacheEverything: true,
+          image: {
+            width: MAX_DIMENSION,
+            height: MAX_DIMENSION,
+            fit: "scale-down",
+            quality: 85,
+            format: "jpeg",
+          },
         },
       },
-    });
+      env,
+      { maxRedirects: 3, timeoutMs: 15_000, maxBytes: 20 * 1024 * 1024 },
+    );
   } catch (error) {
-    console.warn("Image resizing fetch failed, falling back to original", error);
-    upstream = await fetch(target.toString(), {
-      cf: {
-        cacheTtl: 3600,
-        cacheEverything: true,
-      },
-    });
+    if (error instanceof OutboundError) {
+      return new Response(JSON.stringify({ error: "Image URL or redirect was rejected" }), {
+        status: 400,
+        headers: createJsonHeaders(400),
+      });
+    }
+    console.warn("Image resizing fetch failed, falling back to original", error instanceof Error ? error.name : "unknown error");
+    try {
+      upstream = await safeFetch(
+        target,
+        {
+          cf: {
+            cacheTtl: 3600,
+            cacheEverything: true,
+          },
+        },
+        env,
+        { maxRedirects: 3, timeoutMs: 15_000, maxBytes: 20 * 1024 * 1024 },
+      );
+    } catch (fallbackError) {
+      return new Response(JSON.stringify({ error: "Failed to fetch image" }), {
+        status: fallbackError instanceof OutboundError ? 400 : 502,
+        headers: createJsonHeaders(fallbackError instanceof OutboundError ? 400 : 502),
+      });
+    }
   }
 
   if (!upstream.ok) {
