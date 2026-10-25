@@ -25,6 +25,7 @@ import {
 import { formatCoverUrl } from '@/utils/imageUrl'
 import { useAudio } from '@/composables/useAudio'
 import type { Song as StoreSong } from '@/stores/interface'
+import SmartDiscoverySection from '@/components/Recommend/SmartDiscoverySection.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -195,6 +196,10 @@ watch(prefersReduced, syncAutoplay)
             </SwiperSlide>
           </Swiper>
         </section>
+
+        <div class="mb-6 px-4">
+          <SmartDiscoverySection :compact="true" />
+        </div>
 
         <section class="mb-6 px-4">
           <div class="mb-4 flex items-center justify-between">

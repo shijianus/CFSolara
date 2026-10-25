@@ -2,15 +2,40 @@
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/Ui/Button.vue'
 import { useDialogA11y } from '@/composables/useDialogA11y'
+import { useRecommendStore } from '@/stores/modules/recommend'
 import { useToastStore } from '@/stores/modules/toast'
 import { deleteMusicDatabase } from '@/utils/indexedDB'
 
 const { t } = useI18n()
 const toastStore = useToastStore()
+const recommendStore = useRecommendStore()
 
 const confirmOpen = ref(false)
 const isClearing = ref(false)
+const isClearingRecommend = ref(false)
 const dialogRef = ref<HTMLElement | null>(null)
+
+const handleTogglePersonalization = () => {
+  recommendStore.setPersonalizationEnabled(!recommendStore.personalizationEnabled)
+}
+
+const handleToggleAutoDj = () => {
+  recommendStore.autoDjEnabled = !recommendStore.autoDjEnabled
+}
+
+const handleClearRecommendProfile = async () => {
+  if (isClearingRecommend.value) return
+  isClearingRecommend.value = true
+  try {
+    await recommendStore.clearAllRecommendationProfile()
+    toastStore.show({
+      message: t('recommend.privacy.recommendProfileCleared'),
+      type: 'success',
+    })
+  } finally {
+    isClearingRecommend.value = false
+  }
+}
 
 const closeConfirm = () => {
   if (isClearing.value) return
@@ -26,6 +51,9 @@ useDialogA11y({
 const clearAllLocalData = async () => {
   if (isClearing.value) return
   isClearing.value = true
+  try {
+    await recommendStore.clearAllRecommendationProfile()
+  } catch {}
   try {
     localStorage.clear()
     sessionStorage.clear()
@@ -72,6 +100,83 @@ const clearAllLocalData = async () => {
         </dd>
       </div>
     </dl>
+
+    <!-- 智能搜索与推荐隐私开关 -->
+    <div class="border-glass space-y-3 border-t pt-4">
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <div class="text-primary text-xs font-semibold">
+            {{ t('recommend.privacy.personalizationTitle') }}
+          </div>
+          <p class="text-primary/55 mt-0.5 text-xs leading-relaxed">
+            {{ t('recommend.privacy.personalizationDesc') }}
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="recommendStore.personalizationEnabled"
+          @click="handleTogglePersonalization"
+          class="border-glass relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors"
+          :class="
+            recommendStore.personalizationEnabled
+              ? 'bg-sky-500/40'
+              : 'bg-[var(--glass-bg-overlay)]'
+          "
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-sky-400 transition-transform"
+            :class="recommendStore.personalizationEnabled ? 'translate-x-5' : 'translate-x-1'"
+          />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <div class="text-primary text-xs font-semibold">
+            {{ t('recommend.privacy.autoDjTitle') }}
+          </div>
+          <p class="text-primary/55 mt-0.5 text-xs leading-relaxed">
+            {{ t('recommend.privacy.autoDjDesc') }}
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="recommendStore.autoDjEnabled"
+          @click="handleToggleAutoDj"
+          class="border-glass relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors"
+          :class="
+            recommendStore.autoDjEnabled ? 'bg-sky-500/40' : 'bg-[var(--glass-bg-overlay)]'
+          "
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-sky-400 transition-transform"
+            :class="recommendStore.autoDjEnabled ? 'translate-x-5' : 'translate-x-1'"
+          />
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <span class="text-primary/55 text-xs">
+          {{
+            t('recommend.privacy.dislikedCountLabel', {
+              count: recommendStore.dislikedCount,
+            })
+          }}
+        </span>
+        <Button
+          variant="soft"
+          size="sm"
+          rounded="lg"
+          :loading="isClearingRecommend"
+          class="border-glass bg-hover-glass text-primary/80 hover:text-primary border px-3 py-1.5 text-xs"
+          @click="handleClearRecommendProfile"
+        >
+          {{ t('recommend.privacy.clearRecommendProfile') }}
+        </Button>
+      </div>
+    </div>
 
     <Button
       variant="ghost"

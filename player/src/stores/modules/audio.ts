@@ -22,6 +22,19 @@ let lastRetrySongId: string | number | null = null
 let lastRetryTime = 0
 /** 标记当前播放歌曲是否已触发过下一首预加载，避免重复发起 */
 let hasPreloadedNext = false
+/** 推荐行为追踪：记录当前歌曲是否已上报过起播与 50% 有效播放进度 */
+let playStartedSongId: string | number | null = null
+let progressReportedSongId: string | number | null = null
+
+function emitRecommendPlaybackEvent(payload: any) {
+  import('./recommend')
+    .then(({ useRecommendStore }) => {
+      try {
+        useRecommendStore().recordEvent(payload)
+      } catch {}
+    })
+    .catch(() => {})
+}
 
 type PlaybackErrorKind = 'network' | 'source' | 'copyright'
 
@@ -340,6 +353,26 @@ export const useAudioStore = defineStore('audio', {
         this.audio.isLoading = false
         this.audio.isPlaying = true
         this.audio.isPaused = false
+
+        const s = this.audio.currentSong
+        if (s && !s.isLocal && playStartedSongId !== s.id) {
+          playStartedSongId = s.id
+          const durSec = Math.round(
+            audio.duration || (s.duration ? s.duration / 1000 : 0)
+          )
+          emitRecommendPlaybackEvent({
+            type: 'play_start',
+            track: {
+              id: s.id,
+              title: s.name,
+              artist: s.artist,
+              album: s.album,
+              duration: durSec > 0 ? durSec : undefined,
+              cover: s.cover,
+              streamType: s.streamType,
+            },
+          })
+        }
       })
 
       // 网络数据获取停滞
@@ -352,6 +385,32 @@ export const useAudioStore = defineStore('audio', {
         const cur = audio.currentTime || 0
         this.audio.currentTime = cur
         const dur = audio.duration || 0
+        // 达到 50% 播放进度（或播放满 45 秒）上报一次有效播放进度信号
+        const s = this.audio.currentSong
+        if (
+          s &&
+          !s.isLocal &&
+          dur > 20 &&
+          (cur / dur >= 0.5 || cur >= 45) &&
+          progressReportedSongId !== s.id
+        ) {
+          progressReportedSongId = s.id
+          emitRecommendPlaybackEvent({
+            type: 'play_progress',
+            track: {
+              id: s.id,
+              title: s.name,
+              artist: s.artist,
+              album: s.album,
+              duration: Math.round(dur),
+              cover: s.cover,
+              streamType: s.streamType,
+            },
+            playedSeconds: Math.round(cur),
+            durationSeconds: Math.round(dur),
+            progressRatio: Number(Math.min(1, cur / dur).toFixed(2)),
+          })
+        }
         // 主动预判：当播放剩余时间少于 15 秒且非重复触发时，后台静默预解析下一首歌曲地址
         if (dur > 25 && dur - cur < 15 && !hasPreloadedNext) {
           hasPreloadedNext = true
@@ -545,6 +604,8 @@ export const useAudioStore = defineStore('audio', {
         // 切歌时复位进度到开头，强制更新音频源，并重置预加载状态
         if (isSwitchingSong) {
           hasPreloadedNext = false
+          playStartedSongId = null
+          progressReportedSongId = null
           audio.currentTime = 0
           this.audio.currentTime = 0
         }
@@ -599,7 +660,29 @@ export const useAudioStore = defineStore('audio', {
       let nextIndex = this.audio.currentIndex + 1
       if (nextIndex >= this.audio.playlist.length) {
         if (this.audio.playMode === PlayMode.LIST) {
-          nextIndex = 0
+          // 若启用了 Auto DJ 自动连续电台，在最后一首即将结束时静默续接相似推荐曲目
+          try {
+            const { useRecommendStore } = await import('./recommend')
+            const recStore = useRecommendStore()
+            if (recStore.autoDjEnabled && this.audio.currentSong) {
+              const moreSongs = await recStore.fetchAutoDjNextSongs(this.audio.currentSong, 5)
+              const existingIds = new Set(this.audio.playlist.map((s) => String(s.id)))
+              const fresh = moreSongs.filter((s) => !existingIds.has(String(s.id)))
+              if (fresh.length > 0) {
+                this.audio.playlist.push(...fresh)
+                if (this.audio.originalPlaylist.length > 0) {
+                  this.audio.originalPlaylist.push(...fresh)
+                }
+                nextIndex = this.audio.currentIndex + 1
+              } else {
+                nextIndex = 0
+              }
+            } else {
+              nextIndex = 0
+            }
+          } catch {
+            nextIndex = 0
+          }
         } else {
           return
         }
@@ -714,6 +797,38 @@ export const useAudioStore = defineStore('audio', {
     nextSong(isAutoEnd = false) {
       if (this.audio.playlist.length === 0) return
 
+      // 手动切歌时：仅在播放正常（非缓冲卡顿、非报错、非试听受限）且收听不足 25s 时记录一次用户跳过信号
+      if (!isAutoEnd && this.audio.currentSong && !this.audio.currentSong.isLocal) {
+        const cur = this.audio.audio?.currentTime || this.audio.currentTime || 0
+        const dur =
+          this.audio.audio?.duration ||
+          this.audio.duration ||
+          (this.audio.currentSong.duration ? this.audio.currentSong.duration / 1000 : 0)
+        if (
+          cur > 0.5 &&
+          cur < 25 &&
+          !this.audio._isWaiting &&
+          !this.audio.error &&
+          this.audio.currentSong.streamType !== 'trial'
+        ) {
+          emitRecommendPlaybackEvent({
+            type: 'skip',
+            reason: 'user_skip',
+            track: {
+              id: this.audio.currentSong.id,
+              title: this.audio.currentSong.name,
+              artist: this.audio.currentSong.artist,
+              album: this.audio.currentSong.album,
+              duration: dur > 0 ? Math.round(dur) : undefined,
+              cover: this.audio.currentSong.cover,
+            },
+            playedSeconds: Math.round(cur),
+            durationSeconds: dur > 0 ? Math.round(dur) : undefined,
+            progressRatio: dur > 0 ? Number((cur / dur).toFixed(2)) : undefined,
+          })
+        }
+      }
+
       let nextIndex = this.audio.currentIndex
 
       // 如果是单曲播放结束触发的自动切歌，单曲循环模式下重播当前歌曲
@@ -791,8 +906,26 @@ export const useAudioStore = defineStore('audio', {
 
     // 处理歌曲播放结束
     handleSongEnd() {
-      // 试听片段播放完毕：不静默跳歌，明确提示用户
-      if (this.audio.currentSong?.streamType === 'trial') {
+      const s = this.audio.currentSong
+      const dur =
+        this.audio.audio?.duration ||
+        this.audio.duration ||
+        (s?.duration ? s.duration / 1000 : 0)
+
+      // 试听片段播放完毕：不静默跳歌，明确提示用户，且标记 reason='trial_end' 不计入负向反馈
+      if (s?.streamType === 'trial') {
+        emitRecommendPlaybackEvent({
+          type: 'skip',
+          reason: 'trial_end',
+          track: {
+            id: s.id,
+            title: s.name,
+            artist: s.artist,
+            album: s.album,
+            duration: dur > 0 ? Math.round(dur) : undefined,
+            streamType: 'trial',
+          },
+        })
         const toastStore = useToastStore()
         toastStore.show({
           message: i18n.global.t('player.trialEnded'),
@@ -800,6 +933,24 @@ export const useAudioStore = defineStore('audio', {
           duration: 5000,
         })
         return
+      }
+
+      if (s && !s.isLocal) {
+        emitRecommendPlaybackEvent({
+          type: this.audio.playMode === PlayMode.SINGLE ? 'replay' : 'play_complete',
+          track: {
+            id: s.id,
+            title: s.name,
+            artist: s.artist,
+            album: s.album,
+            duration: dur > 0 ? Math.round(dur) : undefined,
+            cover: s.cover,
+            streamType: s.streamType,
+          },
+          playedSeconds: dur > 0 ? Math.round(dur) : undefined,
+          durationSeconds: dur > 0 ? Math.round(dur) : undefined,
+          progressRatio: 1,
+        })
       }
 
       switch (this.audio.playMode) {

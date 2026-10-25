@@ -14,17 +14,21 @@ import {
   type PlaylistData,
 } from '@/utils/transformers'
 import { formatCoverUrl } from '@/utils/imageUrl'
+import { fetchRecommendSimilar, type RecommendSongItem } from '@/api/recommend'
+import { useRecommendStore } from '@/stores/modules/recommend'
 
 const route = useRoute()
 const router = useRouter()
 const songId = computed(() => route.params.id as string | number)
 const { mergedLines, fetchLyrics } = useLyrics()
 const { play, pause, resume, setPlaylist, currentSong, isPlaying } = useAudio()
+const recommendStore = useRecommendStore()
 const showComments = ref(false)
 
 const state = reactive({
   info: null as any,
-  similarSongs: [] as SongData[],
+  similarSongs: [] as RecommendSongItem[],
+  similarArtists: [] as string[],
   similarPlaylists: [] as PlaylistData[],
 })
 
@@ -73,6 +77,24 @@ const isCurrent = computed(() => {
   return String(state.info.id) === String(currentSong.value.id)
 })
 
+const startCurrentRadio = async () => {
+  if (!state.info) return
+  await recommendStore.startSongRadio({
+    id: state.info.id,
+    name: state.info.name,
+    artist: artistName.value,
+    album: albumName.value,
+    duration: duration.value,
+    cover: albumCover.value,
+  })
+}
+
+const playSimilarAt = (song: RecommendSongItem, idx: number, e: Event) => {
+  e.stopPropagation()
+  setPlaylist(state.similarSongs as any, idx)
+  play(song as any, idx)
+}
+
 const loadInfo = async () => {
   try {
     const rawId = String(songId.value)
@@ -84,10 +106,32 @@ const loadInfo = async () => {
       ? song.ar.map((a: any) => a.name).join(' / ')
       : song?.artists?.map((a: any) => a.name).join(' / ')
 
-    // 搜索相似歌曲
-    const resSimSongs = await search({ keywords: artistNameVal || song?.name || '', type: 1 })
-    const { songs } = transformSearchSongs(resSimSongs as Record<string, unknown>, 12)
-    state.similarSongs = songs
+    // 优先通过智能内容相似度与共现引擎获取相似歌曲与相似歌手，失败时自动降级到关键词检索
+    let loadedSmartSim = false
+    try {
+      const simRes = await fetchRecommendSimilar(
+        {
+          trackId: rawId,
+          title: song?.name || '',
+          artist: artistNameVal || '',
+          album: song?.al?.name || song?.album?.name || '',
+          count: 12,
+        },
+        recommendStore.buildRequestHeaders(true)
+      )
+      if (simRes.tracks.length > 0) {
+        state.similarSongs = simRes.tracks
+        state.similarArtists = simRes.similarArtists
+        loadedSmartSim = true
+      }
+    } catch {}
+
+    if (!loadedSmartSim) {
+      const resSimSongs = await search({ keywords: artistNameVal || song?.name || '', type: 1 })
+      const { songs } = transformSearchSongs(resSimSongs as Record<string, unknown>, 12)
+      state.similarSongs = songs as RecommendSongItem[]
+      state.similarArtists = []
+    }
 
     // 搜索相关歌单
     const resSimPls = await search({ keywords: song?.name || '', type: 1000 })
@@ -182,6 +226,14 @@ watch(songId, () => loadInfo())
                 <span class="icon-[mdi--comment-outline] h-5 w-5"></span>
                 {{ $t('song.comments') }}
               </button>
+              <button
+                type="button"
+                class="glass-button hover:bg-hover-glass inline-flex items-center gap-2 px-5 py-3 text-[var(--glass-text-accent)] transition-colors"
+                @click="startCurrentRadio"
+              >
+                <span class="icon-[mdi--radio-tower] h-5 w-5"></span>
+                {{ $t('recommend.actions.startRadio') }}
+              </button>
             </div>
           </div>
         </div>
@@ -217,9 +269,24 @@ watch(songId, () => loadInfo())
           <div class="space-y-6">
             <div v-if="state.similarSongs.length" class="glass-card overflow-hidden rounded-2xl">
               <div class="border-b border-white/10 px-6 py-4">
-                <h2 class="text-lg font-semibold">{{ $t('song.similarSongs') }}</h2>
+                <h2 class="text-lg font-semibold">{{ $t('recommend.actions.similarSongs') }}</h2>
+                <div
+                  v-if="state.similarArtists.length"
+                  class="mt-2 flex flex-wrap items-center gap-1.5"
+                >
+                  <span class="text-primary/50 text-xs">{{ $t('recommend.actions.similarArtists') }}:</span>
+                  <button
+                    v-for="art in state.similarArtists"
+                    :key="art"
+                    type="button"
+                    @click="router.push({ path: '/search', query: { q: art } })"
+                    class="border-glass bg-hover-glass text-primary/75 hover:text-[var(--glass-text-accent)] rounded-full border px-2.5 py-0.5 text-[11px] transition-colors"
+                  >
+                    {{ art }}
+                  </button>
+                </div>
               </div>
-              <div class="custom-scrollbar max-h-[400px] overflow-y-auto">
+              <div class="custom-scrollbar max-h-[420px] overflow-y-auto">
                 <div
                   v-for="(song, index) in state.similarSongs"
                   :key="song.id"
@@ -232,7 +299,20 @@ watch(songId, () => loadInfo())
                       {{ song.name }}
                     </p>
                     <p class="text-primary/60 truncate text-xs">{{ song.artist }}</p>
+                    <p
+                      v-if="song.recommendReason"
+                      class="text-primary/45 mt-0.5 truncate text-[11px]"
+                    >
+                      {{ song.recommendReason }}
+                    </p>
                   </div>
+                  <button
+                    type="button"
+                    @click="playSimilarAt(song, index, $event)"
+                    class="text-primary/50 hover:text-[var(--glass-text-accent)] flex h-7 w-7 items-center justify-center rounded-lg"
+                  >
+                    <span class="icon-[mdi--play] h-4 w-4" />
+                  </button>
                   <span class="text-primary/40 text-xs">{{ formatDuration(song.duration) }}</span>
                 </div>
               </div>

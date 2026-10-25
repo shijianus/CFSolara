@@ -101,6 +101,23 @@ export const useLibraryStore = defineStore('library', {
       const idx = this.likedSongs.findIndex((s: LikedSongItem) => sameId(s.id, song.id))
       if (idx !== -1) {
         this.likedSongs.splice(idx, 1)
+        import('./recommend')
+          .then(({ useRecommendStore }) => {
+            try {
+              useRecommendStore().recordEvent({
+                type: 'unfavorite',
+                track: {
+                  id: song.id,
+                  title: song.name,
+                  artist: song.artist,
+                  album: song.album,
+                  duration: song.duration ? Math.round(song.duration / 1000) : undefined,
+                  cover: song.cover,
+                },
+              })
+            } catch {}
+          })
+          .catch(() => {})
         return false
       }
       this.likedSongs.unshift({
@@ -113,6 +130,23 @@ export const useLibraryStore = defineStore('library', {
         mvId: song.mvId,
         likedAt: Date.now(),
       })
+      import('./recommend')
+        .then(({ useRecommendStore }) => {
+          try {
+            useRecommendStore().recordEvent({
+              type: 'favorite',
+              track: {
+                id: song.id,
+                title: song.name,
+                artist: song.artist,
+                album: song.album,
+                duration: song.duration ? Math.round(song.duration / 1000) : undefined,
+                cover: song.cover,
+              },
+            })
+          } catch {}
+        })
+        .catch(() => {})
       return true
     },
 

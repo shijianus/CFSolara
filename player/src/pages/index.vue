@@ -15,6 +15,7 @@ import HeroCard from '@/components/Ui/HeroCard.vue'
 import ArtistCard from '@/components/Ui/ArtistCard.vue'
 import MVCard from '@/components/Ui/MVCard.vue'
 import SongCard from '@/components/Ui/SongCard.vue'
+import SmartDiscoverySection from '@/components/Recommend/SmartDiscoverySection.vue'
 import {
   transformBanners,
   transformPlaylists,
@@ -218,6 +219,9 @@ onMounted(() => {
           </Swiper>
           <div class="home-pagination mt-4 flex justify-center gap-1.5"></div>
         </section>
+
+        <!-- ═══════ 智能推荐与音乐雷达 ═══════ -->
+        <SmartDiscoverySection />
 
         <!-- ═══════ 推荐歌单 ═══════ -->
         <section v-if="recommendPlaylists.length" v-scroll-in="{ direction: 'up', delay: 0.1 }">

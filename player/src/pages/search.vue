@@ -7,13 +7,16 @@ import PageSkeleton from '@/components/PageSkeleton.vue'
 import TabGroup from '@/components/Ui/TabGroup.vue'
 import Button from '@/components/Ui/Button.vue'
 import { searchHotDetail, searchDefault } from '@/api'
+import { fetchSmartSuggest, type SmartSuggestionItem } from '@/api/recommend'
 import { useGlobalStore } from '@/stores/modules/global'
+import { useRecommendStore } from '@/stores/modules/recommend'
 import { storeToRefs } from 'pinia'
 
 // 路由实例：读取/更新查询参数
 const route = useRoute()
 const router = useRouter()
 const globalStore = useGlobalStore()
+const recommendStore = useRecommendStore()
 const { searchHistory } = storeToRefs(globalStore)
 
 // 当前搜索关键词（来自路由查询参数）
@@ -38,6 +41,27 @@ const searchInput = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 const inputFocused = ref(false)
 const placeholder = ref('')
+const liveSuggestions = ref<SmartSuggestionItem[]>([])
+let suggestTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(searchInput, (val) => {
+  if (suggestTimer) clearTimeout(suggestTimer)
+  const term = val.trim()
+  if (!term) {
+    liveSuggestions.value = []
+    return
+  }
+  suggestTimer = setTimeout(async () => {
+    try {
+      const list = await fetchSmartSuggest(term, recommendStore.buildRequestHeaders(false))
+      if (searchInput.value.trim() === term) {
+        liveSuggestions.value = list
+      }
+    } catch {
+      liveSuggestions.value = []
+    }
+  }, 160)
+})
 
 const playAllSongs = () => {
   songsRef.value?.playAll()
@@ -323,6 +347,40 @@ const maxScore = computed(() => {
               >
                 <span class="icon-[mdi--magnify] h-3.5 w-3.5" />
                 {{ $t('common.search.label') }}
+              </button>
+            </div>
+
+            <!-- 智能实时补全建议下拉框 -->
+            <div
+              v-if="inputFocused && liveSuggestions.length > 0"
+              class="border-glass bg-[var(--glass-bg-overlay)] mt-2 overflow-hidden rounded-2xl border p-1.5 shadow-xl backdrop-blur-2xl"
+            >
+              <div class="text-primary/45 px-3 py-1 text-[11px] font-medium">
+                {{ $t('recommend.search.smartSuggestions') }}
+              </div>
+              <button
+                v-for="sug in liveSuggestions"
+                :key="`${sug.type}-${sug.text}`"
+                type="button"
+                @mousedown.prevent="doSearch(sug.text)"
+                class="hover:bg-hover-glass flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-xs transition-colors"
+              >
+                <div class="flex min-w-0 items-center gap-2">
+                  <span
+                    class="h-4 w-4 shrink-0 text-sky-400"
+                    :class="
+                      sug.type === 'artist'
+                        ? 'icon-[mdi--account-music-outline]'
+                        : sug.type === 'genre'
+                          ? 'icon-[mdi--tag-outline]'
+                          : 'icon-[mdi--music-note-outline]'
+                    "
+                  />
+                  <span class="text-primary truncate font-medium">{{ sug.text }}</span>
+                </div>
+                <span v-if="sug.subLabel" class="text-primary/45 shrink-0 text-[11px]">
+                  {{ sug.subLabel }}
+                </span>
               </button>
             </div>
           </div>
