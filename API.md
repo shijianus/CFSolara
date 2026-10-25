@@ -64,7 +64,7 @@
 
 ## 📡 细粒度模块化 API 接口列表
 
-所有接口均已配置全域 CORS (`Access-Control-Allow-Origin: *`)，前端或后端服务均可直接调用。
+所有接口均已配置全域 CORS (`Access-Control-Allow-Origin: *`)，前端或后端服务均可直接调用。特别说明：根索引接口 `GET /api` 同时输出顶层兼容字段 `brand: "Sonic"` 以及结构化品牌信息 `branding`（含 `wireBrand: "Sonic"`），保证历史存量监控与新版品牌契约双向兼容。
 
 ### 1. 跨站曲库搜索 (`GET /api/sonic/search/nexus` & `GET /api/music/search`)
 - **端点**：

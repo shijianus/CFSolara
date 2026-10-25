@@ -331,7 +331,7 @@ async function runTests() {
       env: {},
     });
     const idxJson = await idxRes.json();
-    assert(idxRes.status === 200 && idxJson?.branding?.wireBrand === 'Sonic', 'GET /api returns 200 Sonic index');
+    assert(idxRes.status === 200 && idxJson.brand === 'Sonic' && idxJson?.branding?.wireBrand === 'Sonic', 'GET /api returns 200 Sonic index');
 
     const loginStatusRes = await handleApiCatchAll({
       request: new Request('https://sonic.epocanvas.tech/api/login/status'),

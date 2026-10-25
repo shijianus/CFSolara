@@ -79,7 +79,7 @@ flowchart TD
 
 
 ### 统一响应结构
-所有 `/api/sonic/*` 接口遵循一致的顶层契约。`brand` 字段固定为 `"Sonic"`，用于兼容既有前端与第三方客户端：
+所有 `/api/sonic/*` 接口遵循一致的顶层契约。`brand` 字段固定为 `"Sonic"`，用于兼容既有前端与第三方客户端（根索引接口 `GET /api` 同时输出顶层 `brand: "Sonic"` 与结构化品牌信息 `branding`，保证历史存量监控与新契约双向兼容）：
 ```json
 {
   "brand": "Sonic",
