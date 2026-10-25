@@ -9,7 +9,13 @@ async function main() {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome',
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--autoplay-policy=no-user-gesture-required',
+      '--disable-features=AudioServiceOutOfProcess',
+    ],
   });
 
   try {
@@ -42,7 +48,8 @@ async function main() {
       };
 
       audioStore.setPlaylist([trialSong], 0);
-      await audioStore.playSong(trialSong, 0, true);
+      audioStore.playSong(trialSong, 0, true).catch(() => {});
+      await new Promise((r) => setTimeout(r, 800));
 
       return {
         currentSongName: audioStore.audio.currentSong?.name,
