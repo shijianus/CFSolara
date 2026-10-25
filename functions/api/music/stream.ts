@@ -47,6 +47,8 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
   let resolvedProvider = 'proxy-target';
   let resolvedVia = 'direct-param';
   let resolvedTrial = false;
+  let resolvedStreamType: 'full' | 'trial' | 'unavailable' = 'full';
+  let resolvedTrialDuration = 0;
   let resolvedReferer = '';
   let resolvedCorsSafe = false;
   let degraded = false;
@@ -118,9 +120,10 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
               status: 503,
               headers: {
                 'Cache-Control': 'no-store',
+                'X-Sonic-Stream-Type': 'unavailable',
                 'X-Sonic-Degraded': '1',
                 'X-Sonic-Circuit': snap.state,
-                'Access-Control-Expose-Headers': 'X-Sonic-Degraded, X-Sonic-Circuit, X-Sonic-Provider',
+                'Access-Control-Expose-Headers': 'X-Sonic-Stream-Type, X-Sonic-Degraded, X-Sonic-Circuit, X-Sonic-Provider',
               },
             },
           );
@@ -140,7 +143,14 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
               provider: 'none',
             },
           },
-          { status: 404, headers: { 'Cache-Control': 'no-store' } },
+          {
+            status: 404,
+            headers: {
+              'Cache-Control': 'no-store',
+              'X-Sonic-Stream-Type': 'unavailable',
+              'Access-Control-Expose-Headers': 'X-Sonic-Stream-Type',
+            },
+          },
         );
       }
 
@@ -151,7 +161,9 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
 
       resolvedProvider = resolved.provider;
       resolvedVia = resolved.via;
-      resolvedTrial = resolved.isTrial;
+      resolvedTrial = Boolean(resolved.isTrial || resolved.streamType === 'trial');
+      resolvedStreamType = resolved.streamType || (resolvedTrial ? 'trial' : 'full');
+      resolvedTrialDuration = resolved.trialDuration || (resolvedTrial ? 30 : 0);
       resolvedReferer = resolved.referer || '';
       resolvedCorsSafe = resolved.corsSafe;
       degraded = resolved.degraded;
@@ -173,8 +185,14 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     redirectHeaders.set('Cache-Control', 'private, max-age=300');
     redirectHeaders.set('X-Sonic-Provider', resolvedProvider);
     redirectHeaders.set('X-Sonic-Via', resolvedVia);
+    redirectHeaders.set('X-Sonic-Stream-Type', resolvedStreamType);
     if (resolvedTrial) redirectHeaders.set('X-Sonic-Stream-Trial', '1');
+    if (resolvedTrialDuration > 0) redirectHeaders.set('X-Sonic-Trial-Duration', String(resolvedTrialDuration));
     if (degraded) redirectHeaders.set('X-Sonic-Degraded', '1');
+    redirectHeaders.set(
+      'Access-Control-Expose-Headers',
+      'Location, X-Sonic-Provider, X-Sonic-Via, X-Sonic-Stream-Trial, X-Sonic-Stream-Type, X-Sonic-Trial-Duration, X-Sonic-Degraded',
+    );
     return new Response(null, { status: 302, headers: redirectHeaders });
   }
 
@@ -220,7 +238,9 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     headers.set('Cache-Control', 'public, max-age=600');
     headers.set('X-Sonic-Provider', resolvedProvider);
     headers.set('X-Sonic-Via', resolvedVia);
+    headers.set('X-Sonic-Stream-Type', resolvedStreamType);
     if (resolvedTrial) headers.set('X-Sonic-Stream-Trial', '1');
+    if (resolvedTrialDuration > 0) headers.set('X-Sonic-Trial-Duration', String(resolvedTrialDuration));
     if (degraded) {
       headers.set('X-Sonic-Degraded', '1');
       if (degradedReason) headers.set('X-Sonic-Degraded-Reason', encodeURIComponent(degradedReason));
@@ -228,7 +248,7 @@ export async function onRequest({ request, env }: { request: Request; env: AppEn
     if (circuitState) headers.set('X-Sonic-Circuit', circuitState);
     headers.set(
       'Access-Control-Expose-Headers',
-      'Content-Range, Content-Length, Accept-Ranges, Content-Type, X-Sonic-Provider, X-Sonic-Via, X-Sonic-Stream-Trial, X-Sonic-Degraded, X-Sonic-Circuit',
+      'Content-Range, Content-Length, Accept-Ranges, Content-Type, X-Sonic-Provider, X-Sonic-Via, X-Sonic-Stream-Trial, X-Sonic-Stream-Type, X-Sonic-Trial-Duration, X-Sonic-Degraded, X-Sonic-Circuit',
     );
 
     return new Response(upstream.body, {

@@ -6,7 +6,7 @@ import type { AppEnv, SongItem } from '../types';
 import type { SonicAttempt, SonicSearchTrack } from './types';
 import { getSonicConfig } from './config';
 import { buildNeteaseEapiParams, buildNeteaseLinuxApiParams } from './crypto';
-import { normalizeArtistString, normalizeText } from './utils';
+import { normalizeArtistString, normalizeText, normalizeCjkText, calcLevenshteinSimilarity } from './utils';
 import { getSonicCachedJson, putSonicCachedJson } from './cache';
 import { callLocalEngineJson, getLocalEngineCircuitSnapshot, type CircuitState } from './local-engine';
 
@@ -451,6 +451,8 @@ export interface ResolvedStreamInfo {
   provider: string;
   via: string;
   isTrial: boolean;
+  streamType?: 'full' | 'trial' | 'unavailable';
+  trialDuration?: number;
   br?: number;
   size?: number;
   contentType?: string;
@@ -505,9 +507,12 @@ async function resolveNeteaseSingleStream(
         const item = json?.data?.[0];
         if (item?.url && typeof item.url === 'string') {
           const type = String(item.type || '').toLowerCase();
+          const isTrial = Boolean(item.freeTrialInfo);
+          const trialDuration = isTrial && item.freeTrialInfo ? Math.max(0, (item.freeTrialInfo.end || 30) - (item.freeTrialInfo.start || 0)) : (isTrial ? 30 : undefined);
           return {
             url: toHttpsIfSafe(item.url),
-            isTrial: Boolean(item.freeTrialInfo),
+            isTrial,
+            trialDuration,
             br: typeof item.br === 'number' ? item.br : undefined,
             size: typeof item.size === 'number' ? item.size : undefined,
             contentType: type === 'flac' ? 'audio/flac' : 'audio/mpeg',
@@ -531,9 +536,12 @@ async function resolveNeteaseSingleStream(
   const item = eJson?.data?.[0];
   if (item?.url && typeof item.url === 'string') {
     const type = String(item.type || '').toLowerCase();
+    const isTrial = Boolean(item.freeTrialInfo);
+    const trialDuration = isTrial && item.freeTrialInfo ? Math.max(0, (item.freeTrialInfo.end || 30) - (item.freeTrialInfo.start || 0)) : (isTrial ? 30 : undefined);
     return {
       url: toHttpsIfSafe(item.url),
-      isTrial: Boolean(item.freeTrialInfo),
+      isTrial,
+      trialDuration,
       br: typeof item.br === 'number' ? item.br : undefined,
       size: typeof item.size === 'number' ? item.size : undefined,
       contentType: type === 'flac' ? 'audio/flac' : 'audio/mpeg',
@@ -667,19 +675,63 @@ async function resolveKuwoSingleStream(
   }
 }
 
-function titlesMatchStrictly(targetTitle: string, candidateTitle: string): boolean {
-  const a = normalizeText(targetTitle);
-  const b = normalizeText(candidateTitle);
-  if (!a || !b) return false;
-  return a === b || (a.length >= 2 && b.startsWith(a) && b.length <= a.length + 6);
+export async function probeStreamPhysicalQuality(
+  url: string,
+  referer?: string,
+  timeoutMs = 1500,
+): Promise<{ streamType: 'full' | 'trial' | 'unavailable'; totalBytes: number }> {
+  try {
+    const headers: Record<string, string> = {
+      Range: 'bytes=0-1023',
+      'User-Agent': DESKTOP_UA,
+    };
+    if (referer) headers.Referer = referer;
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
+    if (res.status === 200 || res.status === 206) {
+      const cr = res.headers.get('content-range') || '';
+      const cl = res.headers.get('content-length') || '';
+      const total = cr.includes('/') ? parseInt(cr.split('/')[1], 10) : parseInt(cl, 10);
+      const bytes = isNaN(total) ? 0 : total;
+      // Reject Kuwo fake 11s prompt audio (181,521 bytes)
+      if (bytes === 181521) {
+        return { streamType: 'unavailable', totalBytes: bytes };
+      }
+      // Official trial previews (30s~45s at 128kbps) are ~480KB - ~720KB (< 1MB)
+      if (bytes > 0 && bytes < 1000000) {
+        return { streamType: 'trial', totalBytes: bytes };
+      }
+      if (bytes >= 1000000) {
+        return { streamType: 'full', totalBytes: bytes };
+      }
+    }
+    return { streamType: 'unavailable', totalBytes: 0 };
+  } catch {
+    return { streamType: 'unavailable', totalBytes: 0 };
+  }
 }
 
-function artistsOverlap(targetArtist: string, candidateArtist: string): boolean {
+export function titlesMatchStrictly(targetTitle: string, candidateTitle: string): boolean {
+  const tNorm = normalizeCjkText(targetTitle);
+  const cNorm = normalizeCjkText(candidateTitle);
+  if (!tNorm || !cNorm) return false;
+
+  // Anti-mismatch keyword exclusions: candidate must not be live/remix/cover/accompaniment unless target was
+  const negativeKeywords = ['live', '现场', 'remix', '伴奏', 'instrumental', 'cover', '翻唱', 'dj'];
+  for (const kw of negativeKeywords) {
+    if (!tNorm.includes(kw) && cNorm.includes(kw)) {
+      return false;
+    }
+  }
+
+  if (tNorm === cNorm) return true;
+  if (cNorm.startsWith(tNorm) && cNorm.length <= tNorm.length + 4) return true;
+  return false;
+}
+
+export function artistsMatchStrictly(targetArtist: string, candidateArtist: string, minSimilarity = 0.85): boolean {
   if (!targetArtist) return true;
-  const aTokens = normalizeText(targetArtist).split(/\s+/).filter(Boolean);
-  const bNorm = normalizeText(candidateArtist);
-  if (aTokens.length === 0) return true;
-  return aTokens.some((tok) => tok.length >= 2 && bNorm.includes(tok)) || bNorm.includes(normalizeText(targetArtist));
+  const sim = calcLevenshteinSimilarity(targetArtist, candidateArtist);
+  return sim >= minSimilarity;
 }
 
 export interface ResolveStreamOptions {
@@ -819,6 +871,7 @@ export async function resolvePlayableStream(
             provider: pLabel,
             via: ne.via,
             isTrial: false,
+            streamType: 'full',
             br: ne.br,
             size: ne.size,
             contentType: ne.contentType,
@@ -844,6 +897,8 @@ export async function resolvePlayableStream(
               provider: pLabel,
               via: ne.via,
               isTrial: true,
+              streamType: 'trial',
+              trialDuration: ne.trialDuration || 30,
               br: ne.br,
               size: ne.size,
               contentType: ne.contentType,
@@ -860,12 +915,16 @@ export async function resolvePlayableStream(
       } else if (cleanSource === 'qq' && cfg.enableQq) {
         const qq = await resolveQQSingleStream(cleanId, env);
         if (qq?.url) {
+          const probe = await probeStreamPhysicalQuality(qq.url, 'https://y.qq.com/', 2000);
+          const isFull = probe.streamType === 'full';
           attempts.push({ provider: pLabel, via: qq.via, ok: true, ms: Date.now() - pStart });
           const out: ResolvedStreamInfo = {
             url: qq.url,
             provider: pLabel,
             via: qq.via,
-            isTrial: false,
+            isTrial: !isFull,
+            streamType: isFull ? 'full' : 'trial',
+            trialDuration: isFull ? undefined : 30,
             contentType: 'audio/mp4',
             referer: 'https://y.qq.com/',
             corsSafe: false,
@@ -874,20 +933,28 @@ export async function resolvePlayableStream(
             circuitState,
             attempts,
           };
-          if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
-          return out;
+          if (isFull) {
+            if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
+            return out;
+          } else if (allowTrial) {
+            trialCandidate = out;
+          }
         }
         attempts.push({ provider: pLabel, via: viaLabel(env, 'qq-vkey'), ok: false, ms: Date.now() - pStart, error: 'Empty vkey purl (region or VIP restricted)' });
       } else if (cleanSource === 'kugou' && cfg.enableKugou) {
         const kg = await resolveKugouSingleStream(cleanId, env);
         if (kg?.url) {
+          const probe = await probeStreamPhysicalQuality(kg.url, 'https://m.kugou.com/', 2000);
+          const isFull = probe.streamType === 'full' || (typeof kg.size === 'number' && kg.size >= 1000000);
           attempts.push({ provider: pLabel, via: kg.via, ok: true, ms: Date.now() - pStart });
           const out: ResolvedStreamInfo = {
             url: kg.url,
             provider: pLabel,
             via: kg.via,
-            isTrial: false,
-            size: kg.size,
+            isTrial: !isFull,
+            streamType: isFull ? 'full' : 'trial',
+            trialDuration: isFull ? undefined : 30,
+            size: probe.totalBytes || kg.size,
             contentType: 'audio/mpeg',
             corsSafe: true,
             degraded,
@@ -895,8 +962,12 @@ export async function resolvePlayableStream(
             circuitState,
             attempts,
           };
-          if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
-          return out;
+          if (isFull) {
+            if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
+            return out;
+          } else if (allowTrial) {
+            trialCandidate = out;
+          }
         }
         attempts.push({ provider: pLabel, via: viaLabel(env, 'kugou-playinfo'), ok: false, ms: Date.now() - pStart, error: 'Empty playInfo url (VIP or region restricted)' });
       } else if (cleanSource === 'kuwo' && cfg.enableKuwo) {
@@ -908,6 +979,7 @@ export async function resolvePlayableStream(
             provider: pLabel,
             via: kw.via,
             isTrial: false,
+            streamType: 'full',
             size: kw.size,
             contentType: 'audio/mpeg',
             referer: 'https://www.kuwo.cn/',
@@ -930,8 +1002,12 @@ export async function resolvePlayableStream(
   // 4. Legitimate Free-Catalog Cross-Platform Match (ONLY matches genuinely free full songs; never bypasses VIP DRM)
   const searchKeywords = [opts.title, opts.artist].filter(Boolean).join(' ').trim();
   if (cfg.enableFreeCrossMatch && searchKeywords && opts.title) {
+    const budgetMs = cfg.crossMatchBudgetMs;
+    const matchStart = Date.now();
+    const isBudgetExceeded = () => Date.now() - matchStart >= budgetMs;
+
     // 4a. Try NetEase free catalog (`fee=0/8`, non-trial) if primary wasn't NetEase
-    if (cleanSource !== 'netease' && cfg.enableNetease) {
+    if (cleanSource !== 'netease' && cfg.enableNetease && !isBudgetExceeded()) {
       const sStart = Date.now();
       const label = providerLabel('netease', env);
       try {
@@ -939,65 +1015,24 @@ export async function resolvePlayableStream(
         const match = neSearch.tracks.find(
           (t) =>
             titlesMatchStrictly(opts.title!, t.title) &&
-            artistsOverlap(opts.artist || '', t.artist) &&
-            (!opts.durationSec || !t.duration || Math.abs(t.duration - opts.durationSec) <= 6),
+            artistsMatchStrictly(opts.artist || '', t.artist, cfg.crossMatchArtistSimilarity) &&
+            (!opts.durationSec || !t.duration || Math.abs(t.duration - opts.durationSec) <= cfg.crossMatchDurationToleranceSec),
         );
         if (match) {
           const neStream = await resolveNeteaseSingleStream(match.platformId, quality, env);
           if (neStream?.url && !neStream.isTrial) {
-            attempts.push({ provider: label, via: `${neStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
-            const out: ResolvedStreamInfo = {
-              url: neStream.url,
-              provider: label,
-              via: `${neStream.via}:free-match`,
-              isTrial: false,
-              br: neStream.br,
-              size: neStream.size,
-              contentType: neStream.contentType,
-              corsSafe: true,
-              degraded,
-              degradedReason,
-              circuitState,
-              attempts,
-            };
-            if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
-            return out;
-          }
-        }
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No free full-length match' });
-      } catch (err: any) {
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
-      }
-    }
-
-    // 4b. Try Kugou genuinely free (`privilege=0`) tracks
-    if (cleanSource !== 'kugou' && cfg.enableKugou) {
-      const sStart = Date.now();
-      const label = providerLabel('kugou', env);
-      try {
-        const kgRes = await fetch(
-          `http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword=${encodeURIComponent(searchKeywords)}&page=1&pagesize=5&showtype=1`,
-          { headers: { 'User-Agent': DESKTOP_UA }, signal: AbortSignal.timeout(4000) },
-        );
-        if (kgRes.ok) {
-          const kgJson = (await kgRes.json()) as any;
-          const freeItem = (kgJson?.data?.info || []).find(
-            (it: any) =>
-              (it.privilege === 0 || it.privilege === 8) &&
-              titlesMatchStrictly(opts.title!, String(it.songname || '')) &&
-              artistsOverlap(opts.artist || '', String(it.singername || '')),
-          );
-          if (freeItem?.hash) {
-            const kgStream = await resolveKugouSingleStream(freeItem.hash, env);
-            if (kgStream?.url) {
-              attempts.push({ provider: label, via: `${kgStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
+            const probe = await probeStreamPhysicalQuality(neStream.url, undefined, 2000);
+            if (probe.streamType === 'full') {
+              attempts.push({ provider: label, via: `${neStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
               const out: ResolvedStreamInfo = {
-                url: kgStream.url,
+                url: neStream.url,
                 provider: label,
-                via: `${kgStream.via}:free-match`,
+                via: `${neStream.via}:free-match`,
                 isTrial: false,
-                size: kgStream.size,
-                contentType: 'audio/mpeg',
+                streamType: 'full',
+                br: neStream.br,
+                size: probe.totalBytes || neStream.size,
+                contentType: neStream.contentType,
                 corsSafe: true,
                 degraded,
                 degradedReason,
@@ -1009,39 +1044,99 @@ export async function resolvePlayableStream(
             }
           }
         }
-        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No free privilege=0 match' });
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No verified free full-length match' });
+      } catch (err: any) {
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
+      }
+    }
+
+    // 4b. Try Kugou genuinely free (`privilege=0`) tracks
+    if (cleanSource !== 'kugou' && cfg.enableKugou && !isBudgetExceeded()) {
+      const sStart = Date.now();
+      const label = providerLabel('kugou', env);
+      try {
+        const timeoutRemaining = Math.min(3000, Math.max(500, budgetMs - (Date.now() - matchStart)));
+        const kgRes = await fetch(
+          `http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword=${encodeURIComponent(searchKeywords)}&page=1&pagesize=5&showtype=1`,
+          { headers: { 'User-Agent': DESKTOP_UA }, signal: AbortSignal.timeout(timeoutRemaining) },
+        );
+        if (kgRes.ok) {
+          const kgJson = (await kgRes.json()) as any;
+          const freeItem = (kgJson?.data?.info || []).find(
+            (it: any) =>
+              (it.privilege === 0 || it.privilege === 8) &&
+              titlesMatchStrictly(opts.title!, String(it.songname || '')) &&
+              artistsMatchStrictly(opts.artist || '', String(it.singername || ''), cfg.crossMatchArtistSimilarity) &&
+              (!opts.durationSec || !it.duration || Math.abs(it.duration - opts.durationSec) <= cfg.crossMatchDurationToleranceSec),
+          );
+          if (freeItem?.hash) {
+            const kgStream = await resolveKugouSingleStream(freeItem.hash, env);
+            if (kgStream?.url) {
+              const probe = await probeStreamPhysicalQuality(kgStream.url, 'https://m.kugou.com/', 2000);
+              if (probe.streamType === 'full') {
+                attempts.push({ provider: label, via: `${kgStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
+                const out: ResolvedStreamInfo = {
+                  url: kgStream.url,
+                  provider: label,
+                  via: `${kgStream.via}:free-match`,
+                  isTrial: false,
+                  streamType: 'full',
+                  size: probe.totalBytes || kgStream.size,
+                  contentType: 'audio/mpeg',
+                  corsSafe: true,
+                  degraded,
+                  degradedReason,
+                  circuitState,
+                  attempts,
+                };
+                if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
+                return out;
+              }
+            }
+          }
+        }
+        attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: 'No verified free full-length match' });
       } catch (err: any) {
         attempts.push({ provider: label, via: viaLabel(env, 'free-match'), ok: false, ms: Date.now() - sStart, error: err?.message });
       }
     }
 
     // 4c. Try Kuwo verified free full-length tracks (rejects `/nf/resource/` 181KB clips!)
-    if (cleanSource !== 'kuwo' && cfg.enableKuwo) {
+    if (cleanSource !== 'kuwo' && cfg.enableKuwo && !isBudgetExceeded()) {
       const sStart = Date.now();
       const label = providerLabel('kuwo', env);
       try {
         const kwTracks = await searchKuwoNative(searchKeywords, 4, 1);
         for (const kt of kwTracks) {
-          if (titlesMatchStrictly(opts.title!, kt.title) && artistsOverlap(opts.artist || '', kt.artist)) {
+          if (isBudgetExceeded()) break;
+          if (
+            titlesMatchStrictly(opts.title!, kt.title) &&
+            artistsMatchStrictly(opts.artist || '', kt.artist, cfg.crossMatchArtistSimilarity) &&
+            (!opts.durationSec || !kt.duration || Math.abs(kt.duration - opts.durationSec) <= cfg.crossMatchDurationToleranceSec)
+          ) {
             const kwStream = await resolveKuwoSingleStream(kt.platformId, env);
             if (kwStream?.url) {
-              attempts.push({ provider: label, via: `${kwStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
-              const out: ResolvedStreamInfo = {
-                url: kwStream.url,
-                provider: label,
-                via: `${kwStream.via}:free-match`,
-                isTrial: false,
-                size: kwStream.size,
-                contentType: 'audio/mpeg',
-                referer: 'https://www.kuwo.cn/',
-                corsSafe: false,
-                degraded,
-                degradedReason,
-                circuitState,
-                attempts,
-              };
-              if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
-              return out;
+              const probe = await probeStreamPhysicalQuality(kwStream.url, 'https://www.kuwo.cn/', 2000);
+              if (probe.streamType === 'full') {
+                attempts.push({ provider: label, via: `${kwStream.via}:free-match`, ok: true, ms: Date.now() - sStart });
+                const out: ResolvedStreamInfo = {
+                  url: kwStream.url,
+                  provider: label,
+                  via: `${kwStream.via}:free-match`,
+                  isTrial: false,
+                  streamType: 'full',
+                  size: probe.totalBytes || kwStream.size,
+                  contentType: 'audio/mpeg',
+                  referer: 'https://www.kuwo.cn/',
+                  corsSafe: false,
+                  degraded,
+                  degradedReason,
+                  circuitState,
+                  attempts,
+                };
+                if (!opts.nocache) await putSonicCachedJson('stream-url-v1', cacheId, out, 480, 1200, env);
+                return out;
+              }
             }
           }
         }
@@ -1092,6 +1187,9 @@ export async function resolvePlayableStream(
   if (trialCandidate && allowTrial) {
     return {
       ...trialCandidate,
+      streamType: 'trial',
+      isTrial: true,
+      trialDuration: trialCandidate.trialDuration || 30,
       attempts,
     };
   }
@@ -1111,6 +1209,8 @@ export function sonicTrackToLegacySongItem(t: SonicSearchTrack): SongItem {
     urlId: t.urlId || t.platformId,
     coverUrl: t.coverUrl || t.cover,
     duration: t.duration,
+    sources: t.sources,
+    streamType: t.platform === 'netease' && (t as any).isVip ? 'trial' : 'full',
   };
 }
 

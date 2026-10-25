@@ -31,6 +31,10 @@ export interface SonicConfig {
   enableYtmusic: boolean;
   timeoutMs: number;
   engineTimeoutMs: number;
+  crossMatchDurationToleranceSec: number;
+  crossMatchArtistSimilarity: number;
+  crossMatchMaxConcurrency: number;
+  crossMatchBudgetMs: number;
 }
 
 export function isEnvEnabled(val: unknown, defaultValue = true): boolean {
@@ -71,5 +75,9 @@ export function getSonicConfig(env?: AppEnv): SonicConfig {
     enableYtmusic: isEnvEnabled(e.SONIC_ENABLE_YTMUSIC, false),
     timeoutMs: Math.max(1, parseInt(String(e.SONIC_TIMEOUT_MS || '8000'), 10) || 8000),
     engineTimeoutMs: Math.max(100, parseInt(String(e.SONIC_ENGINE_TIMEOUT_MS || '4500'), 10) || 4500),
+    crossMatchDurationToleranceSec: Math.max(1, parseInt(String(e.SONIC_CROSS_DURATION_TOLERANCE_SEC || '6'), 10) || 6),
+    crossMatchArtistSimilarity: Math.max(0.5, Math.min(1.0, parseFloat(String(e.SONIC_CROSS_ARTIST_SIMILARITY || '0.85')) || 0.85)),
+    crossMatchMaxConcurrency: Math.max(1, parseInt(String(e.SONIC_CROSS_CONCURRENCY || '2'), 10) || 2),
+    crossMatchBudgetMs: Math.max(500, parseInt(String(e.SONIC_CROSS_BUDGET_MS || '3000'), 10) || 3000),
   };
 }

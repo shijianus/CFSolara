@@ -62,6 +62,8 @@ export interface SongItem {
   urlId?: string;
   coverUrl?: string;
   duration?: number;
+  sources?: any[];
+  streamType?: 'full' | 'trial' | 'unavailable';
 }
 
 export type LyricSyncType = 'word' | 'line';

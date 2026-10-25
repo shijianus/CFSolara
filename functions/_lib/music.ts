@@ -57,6 +57,9 @@ export function normalizeTrack(raw: Record<string, any>, fallbackSource = 'netea
       : artist && artist !== '未知歌手'
         ? `/api/music/cover?artist=${encodeURIComponent(artist)}&source=${source}`
         : undefined,
+    duration: typeof raw.duration === 'number' ? raw.duration : (typeof raw.dt === 'number' ? Math.round(raw.dt / 1000) : undefined),
+    sources: Array.isArray(raw.sources) ? raw.sources : undefined,
+    streamType: raw.streamType,
   };
 }
 

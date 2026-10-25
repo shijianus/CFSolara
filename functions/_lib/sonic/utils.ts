@@ -148,6 +148,56 @@ export function normalizeText(text: string): string {
     .trim();
 }
 
+// Common traditional/simplified & Japanese Shinjitai variant map for CJK normalization
+const CJK_CANONICAL_MAP: Record<string, string> = {
+  '橋': '桥', '國': '国', '廣': '广', '樂': '乐', '葉': '叶', '華': '华',
+  '飛': '飞', '龍': '龙', '戀': '恋', '聽': '听', '邊': '边', '體': '体',
+  '聲': '声', '齊': '齐', '雲': '云', '電': '电', '頭': '头', '點': '点',
+  '風': '风', '餘': '余', '飯': '饭', '飾': '饰', '養': '养', '館': '馆',
+  '馬': '马', '驗': '验', '鳥': '鸟', '鳴': '鸣', '黃': '黄', '臺': '台',
+  '愛': '爱', '遠': '远', '會': '会', '學': '学', '發': '发', '無': '无',
+  '萬': '万', '過': '过', '進': '进', '開': '开', '關': '关', '時': '时',
+  '間': '间', '機': '机', '長': '长', '門': '门', '問': '问', '見': '见',
+  '寶': '宝', '書': '书', '動': '动', '車': '车', '東': '东',
+  '紅': '红', '藍': '蓝', '綠': '绿', '櫻': '樱', '闊': '阔',
+};
+
+export function normalizeCjkText(text: string): string {
+  let s = String(text || '').normalize('NFKC').toLowerCase();
+  for (const [k, v] of Object.entries(CJK_CANONICAL_MAP)) {
+    s = s.replaceAll(k.toLowerCase(), v);
+  }
+  return s
+    .replace(/[\s\-_—·・•.,!?'"`()[\]{}<>《》「」【】~:：;；，,。/\\|]/g, '')
+    .trim();
+}
+
+export function calcLevenshteinSimilarity(a: string, b: string): number {
+  const normA = normalizeCjkText(a);
+  const normB = normalizeCjkText(b);
+  if (!normA && !normB) return 1.0;
+  if (!normA || !normB) return 0.0;
+  if (normA === normB) return 1.0;
+  if (normA.includes(normB) || normB.includes(normA)) return 0.95;
+
+  const m = normA.length;
+  const n = normB.length;
+  const d: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) d[i][0] = i;
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = normA[i - 1] === normB[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+    }
+  }
+
+  const dist = d[m][n];
+  const maxLen = Math.max(m, n);
+  return Math.max(0, 1 - dist / maxLen);
+}
+
 export function normalizeArtistString(artist: unknown): string {
   if (Array.isArray(artist)) {
     return artist
