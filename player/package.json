@@ -79,6 +79,10 @@
     "pnpm": ">=10"
   },
   "pnpm": {
+    "overrides": {
+      "braces": ">=3.0.3",
+      "music-metadata": ">=11.15.0"
+    },
     "onlyBuiltDependencies": [
       "esbuild",
       "@parcel/watcher"
