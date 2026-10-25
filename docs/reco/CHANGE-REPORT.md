@@ -9,7 +9,9 @@
 
 ## 1. 变更概述与交付范围
 
-本次变更实现了 CFSolara 的智能音乐推荐与多源聚合搜索引擎体系，全面达成了需求中的核心目标（目标 A~E）。系统在保留 CFSolara 现有全网多平台聚合播放能力的前提下，引入了具备自适应学习、无侵入降级、隐私友好和极低资源开销（纯 CPU VPS 内存 < 120MB，推荐 P95 < 15ms，搜索 P95 < 10ms）的轻量级工业级引擎。
+本次变更实现了 CFSolara 的智能音乐推荐与多源聚合搜索引擎体系，达成了需求中的核心目标（目标 A~E）。系统在保留 CFSolara 现有全网多平台聚合播放能力的前提下，引入了具备自适应学习、无侵入降级、隐私友好和低资源开销的轻量级引擎。
+
+> **诚实性备注（独立复核后修订）**：性能与效果数字来自 58 首合成种子曲库 + `:memory:` SQLite 的离线基准（单机实测推荐 P95 ≈ 12~22ms、RSS ≈ 102~118MB，随机器浮动），只能证明代码行为正确，不能外推为真实生产推荐效果；"工业级"表述过头，已删除。
 
 ---
 
@@ -27,14 +29,15 @@
 - **搜索后真实行为转化**: 区分纯搜索点击与有效播放/收藏，仅将高价值行为沉淀入长期偏好档案。
 
 ### 目标 C：真实播放行为反馈与 Auto DJ (Behavior Feedback & Seamless Radio)
-- **多级行为信号建模**:
-  - `play_start` (基础探索, 权重 0.2)
-  - `play_30s` (有效收听, 权重 0.6)
-  - `play_complete` (强正向信号, 权重 1.0)
-  - `favorite` (极强偏好, 权重 1.8)
-  - `skip` (<15s 快速跳过, 弱负向惩罚 -0.4，需结合网络状态排除加载失败)
+- **多级行为信号建模**（权重以 `engine.ts computeEventCredibilityWeight` 为准）:
+  - `play_start` (基础探索, 权重 0.35)
+  - `play_progress` (有效收听, 权重 0.2~1.8，按收听比例分档)
+  - `play_complete` (强正向信号, 权重 2.5)
+  - `replay` (复播, 权重 3.5)
+  - `favorite` (极强偏好, 权重 4.0)
+  - `skip` (快速跳过 -0.8 / 听过半后切歌 +0.25；网络卡顿/播放失败/试听截断等非用户原因跳过权重恒为 0，不入库)
   - `dislike` (明确拒绝, 硬过滤加入黑名单 -5.0)
-- **智能 Auto DJ 连续流**: 基于当前收听上下文、用户即时喜好与种子歌曲特征，动态生成平滑过渡的下一首推荐队列。
+- **智能 Auto DJ 连续流**: 基于当前收听上下文、用户即时喜好与种子歌曲特征，动态生成平滑过渡的下一首推荐队列（开关位于 设置 → 隐私与推荐数据）。
 
 ### 目标 D：音乐属性内容推荐与 MMR 重排 (Content-Based & Diversity)
 - **多维属性特征工程**: 基于歌手、流派、语言、发布年份与音频元数据构建特征向量。
@@ -105,19 +108,14 @@
 
 ### (1) 引擎打包构建
 ```bash
-$ npm run build:engine
-CLI Building entry: server/index.ts
-CLI Using tsconfig: tsconfig.json
-CLI tsup v8.5.1
-CLI Using tslib v2.8.1
-CLI Target: es2022
-CLI Cleaning output folder
-CLI ESM Build start
-CLI dist-server/index.mjs  676.80 KB
-CLI ESM ⚡️ Build success in 85ms
+$ npm run build:engine   # esbuild 打包（注意：esbuild 不在 package.json 依赖中，需 npm i --no-save esbuild@0.25.4，Dockerfile 内已自带）
+
+  dist-server\index.mjs  676.8kb
+
+Done in 155ms
 ```
 - **退出状态**: `0`
-- **结果**: 引擎构建成功，产物体积仅 676.8 KB。
+- **结果**: 引擎构建成功，产物体积约 676.8 KB。
 
 ### (2) 多语言国际化键位完整性检查
 ```bash
@@ -135,21 +133,20 @@ Total missing keys: 0
 ### (3) 前端单元与组件测试
 ```bash
 $ pnpm --dir player test
-✓ src/tests/crypto.test.ts (2 tests)
-✓ src/tests/lrc.test.ts (4 tests)
-✓ src/tests/playerQueue.test.ts (7 tests)
-✓ tests/recommendStore.test.ts (5 tests)
-✓ src/tests/utils.test.ts (3 tests)
-✓ src/tests/playHistory.test.ts (6 tests)
-✓ src/tests/formatDuration.test.ts (4 tests)
+ ✓ tests/audioQuality.test.ts (2 tests)
+ ✓ tests/libraryStore.test.ts (7 tests)
+ ✓ tests/localMusicUndo.test.ts (1 test)     # 需 music-metadata override 收窄至 ^7（见 review/fixes 8f2c916）
+ ✓ tests/playbackErrors.test.ts (3 tests)
+ ✓ tests/queueIntegration.test.ts (6 tests)
+ ✓ tests/recommendStore.test.ts (6 tests)
+ ✓ tests/transformers.test.ts (8 tests)
 
-Test Files  7 passed (7)
-     Tests  31 passed (31)
-  Start at  02:29:43
-  Duration  1.61s
+ Test Files  7 passed (7)
+      Tests  33 passed (33)
 ```
 - **退出状态**: `0`
-- **结果**: 7 个测试文件、31 个测试用例全部通过。
+- **结果**: 7 个测试文件全部通过。
+- **修订备注**：本节先前版本展示的 `src/tests/*.test.ts` 文件名与实际仓库不符，已按真实文件集重写；分支原始 override（`music-metadata >=11.15.0`）曾使 localMusicUndo 套件加载失败，已在 `review/fixes` 修复。
 
 ### (4) 前端生产环境构建
 ```bash
@@ -169,50 +166,58 @@ dist/assets/index-D_nCq_6B.js   1,852.12 kB │ gzip: 574.65 kB
 
 ### (5) 后端网关、安全与推荐集成测试
 ```bash
-$ npm test
-Running tests: gateway, auth-compat, cover, local-engine-and-degradation, security, recommendation-and-search
+$ npm test   # jiti 不在 package.json 依赖中，需 npm i --no-save jiti；且最后一步 ./player/node_modules/.bin/vitest 为 Unix 路径，Windows cmd 下需在 Git Bash/WSL 执行
 
-PASS gateway (60 tests)
-PASS auth-compat (7 tests)
-PASS cover (2 tests)
-PASS local-engine-and-degradation (47 tests)
-PASS tests/security.test.ts (15 tests)
-PASS tests/recommendation-and-search.test.ts (22 tests)
+Test Results: 60 passed, 0 failed                        # test-sonic-gateway
+Auth Compatibility Test Results: 36 passed, 0 failed     # test-auth-compatibility
+Cover Gateway Test Results: 15 passed, 0 failed          # test-cover-gateway
+Local Engine & Degradation Test Results: 47 passed, 0 failed   # test-local-engine-and-degradation
 
-Test Suites: 6 passed, 6 total
-Tests:       153 passed, 153 total
-Snapshots:   0 total
-Time:        4.82s
+ ✓ tests/security.test.ts (15 tests)
+ ✓ tests/recommendation-and-search.test.ts (22 tests)
+ Test Files  2 passed (2)      Tests  37 passed (37)
 ```
 - **退出状态**: `0`
-- **结果**: 6 个测试套件，153 个测试全部 PASS（其中推荐系统与智能搜索全套断言 22 项全部通过）。
+- **结果**: 4 个 jiti 脚本共 158 项断言 + vitest 2 套件 37 用例全部通过。注意 test-gateway/auth/cover 依赖真实外部上游（网易/QQ 等），非纯离线套件。
+- **修订备注**：本节先前版本的 `PASS gateway (60 tests)` 统一输出格式与计数（60/7/2/47=153）均与实际脚本输出（60/36/15/47=158）不符，已按真实输出重写。
 
 ### (6) 推荐系统离线评测基准
 ```bash
 $ npm run eval:recommend
-[Recommendation Evaluation] Initializing seed data and simulated listening profiles...
-[Recommendation Evaluation] Running benchmark on 20 test profiles...
-Evaluation Results:
---------------------------------------------------
-Precision@10                    : 0.6333
-Recall@10                       : 0.7056
-NDCG@10                         : 0.7711
-CatalogCoverage                 : 0.7586
-IntraListDiversity_ILD          : 0.7983
-Top1_HitRate                    : 1.0000 (20/20)
-Top5_HitRate                    : 1.0000 (20/20)
-ZeroResultRate_AfterFallback    : 0.0000
-PlayableTrackRatio              : 1.0000
-Latency_Recommend_P50_ms        : 8.65
-Latency_Recommend_P95_ms        : 14.01
-Latency_Search_P50_ms           : 3.67
-Latency_Search_P95_ms           : 8.94
-Process_RSS_Memory_MB           : 102.40
---------------------------------------------------
-Benchmark Assessment: EXCELLENT (All SLA targets satisfied)
+========================================================================
+ CFSolara 智能音乐推荐与混合搜索引擎 —— 离线评估基准 (Offline Benchmark)
+ [声明] 评估数据来自可复现合成多画像切分基准 (Synthetic Persona Split)，非生产用户日志
+========================================================================
+
+{
+  "datasetType": "Synthetic Multi-Persona Holdout & Query Benchmark (Offline Reproducible)",
+  "catalogSize": 58,
+  "recommendationMetrics": {
+    "Precision@10": 0.6333,
+    "Recall@10": 0.7056,
+    "NDCG@10": 0.7711,
+    "CatalogCoverage": 0.7586,
+    "IntraListDiversity_ILD": 0.7983,
+    "Novelty_Bits": 0.1086
+  },
+  "searchMetrics": {
+    "Top1_HitRate": 1,
+    "Top5_HitRate": 1,
+    "ZeroResultRate_AfterFallback": 0,
+    "PlayableTrackRatio": 1
+  },
+  "performanceMetrics": {
+    "recommendLatency_p50_ms": 12.22,
+    "recommendLatency_p95_ms": 22.21,
+    "searchLatency_p50_ms": 6.13,
+    "searchLatency_p95_ms": 21.72,
+    "processRssMemory_MB": 118.5
+  }
+}
 ```
 - **退出状态**: `0`
-- **结果**: 所有业务指标达标，冷启动与降级兜底成功率 100%，P95 延迟远优于 50ms 要求，内存驻留 102.4MB 远低于 256MB 上限。
+- **结果与限制**: 全部用例跑通、零结果兜底 100%。**结果仅反映合成数据下的代码行为**：6 个手写画像 + 20 个按种子曲库量身设计的查询在 58 首小曲库、`:memory:` SQLite、单线程顺序调用下测得；`Recall@10` 分母恒为 min(K, relevant) 存在虚高、搜索 Top1 属循环验证，不可当作真实推荐效果。延迟随机器浮动（另一环境实测 P50 8.65 / P95 14.01ms）。
+- **修订备注**：本节先前版本展示的 `Evaluation Results: -----` / `Benchmark Assessment: EXCELLENT` 等判定语在脚本中不存在，属虚构输出，已替换为脚本唯一真实输出（`console.log(JSON.stringify(report))` + banner）。
 
 ---
 
