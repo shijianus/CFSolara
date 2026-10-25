@@ -794,11 +794,12 @@ export const useAudioStore = defineStore('audio', {
     },
 
     // 下一首
-    nextSong(isAutoEnd = false) {
+    nextSong(isAutoEnd = false, opts?: { suppressSkipSignal?: boolean }) {
       if (this.audio.playlist.length === 0) return
 
       // 手动切歌时：仅在播放正常（非缓冲卡顿、非报错、非试听受限）且收听不足 25s 时记录一次用户跳过信号
-      if (!isAutoEnd && this.audio.currentSong && !this.audio.currentSong.isLocal) {
+      // suppressSkipSignal: 播放失败 Toast 的"下一首"入口传入——播放失败不是用户嫌弃歌曲,不得记负反馈
+      if (!isAutoEnd && !opts?.suppressSkipSignal && this.audio.currentSong && !this.audio.currentSong.isLocal) {
         const cur = this.audio.audio?.currentTime || this.audio.currentTime || 0
         const dur =
           this.audio.audio?.duration ||
@@ -1424,8 +1425,9 @@ export const useAudioStore = defineStore('audio', {
           {
             label: i18n.global.t('player.next'),
             handler: () => {
+              // 播放失败后切下一首:抑制 user_skip 负反馈(该跳过由故障触发,非用户口味信号)
               this.clearError()
-              this.nextSong()
+              this.nextSong(false, { suppressSkipSignal: true })
             },
           },
         ],
