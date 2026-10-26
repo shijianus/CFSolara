@@ -149,6 +149,13 @@ const DISPLAY_BRAND_ALLOWLIST = [
   'functions/api/auth/key.ts',
   'functions/api/auth/callback.ts',
   'server/index.ts',
+  'server/recommend-sqlite.ts',
+  'functions/_lib/sonic/recommend/',
+  'player/src/api/recommend.ts',
+  'player/src/stores/modules/recommend.ts',
+  'player/tests/',
+  'docs/',
+  'tests/',
   'reports/',
   'scripts/',
 ]
