@@ -53,7 +53,7 @@ export function getSonicConfig(env?: AppEnv): SonicConfig {
     localEngineUrl,
     engineSecret: e.SONIC_ENGINE_SECRET ? String(e.SONIC_ENGINE_SECRET) : undefined,
     ncmApiUrl: e.SONIC_NCM_API_URL ? String(e.SONIC_NCM_API_URL).replace(/\/+$/, '') : undefined,
-    realIp: e.SONIC_REAL_IP || '116.25.146.177',
+    realIp: e.SONIC_REAL_IP ? String(e.SONIC_REAL_IP).trim() : '203.0.113.10',
     upstreamLyriva: e.SONIC_UPSTREAM_LYRIVA || 'https://api.lyriva.xyz',
     upstreamGdstudio: e.SONIC_UPSTREAM_GDSTUDIO || e.MUSIC_API_BASE || 'https://music-api.gdstudio.xyz/api.php',
     upstreamAmll: e.SONIC_UPSTREAM_AMLL || 'https://api.amll.dev',
