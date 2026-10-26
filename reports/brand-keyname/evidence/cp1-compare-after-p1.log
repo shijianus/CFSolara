@@ -1,0 +1,10 @@
+
+Protected contract comparison FAILED:
+
+[api-sonic-route] public API route namespace
+  - removed: scripts/final_delivery_verification_results.json (4)
+  + added:   reports/archived/final_delivery_verification_results.json (+4)
+
+[cfsolara-project] Cloudflare Pages project name
+  - removed: scripts/final_delivery_verification_results.json (18)
+  + added:   reports/archived/final_delivery_verification_results.json (+18)

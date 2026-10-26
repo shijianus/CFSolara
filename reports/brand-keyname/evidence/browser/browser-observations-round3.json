@@ -1,0 +1,90 @@
+{
+  "log": [
+    {
+      "step": "A3(重跑) 搜索命中",
+      "status": "PASS",
+      "detail": {
+        "hit": "晴天"
+      },
+      "at": "2026-10-25T00:16:15.513Z"
+    },
+    {
+      "step": "旅程 A 补测中断",
+      "status": "FAIL",
+      "detail": "poll timeout: 兜底后播放",
+      "at": "2026-10-25T00:17:21.787Z"
+    },
+    {
+      "step": "A9 移动端搜索点播",
+      "status": "SKIPPED",
+      "detail": "poll timeout: 移动端任一 audio 播放",
+      "at": "2026-10-25T00:18:15.657Z"
+    },
+    {
+      "step": "B4(重跑) 搜索命中",
+      "status": "PASS",
+      "detail": {
+        "hit": "晴天"
+      },
+      "at": "2026-10-25T00:18:19.397Z"
+    },
+    {
+      "step": "旅程 B 补测中断",
+      "status": "FAIL",
+      "detail": "poll timeout: B 任一 audio 播放",
+      "at": "2026-10-25T00:19:20.652Z"
+    },
+    {
+      "step": "C4(重跑) 搜索命中",
+      "status": "PASS",
+      "detail": {
+        "hit": "晴天"
+      },
+      "at": "2026-10-25T00:19:23.798Z"
+    },
+    {
+      "step": "旅程 C 补测中断",
+      "status": "FAIL",
+      "detail": "poll timeout: C 任一 audio 播放",
+      "at": "2026-10-25T00:20:25.299Z"
+    },
+    {
+      "step": "B/C 补测一致性",
+      "status": "CHECK",
+      "detail": {
+        "searchHit": "一致",
+        "bothPlaying": "不一致",
+        "mobileToolbar": "一致",
+        "intendedDelta": {
+          "note": "预期内唯一差异：旧站保留 Solara* 兼容全局，新站已清理",
+          "new_hasSolaraGlobals": false,
+          "old_hasSolaraGlobals": false,
+          "both_have_sonic_globals": false
+        }
+      },
+      "at": "2026-10-25T00:20:25.300Z"
+    }
+  ],
+  "results": {
+    "journeyA": {
+      "searchHit": "晴天"
+    },
+    "journeyB": {
+      "searchHit": "晴天"
+    },
+    "journeyC": {
+      "searchHit": "晴天"
+    }
+  },
+  "compare": {
+    "searchHit": "一致",
+    "bothPlaying": "不一致",
+    "mobileToolbar": "一致",
+    "intendedDelta": {
+      "note": "预期内唯一差异：旧站保留 Solara* 兼容全局，新站已清理",
+      "new_hasSolaraGlobals": false,
+      "old_hasSolaraGlobals": false,
+      "both_have_sonic_globals": false
+    }
+  }
+}

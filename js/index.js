@@ -53,15 +53,13 @@ const dom = {
 };
 
 window.SonicDom = dom;
-window.SolaraDom = dom;
 
-const isMobileView = Boolean(window.__SONIC_IS_MOBILE || window.__SOLARA_IS_MOBILE);
+const isMobileView = Boolean(window.__SONIC_IS_MOBILE);
 
-const mobileBridge = window.SonicMobileBridge || window.SolaraMobileBridge || {};
+const mobileBridge = window.SonicMobileBridge || {};
 mobileBridge.handlers = mobileBridge.handlers || {};
 mobileBridge.queue = Array.isArray(mobileBridge.queue) ? mobileBridge.queue : [];
 window.SonicMobileBridge = mobileBridge;
-window.SolaraMobileBridge = mobileBridge;
 
 function invokeMobileHook(name, ...args) {
     if (!isMobileView) {
@@ -4476,7 +4474,6 @@ function showNotification(message, type = "success") {
 // -------------------------------------------------------------
 (function initEpomailAuth() {
     const STORAGE_KEY = "sonic_epomail_session";
-    const LEGACY_STORAGE_KEY = "solara_epomail_session";
     const loginBtn = document.getElementById("epomailLoginBtn");
     const userLabel = document.getElementById("epomailUserLabel");
     const modal = document.getElementById("apiKeyModal");
@@ -4484,22 +4481,14 @@ function showNotification(message, type = "success") {
     const closeBtn = document.getElementById("closeApiKeyModalBtn");
     const copyBtn = document.getElementById("copyApiKeyBtn");
     const keyInput = document.getElementById("userApiKeyInput");
-    const logoutBtn = document.getElementById("solaraLogoutBtn");
-    const userName = document.getElementById("solaraUserName");
-    const userEmail = document.getElementById("solaraUserEmail");
-    const userAvatar = document.getElementById("solaraUserAvatar");
+    const logoutBtn = document.getElementById("sonicLogoutBtn");
+    const userName = document.getElementById("sonicUserName");
+    const userEmail = document.getElementById("sonicUserEmail");
+    const userAvatar = document.getElementById("sonicUserAvatar");
 
     function getSavedSession() {
         try {
-            let raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) {
-                raw = localStorage.getItem(LEGACY_STORAGE_KEY);
-                if (raw) {
-                    try {
-                        localStorage.setItem(STORAGE_KEY, raw);
-                    } catch {}
-                }
-            }
+            const raw = localStorage.getItem(STORAGE_KEY);
             return raw ? JSON.parse(raw) : null;
         } catch {
             return null;
@@ -4508,16 +4497,13 @@ function showNotification(message, type = "success") {
 
     function saveSession(session) {
         try {
-            const serialized = JSON.stringify(session);
-            localStorage.setItem(STORAGE_KEY, serialized);
-            localStorage.setItem(LEGACY_STORAGE_KEY, serialized);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
         } catch {}
     }
 
     function clearSession() {
         try {
             localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(LEGACY_STORAGE_KEY);
         } catch {}
     }
 

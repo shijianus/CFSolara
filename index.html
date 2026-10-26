@@ -24,7 +24,6 @@
             const isSmallScreen = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 820px)").matches;
             const isMobile = isMobileUA || isSmallScreen;
             window.__SONIC_IS_MOBILE = isMobile;
-            window.__SOLARA_IS_MOBILE = isMobile;
             if (!isMobile) {
                 document.documentElement.classList.add("desktop-view");
                 const desktopLink = document.createElement("link");
@@ -102,21 +101,21 @@
             </div>
         </div>
 
-        <div id="apiKeyModal" class="sonic-modal-backdrop solara-modal-backdrop" style="display:none;" aria-hidden="true">
-            <div class="sonic-modal-card solara-modal-card">
-                <div class="sonic-modal-header solara-modal-header">
+        <div id="apiKeyModal" class="sonic-modal-backdrop" style="display:none;" aria-hidden="true">
+            <div class="sonic-modal-card">
+                <div class="sonic-modal-header">
                     <h3><i class="fas fa-key"></i> epocanvas sonic 开发者专案连结 (sonic Pass)</h3>
-                    <button type="button" id="closeApiKeyModalX" class="sonic-modal-close solara-modal-close" aria-label="关闭">&times;</button>
+                    <button type="button" id="closeApiKeyModalX" class="sonic-modal-close" aria-label="关闭">&times;</button>
                 </div>
-                <div class="sonic-modal-body solara-modal-body">
-                    <div class="sonic-user-badge solara-user-badge" id="solaraUserBadge">
-                        <img id="solaraUserAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=epomail" alt="User Avatar" class="sonic-user-avatar solara-user-avatar" />
+                <div class="sonic-modal-body">
+                    <div class="sonic-user-badge" id="sonicUserBadge">
+                        <img id="sonicUserAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=epomail" alt="User Avatar" class="sonic-user-avatar" />
                         <div>
-                            <strong id="solaraUserName">Epomail 用户</strong>
-                            <small id="solaraUserEmail">user@epocanvas.com</small>
+                            <strong id="sonicUserName">Epomail 用户</strong>
+                            <small id="sonicUserEmail">user@epocanvas.com</small>
                         </div>
                     </div>
-                    <p class="sonic-modal-tip solara-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
+                    <p class="sonic-modal-tip">您已通过 EpoMail 原生 OAuth 安全验证。将以下专属 epocanvas sonic API Key 接入您的独立外部专案（如博客、静态站点），即可直接免受限流阻挡并调用全量微服务 API：</p>
                     <div class="api-key-box">
                         <input type="text" id="userApiKeyInput" readonly value="sonic_live_..." />
                         <button type="button" id="copyApiKeyBtn"><i class="fas fa-copy"></i> 复制 Key</button>
@@ -128,9 +127,9 @@
                         <code>GET /api/music/stream?id={歌曲ID}</code>
                     </div>
                 </div>
-                <div class="sonic-modal-footer solara-modal-footer">
-                    <button type="button" id="solaraLogoutBtn" class="sonic-btn-danger solara-btn-danger">退出登录</button>
-                    <button type="button" id="closeApiKeyModalBtn" class="sonic-btn-primary solara-btn-primary">关闭</button>
+                <div class="sonic-modal-footer">
+                    <button type="button" id="sonicLogoutBtn" class="sonic-btn-danger">退出登录</button>
+                    <button type="button" id="closeApiKeyModalBtn" class="sonic-btn-primary">关闭</button>
                 </div>
             </div>
         </div>
@@ -272,7 +271,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="js/index.js"></script>
 <script>
-    if (window.__SONIC_IS_MOBILE || window.__SOLARA_IS_MOBILE) {
+    if (window.__SONIC_IS_MOBILE) {
         const mobileScript = document.createElement('script');
         mobileScript.src = 'js/mobile.js';
         mobileScript.async = false;

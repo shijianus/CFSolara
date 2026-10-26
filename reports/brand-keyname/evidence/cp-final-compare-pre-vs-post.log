@@ -1,0 +1,17 @@
+
+Protected contract comparison FAILED:
+
+[api-sonic-route] public API route namespace
+  - removed: scripts/final_delivery_verification_results.json (4)
+  + added:   reports/archived/final_delivery_verification_results.json (+4)
+
+[legacy-session-key] legacy auth session key
+  - removed: js/index.js (1)
+
+[cfsolara-project] Cloudflare Pages project name
+  - removed: scripts/final_delivery_verification_results.json (18)
+  + added:   reports/archived/final_delivery_verification_results.json (+18)
+
+[legacy-sonic-globals] legacy runtime globals
+  - removed: js/index.js (3)
+  - removed: js/mobile.js (3)

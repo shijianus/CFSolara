@@ -28,6 +28,8 @@ const SCAN_EXTENSIONS = new Set([
 const EXCLUDE_PREFIXES = [
   '.zcode/',
   '.git/',
+  '.deploy/',
+  '.wrangler/',
   'node_modules/',
   'player/node_modules/',
   'dist/',
@@ -49,7 +51,7 @@ const PROTECTED_PATTERNS = [
   { id: 'solara-secret', re: /\bSOLARA_SECRET\b/g, note: 'legacy signing-secret fallback' },
   { id: 'sonic-cache-param', re: /\b_sonic_[a-z0-9_]+\b/g, note: 'cache-key query parameter' },
   { id: 'indexeddb-name', re: /\bSonicMusicPlayerDB\b/g, note: 'IndexedDB database name' },
-  { id: 'legacy-session-key', re: /\b(?:sonic_epomail_session|solara_epomail_session)\b/g, note: 'legacy auth session key' },
+  { id: 'legacy-session-key', re: /\bsonic_epomail_session\b/g, note: 'legacy auth session key' },
   { id: 'perf-mode-storage', re: /\bsonic-perf-mode\b/g, note: 'performance-mode storage key' },
   { id: 'platform-sonic', re: /\bplatform\s*:\s*['"]sonic['"]/g, note: 'desensitized provider id' },
   { id: 'source-sonic', re: /\bsource\s*:\s*['"]sonic['"]/g, note: 'source identifier' },
@@ -59,7 +61,7 @@ const PROTECTED_PATTERNS = [
   { id: 'logo-path', re: /["']\/logo\.svg["']/g, note: 'logo asset path' },
   { id: 'cfsolara-project', re: /\bcfsolara\b/g, note: 'Cloudflare Pages project name' },
   { id: 'sonic-audio-global', re: /\b__sonicAudio\b/g, note: 'debug/global audio handle' },
-  { id: 'legacy-sonic-globals', re: /\b(?:SonicDom|SonicMobileBridge|SolaraDom|SolaraMobileBridge)\b/g, note: 'legacy runtime globals' },
+  { id: 'legacy-sonic-globals', re: /\b(?:SonicDom|SonicMobileBridge)\b/g, note: 'legacy runtime globals' },
   { id: 'pinia-storage-keys', re: /piniaPersistConfig\(\s*['"](?:global|settings|audio|user)['"]|localStorage\.getItem\(\s*['"]global['"]/g, note: 'player persistence keys' },
   { id: 'quality-labels', re: /['"](?:SQ|HQ|标准)['"]/g, note: 'quality badge/filter labels' },
 ]

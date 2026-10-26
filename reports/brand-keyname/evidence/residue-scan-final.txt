@@ -1,0 +1,60 @@
+# CP-Z 残留复扫 @ 2026-10-25T07:21:43+08:00
+
+== solara (不区分大小写) 残留分布 ==
+     35 scripts\test-auth-compatibility.mjs
+     18 reports\archived\final_delivery_verification_results.json
+      6 scripts\audit_independent_qa_results.json
+      6 functions\_lib\auth.ts
+      4 scripts\brand-audit.mjs
+      4 API.md
+      3 scripts\verify_sonic_public.py
+      3 scripts\audit_multilingual_results.json
+      3 scripts\audit_independent_qa_results_final.json
+      3 scripts\audit_independent_qa.py
+      3 scripts\audit_independent_api.py
+      3 README.md
+      2 scripts\rollback-production.sh
+      2 scripts\audit_sonic_gateway.py
+      2 scripts\audit_independent_dom.js
+      1 scripts\visual-verify-cf.mjs
+      1 scripts\verify_production_delivery.mjs
+      1 scripts\verify_production_commercial.mjs
+      1 scripts\verify_lyrics_live.mjs
+      1 scripts\verify-live-lyrics.mjs
+      1 scripts\verify-live-cf-deployment.mjs
+      1 scripts\test-multilingual-live.mjs
+      1 scripts\test-live-verified.mjs
+      1 scripts\run_part2_audit.js
+      1 scripts\run_part1_audit.py
+      1 scripts\final_delivery_verification.mjs
+      1 scripts\e2e_full_audit.js
+      1 scripts\audit_part2_e2e.js
+      1 scripts\audit_part2.js
+      1 scripts\audit_part1.py
+      1 package.json
+      1 functions\api\index.ts
+      1 functions\api\auth\key.ts
+      1 functions\_lib\types.ts
+      1 functions\_lib\sonic\security.ts
+      1 functions\_lib\sonic\route-helpers.ts
+      1 functions\_lib\http.ts
+
+== PascalCase EpoCanvas 残留 ==
+     16 reports\archived\final_delivery_verification_results.json
+      1 scripts\brand-audit.mjs
+
+== shijianus 残留 ==
+      1 scripts\verify_production_delivery.mjs
+      1 scripts\test_puppeteer_init.js
+      1 scripts\test-multilingual-live.mjs
+      1 scripts\run_part2_audit.js
+      1 scripts\final_delivery_verification.mjs
+      1 scripts\e2e_full_audit.js
+      1 scripts\brand-audit.mjs
+      1 scripts\audit_part2_e2e.js
+      1 scripts\audit_part2.js
+      1 scripts\audit_multilingual_dom.js
+      1 scripts\audit_independent_qa_final.js
+      1 scripts\audit_independent_dom.js
+      1 functions\_lib\http.ts
+      1 API.md

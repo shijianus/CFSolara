@@ -1,0 +1,240 @@
+{
+  "log": [
+    {
+      "step": "A1 首页加载（路由感知标题以品牌结尾）",
+      "status": "PASS",
+      "detail": {
+        "title": "首页 - epocanvas sonic"
+      },
+      "at": "2026-10-25T00:00:00.256Z"
+    },
+    {
+      "step": "A2 品牌常量 UI 展示",
+      "status": "PASS",
+      "detail": {
+        "epocanvas": true,
+        "sonic": true,
+        "studio": true,
+        "tagline": true
+      },
+      "at": "2026-10-25T00:00:01.514Z"
+    },
+    {
+      "step": "A3 搜索“周杰伦”返回真实结果",
+      "status": "PASS",
+      "detail": {
+        "firstKnownSong": "晴天"
+      },
+      "at": "2026-10-25T00:00:04.330Z"
+    },
+    {
+      "step": "旅程 A 中断",
+      "status": "FAIL",
+      "detail": "poll timeout: 音频播放态",
+      "at": "2026-10-25T00:01:07.039Z"
+    },
+    {
+      "step": "A7 404 页品牌展示",
+      "status": "PASS",
+      "detail": {
+        "title": "页面不存在 - epocanvas sonic",
+        "has404Text": true,
+        "hasBrand": true
+      },
+      "at": "2026-10-25T00:01:07.763Z"
+    },
+    {
+      "step": "A8 移动端视口加载（品牌渲染）",
+      "status": "PASS",
+      "detail": {
+        "sample": "epocanvas\nsonic\n跟随系统\n推荐歌单\n热门歌手\n新歌速递\n推荐MV\n\n晴天\n\n周杰伦\n\n故事的小黄花\n\n0"
+      },
+      "at": "2026-10-25T00:01:08.978Z"
+    },
+    {
+      "step": "A9 移动端搜索点播",
+      "status": "SKIPPED",
+      "detail": "poll timeout: 移动端播放",
+      "at": "2026-10-25T00:02:11.895Z"
+    },
+    {
+      "step": "B1 首页加载",
+      "status": "PASS",
+      "detail": {
+        "title": "epocanvas sonic"
+      },
+      "at": "2026-10-25T00:02:14.272Z"
+    },
+    {
+      "step": "B2 会话注入→模态框→id 接线断言（sonic*）",
+      "status": "PASS",
+      "detail": {
+        "userName": "浏览器验证用户",
+        "userEmail": "browser-verify@epocanvas.com",
+        "key": "sonic_live_browser_verify_key",
+        "logoutExists": true,
+        "badgeVisible": true
+      },
+      "at": "2026-10-25T00:02:16.791Z"
+    },
+    {
+      "step": "B3 退出登录",
+      "status": "PASS",
+      "detail": {
+        "modalHidden": true,
+        "sessionCleared": true,
+        "legacyCleared": true,
+        "notify": true
+      },
+      "at": "2026-10-25T00:02:17.664Z"
+    },
+    {
+      "step": "B4 搜索“周杰伦”返回结果",
+      "status": "PASS",
+      "detail": {
+        "firstKnownSong": "晴天"
+      },
+      "at": "2026-10-25T00:02:20.475Z"
+    },
+    {
+      "step": "旅程 B 中断",
+      "status": "FAIL",
+      "detail": "poll timeout: B 音频播放",
+      "at": "2026-10-25T00:03:21.211Z"
+    },
+    {
+      "step": "C1 首页加载",
+      "status": "PASS",
+      "detail": {
+        "title": "epocanvas sonic"
+      },
+      "at": "2026-10-25T00:03:23.152Z"
+    },
+    {
+      "step": "C2 会话注入→模态框→id 接线断言（solara*）",
+      "status": "PASS",
+      "detail": {
+        "userName": "浏览器验证用户",
+        "userEmail": "browser-verify@epocanvas.com",
+        "key": "sonic_live_browser_verify_key",
+        "logoutExists": true,
+        "badgeVisible": true
+      },
+      "at": "2026-10-25T00:03:25.585Z"
+    },
+    {
+      "step": "C3 退出登录",
+      "status": "PASS",
+      "detail": {
+        "modalHidden": true,
+        "sessionCleared": true,
+        "legacyCleared": true,
+        "notify": true
+      },
+      "at": "2026-10-25T00:03:26.448Z"
+    },
+    {
+      "step": "C4 搜索“周杰伦”返回结果",
+      "status": "PASS",
+      "detail": {
+        "firstKnownSong": "晴天"
+      },
+      "at": "2026-10-25T00:03:27.596Z"
+    },
+    {
+      "step": "旅程 C 中断",
+      "status": "FAIL",
+      "detail": "poll timeout: C 音频播放",
+      "at": "2026-10-25T00:04:28.422Z"
+    },
+    {
+      "step": "B/C 新旧行为一致性对比",
+      "status": "CHECK",
+      "detail": {
+        "homeTitle": "一致",
+        "modalUserName": "一致",
+        "modalUserEmail": "一致",
+        "modalKey": "一致",
+        "modalLogout": "一致",
+        "searchHit": "一致",
+        "bothPlaying": "不一致",
+        "mobileToolbar": "一致",
+        "intendedDelta": {
+          "note": "预期内的唯一差异：旧站保留 Solara* 兼容全局镜像，新站已清理",
+          "new_hasSolaraGlobals": false,
+          "old_hasSolaraGlobals": false,
+          "both_have_sonic_globals": false
+        }
+      },
+      "at": "2026-10-25T00:04:28.423Z"
+    }
+  ],
+  "results": {
+    "journeyA": {
+      "homeTitle": "首页 - epocanvas sonic",
+      "brandTexts": {
+        "epocanvas": true,
+        "sonic": true,
+        "studio": true,
+        "tagline": true
+      },
+      "searchHit": "晴天",
+      "page404": {
+        "title": "页面不存在 - epocanvas sonic",
+        "has404Text": true,
+        "hasBrand": true
+      },
+      "mobileText": "epocanvas\nsonic\n跟随系统\n推荐歌单\n热门歌手\n新歌速递\n推荐MV\n\n晴天\n\n周杰伦\n\n故事的小黄花\n\n00:00\n02:14\n首页\n搜索\n最近播放\n设置"
+    },
+    "journeyB": {
+      "homeTitle": "epocanvas sonic",
+      "modal": {
+        "userName": "浏览器验证用户",
+        "userEmail": "browser-verify@epocanvas.com",
+        "key": "sonic_live_browser_verify_key",
+        "logoutExists": true,
+        "badgeVisible": true
+      },
+      "afterLogout": {
+        "modalHidden": true,
+        "sessionCleared": true,
+        "legacyCleared": true,
+        "notify": true
+      },
+      "searchHit": "晴天"
+    },
+    "journeyC": {
+      "homeTitle": "epocanvas sonic",
+      "modal": {
+        "userName": "浏览器验证用户",
+        "userEmail": "browser-verify@epocanvas.com",
+        "key": "sonic_live_browser_verify_key",
+        "logoutExists": true,
+        "badgeVisible": true
+      },
+      "afterLogout": {
+        "modalHidden": true,
+        "sessionCleared": true,
+        "legacyCleared": true,
+        "notify": true
+      },
+      "searchHit": "晴天"
+    }
+  },
+  "compare": {
+    "homeTitle": "一致",
+    "modalUserName": "一致",
+    "modalUserEmail": "一致",
+    "modalKey": "一致",
+    "modalLogout": "一致",
+    "searchHit": "一致",
+    "bothPlaying": "不一致",
+    "mobileToolbar": "一致",
+    "intendedDelta": {
+      "note": "预期内的唯一差异：旧站保留 Solara* 兼容全局镜像，新站已清理",
+      "new_hasSolaraGlobals": false,
+      "old_hasSolaraGlobals": false,
+      "both_have_sonic_globals": false
+    }
+  }
+}
