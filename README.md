@@ -187,13 +187,19 @@ npx wrangler pages deploy dist --project-name cfsolara
 
 ### 2. Linux VPS 本地解析引擎部署
 ```bash
-# 1. 构建本地引擎单文件
+# 1. 构建前端产物 dist/(必需: Dockerfile 会 COPY dist 进镜像,而 dist 被 .gitignore 排除)
+npm run build
+
+# 2. 构建本地引擎单文件(供 Docker 外直接运行使用;镜像内会自行重复此步)
 npm run build:server
 
-# 2. 在 VPS /data/workspace/CFSolara 启动 Docker Compose 栈
+# 3. 从 .env.example 生成 .env 并填入 SONIC_ENGINE_SECRET(>=32 字符,否则引擎健康端点 401、容器被判 unhealthy)
+cp .env.example .env && chmod 600 .env
+
+# 4. 在 VPS /data/workspace/CFSolara 启动 Docker Compose 栈
 docker compose up -d --build
 
-# 3. 检查容器健康状态
+# 5. 检查容器健康状态
 docker compose ps
 ```
 

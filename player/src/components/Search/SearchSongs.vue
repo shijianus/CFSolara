@@ -41,41 +41,44 @@ const state = reactive<SongsState>({
 })
 const { results, fallbackTracks, suggestions, fallbackUsed, isLoading } = toRefs(state)
 
-const { setPlaylist, play, currentSong } = useAudio()
-let lastClickedSongId: string | number | null = null
+const { setPlaylist, play } = useAudio()
 
-watch(
-  () => currentSong.value?.id,
-  (newId) => {
-    if (!newId || newId === lastClickedSongId) return
-    const term = props.keywords?.trim()
-    if (!term) return
-    const matched =
-      state.results.find((s) => String(s.id) === String(newId)) ||
-      state.fallbackTracks.find((s) => String(s.id) === String(newId))
-    if (matched) {
-      lastClickedSongId = newId
-      recommendStore.recordEvent({
-        type: 'search_click',
-        query: term,
-        track: {
-          id: matched.id,
-          title: matched.name,
-          artist: matched.artist,
-          album: matched.album,
-          duration: matched.duration ? Math.round(matched.duration / 1000) : undefined,
-          cover: matched.cover,
-        },
-      })
-    }
-  }
-)
+// 仅在用户真实点击搜索结果(或点"播放全部"的第一首)时上报 search_click;
+// 此前通过 watch(currentSong) 上报会把自动连播的后续曲目误记为点击,污染推荐信号。
+const reportSearchClick = (song: {
+  id: string | number
+  name: string
+  artist: string
+  album?: string
+  duration?: number
+  cover?: string
+}) => {
+  const term = props.keywords?.trim()
+  if (!term || !song) return
+  recommendStore.recordEvent({
+    type: 'search_click',
+    query: term,
+    track: {
+      id: song.id,
+      title: song.name,
+      artist: song.artist,
+      album: song.album,
+      duration: song.duration ? Math.round(song.duration / 1000) : undefined,
+      cover: song.cover,
+    },
+  })
+}
+
+const onSongPlayed = (song: Parameters<typeof reportSearchClick>[0], _index?: number) => {
+  reportSearchClick(song)
+}
 
 const playAll = () => {
   const list = state.results.length > 0 ? state.results : state.fallbackTracks
   if (list.length === 0) return
   setPlaylist(list, 0)
   play(list[0], 0)
+  reportSearchClick(list[0])
 }
 
 const applySuggestion = (text: string) => {
@@ -250,6 +253,7 @@ defineExpose({
         :showHeader="true"
         :showControls="false"
         :emptyMessage="$t('components.songList.empty')"
+        @play="onSongPlayed"
       />
     </template>
 
@@ -260,6 +264,7 @@ defineExpose({
       :showHeader="true"
       :showControls="false"
       :emptyMessage="$t('components.songList.empty')"
+      @play="onSongPlayed"
     />
   </div>
 </template>

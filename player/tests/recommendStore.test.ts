@@ -78,4 +78,59 @@ describe('recommend store: 隐私控制、不感兴趣负反馈与事件队列',
       )
     ).toBe(true)
   })
+
+  it('事件批量发送失败后整批回到队首,随下一次批量一起重试', async () => {
+    vi.useFakeTimers()
+    try {
+      const rec = useRecommendStore()
+      rec.personalizationEnabled = true
+      rec.anonId = 'anon_testretry0000000000000a'
+
+      const postCalls: Array<{ url: string; body?: string }> = []
+      vi.spyOn(globalThis, 'fetch').mockImplementation(async (url: any, init?: any) => {
+        if (String(url).includes('/api/sonic/events') && init?.method !== 'DELETE') {
+          postCalls.push({ url: String(url), body: init?.body })
+          // 第一次 POST 失败(网关 5xx),第二次成功
+          return postCalls.length === 1
+            ? new Response('err', { status: 502 })
+            : new Response('{}', { status: 200 })
+        }
+        return new Response('{}', { status: 200 })
+      })
+
+      rec.recordEvent({ type: 'play_start', track: { id: 1, title: '晴天', artist: '周杰伦' } })
+      await vi.advanceTimersByTimeAsync(1300)
+      expect(postCalls.length).toBe(1)
+
+      // 首次失败后新事件入队应触发重试,且批次包含上一轮失败的事件
+      rec.recordEvent({ type: 'favorite', track: { id: 2, title: '夜曲', artist: '周杰伦' } })
+      await vi.advanceTimersByTimeAsync(1300)
+      expect(postCalls.length).toBe(2)
+
+      const retryBody = JSON.parse(postCalls[1].body || '{}')
+      const retriedTypes = (retryBody.events || []).map((e: any) => e.type)
+      expect(retriedTypes).toContain('play_start')
+      expect(retriedTypes).toContain('favorite')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('关闭个性化后 recordEvent 完全不产生网络上报', async () => {
+    vi.useFakeTimers()
+    try {
+      const rec = useRecommendStore()
+      rec.personalizationEnabled = false
+      const fetchMock = vi.spyOn(globalThis, 'fetch')
+
+      rec.recordEvent({ type: 'favorite', track: { id: 3, title: '演员', artist: '薛之谦' } })
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(
+        fetchMock.mock.calls.some((c) => String(c[0]).includes('/api/sonic/events'))
+      ).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

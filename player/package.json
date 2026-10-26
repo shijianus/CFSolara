@@ -81,7 +81,7 @@
   "pnpm": {
     "overrides": {
       "braces": ">=3.0.3",
-      "music-metadata": ">=11.15.0"
+      "music-metadata": ">=7.14.0 <8"
     },
     "onlyBuiltDependencies": [
       "esbuild",
