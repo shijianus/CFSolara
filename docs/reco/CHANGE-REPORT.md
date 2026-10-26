@@ -1,6 +1,7 @@
 # CFSolara 智能音乐推荐与搜索引擎变更审查报告 (Change Report)
 
 > **评审日期**: 2026-10-25  
+> **复验日期**: 2026-10-26（干净环境重跑，完整结果见第 6 节）
 > **目标分支**: `feat/smart-reco`  
 > **基线分支**: `security/fix-auth-ratelimit-ssrf`  
 > **部署原则**: Linux VPS 为主（承载同构内核、SQLite 持久化、重度推荐与搜索计算），Cloudflare Pages/Functions 为辅（网关代理、安全校验、降级响应与轻量缓存）
@@ -104,38 +105,58 @@
 
 ## 6. 实际执行的命令及真实输出摘要
 
-以下所有测试与构建命令均在当前工作区真实执行，无任何 `|| true` 掩盖：
+以下命令于 2026-10-26 在 Windows 10.0.26200 / Git Bash 的干净环境中重跑（Node v24.14.0、npm 11.9.0、pnpm 10.34.5；生产镜像仍为 Node 22）。安装前已删除 `node_modules`、`player/node_modules`、`dist`、`player/dist`、`dist-server`。无任何 `|| true` 掩盖，退出码与失败均如实记录。
+
+### (0) 干净安装与依赖可复现性
+```bash
+$ npm ci
+added 39 packages, and audited 40 packages in 5s
+9 packages are looking for funding
+found 0 vulnerabilities
+# exit 0
+
+$ pnpm --dir player install --frozen-lockfile
+Lockfile is up to date, resolution step is skipped
+Packages: +701
+Done in 22.9s using pnpm v10.34.5
+# exit 0
+```
+- **结果**: 根依赖与 player 依赖均可从已提交的 lock 文件复现；`player/pnpm-lock.yaml` 将 `music-metadata` 固定为 `7.14.0`。
+- **说明**: 根目录统一使用 npm（`package-lock.json`），player 使用 pnpm；`player/.gitignore` 已不再忽略 lock 文件。
 
 ### (1) 引擎打包构建
 ```bash
-$ npm run build:engine   # esbuild 打包（注意：esbuild 不在 package.json 依赖中，需 npm i --no-save esbuild@0.25.4，Dockerfile 内已自带）
+$ npm run build:engine
 
-  dist-server\index.mjs  676.8kb
+  dist-server\index.mjs  677.2kb
 
-Done in 155ms
+Done in 45ms
 ```
 - **退出状态**: `0`
-- **结果**: 引擎构建成功，产物体积约 676.8 KB。
+- **结果**: 引擎构建成功，产物体积 677.2 KB。`esbuild` 已声明为根 devDependency，不再需要 `npm i --no-save`。
 
 ### (2) 多语言国际化键位完整性检查
 ```bash
 $ node player/scripts/i18n-missing-keys.mjs
-Key count: zh=613 en=613 ja=613
-Missing in en compared to zh: []
-Missing in ja compared to zh: []
-Missing in zh compared to en: []
-Missing in zh compared to ja: []
-Total missing keys: 0
+叶子键数: zh=613 en=613 ja=613
+en 相对 zh 缺失 0 个:
+ja 相对 zh 缺失 0 个:
+zh 相对 en 缺失 0 个:
+zh 相对 ja 缺失 0 个:
+代码引用键: 507 个;语言包未定义: 0 个
+动态前缀: mvList.categories.
+
+结论: 三语对齐=通过;引用键完整性=通过
 ```
 - **退出状态**: `0`
-- **结果**: 中、英、日三语完全对齐，缺失键数 0。
+- **结果**: 中、英、日三语各 613 个叶子键，双向缺失均为 0；代码引用的 507 个键均有定义。
 
 ### (3) 前端单元与组件测试
 ```bash
 $ pnpm --dir player test
  ✓ tests/audioQuality.test.ts (2 tests)
  ✓ tests/libraryStore.test.ts (7 tests)
- ✓ tests/localMusicUndo.test.ts (1 test)     # 需 music-metadata override 收窄至 ^7（见 review/fixes 8f2c916）
+ ✓ tests/localMusicUndo.test.ts (1 test)
  ✓ tests/playbackErrors.test.ts (3 tests)
  ✓ tests/queueIntegration.test.ts (6 tests)
  ✓ tests/recommendStore.test.ts (6 tests)
@@ -145,28 +166,34 @@ $ pnpm --dir player test
       Tests  33 passed (33)
 ```
 - **退出状态**: `0`
-- **结果**: 7 个测试文件全部通过。
-- **修订备注**：本节先前版本展示的 `src/tests/*.test.ts` 文件名与实际仓库不符，已按真实文件集重写；分支原始 override（`music-metadata >=11.15.0`）曾使 localMusicUndo 套件加载失败，已在 `review/fixes` 修复。
+- **结果**: 7 个测试文件、33 个用例全部通过。
+- **说明**: `localMusicUndo` 在 `music-metadata@7.14.0` 下通过；jsdom 输出的 `Not implemented: HTMLMediaElement's load()` 是测试环境提示，未导致失败。
 
 ### (4) 前端生产环境构建
 ```bash
 $ npm run build
 vite v7.3.7 building client environment for production...
 transforming...
-✓ 4099 modules transformed.
+✓ 715 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                     4.18 kB │ gzip:   1.62 kB
-dist/assets/index-B_Bf6gS1.css     72.03 kB │ gzip:  13.48 kB
-dist/assets/index-D_nCq_6B.js   1,852.12 kB │ gzip: 574.65 kB
-✓ built in 5.38s
+dist/index.html                                                              6.79 kB │ gzip:   2.30 kB
+dist/static/css/index-9ds6khUj.css                                          234.18 kB │ gzip:  33.53 kB
+dist/static/js/index-Bnb9WBrK.js                                            146.47 kB │ gzip:  47.63 kB
+dist/static/js/hls.js@1.7.3-BiqmjCGT.js                                     577.71 kB │ gzip: 180.16 kB
+dist/static/js/three@0.181.2-BPWI-S8h.js                                    470.84 kB │ gzip: 120.71 kB
+[build] copied <repo>\player\dist -> <repo>\dist
 ```
 - **退出状态**: `0`
-- **结果**: Vite 构建成功，静态资源输出至 `dist/`。
+- **结果**: Vite 7.3.7 构建成功，715 个模块完成转换，产物已由 `scripts/copy-dist.mjs` 同步到 `dist/`（实际输出为 Windows 绝对路径，此处以 `<repo>` 归一化）。
+- **非致命警告**: 8 个空 chunk、`file-type` 使用 `eval`、`recommend.ts` 同时被动态/静态导入导致该模块不单独拆包、部分 chunk 超过 500 KB；均未导致构建失败。
 
 ### (5) 后端网关、安全与推荐集成测试
 ```bash
-$ npm test   # jiti 不在 package.json 依赖中，需 npm i --no-save jiti；且最后一步 ./player/node_modules/.bin/vitest 为 Unix 路径，Windows cmd 下需在 Git Bash/WSL 执行
+$ npm test
+> npm run typecheck
+> tsc --noEmit
+# exit 0
 
 Test Results: 60 passed, 0 failed                        # test-sonic-gateway
 Auth Compatibility Test Results: 36 passed, 0 failed     # test-auth-compatibility
@@ -178,8 +205,9 @@ Local Engine & Degradation Test Results: 47 passed, 0 failed   # test-local-engi
  Test Files  2 passed (2)      Tests  37 passed (37)
 ```
 - **退出状态**: `0`
-- **结果**: 4 个 jiti 脚本共 158 项断言 + vitest 2 套件 37 用例全部通过。注意 test-gateway/auth/cover 依赖真实外部上游（网易/QQ 等），非纯离线套件。
-- **修订备注**：本节先前版本的 `PASS gateway (60 tests)` 统一输出格式与计数（60/7/2/47=153）均与实际脚本输出（60/36/15/47=158）不符，已按真实输出重写。
+- **结果**: typecheck 通过；4 个 jiti 脚本共 158 项断言（60+36+15+47）+ 根目录 Vitest 2 套件 37 用例全部通过。
+- **首次失败记录（未掩盖）**: 第一次执行时，`pnpm --dir player exec vitest` 将工作目录切到 `player/`，根目录 `tests/security.test.ts` 与 `tests/recommendation-and-search.test.ts` 未被发现，Vitest 报 `No test files found, exiting with code 1`；此前 typecheck 与 4 个 jiti 套件已通过。将命令改为 `pnpm --dir player exec vitest run --root .. ...` 后重跑，最终退出码 0。
+- **说明**: `test-gateway`/`test-auth`/`test-cover` 依赖真实外部上游（网易/QQ 等），非纯离线套件；本次运行全部通过。
 
 ### (6) 推荐系统离线评测基准
 ```bash
@@ -207,17 +235,29 @@ $ npm run eval:recommend
     "PlayableTrackRatio": 1
   },
   "performanceMetrics": {
-    "recommendLatency_p50_ms": 12.22,
-    "recommendLatency_p95_ms": 22.21,
-    "searchLatency_p50_ms": 6.13,
-    "searchLatency_p95_ms": 21.72,
-    "processRssMemory_MB": 118.5
+    "recommendLatency_p50_ms": 7.8,
+    "recommendLatency_p95_ms": 11.16,
+    "searchLatency_p50_ms": 3.6,
+    "searchLatency_p95_ms": 6.88,
+    "processRssMemory_MB": 127.6
   }
 }
 ```
 - **退出状态**: `0`
-- **结果与限制**: 全部用例跑通、零结果兜底 100%。**结果仅反映合成数据下的代码行为**：6 个手写画像 + 20 个按种子曲库量身设计的查询在 58 首小曲库、`:memory:` SQLite、单线程顺序调用下测得；`Recall@10` 分母恒为 min(K, relevant) 存在虚高、搜索 Top1 属循环验证，不可当作真实推荐效果。延迟随机器浮动（另一环境实测 P50 8.65 / P95 14.01ms）。
-- **修订备注**：本节先前版本展示的 `Evaluation Results: -----` / `Benchmark Assessment: EXCELLENT` 等判定语在脚本中不存在，属虚构输出，已替换为脚本唯一真实输出（`console.log(JSON.stringify(report))` + banner）。
+- **结果与限制**: 全部用例跑通、零结果兜底 100%。**结果仅反映合成数据下的代码行为**：6 个手写画像 + 20 个按种子曲库量身设计的查询在 58 首小曲库、`:memory:` SQLite、单线程顺序调用下测得；`Recall@10` 分母恒为 min(K, relevant) 存在虚高、搜索 Top1 属循环验证，不可当作真实推荐效果。延迟随机器/负载浮动（本次实测 P50 7.8 / P95 11.16 ms；此前一次记录为 P50 12.22 / P95 22.21 ms）。
+
+### (7) Docker Compose 配置校验
+```bash
+$ cp .env.example .env
+$ git check-ignore -v .env
+.gitignore:6:.env	.env
+$ docker compose config
+# exit 0
+$ rm -f .env
+```
+- **退出状态**: `0`
+- **结果**: Compose 成功解析 `ncm-api` 与 `sonic-engine` 两个服务；`sonic-engine` 的 `SONIC_REAL_IP` 为占位地址 `203.0.113.10`。
+- **说明**: 仅做配置解析，未启动容器、未部署线上；`.env` 由 `.env.example` 临时生成，确认被 `.gitignore` 忽略后已删除，未入库。
 
 ---
 
@@ -231,3 +271,5 @@ $ npm run eval:recommend
 5. `chore(docker)`: VPS 容器化持久卷挂载与环境变量配置
 6. `test(reco)`: 全链路端到端自动化测试与离线评测基准
 7. `docs(reco)`: 架构算法选型文档与变更审查报告
+
+> **本次交付分支现状**: 在 `feat/smart-reco` 上以 `--no-ff` 合入 `review/fixes` 的 6 个修复提交，并追加安全清理（生产 IP 去硬编码）与可复现性（根依赖、跨平台脚本、lock 文件）提交；未合并到 `main`，未部署线上。
